@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kube-prometheus-exporter-gn-spring-boot
+  labels:
+    run: gn-spring-boot
+    app: gn-spring-boot
+    prometheus: kube-prometheus
+spec:
+  selector:
+    jobLabel: gn-spring-boot
+    matchLabels:
+      app: gn-spring-boot
+      run: gn-spring-boot
+  endpoints:
+  - port: https
+    interval: 30s
+    path: /actuator/prometheus
+  nameSpaceSelector:
+    any: true

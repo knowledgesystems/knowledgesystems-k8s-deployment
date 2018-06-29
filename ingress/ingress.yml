@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: genome-nexus-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - genomenexus.ingress.cbioportal.review
+    secretName: example-nodejs-crt
+  - hosts:
+    - v2.genomenexus.org
+    secretName: genome-nexus-v2-cert
+  rules:
+  - host: genomenexus.ingress.cbioportal.review
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: genome-nexus
+          servicePort: http
+  - host: v2.genomenexus.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: genome-nexus
+          servicePort: http
