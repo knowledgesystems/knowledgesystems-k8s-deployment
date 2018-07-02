@@ -17,6 +17,7 @@ If you want to enable sentry, you need to provide it as a secret:
 ```
 kubectl create secret generic genome-nexus-sentry-dsn --from-literal=dsn=https://sentry-key
 ```
+It is referenced in the spring boot app [here](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/genome-nexus/gn_spring_boot.yaml#L34-L38)
 
 ## Notes
 - alpine docker image doesn't play nice with kubernetes (https://twitter.com/inodb/status/999041628970127360)
