@@ -5,6 +5,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   tls:
   - hosts:
@@ -22,6 +23,13 @@ spec:
           serviceName: genome-nexus
           servicePort: http
   - host: v2.genomenexus.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: genome-nexus
+          servicePort: http
+  - host: v1.genomenexus.org
     http:
       paths:
       - path: /
