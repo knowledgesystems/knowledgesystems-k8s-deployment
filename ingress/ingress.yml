@@ -14,6 +14,9 @@ spec:
   - hosts:
     - v2.genomenexus.org
     secretName: genome-nexus-v2-cert
+  - hosts:
+    - k8s.cbioportal.org
+    secretName: cbioportal-k8s-cert
   rules:
   - host: genomenexus.ingress.cbioportal.review
     http:
@@ -35,4 +38,11 @@ spec:
       - path: /
         backend:
           serviceName: genome-nexus
+          servicePort: http
+  - host: k8s.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal
           servicePort: http
