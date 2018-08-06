@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-spring-boot
+    app: gn-spring-boot
+  name: genome-nexus
+  selfLink: /api/v1/namespaces/default/services/genome-nexus
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  - port: 443
+    name: https
+    targetPort: 8888
+  selector:
+    run: gn-spring-boot
+  type: ClusterIP

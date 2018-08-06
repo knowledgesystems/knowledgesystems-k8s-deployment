@@ -10,13 +10,13 @@ metadata:
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-spring-boot
   strategy:
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 2
       maxUnavailable: 1
     type: RollingUpdate
   template:
@@ -32,10 +32,10 @@ spec:
         image: cbioportal/cbioportal:release-1.15.0-rc2
         command: ["/usr/bin/java", 
                   "-Ddbconnector=dbcp",
-                  "-Dsession.service.url=http://cbioportal-session-service/api/sessions/public_portal",
-                  "-Dsession.service.origin=*",
+                  "-Dsession.service.url=http://cbioportal-session-service/api/sessions/public_portal/",
                   "-jar",
                   "/webapp-runner.jar",
+                  "--enable-compression",
                   "--port",
                   "8888",
                   "--expand-war",

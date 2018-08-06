@@ -32,7 +32,7 @@ Then copy the output folder to the contaier
 ```bash
 kubectl cp  \
     ${OUTPUT_FOLDER} \
-    ${MONGO_CONTAINER_NAME}:/var/backups/mongo-session-service-dump
+    ${MONGO_CONTAINER_NAME}:/bitnami/mongodb/mongo-session-service-dump
 ```
 
 NOTE: you can get the ${MONGO_CONTAINER_NAME} by looking
@@ -50,7 +50,7 @@ mongorestore \
     -p ${MONGODB_ROOT_PASSWORD} \
     --db ${DB_NAME} \
     --drop \
-    /var/backups/mongo-session-service-dump/${DB_NAME}
+    /bitnami/mongodb/mongo-session-service-dump/${DB_NAME}
 # you can get the mongodb root password from the helm chart
 # helm status cbioportal-session-service-mongo
 ```
@@ -58,7 +58,7 @@ mongorestore \
 Once completed you can delete the dump again:
 
 ```bash
-rm -rf /var/backups/mongo-session-service-dump
+rm -rf /bitnami/mongodb/mongo-session-service-dump
 ```
 
 ## cBioPortal backend
@@ -75,3 +75,8 @@ kubectl apply -f portal-configuration/k8s-config-vars/public/config_map.yaml
 
 For now we only allow changing a few runtime properties that aren't in the
 default `portal.properties.EXAMPLE` file of the repo.
+
+```bash
+kubectl apply -f cbioportal_spring_boot.yaml
+kubectl apply -f service.yaml
+```

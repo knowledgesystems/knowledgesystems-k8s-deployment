@@ -13,7 +13,7 @@ Then:
 export STATE_STORE=s3://random-k8s-state-store-name
 export NAME=genome-nexus.review.k8s.local
 # create config
-kops create cluster --state=${STATE_STORE} --cloud=aws --zones=us-east-1a,us-east-1c --node-count=2  --node-size=t2.small --master-size=t2.small ${NAME}
+kops create cluster --state=${STATE_STORE} --cloud=aws --zones=us-east-1a,us-east-1c --node-count=2  --node-size=t2.large --master-size=t2.medium ${NAME}
 # create cluster
 kops update cluster ${NAME} --yes --state ${STATE_STORE}
 ```

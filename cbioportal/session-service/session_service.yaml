@@ -29,9 +29,16 @@ spec:
       - env:
         - name: SERVER_PORT
           value: "8888"
-        - name: MONGODB_URI
-          value: mongodb://cbioportal-session-service-mongo-mongodb:27017/session_service
+        - name: MONGODB_ROOT_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: cbioportal-session-service-mongo-mongodb
+              key: mongodb-root-password
         image: cbioportal/session-service:e5bfa43e883f33d730cf0bb460912f31c86d1977
+        command: ["/usr/bin/java", 
+                  "-Dspring.data.mongodb.uri=mongodb://root:${MONGODB_ROOT_PASSWORD}@cbioportal-session-service-mongo-mongodb:27017/session_service?authSource=admin",
+                  "-jar",
+                  "/app.war"]
         imagePullPolicy: Always
         readinessProbe:
           httpGet:

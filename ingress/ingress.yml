@@ -9,30 +9,13 @@ metadata:
 spec:
   tls:
   - hosts:
-    - genomenexus.ingress.cbioportal.review
-    secretName: example-nodejs-crt
-  - hosts:
     - v2.genomenexus.org
     secretName: genome-nexus-v2-cert
-  - hosts:
-    - k8s.cbioportal.org
-    secretName: cbioportal-k8s-cert
+#  - hosts:
+#    - k8s.cbioportal.org
+#    secretName: cbioportal-k8s-cert
   rules:
-  - host: genomenexus.ingress.cbioportal.review
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus
-          servicePort: http
   - host: v2.genomenexus.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus
-          servicePort: http
-  - host: v1.genomenexus.org
     http:
       paths:
       - path: /
