@@ -1,25 +1,7 @@
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
-  name: example-nodejs-crt
-spec:
-  secretName: example-nodejs-crt
-  dnsNames:
-  - genomenexus.ingress.cbioportal.review
-  acme:
-    config:
-    - http01:
-        ingressClass: nginx
-      domains:
-      - genomenexus.ingress.cbioportal.review
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
----
-apiVersion: certmanager.k8s.io/v1alpha1
-kind: Certificate
-metadata:
-  name: genome-nexus-v2-crt
+  name: genome-nexus-v2-cert
 spec:
   secretName: genome-nexus-v2-cert
   dnsNames:
@@ -33,11 +15,10 @@ spec:
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
----
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
-  name: cbioportal-k8s-crt
+  name: cbioportal-k8s-cert
 spec:
   secretName: cbioportal-k8s-cert
   dnsNames:

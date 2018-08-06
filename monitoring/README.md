@@ -12,5 +12,5 @@ helm install -f kube_prometheus_values.yml coreos/kube-prometheus --name kube-pr
 ```
 If you want to add new monitors, update the `kube_prometheus_values.yml` file and do:
 ```
-helm upgrade -f kube_prometheus_values.yml coreos/kube-prometheus --name kube-prometheus 
+helm upgrade -f kube_prometheus_values.yml coreos/kube-prometheus --name kube-prometheus
 ```

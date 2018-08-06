@@ -1,7 +1,7 @@
 # Attach a domain name to a service
 We use the nginx-ingress controller:
 ```
-helm install -f ingress_values.yml  eating-dingo   stable/nginx-ingress
+helm install -f ingress_values.yml  --name eating-dingo   stable/nginx-ingress
 ```
 Then for ssl certificates use [cert-manager](https://github.com/kubernetes/charts/tree/master/stable/cert-manager):
 ```
