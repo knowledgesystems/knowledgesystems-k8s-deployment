@@ -1,0 +1,25 @@
+image: mysql
+imagePullPolicy: IfNotPresent
+imageTag: 5.7.14
+persistence:
+  size: 120Gi
+mysqlDatabase: cbioportal_public
+mysqlUser: cbio_user
+configurationFiles:
+  mysql.cnf: |-
+    [mysqld]
+    skip-host-cache
+    skip-name-resolve
+    max_allowed_packet = 256M
+    sort_buffer_size = 512K
+    net_buffer_length = 8K
+    read_buffer_size = 256K
+    read_rnd_buffer_size = 512K
+    myisam_sort_buffer_size = 8M
+    group_concat_max_len = 1M
+    innodb_buffer_pool_size=2G
+    max_connections = 10000
+resources:
+  requests:
+    cpu: 250m
+    memory: 4Gi
