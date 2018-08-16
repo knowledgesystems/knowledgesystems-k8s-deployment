@@ -63,6 +63,18 @@ rm -rf /bitnami/mongodb/mongo-session-service-dump
 
 ## cBioPortal backend
 
+### Database
+
+We are running a mysql database inside the cluster:
+
+```bash
+helm upgrade --install -f cbioportal_mysql_db_values.yml cbioportal-prod-db   stable/mysql
+```
+NOTE: downloading index.do for all studies went down from 2m to 30s by
+playing with the mysql configuration, so be sure to use ours. There's an
+article about setting the right `innodb_buffer_pool_size`:
+https://scalegrid.io/blog/calculating-innodb-buffer-pool-size-for-your-mysql-server/
+
 ### Configuration
 
 To set up the configuration values one needs access to the

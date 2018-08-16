@@ -6,10 +6,15 @@ metadata:
     kubernetes.io/ingress.class: nginx
     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    # increae max response size to avoid 413 errors see
-    # https://github.com/kubernetes/ingress-nginx/issues/1824
-    nginx.ingress.kubernetes.io/proxy-body-size: 500m
-    ingress.kubernetes.io/proxy-body-size: 500m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300s"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300s"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300s"
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    # increase idle timeout of aws load balancer (60s default)
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300s"
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
   tls:
   - hosts:

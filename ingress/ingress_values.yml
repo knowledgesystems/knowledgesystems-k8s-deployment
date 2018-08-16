@@ -11,4 +11,3 @@ controller:
     enabled: true
 rbac:
   create: true
-
