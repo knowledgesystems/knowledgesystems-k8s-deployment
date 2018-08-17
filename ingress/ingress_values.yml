@@ -5,6 +5,7 @@ controller:
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300s"
   stats:
     enabled: true
   metrics:
