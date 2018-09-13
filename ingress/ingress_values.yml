@@ -1,14 +1,16 @@
 controller:
   config:
     use-proxy-protocol: "true"
+  metrics:
+    enabled: true
   replicaCount: 2
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300s"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
   stats:
-    enabled: true
-  metrics:
     enabled: true
 rbac:
   create: true
+tcp:
+  3306: default/cbioportal-prod-db-mysql:3306
