@@ -12,22 +12,15 @@ prometheus:
       endpoints:
         - port: metrics
           interval: 30s
-  serviceMonitorsSelector:
-    matchExpressions:
-    - key: app
-      operator: In
-      values:
-      - gn-spring-boot
-      - alertmanager
-      - exporter-coredns
-      - exporter-kube-controller-manager
-      - exporter-kube-dns
-      - exporter-kube-etcd
-      - exporter-kube-scheduler
-      - exporter-kube-state
-      - exporter-kubelets
-      - exporter-kubernetes
-      - exporter-node
-      - grafana
-      - prometheus
-      - prometheus-operator
+    - name: cbioportal-prod-db-mysql-service-monitor
+      jobLabel: cbioportal-prod-db-mysql
+      selector:
+        matchLabels:
+          app: cbioportal-prod-db-mysql
+          release: cbioportal-prod-db
+      namespaceSelector:
+        matchNames:
+          - default
+      endpoints:
+        - port: metrics
+          interval: 30s

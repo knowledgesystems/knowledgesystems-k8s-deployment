@@ -19,7 +19,11 @@ configurationFiles:
     group_concat_max_len = 1M
     innodb_buffer_pool_size=2G
     max_connections = 10000
+    connect_timeout = 10
 resources:
   requests:
     cpu: 250m
     memory: 4Gi
+metrics:
+  enabled: true
+  imageTag: v0.10.0
