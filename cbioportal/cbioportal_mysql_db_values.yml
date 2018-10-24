@@ -29,3 +29,6 @@ resources:
 metrics:
   enabled: false
   imageTag: v0.10.0
+# run on big memory machine
+nodeSelector:
+  kops.k8s.io/instancegroup: large-mem
