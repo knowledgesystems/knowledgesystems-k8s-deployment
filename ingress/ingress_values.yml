@@ -12,5 +12,3 @@ controller:
     enabled: true
 rbac:
   create: true
-tcp:
-  3306: default/cbioportal-prod-db-mysql:3306
