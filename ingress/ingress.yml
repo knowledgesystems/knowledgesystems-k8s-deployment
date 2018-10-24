@@ -13,6 +13,8 @@ metadata:
     # https://github.com/kubernetes/ingress-nginx/issues/1824
     nginx.ingress.kubernetes.io/proxy-body-size: 512m
     ingress.kubernetes.io/proxy-body-size: 512m
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
   tls:
   - hosts:
