@@ -12,12 +12,12 @@ prometheus:
       endpoints:
         - port: metrics
           interval: 30s
-    - name: cbioportal-prod-db-mysql-service-monitor
-      jobLabel: cbioportal-prod-db-mysql
+    - name: cbioportal-production-db-mysql-service-monitor
+      jobLabel: cbioportal-production-db-mysql
       selector:
         matchLabels:
-          app: cbioportal-prod-db-mysql
-          release: cbioportal-prod-db
+          app: cbioportal-production-db-mysql
+          release: cbioportal-production-db
       namespaceSelector:
         matchNames:
           - default

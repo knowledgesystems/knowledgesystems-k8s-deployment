@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: cbioportal-spring-boot
@@ -29,21 +29,34 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:release-1.15.0-rc2
-        command: ["/usr/bin/java", 
-                  "-Xms2g",
-                  "-Xmx6g",
-                  "-Xss20m",
-                  "-XX:PermSize=128m",
-                  "-Ddbconnector=dbcp",
-                  "-Dsession.service.url=http://cbioportal-session-service/api/sessions/public_portal/",
-                  "-jar",
-                  "/webapp-runner.jar",
-                  "--enable-compression",
-                  "--port",
-                  "8888",
-                  "--expand-war",
-                  "/app.war"]
+        image: cbioportal/cbioportal:release-1.18.0-rc1
+        command: [ "/usr/bin/java" ] 
+        args: [
+            "-Xms2g",
+            "-Xmx6g",
+            "-Xss20m",
+            "-XX:PermSize=128m",
+            "-Dfrontend.url=https://release-1-18-0--cbioportal-frontend.netlify.com/",
+            "-Dskin.footer=",
+            "-Dapp.name=public-portal",
+            "-Ddbconnector=dbcp",
+            "-Dauthenticate=false",
+            "-Ddb.user=$(DB_USER)",
+            "-Ddb.password=$(DB_PASSWORD)",
+            "-Ddb.host=$(DB_HOST)",
+            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Dtomcat.catalina.scope=runtime",
+            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
+            "-Dshow.civivc=$(SHOW_CIVIC)",
+            "-Dsession.service.url=http://cbioportal-session-service/api/sessions/public_portal/",
+            "-jar",
+            "/webapp-runner.jar",
+            "--enable-compression",
+            "--port",
+            "8888",
+            "--expand-war",
+            "/app.war"
+        ]
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
