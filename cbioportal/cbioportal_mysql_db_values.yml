@@ -5,6 +5,7 @@ persistence:
   size: 120Gi
 mysqlDatabase: cbioportal_public
 mysqlUser: cbio_user
+mysqlPassword: cbio_pass
 # make sure this config is actually loaded by checking with e.g. select
 # @@innodb_buffer_pool_size, if not comment the lines, upgrade and uncomment
 # again
@@ -27,7 +28,7 @@ resources:
     cpu: 250m
     memory: 4Gi
 metrics:
-  enabled: false
+  enabled: true
   imageTag: v0.10.0
 # run on big memory machine
 nodeSelector:
