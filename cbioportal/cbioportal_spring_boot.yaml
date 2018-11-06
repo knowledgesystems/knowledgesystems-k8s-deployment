@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-spring-boot
@@ -29,18 +29,20 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:release-1.18.0-rc1
+        - configMapRef:
+            name: cbioportal-session-service-user-credentials
+        image: cbioportal/cbioportal:release-1.18.0-rc2
         command: [ "/usr/bin/java" ] 
         args: [
             "-Xms2g",
             "-Xmx6g",
             "-Xss20m",
-            "-XX:PermSize=128m",
-            "-Dfrontend.url=https://release-1-18-0--cbioportal-frontend.netlify.com/",
+            "-Dfrontend.url=https://cbioportal-frontend.netlify.com/",
             "-Dskin.footer=",
             "-Dapp.name=public-portal",
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=false",
+            "-Dauthenticate=social_auth",
+            "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
@@ -48,7 +50,14 @@ spec:
             "-Dtomcat.catalina.scope=runtime",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Dshow.civivc=$(SHOW_CIVIC)",
+            "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
+            "-Dmybatis.cache.enabled=false",
             "-Dsession.service.url=http://cbioportal-session-service/api/sessions/public_portal/",
+            "-Dsession.service.origin=*",
+            "-Dsession.service.user=$(USER_NAME)",
+            "-Dsession.service.password=$(USER_PASSWORD)",
+            "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
+            "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "-jar",
             "/webapp-runner.jar",
             "--enable-compression",

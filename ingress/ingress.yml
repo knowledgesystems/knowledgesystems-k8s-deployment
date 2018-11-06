@@ -23,6 +23,9 @@ spec:
   - hosts:
     - k8s.cbioportal.org
     secretName: cbioportal-k8s-cert
+  - hosts:
+    - session-service.cbioportal.org
+    secretName: cbioportal-session-service-cert
   rules:
   - host: v2.genomenexus.org
     http:
@@ -37,6 +40,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal
+          servicePort: http
+  - host: session-service.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-session-service
           servicePort: http
 ---
 apiVersion: extensions/v1beta1

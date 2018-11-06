@@ -16,7 +16,7 @@ spec:
       run: cbioportal-session-service
   strategy:
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 3
       maxUnavailable: 1
     type: RollingUpdate
   template:
@@ -34,15 +34,22 @@ spec:
             secretKeyRef:
               name: cbioportal-session-service-mongo-mongodb
               key: mongodb-root-password
-        image: cbioportal/session-service:e5bfa43e883f33d730cf0bb460912f31c86d1977
-        command: ["/usr/bin/java", 
-                  "-Dspring.data.mongodb.uri=mongodb://root:${MONGODB_ROOT_PASSWORD}@cbioportal-session-service-mongo-mongodb:27017/session_service?authSource=admin",
+        envFrom:
+          - configMapRef:
+              name: cbioportal-session-service-user-credentials
+        image: cbioportal/session-service:basic-auth-0fafa70
+        command: ["/usr/bin/java"]
+        args: [
+                  "-Dspring.data.mongodb.uri=mongodb://root:$(MONGODB_ROOT_PASSWORD)@cbioportal-session-service-mongo-mongodb:27017/session_service?authSource=admin",
+                  "-Dsecurity.basic.enabled=true",
+                  "-Dsecurity.user.name=$(USER_NAME)",
+                  "-Dsecurity.user.password=$(USER_PASSWORD)",
                   "-jar",
-                  "/app.war"]
+                  "/app.war"
+        ]
         imagePullPolicy: Always
         readinessProbe:
-          httpGet:
-            path: /swagger-ui.html
+          tcpSocket:
             port: 8888
           initialDelaySeconds: 30
           timeoutSeconds: 2
