@@ -1,6 +1,9 @@
 controller:
   config:
     use-proxy-protocol: "true"
+    proxy-connect-timeout: "300"
+    proxy-read-timeout: "300"
+    proxy-send-timeout: "300"
   metrics:
     enabled: true
   replicaCount: 2
