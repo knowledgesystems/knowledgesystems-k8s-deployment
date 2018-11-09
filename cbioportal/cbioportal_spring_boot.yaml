@@ -31,13 +31,14 @@ spec:
             name: cbioportal-public
         - configMapRef:
             name: cbioportal-session-service-user-credentials
-        image: cbioportal/cbioportal:release-1.18.0-rc2
+        image: cbioportal/cbioportal:release-1.18.0-rc3
         command: [ "/usr/bin/java" ] 
         args: [
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseCGroupMemoryLimitForHeap",
+            "-XX:MaxRAMFraction=1",
             "-Xms2g",
-            "-Xmx6g",
-            "-Xss20m",
-            "-Dfrontend.url=https://cbioportal-frontend.netlify.com/",
+            "-Dfrontend.url=https://master--cbioportal-frontend.netlify.com/",
             "-Dskin.footer=",
             "-Dapp.name=public-portal",
             "-Ddbconnector=dbcp",
@@ -72,8 +73,15 @@ spec:
             path: /api/swagger-ui.html
             port: 8888
           initialDelaySeconds: 30
-          timeoutSeconds: 2
-          periodSeconds: 5
+          timeoutSeconds: 8
+          periodSeconds: 16
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8888
+          initialDelaySeconds: 60
+          timeoutSeconds: 12
+          periodSeconds: 30
         name: cbioportal-spring-boot
         ports:
         - containerPort: 8888
@@ -83,7 +91,7 @@ spec:
                 cpu: 250m
                 memory: 6Gi
             limits:
-                memory: 7Gi
+                memory: 7.5Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
