@@ -29,6 +29,9 @@ spec:
   - hosts:
     - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
+  - hosts:
+    - k8s.oncokb.org
+    secretName: oncokb-k8s-cert
   rules:
   - host: v2.genomenexus.org
     http:
@@ -50,6 +53,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-session-service
+          servicePort: http
+  - host: k8s.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb
           servicePort: http
 ---
 apiVersion: extensions/v1beta1

@@ -1,0 +1,92 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "4"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    run: oncokb
+  name: oncokb
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/oncokb
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: oncokb
+  strategy:
+    rollingUpdate:
+      maxSurge: 3
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: oncokb
+    spec:
+      containers:
+      - env:
+        envFrom:
+          - configMapRef:
+              name: oncokb-credentials
+        image: cbioportal/oncokb:oncokb-public-devops-v0.3.4-5-gac9f228b
+        command: ["/usr/bin/java"]
+        args: [
+                  "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+                  "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(DB_NAME)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+                  "-Djdbc.username=$(USER_NAME)",
+                  "-Djdbc.password=$(USER_PASSWORD)",
+                  "-jar",
+                  "/webapp-runner.jar",
+                  "--enable-compression",
+                  "--expand-war",
+                  "--port",
+                  "8888",
+                  "/app.war"
+        ]
+        imagePullPolicy: Always
+        # use actionable variants endpoint to cache everything
+        readinessProbe:
+          httpGet:
+            path: /api/v1/utils/allActionableVariants
+            port: 8888
+          initialDelaySeconds: 300
+          timeoutSeconds: 10
+          periodSeconds: 20
+        livenessProbe:
+          httpGet:
+            path: /api/v1/utils/allActionableVariants
+            port: 8888
+          initialDelaySeconds: 30
+          timeoutSeconds: 300
+          periodSeconds: 200
+        name: oncokb
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: oncokb
+  name: oncokb
+  selfLink: /api/v1/namespaces/default/services/oncokb
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  selector:
+    run: oncokb
+  type: ClusterIP
