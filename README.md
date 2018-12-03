@@ -11,6 +11,7 @@ https://github.com/kubernetes/helm/blob/master/docs/rbac.md#role-based-access-co
 
 ## Knowledge Systems Group Apps
 - [Genome Nexus](genome-nexus/README.md)
+- [OncoKB](oncokb/README.md)
 
 ## Routing of Domain Names
 We use nginx ingress to handle the routing to the services. See
