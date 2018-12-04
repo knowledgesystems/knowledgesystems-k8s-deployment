@@ -7,7 +7,7 @@ We use an external AWS MySQL db for OncoKB. Credentials are in
 kubectl apply -f portal-configuration/k8s-config-vars/oncokb/config_map.yaml
 ```
 
-To deploy cbioportal once the database has been initialized (see [Init or Update AWS db](#Init-or-Update-AWS-db)):
+To deploy OncoKB once the database has been initialized (see [Init or Update AWS db](#Init-or-Update-AWS-db)):
 
 ```bash
 kubectl apply -f oncokb.yaml
@@ -15,7 +15,7 @@ kubectl apply -f oncokb.yaml
 
 ## Init or Update AWS db
 
-From OncoKb repo run:
+From OncoKB repo run:
 
 ```bash
 cat ./core/src/main/resources/spring/database/oncokb.sql | \
