@@ -1,7 +1,7 @@
 # Genome Nexus
 Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/):
 ```
-helm install --version 3.0.4 --name gn-mongo-v0dot3 --set image.repository=genomenexus/gn-mongo,image.tag=v0.3,persistence.size=20Gi stable/mongodb
+helm install --version 4.9.1 --name gn-mongo-v0dot6 --set securityContext.enabled=false,image.repository=genomenexus/gn-mongo,image.tag=v0.6,persistence.size=20Gi stable/mongodb
 ```
 Deploy genome nexus app:
 ```
@@ -18,6 +18,16 @@ If you want to enable sentry, you need to provide it as a secret:
 kubectl create secret generic genome-nexus-sentry-dsn --from-literal=dsn=https://sentry-key
 ```
 It is referenced in the spring boot app [here](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/genome-nexus/gn_spring_boot.yaml#L34-L38)
+
+## VEP
+Genome Nexus relies heavily on VEP. One can spin up their own version of VEP GRCh37 like this:
+
+```
+kubectl apply -f vep/gn_vep.yaml
+```
+
+It takes quite a while to start (~40m), because it downloads the VEP cache data
+first.
 
 ## Notes
 - alpine docker image doesn't play nice with kubernetes (https://twitter.com/inodb/status/999041628970127360)

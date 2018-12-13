@@ -32,6 +32,10 @@ spec:
   - hosts:
     - k8s.oncokb.org
     secretName: oncokb-k8s-cert
+  - hosts:
+    - cbioportal.review
+    - www.cbioportal.review
+    secretName: cbioportal-review-cert
   rules:
   - host: v2.genomenexus.org
     http:
@@ -55,6 +59,20 @@ spec:
           serviceName: cbioportal-session-service
           servicePort: http
   - host: k8s.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb
+          servicePort: http
+  - host: cbioportal.review
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb
+          servicePort: http
+  - host: www.cbioportal.review
     http:
       paths:
       - path: /
