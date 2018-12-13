@@ -30,14 +30,23 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot3-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-v0dot6-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:v1.0.0-110-g7538a5d
+        image: genomenexus/gn-spring-boot:v1.0.0-150-gd714450-vep-by-region
         imagePullPolicy: Always
+        command: [ "/usr/bin/java" ]
+        args: [
+            "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
+            # this is to use VEP running inside K8s. Remove to use
+            # grch37.rest.ensembl.org instead
+            "-Dgn_vep.region.url=http://gn-vep/vep/human/region/VARIANT",
+            "-jar",
+            "/app.war"
+        ]
         readinessProbe:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
@@ -58,3 +67,23 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
 status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-spring-boot
+    app: gn-spring-boot
+  name: genome-nexus
+  selfLink: /api/v1/namespaces/default/services/genome-nexus
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  - port: 443
+    name: https
+    targetPort: 8888
+  selector:
+    run: gn-spring-boot
+  type: ClusterIP
