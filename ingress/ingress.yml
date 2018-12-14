@@ -30,8 +30,9 @@ spec:
     - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
   - hosts:
-    - k8s.oncokb.org
-    secretName: oncokb-k8s-cert
+    - oncokb.org
+    - www.oncokb.org
+    secretName: oncokb-cert
   - hosts:
     - cbioportal.review
     - www.cbioportal.review
@@ -58,7 +59,14 @@ spec:
         backend:
           serviceName: cbioportal-session-service
           servicePort: http
-  - host: k8s.oncokb.org
+  - host: oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb
+          servicePort: http
+  - host: www.oncokb.org
     http:
       paths:
       - path: /
