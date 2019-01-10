@@ -29,7 +29,7 @@ spec:
       - env:
         - name: SERVER_PORT
           value: "8888"
-        image: genomenexus/gn-vep:fed3ac3ad9305fff37d09c171ab2855f81bb4182
+        image: genomenexus/gn-vep:27223ebc69be55f8d6b31b9111c697ff7b2c0850
         imagePullPolicy: Always
         volumeMounts:
         - name: vep-data
@@ -56,13 +56,13 @@ spec:
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-      # download data from s3 bucket (takes ~40m).
+      # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
       initContainers:
       - name: download-vep-cache
-        image: busybox
+        image: busybox:1.30.0
         command: ['sh', '-c',
-			'cd /vep_data; wget https://gn-vep-data.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://gn-vep-data.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvzf homo_sapiens_vep_92_GRCh37.tar.gz'
+            'cd /vep_data; wget https://gn-vep-data.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://gn-vep-data.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvzf homo_sapiens_vep_92_GRCh37.tar.gz'
         ]
         volumeMounts:
         - name: vep-data
