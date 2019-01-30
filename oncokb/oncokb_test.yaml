@@ -30,6 +30,8 @@ spec:
         envFrom:
           - configMapRef:
               name: oncokb-credentials
+          - configMapRef:
+              name: oncokb-curation-platform-credentials
         image: cbioportal/oncokb:0.3.12-curation-test
         command: ["/usr/bin/java"]
         args: [
