@@ -32,6 +32,7 @@ spec:
   - hosts:
     - oncokb.org
     - www.oncokb.org
+    - test.oncokb.org
     secretName: oncokb-cert
   - hosts:
     - cbioportal.review
@@ -72,6 +73,13 @@ spec:
       - path: /
         backend:
           serviceName: oncokb
+          servicePort: http
+  - host: test.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-test
           servicePort: http
   - host: cbioportal.review
     http:
