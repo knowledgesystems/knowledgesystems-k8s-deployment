@@ -23,7 +23,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncokb
+        run: oncokb-test
     spec:
       containers:
       - env:
@@ -96,7 +96,7 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 300
           periodSeconds: 200
-        name: oncokb
+        name: oncokb-test
         ports:
         - containerPort: 8888
           protocol: TCP
