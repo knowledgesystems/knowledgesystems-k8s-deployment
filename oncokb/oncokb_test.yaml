@@ -16,7 +16,7 @@ spec:
       run: oncokb-test
   strategy:
     rollingUpdate:
-      maxSurge: 3
+      maxSurge: 2
       maxUnavailable: 1
     type: RollingUpdate
   template:
@@ -54,8 +54,8 @@ spec:
                   "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(DB_NAME)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
                   "-Djdbc.username=$(USER_NAME)",
                   "-Djdbc.password=$(USER_PASSWORD)",
-                  "-Ddata.version=v1.18",
-                  "-Ddata.version_date=12/14/2018",
+                  "-Ddata.version=v1.19",
+                  "-Ddata.version_date=01/24/2019",
                   "-Dgenomenexus.api=https://www.genomenexus.org",
                   "-jar",
                   "/webapp-runner.jar",
