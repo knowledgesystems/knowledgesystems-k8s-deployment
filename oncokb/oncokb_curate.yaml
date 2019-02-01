@@ -6,14 +6,14 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: oncokb-test
-  name: oncokb-test
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/oncokb-test
+    run: oncokb-curate
+  name: oncokb-curate
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/oncokb-curate
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: oncokb-test
+      run: oncokb-curate
   strategy:
     rollingUpdate:
       maxSurge: 2
@@ -23,14 +23,16 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncokb-test
+        run: oncokb-curate
     spec:
       containers:
       - env:
         envFrom:
           - configMapRef:
               name: oncokb-credentials
-        image: cbioportal/oncokb:test-google
+          - configMapRef:
+              name: oncokb-curation-platform-credentials
+        image: cbioportal/oncokb:0.3.12-curation-test
         command: ["/usr/bin/java"]
         args: [
                   # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -56,6 +58,19 @@ spec:
                   "-Djdbc.password=$(USER_PASSWORD)",
                   "-Ddata.version=v1.19",
                   "-Ddata.version_date=01/24/2019",
+                  "-Dcuration_platform.curation_link=legacy-api/",
+                  "-Dcuration_platform.private_link=api/private/",
+                  "-Dcuration_platform.api_link=$(CURATION_PLATFORM_API_LINK)",
+                  "-Dcuration_platform.public_api_link=$(CURATION_PLATFORM_PUBLIC_API_LINK)",
+                  "-Dcuration_platform.testing=false",
+                  "-Dcuration_platform.production=true",
+                  # following are firebase settings for frontend
+                  "-Dcuration_platform.firebase_config.api_key=$(CURATION_PLATFORM_FIREBASE_API_KEY)",
+                  "-Dcuration_platform.firebase_config.auth_domain=$(CURATION_PLATFORM_FIREBASE_AUTH_DOMAIN)",
+                  "-Dcuration_platform.firebase_config.database_url=$(CURATION_PLATFORM_FIREBASE_DATABASE_URL)",
+                  "-Dcuration_platform.firebase_config.project_id=$(CURATION_PLATFORM_FIREBASE_PROJECT_ID)",
+                  "-Dcuration_platform.firebase_config.storage_bucket=$(CURATION_PLATFORM_FIREBASE_STORAGE_BUCKET)",
+                  "-Dcuration_platform.firebase_config.messaging_sender_id=$(CURATION_PLATFORM_FIREBASE_MESSAGING_SENDER_ID)",
                   "-Dgenomenexus.api=https://www.genomenexus.org",
                   "-jar",
                   "/webapp-runner.jar",
@@ -81,7 +96,7 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 300
           periodSeconds: 200
-        name: oncokb-test
+        name: oncokb-curate
         ports:
         - containerPort: 8888
           protocol: TCP
@@ -104,14 +119,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncokb-test
-  name: oncokb-test
-  selfLink: /api/v1/namespaces/default/services/oncokb-test
+    run: oncokb-curate
+  name: oncokb-curate
+  selfLink: /api/v1/namespaces/default/services/oncokb-curate
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8888
   selector:
-    run: oncokb-test
+    run: oncokb-curate
   type: ClusterIP
