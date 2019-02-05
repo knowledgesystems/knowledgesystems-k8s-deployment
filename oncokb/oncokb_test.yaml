@@ -30,7 +30,7 @@ spec:
         envFrom:
           - configMapRef:
               name: oncokb-credentials
-        image: cbioportal/oncokb:google-test-2
+        image: cbioportal/oncokb:google-test-1
         command: ["/usr/bin/java"]
         args: [
                   # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -62,8 +62,6 @@ spec:
                   "/webapp-runner.jar",
                   "--enable-compression",
                   "--expand-war",
-                  "--proxy-base-url",
-                  "https://test.oncokb.org",
                   "--port",
                   "8888",
                   "/app.war"
