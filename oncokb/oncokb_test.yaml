@@ -30,7 +30,7 @@ spec:
         envFrom:
           - configMapRef:
               name: oncokb-credentials
-        image: cbioportal/oncokb:google-test-4
+        image: cbioportal/oncokb:google-test-6
         command: ["/usr/bin/java"]
         args: [
                   # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -57,7 +57,7 @@ spec:
                   "-Ddata.version=v1.19",
                   "-Ddata.version_date=01/24/2019",
                   "-Dgenomenexus.api=https://www.genomenexus.org",
-                  "-Dshow_sitemaps=true",
+                  "-Dshow_sitemaps=false",
                   "-jar",
                   "/webapp-runner.jar",
                   "--proxy-base-url",
