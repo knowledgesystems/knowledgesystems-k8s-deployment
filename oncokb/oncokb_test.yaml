@@ -60,6 +60,8 @@ spec:
                   "-Dshow_sitemaps=false",
                   "-jar",
                   "/webapp-runner.jar",
+                  "--proxy-base-url",
+                  "https://test.oncokb.org",
                   "--enable-compression",
                   "--expand-war",
                   "--port",

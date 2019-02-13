@@ -60,6 +60,8 @@ spec:
                   "-Dshow_sitemaps=true",
                   "-jar",
                   "/webapp-runner.jar",
+                  "--proxy-base-url",
+                  "https://oncokb.org",
                   "--enable-compression",
                   "--expand-war",
                   "--port",
@@ -72,7 +74,7 @@ spec:
           httpGet:
             path: /api/v1/utils/allActionableVariants
             port: 8888
-          initialDelaySeconds: 300
+          initialDelaySeconds: 360
           timeoutSeconds: 10
           periodSeconds: 20
         livenessProbe:
