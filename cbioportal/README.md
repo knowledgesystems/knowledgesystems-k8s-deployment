@@ -61,6 +61,16 @@ Once completed you can delete the dump again:
 rm -rf /bitnami/mongodb/mongo-session-service-dump
 ```
 
+## Make a dump of the mongo data base in kubernetes
+Port forward the database
+```bash
+kubectl port-forward  svc/cbioportal-session-service-mongo-mongodb   37017:27017
+```
+Then connect locally using Docker (this is using docker on Mac):
+```bash
+docker run -v $PWD:/local --rm -it mongo:3.6 mongodump --out /local/session-service-dump-20190207 --uri mongodb://docker.for.mac.localhost:37017/session_service
+```
+
 ## cBioPortal backend
 
 ### Database
@@ -74,6 +84,11 @@ NOTE: downloading index.do for all studies went down from 2m to 30s by
 playing with the mysql configuration, so be sure to use ours. There's an
 article about setting the right `innodb_buffer_pool_size`:
 https://scalegrid.io/blog/calculating-innodb-buffer-pool-size-for-your-mysql-server/
+
+### Redis
+```bash
+helm install  --name cbioportal-redis  stable/redis --set master.securityContext.enabled=false --set password=picksomeredispassword --set slave.securityContext.enabled=false --set cluster.enabled=false
+```
 
 ### Configuration
 
