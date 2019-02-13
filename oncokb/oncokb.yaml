@@ -30,7 +30,7 @@ spec:
         envFrom:
           - configMapRef:
               name: oncokb-credentials
-        image: cbioportal/oncokb:0.3.11-public-1
+        image: cbioportal/oncokb:0.3.13
         command: ["/usr/bin/java"]
         args: [
                   # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -57,6 +57,7 @@ spec:
                   "-Ddata.version=v1.19",
                   "-Ddata.version_date=01/24/2019",
                   "-Dgenomenexus.api=https://www.genomenexus.org",
+                  "-Dshow_sitemaps=true",
                   "-jar",
                   "/webapp-runner.jar",
                   "--enable-compression",
