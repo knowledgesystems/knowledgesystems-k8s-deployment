@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dev-cbioportal-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    # increae max response size to avoid 413 errors see
+    # https://github.com/kubernetes/ingress-nginx/issues/1824
+    nginx.ingress.kubernetes.io/proxy-body-size: "1G"
+    ingress.kubernetes.io/proxy-body-size: "1G"
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+spec:
+  tls:
+  - hosts:
+    - k8s.cbioportal.org
+    secretName: k8s-cbioportal-cert
+  rules:
+  - host: k8s.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal
+          servicePort: http

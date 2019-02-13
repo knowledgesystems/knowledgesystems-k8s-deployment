@@ -31,28 +31,43 @@ spec:
             name: cbioportal-public
         - configMapRef:
             name: cbioportal-session-service-user-credentials
-        image: cbioportal/cbioportal:release-1.18.0-rc4
+        image: cbioportal/cbioportal:release-2.0.1-rc4
         command: [ "/usr/bin/java" ] 
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
-            "-Xms1g",
-            "-XX:ParallelGCThreads=2",
-            # aggressive garbage collection
-            "-XX:MinHeapFreeRatio=20",
-            "-XX:MaxHeapFreeRatio=40",
-            "-XX:GCTimeRatio=4",
-            "-XX:AdaptiveSizePolicyWeight=90",
+            "-Xms20g",
+            "-Xmx25g",
             "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseShenandoahGC",
+            "-XX:ShenandoahUncommitDelay=1000",
+            "-XX:ShenandoahGuaranteedGCInterval=10000",
+            #"-XX:+AlwaysPreTouch",
+            #"-XX:+UseTransparentHugePages",
+            #"-XX:+UseNUMA",
+            #"-XX:+PrintGCDetails",
+            #"-XX:+UseParallelGC",
+            #"-XX:+PrintGCDateStamps",
+            "-XX:ParallelGCThreads=4",
+            #"-XX:+UseG1GC",
+            #"-XX:+AggressiveHeap",
+            # non aggressive garbage collection
+            #"-XX:MinHeapFreeRatio=20",
+            #"-XX:MaxHeapFreeRatio=40",
+            #"-XX:GCTimeRatio=19",
+            #"-XX:AdaptiveSizePolicyWeight=90",
             "-XX:+UseCGroupMemoryLimitForHeap",
-            # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
-            "-XX:MaxRAMFraction=2",
+            # This issue says to use maxRAMFraction > 1
+            # https://github.com/akka/akka/issues/23499, but haven't found this
+            # to work v well
+            #"-XX:MaxRAMFraction=1",
             "-XX:+PrintFlagsFinal",
             "-XshowSettings:vm",
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
-            "-XX:MaxRAM=6000m",
-            "-Dfrontend.url=https://master--cbioportal-frontend.netlify.com/",
+            #"-XX:MaxRAM=6500m",
+            "-Dfrontend.url=https://cbioportal-frontend.netlify.com/",
             "-Dskin.footer=",
+            "-Dskin.right_nav.whats_new_blurb=",
             "-Dapp.name=public-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
@@ -64,21 +79,45 @@ spec:
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
-            "-Dshow.civivc=$(SHOW_CIVIC)",
+            "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
+            "-Dskin.email_contact=cbioportal@googlegroups.com",
+            "-Dskin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of provisional TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a> and updated quarterly.",
+            "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
+            "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google account to store your virtual studies. This will allow you to access your studies from any computer. Login is optional and not required to access any of the other features of cBioPortal.",
+            "-Dpriority_studies=PanCancer Studies#msk_impact_2017,nsclc_tcga_broad_2016,mixed_pipseq_2017;Cell lines#cellline_ccle_broad,cellline_nci60",
             "-Dmybatis.cache.enabled=false",
-            "-Dsession.service.url=http://cbioportal-session-service/api/sessions/public_portal/",
+            "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(USER_NAME)",
             "-Dsession.service.password=$(USER_PASSWORD)",
+            "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
             "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            "-Dbitly.url=$(BITLY_URL)",
+            "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
+            "-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
+            "-Ddb.suppress_schema_version_mismatch_errors=true",
+            "-Dsitemaps=true",
+            "-Dgenomenexus.url=https://www.genomenexus.org",
             "-jar",
             "/webapp-runner.jar",
+            # this addresses same issue as
+            # https://github.com/cBioPortal/cbioportal/issues/2328 one needs to
+            # set this if one doesn't want to forward https -> http -> https
+            # when logging in through google auth. Somehow this goes over http
+            # otherwise.
+            # "--proxy-base-url",
+            # "https://k8s.cbioportal.org",
+            "--max-threads",
+            "200",
+            "--session-store",
+            "redis",
+            "--session-store-operation-timeout",
+            "10000",
             "--enable-compression",
             "--port",
             "8888",
-            "--expand-war",
             "/app.war"
         ]
         imagePullPolicy: Always
@@ -86,26 +125,28 @@ spec:
           httpGet:
             path: /api/cancer-types
             port: 8888
-          initialDelaySeconds: 30
-          timeoutSeconds: 10
-          periodSeconds: 20
+          initialDelaySeconds: 45
+          timeoutSeconds: 1
+          periodSeconds: 5
+          failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /
             port: 8888
-          initialDelaySeconds: 60
-          timeoutSeconds: 12
-          periodSeconds: 30
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+          periodSeconds: 12
+          failureThreshold: 5
         name: cbioportal-spring-boot
         ports:
         - containerPort: 8888
           protocol: TCP
         resources:
             requests:
-                cpu: 1500m
-                memory: 5Gi
+                cpu: 2000m
+                memory: 20Gi
             limits:
-                memory: 7Gi
+                memory: 26Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
@@ -117,3 +158,19 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
 status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: cbioportal-spring-boot
+  name: cbioportal
+  selfLink: /api/v1/namespaces/default/services/cbioportal-spring-boot
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  selector:
+    run: cbioportal-spring-boot
+  type: ClusterIP

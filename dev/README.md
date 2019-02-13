@@ -5,6 +5,7 @@ This requires:
 - aws command line client
 - kops
 - kubernetes
+- helm (k8s package manager)
 
 ```
 # takes about 5m

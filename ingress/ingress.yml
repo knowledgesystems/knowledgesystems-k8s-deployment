@@ -24,20 +24,19 @@ spec:
     - v2.genomenexus.org
     secretName: genome-nexus-v2-cert
   - hosts:
-    - k8s.cbioportal.org
-    secretName: cbioportal-k8s-cert
+    - www.cbioportal.org
+    secretName: cbioportal-www-cert
   - hosts:
     - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
+  - hosts:
+    - session-service-beta.cbioportal.org
+    secretName: cbioportal-session-service-beta-cert
   - hosts:
     - oncokb.org
     - www.oncokb.org
     - test.oncokb.org
     secretName: oncokb-cert
-  - hosts:
-    - cbioportal.review
-    - www.cbioportal.review
-    secretName: cbioportal-review-cert
   rules:
   - host: v2.genomenexus.org
     http:
@@ -46,7 +45,7 @@ spec:
         backend:
           serviceName: genome-nexus
           servicePort: http
-  - host: k8s.cbioportal.org
+  - host: www.cbioportal.org
     http:
       paths:
       - path: /
@@ -59,6 +58,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-session-service
+          servicePort: http
+  - host: session-service-beta.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-session-service-beta
           servicePort: http
   - host: oncokb.org
     http:
@@ -80,20 +86,6 @@ spec:
       - path: /
         backend:
           serviceName: oncokb-test
-          servicePort: http
-  - host: cbioportal.review
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb
-          servicePort: http
-  - host: www.cbioportal.review
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb
           servicePort: http
 ---
 apiVersion: extensions/v1beta1
