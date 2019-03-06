@@ -31,12 +31,14 @@ spec:
             name: cbioportal-public
         - configMapRef:
             name: cbioportal-session-service-user-credentials
-        image: cbioportal/cbioportal:release-2.0.1-rc4
+        image: cbioportal/cbioportal:release-2.1.0-rc4-restore-cache
         command: [ "/usr/bin/java" ] 
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms20g",
             "-Xmx25g",
+            "-Xms1g",
+            "-Xmx4g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -47,7 +49,7 @@ spec:
             #"-XX:+PrintGCDetails",
             #"-XX:+UseParallelGC",
             #"-XX:+PrintGCDateStamps",
-            "-XX:ParallelGCThreads=4",
+            #"-XX:ParallelGCThreads=4",
             #"-XX:+UseG1GC",
             #"-XX:+AggressiveHeap",
             # non aggressive garbage collection
@@ -65,9 +67,19 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #"-XX:MaxRAM=6500m",
+            # enable remote debug
+            "-Dcom.sun.management.jmxremote.rmi.port=8849",
+            "-Dcom.sun.management.jmxremote=false",
+            "-Dcom.sun.management.jmxremote.port=8849",
+            "-Dcom.sun.management.jmxremote.ssl=false",
+            "-Dcom.sun.management.jmxremote.authenticate=false",
+            "-Dcom.sun.management.jmxremote.local.only=false",
+            "-Djava.rmi.server.hostname=localhost",
+            # /enable remote debug
             "-Dfrontend.url=https://cbioportal-frontend.netlify.com/",
             "-Dskin.footer=",
             "-Dskin.right_nav.whats_new_blurb=",
+            "-Dskin.example_study_queries=tcga pancancer atlas\ntcga provisional\ntcga -provisional -pancancer\ntcga or icgc\nmsk-impact\n-\"cell line\"\nbreast\nesophageal OR stomach\nprostate msk\nserous",
             "-Dapp.name=public-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
@@ -115,6 +127,8 @@ spec:
             "redis",
             "--session-store-operation-timeout",
             "10000",
+            # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
+            "-AmaxHttpHeaderSize=65536",
             "--enable-compression",
             "--port",
             "8888",
@@ -141,17 +155,25 @@ spec:
         ports:
         - containerPort: 8888
           protocol: TCP
+        - containerPort: 8849
+          protocol: TCP
         resources:
-            requests:
-                cpu: 2000m
-                memory: 20Gi
-            limits:
-                memory: 26Gi
+          requests:
+              cpu: 2000m
+              memory: 20Gi
+          limits:
+              memory: 26Gi
+        # for dev
+        # resources:
+        #     requests:
+        #         memory: 1Gi
+        #     limits:
+        #         memory: 4Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-          kops.k8s.io/instancegroup: large-mem
+         kops.k8s.io/instancegroup: large-mem
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
