@@ -37,8 +37,6 @@ spec:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms20g",
             "-Xmx25g",
-            "-Xms1g",
-            "-Xmx4g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -128,7 +126,7 @@ spec:
             "--session-store-operation-timeout",
             "10000",
             # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
-            "-AmaxHttpHeaderSize=65536",
+            "-AmaxHttpHeaderSize=16384",
             "--enable-compression",
             "--port",
             "8888",
