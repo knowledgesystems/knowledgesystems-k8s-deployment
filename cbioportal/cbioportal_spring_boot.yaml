@@ -29,8 +29,6 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        - configMapRef:
-            name: cbioportal-session-service-user-credentials
         image: cbioportal/cbioportal:release-2.1.0-rc4-restore-cache
         command: [ "/usr/bin/java" ] 
         args: [
@@ -99,16 +97,18 @@ spec:
             "-Dmybatis.cache.enabled=true",
             "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
-            "-Dsession.service.user=$(USER_NAME)",
-            "-Dsession.service.password=$(USER_PASSWORD)",
+            "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
+            "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
             "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
             "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "-Dbitly.url=$(BITLY_URL)",
             "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
+            "-Dsentry.dsn=$(SENTRY_DSN)",
             "-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dsitemaps=true",
+            "-Doncokb.public_api.url=https://oncokb.org/api/v1",
             "-Dgenomenexus.url=https://www.genomenexus.org",
             "-jar",
             "/webapp-runner.jar",
@@ -127,6 +127,7 @@ spec:
             "10000",
             # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
             "-AmaxHttpHeaderSize=16384",
+            "-AconnectionTimeout=20000",
             "--enable-compression",
             "--port",
             "8888",
@@ -161,12 +162,6 @@ spec:
               memory: 20Gi
           limits:
               memory: 26Gi
-        # for dev
-        # resources:
-        #     requests:
-        #         memory: 1Gi
-        #     limits:
-        #         memory: 4Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
