@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:release-2.1.0-rc4-restore-cache
+        image: cbioportal/cbioportal:release-2.1.0-rc5
         command: [ "/usr/bin/java" ] 
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -94,7 +94,7 @@ spec:
             "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
             "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google account to store your virtual studies. This will allow you to access your studies from any computer. Login is optional and not required to access any of the other features of cBioPortal.",
             "-Dpriority_studies=PanCancer Studies#msk_impact_2017,nsclc_tcga_broad_2016,mixed_pipseq_2017;Cell lines#cellline_ccle_broad,cellline_nci60",
-            "-Dmybatis.cache.enabled=true",
+            "-Dmybatis.cache.enabled=false",
             "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
