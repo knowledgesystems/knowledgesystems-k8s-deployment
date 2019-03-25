@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       run: cbioportal-spring-boot
