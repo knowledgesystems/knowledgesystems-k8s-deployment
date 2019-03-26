@@ -36,6 +36,8 @@ spec:
     - oncokb.org
     - www.oncokb.org
     - test.oncokb.org
+    - beta.oncokb.org
+    - beta.curate.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: v2.genomenexus.org
@@ -87,6 +89,20 @@ spec:
         backend:
           serviceName: oncokb-test
           servicePort: http
+  - host: beta.oncokb.org
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: oncokb-beta
+            servicePort: http
+  - host: beta.curate.oncokb.org
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: oncokb-curate-beta
+            servicePort: http
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
