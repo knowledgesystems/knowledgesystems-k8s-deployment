@@ -29,7 +29,7 @@ spec:
       - env:
         envFrom:
           - configMapRef:
-              name: oncokb-credentials
+              name: oncokb-beta-db-credentials
         image: cbioportal/oncokb:0.3.13
         command: ["/usr/bin/java"]
         args: [
