@@ -12,6 +12,7 @@ metadata:
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
     ingress.kubernetes.io/proxy-send-timeout: "300"
+    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
     # increae max response size to avoid 413 errors see
     # https://github.com/kubernetes/ingress-nginx/issues/1824
     nginx.ingress.kubernetes.io/proxy-body-size: 512m
@@ -26,6 +27,9 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
+  - hosts:
+    - beta.cbioportal.org
+    secretName: cbioportal-beta-cert
   - hosts:
     - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
@@ -51,6 +55,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal
+          servicePort: http
+  - host: beta.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-backend-beta
           servicePort: http
   - host: session-service.cbioportal.org
     http:
