@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:release-3.0.0-rc1
+        image: cbioportal/cbioportal:release.3.0.0-rc2
         command: [ "/usr/bin/java" ] 
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -72,7 +72,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://cbioportal.mskcc.org/frontend/df13f9821eb1e414752f7ed36b730e08a43a42da",
+            "-Dfrontend.url=https://release-3-0-0--cbioportalfrontend.netlify.com",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
