@@ -88,6 +88,7 @@ spec:
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Ddat.method=none",
             "-Dtomcat.catalina.scope=runtime",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Dshow.civic=$(SHOW_CIVIC)",
