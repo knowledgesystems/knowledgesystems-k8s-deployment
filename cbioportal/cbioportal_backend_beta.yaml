@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:release-3.0.0-rc5
+        image: cbioportal/cbioportal:release-3.0.0
         command: [ "/usr/bin/java" ] 
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -88,7 +88,6 @@ spec:
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
-            "-Ddat.method=none",
             "-Dtomcat.catalina.scope=runtime",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Dshow.civic=$(SHOW_CIVIC)",
