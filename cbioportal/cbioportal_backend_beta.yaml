@@ -33,8 +33,10 @@ spec:
         command: [ "/usr/bin/java" ] 
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
-            "-Xms5g",
-            "-Xmx14g",
+            # "-Xms5g",
+            # "-Xmx14g",
+            "-Xms10g",
+            "-Xmx20g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -160,9 +162,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 5Gi
+              memory: 10Gi
           limits:
-              memory: 15Gi
+              memory: 20Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
