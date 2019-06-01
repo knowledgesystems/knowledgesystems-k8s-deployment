@@ -28,7 +28,7 @@ spec:
       containers:
       - envFrom:
         - configMapRef:
-            name: cbioportal-public
+            name: cbioportal-public-beta
         image: cbioportal/cbioportal:release-3.0.0
         command: [ "/usr/bin/java" ] 
         args: [
