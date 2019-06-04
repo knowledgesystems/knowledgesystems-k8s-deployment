@@ -30,7 +30,7 @@ spec:
         - configMapRef:
             name: cbioportal-public-beta
         image: cbioportal/cbioportal:release-3.0.0
-        command: [ "/usr/bin/java" ] 
+        command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",
@@ -104,7 +104,7 @@ spec:
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
-            "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
+            "-Dgoogle_analytics_profile_id=UA-17134933-2",
             "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "-Dbitly.url=$(BITLY_URL)",
