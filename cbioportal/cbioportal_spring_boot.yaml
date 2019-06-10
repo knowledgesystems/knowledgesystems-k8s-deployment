@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:release-2.2.1
+        image: cbioportal/cbioportal:v3.0.0-web-shenandoah
         command: [ "/usr/bin/java" ] 
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -95,10 +95,10 @@ spec:
             "-Dskin.email_contact=cbioportal@googlegroups.com",
             "-Dskin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of provisional TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a> and updated quarterly.",
             "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
-            "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google account to store your virtual studies. This will allow you to access your studies from any computer. Login is optional and not required to access any of the other features of cBioPortal.",
+            "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google account to store your virtual studies and groups. This will allow you to access your studies and groups from any computer. Login is optional and not required to access any of the other features of cBioPortal.",
             "-Dpriority_studies=PanCancer Studies#msk_impact_2017,nsclc_tcga_broad_2016,mixed_pipseq_2017;Cell lines#cellline_ccle_broad,cellline_nci60",
             "-Dmybatis.cache.enabled=false",
-            "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/",
+            "-Dsession.service.url=https://session-service-beta.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
