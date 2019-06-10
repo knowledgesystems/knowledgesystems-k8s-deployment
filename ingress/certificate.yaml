@@ -19,24 +19,6 @@ spec:
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
-  name: cbioportal-k8s-cert
-spec:
-  secretName: cbioportal-k8s-cert
-  dnsNames:
-  - k8s.cbioportal.org
-  acme:
-    config:
-    - http01:
-        ingressClass: nginx
-      domains:
-      - k8s.cbioportal.org
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
----
-apiVersion: certmanager.k8s.io/v1alpha1
-kind: Certificate
-metadata:
   name: grafana-cert
 spec:
   secretName: grafana-cert
