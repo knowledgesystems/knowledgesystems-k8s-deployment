@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cbioportal-sync-rc-database
+spec:
+  template:
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: cbioportal-importer
+        name: cbioportal-sync-rc-database
+        image: mysql:5.7
+        command: ["/bin/sh", "-c"]
+        args:
+          - echo "Install curl";
+            apt-get update; apt-get install curl -y;
+            echo "Done installing curl";
+
+            echo Drop and create database ${DB_PUBLIC_RC_PORTAL_DB_NAME};
+            echo DROP DATABASE IF EXISTS ${DB_PUBLIC_RC_PORTAL_DB_NAME} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
+            echo CREATE DATABASE ${DB_PUBLIC_RC_PORTAL_DB_NAME} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
+
+            echo "Copy public database to rc database";
+            date;
+            mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PUBLIC_PORTAL_DB_NAME} | mysql  -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_PUBLIC_RC_PORTAL_DB_NAME};
+            date;
+            echo "Done copying database";
+
+            echo "Apply migration to 2.9.1";
+            curl "https://raw.githubusercontent.com/cBioPortal/cbioportal/rc/db-scripts/src/main/resources/migration.sql" | awk '{if (new_version) {print $0} else if ($0 ~ /##version/ && $0 ~ /2.9.1/) { new_version=1; print $0 } }' | mysql  -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_PUBLIC_RC_PORTAL_DB_NAME};
+      restartPolicy: Never
+  backoffLimit: 0
