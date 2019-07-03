@@ -10,6 +10,7 @@ Set up helm with Role-based access control:
 https://github.com/kubernetes/helm/blob/master/docs/rbac.md#role-based-access-control
 
 ## Knowledge Systems Group Apps
+- [cBioPortal](cbioportal/README.md)
 - [Genome Nexus](genome-nexus/README.md)
 - [OncoKB](oncokb/README.md)
 
