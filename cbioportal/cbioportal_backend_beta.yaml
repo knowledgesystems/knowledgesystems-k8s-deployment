@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:release-3.0.0
+        image: cbioportal/cbioportal:master-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -74,7 +74,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://release-3-0-0--cbioportalfrontend.netlify.com",
+            "-Dfrontend.url=https://frontend.cbioportal.org",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
@@ -84,7 +84,7 @@ spec:
             "-Dapp.name=public-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=social_auth",
+            "-Dauthenticate=social_auth_microsoft,social_auth_google",
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
@@ -97,9 +97,8 @@ spec:
             "-Dskin.email_contact=cbioportal@googlegroups.com",
             "-Dskin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of provisional TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a> and updated quarterly.",
             "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
-            "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google account to store your virtual studies and groups. This will allow you to access your studies from any computer. Login is optional and not required to access any of the other features of cBioPortal.",
+            "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google account to store your <a href=\"https://www.cbioportal.org/tutorials#virtual-studies\" target=\"_blank\">virtual studies</a> and <a href=\"https://www.cbioportal.org/tutorials#group-comparison\" target=\"_blank\">groups</a>. This will allow you to access your studies and groups from any computer. Login is optional and not required to access any of the other features of cBioPortal.",
             "-Dpriority_studies=PanCancer Studies#msk_impact_2017,nsclc_tcga_broad_2016,mixed_pipseq_2017;Cell lines#cellline_ccle_broad,cellline_nci60",
-            "-Dskin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/release-3.0.0/docs/",
             "-Dmybatis.cache.enabled=false",
             "-Dsession.service.url=https://session-service-beta.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
@@ -108,6 +107,8 @@ spec:
             "-Dgoogle_analytics_profile_id=UA-17134933-2",
             "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            "-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
+            "-Dmicrosoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
             "-Dbitly.url=$(BITLY_URL)",
             "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
             "-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
@@ -122,8 +123,8 @@ spec:
             # set this if one doesn't want to forward https -> http -> https
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
-            # "--proxy-base-url",
-            # "https://k8s.cbioportal.org",
+            "--proxy-base-url",
+            "https://beta.cbioportal.org",
             "--max-threads",
             "10",
             "--session-store",

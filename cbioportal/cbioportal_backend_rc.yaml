@@ -28,8 +28,8 @@ spec:
       containers:
       - envFrom:
         - configMapRef:
-            name: cbioportal-public
-        image: cbioportal/cbioportal:rc
+            name: cbioportal-public-rc
+        image: cbioportal/cbioportal:rc-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
