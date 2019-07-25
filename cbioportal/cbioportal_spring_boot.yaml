@@ -99,7 +99,7 @@ spec:
             "-Dskin.blurb=",
             "-Dpriority_studies=PanCancer Studies#msk_impact_2017,nsclc_tcga_broad_2016,mixed_pipseq_2017;Cell lines#cellline_ccle_broad,cellline_nci60",
             "-Dmybatis.cache.enabled=false",
-            "-Dsession.service.url=https://session-service-beta.cbioportal.org/api/sessions/public_portal/",
+            "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
