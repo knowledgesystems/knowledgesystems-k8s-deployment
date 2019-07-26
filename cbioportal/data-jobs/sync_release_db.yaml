@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cbioportal-sync-release-3-1-0-database
+spec:
+  template:
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: cbioportal-importer
+        name: cbioportal-sync-release-3-1-0-database
+        image: mysql:5.7
+        command: ["/bin/sh", "-c"]
+        args:
+          - echo "Install curl";
+            apt-get update; apt-get install curl -y;
+            echo "Done installing curl";
+
+            export DB_TEMP=${DB_PUBLIC_RELEASE_PORTAL_DB_NAME}_temp;
+            echo Drop and create database ${DB_TEMP};
+            echo DROP DATABASE IF EXISTS ${DB_TEMP} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
+            echo CREATE DATABASE ${DB_TEMP} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
+
+            echo "Copy public database to release-3.1.0 temp database";
+            date;
+            mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PUBLIC_PORTAL_DB_NAME} | mysql  -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_TEMP};
+            date;
+            echo "Done copying database to temp";
+
+            echo "Apply all migrations from version 2.9.1 until latest";
+            curl "https://raw.githubusercontent.com/cBioPortal/cbioportal/release-3.1.0/db-scripts/src/main/resources/migration.sql" | awk '{if (new_version) {print $0} else if ($0 ~ /##version/ && $0 ~ /2.9.1/) { new_version=1; print $0 } }' | mysql  -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_TEMP};
+
+            echo Drop and create database ${DB_PUBLIC_RELEASE_PORTAL_DB_NAME};
+            echo DROP DATABASE IF EXISTS ${DB_PUBLIC_RELEASE_PORTAL_DB_NAME} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
+            echo CREATE DATABASE ${DB_PUBLIC_RELEASE_PORTAL_DB_NAME} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
+
+            for table in $(mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} -s -N -e "use ${DB_TEMP};show tables from ${DB_TEMP};");
+                do mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} -s -N -e "use ${DB_TEMP};rename table ${DB_TEMP}.$table to ${DB_PUBLIC_RELEASE_PORTAL_DB_NAME}.$table;";
+            done;
+
+            echo DROP DATABASE IF EXISTS ${DB_TEMP} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
+      restartPolicy: Never
+  backoffLimit: 0
