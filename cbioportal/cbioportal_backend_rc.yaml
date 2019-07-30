@@ -82,7 +82,7 @@ spec:
             "-Dapp.name=public-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=social_auth",
+            "-Dauthenticate=social_auth_microsoft,social_auth_google",
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
@@ -102,9 +102,11 @@ spec:
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
-            "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
+            "-Dgoogle_analytics_profile_id=UA-17134933-2",
             "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            "-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
+            "-Dmicrosoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
             "-Dbitly.url=$(BITLY_URL)",
             "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
             "-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
@@ -119,8 +121,8 @@ spec:
             # set this if one doesn't want to forward https -> http -> https
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
-            # "--proxy-base-url",
-            # "https://k8s.cbioportal.org",
+            "--proxy-base-url",
+            "https://rc.cbioportal.org",
             "--max-threads",
             "10",
             "--session-store",
