@@ -35,7 +35,7 @@ spec:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",
             # "-Xmx14g",
-            "-Xms10g",
+            "-Xms100m",
             "-Xmx20g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
