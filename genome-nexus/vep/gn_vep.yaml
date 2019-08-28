@@ -40,15 +40,15 @@ spec:
             path: /vep/human/region/7:140453136-140453136:1/T
             port: 8888
           initialDelaySeconds: 10
-          timeoutSeconds: 2
-          periodSeconds: 5
+          timeoutSeconds: 15
+          periodSeconds: 15
         livenessProbe:
           httpGet:
             path: /vep/human/region/7:140453136-140453136:1/T
             port: 8888
           initialDelaySeconds: 30
-          timeoutSeconds: 6
-          periodSeconds: 15
+          timeoutSeconds: 30
+          periodSeconds: 30
         name: gn-vep
         ports:
         - containerPort: 8888
