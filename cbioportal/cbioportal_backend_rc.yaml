@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-rc
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-rc
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: cbioportal-backend-rc
@@ -164,7 +164,7 @@ spec:
           requests:
               memory: 2Gi
           limits:
-              memory: 15Gi
+              memory: 26Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
