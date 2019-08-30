@@ -8,8 +8,8 @@ metadata:
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
   machineType: r5.xlarge
-  maxSize: 3
-  minSize: 3
+  maxSize: 2
+  minSize: 2
   nodeLabels:
     kops.k8s.io/instancegroup: large-mem
   role: Node
