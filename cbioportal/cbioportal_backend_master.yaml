@@ -25,17 +25,17 @@ spec:
       labels:
         run: cbioportal-backend-master
     spec:
-      volumes:
-      - name: ehcache-volume
-        emptyDir: {}
+      #volumes:
+        #- name: ehcache-volume
+        #  emptyDir: {}
       containers:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:3.1.0-web-shenandoah-ehcache-oldimage
-        volumeMounts:
-        - name: ehcache-volume
-          mountPath: /ehcache
+        image: cbioportal/cbioportal:master-web-shenandoah
+        # volumeMounts:
+        # - name: ehcache-volume
+        #   mountPath: /ehcache
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -122,15 +122,15 @@ spec:
             "-Dsitemaps=false",
             "-Doncokb.public_api.url=https://oncokb.org/api/v1",
             "-Dgenomenexus.url=https://www.genomenexus.org",
-            "-Dehcache.cache_enabled=true",
-            "-Dehcache.xml_configuration=/ehcache.xml",
-            "-Dehcache.statistics_enabled=true",
-            "-Dcache.statistics_endpoint_enabled=true",
-            "-Dehcache.general_repository_cache.max_mega_bytes_heap=1024",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
-            "-Dehcache.persistence_path=/ehcache",
-            "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4096",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
+            # "-Dehcache.cache_enabled=true",
+            # "-Dehcache.xml_configuration=/ehcache.xml",
+            # "-Dehcache.statistics_enabled=true",
+            # "-Dcache.statistics_endpoint_enabled=true",
+            # "-Dehcache.general_repository_cache.max_mega_bytes_heap=1024",
+            # "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
+            # "-Dehcache.persistence_path=/ehcache",
+            # "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4096",
+            # "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
