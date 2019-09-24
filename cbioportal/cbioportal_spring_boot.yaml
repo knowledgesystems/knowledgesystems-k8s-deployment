@@ -124,9 +124,9 @@ spec:
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # ehcache settings
-            "-Dehcache.cache_enabled=true",
+            "-Dehcache.cache_enabled=false",
             "-Dehcache.xml_configuration=/ehcache.xml",
-            "-Dehcache.statistics_enabled=true",
+            "-Dehcache.statistics_enabled=false",
             "-Dcache.statistics_endpoint_enabled=true",
             "-Dehcache.general_repository_cache.max_mega_bytes_heap=1024",
             "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
