@@ -87,11 +87,11 @@ spec:
             "-Dskin.right_nav.whats_new_blurb=",
             "-Dskin.quick_select_buttons=TCGA PanCancer Atlas Studies#*pan_can_atlas*;Curated set of non-redundant studies|158 studies that are manually curated including TCGA and non-TCGA studies with no overlapping samples#acbc_mskcc_2015,acc_tcga_pan_can_atlas_2018,acyc_fmi_2014,acyc_mda_2015,acyc_mgh_2016,acyc_mskcc_2013,acyc_sanger_2013,all_phase2_target_2018_pub,all_stjude_2016,aml_target_2018_pub,ampca_bcm_2016,angs_project_painter_2018,bfn_duke_nus_2015,blca_bgi,blca_cornell_2016,blca_dfarber_mskcc_2014,blca_mskcc_solit_2012,blca_mskcc_solit_2014,blca_tcga_pan_can_atlas_2018,brca_bccrc,brca_broad,brca_igr_2015,brca_mbcproject_wagle_2017,brca_metabric,brca_sanger,brca_tcga_pan_can_atlas_2018,ccrcc_irc_2014,ccrcc_utokyo_2013,cesc_tcga_pan_can_atlas_2018,chol_jhu_2013,chol_nccs_2013,chol_nus_2012,chol_tcga_pan_can_atlas_2018,cll_iuopa_2015,cllsll_icgc_2011,coadread_dfci_2016,coadread_genentech,coadread_mskcc,coadread_tcga_pan_can_atlas_2018,cscc_dfarber_2015,cscc_hgsc_bcm_2014,ctcl_columbia_2015,desm_broad_2015,dlbc_tcga_pan_can_atlas_2018,dlbcl_dfci_2018,dlbcl_duke_2017,egc_tmucih_2015,es_dfarber_broad_2014,es_iocurie_2014,esca_broad,esca_tcga_pan_can_atlas_2018,escc_icgc,escc_ucla_2014,gbc_shanghai_2014,gbm_tcga_pan_can_atlas_2018,glioma_msk_2018,hcc_inserm_fr_2015,hcc_msk_venturaa_2018,hnsc_broad,hnsc_jhu,hnsc_mdanderson_2013,hnsc_tcga_pan_can_atlas_2018,kich_tcga_pan_can_atlas_2018,kirc_bgi,kirc_tcga_pan_can_atlas_2018,kirp_tcga_pan_can_atlas_2018,laml_tcga_pan_can_atlas_2018,lcll_broad_2013,lgg_tcga_pan_can_atlas_2018,lgg_ucsf_2014,liad_inserm_fr_2014,lihc_amc_prv,lihc_riken,lihc_tcga_pan_can_atlas_2018,luad_broad,luad_tcga_pan_can_atlas_2018,luad_tsp,lung_msk_pdx,lusc_tcga_pan_can_atlas_2018,mbl_broad_2012,mbl_pcgp,mbl_sickkids_2016,mcl_idibips_2013,mds_tokyo_2011,mel_tsam_liang_2017,meso_tcga_pan_can_atlas_2018,mixed_allen_2018,mixed_pipseq_2017,mm_broad,mpnst_mskcc,mrt_bcgsc_2016,msk_impact_2017,nbl_amc_2012,nbl_target_2018_pub,nbl_ucologne_2015,nccrcc_genentech_2014,nepc_wcm_2016,nhl_bcgsc_2011,nhl_bcgsc_2013,npc_nusingapore,nsclc_unito_2016,ov_tcga_pan_can_atlas_2018,paac_jhu_2014,paad_qcmg_uq_2016,paad_tcga_pan_can_atlas_2018,paad_utsw_2015,pact_jhu_2011,panet_arcnet_2017,panet_jhu_2011,panet_shanghai_2013,pcnsl_mayo_2015,pcpg_tcga_pan_can_atlas_2018,pediatric_dkfz_2017,plmeso_nyu_2015,prad_broad,prad_eururol_2017,prad_fhcrc,prad_mich,prad_mpcproject_2018,prad_mskcc,prad_mskcc_cheny1_organoids_2014,prad_tcga_pan_can_atlas_2018,rms_nih_2014,rt_target_2018_pub,sarc_mskcc,sarc_tcga_pan_can_atlas_2018,scco_mskcc,sclc_cancercell_gardner_2017,sclc_jhu,sclc_ucologne_2015,skcm_broad,skcm_broad_brafresist_2012,skcm_tcga_pan_can_atlas_2018,skcm_ucla_2016,skcm_vanderbilt_mskcc_2015,skcm_yale,stad_pfizer_uhongkong,stad_tcga_pan_can_atlas_2018,stad_utokyo,summit_2018,tet_nci_2014,tgct_tcga_pan_can_atlas_2018,thca_tcga_pan_can_atlas_2018,thym_tcga_pan_can_atlas_2018,uccc_nih_2017,ucec_tcga_pan_can_atlas_2018,ucs_jhu_2014,ucs_tcga_pan_can_atlas_2018,um_qimr_2016,urcc_mskcc_2016,utuc_mskcc_2015,uvm_tcga_pan_can_atlas_2018,vsc_cuk_2018,wt_target_2018_pub,acyc_jhu_2016,histiocytosis_cobi_msk_2019,utuc_cornell_baylor_mdacc_2019,prad_su2c_2019",
             "-Dskin.example_study_queries=tcga pancancer atlas\ntcga provisional\ntcga -provisional -pancancer\ntcga or icgc\nmsk-impact\n-\"cell line\"\nbreast\nesophageal OR stomach\nprostate msk\nserous",
-            "-Dapp.name=public-portal",
+            "-Dapp.name=genie-public-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=social_auth_microsoft,social_auth_google",
-            "-Dauthorization=false",
+            "-Dauthenticate=googleplus",
+            "-Dauthorization=true",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
@@ -156,21 +156,15 @@ spec:
         ]
         imagePullPolicy: Always
         readinessProbe:
-          httpGet:
-            path: /api/cancer-types
-            port: 8888
-          initialDelaySeconds: 45
-          timeoutSeconds: 1
-          periodSeconds: 5
-          failureThreshold: 3
+           tcpSocket:
+             port: 8888
+           initialDelaySeconds: 5
+           periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /
-            port: 8888
-          initialDelaySeconds: 90
-          timeoutSeconds: 1
-          periodSeconds: 12
-          failureThreshold: 5
+           tcpSocket:
+             port: 8888
+           initialDelaySeconds: 15
+           periodSeconds: 20 
         name: cbioportal-backend-genie
         ports:
         - containerPort: 8888
