@@ -1,0 +1,211 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "4"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    run: cbioportal-backend-genie
+  name: cbioportal-backend-genie
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioportal-backend-genie
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: cbioportal-backend-genie
+    spec:
+      #volumes:
+        #- name: ehcache-volume
+        #  emptyDir: {}
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: cbioportal-public-genie
+        image: cbioportal/cbioportal:master-web-shenandoah
+        # volumeMounts:
+        # - name: ehcache-volume
+        #   mountPath: /ehcache
+        command: [ "/usr/bin/java" ]
+        args: [
+            # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
+            # "-Xms5g",
+            # "-Xmx14g",
+            "-Xms100m",
+            "-Xmx10g",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseShenandoahGC",
+            "-XX:ShenandoahUncommitDelay=1000",
+            "-XX:ShenandoahGuaranteedGCInterval=10000",
+            #"-XX:+AlwaysPreTouch",
+            #"-XX:+UseTransparentHugePages",
+            #"-XX:+UseNUMA",
+            #"-XX:+PrintGCDetails",
+            #"-XX:+UseParallelGC",
+            #"-XX:+PrintGCDateStamps",
+            #"-XX:ParallelGCThreads=4",
+            #"-XX:+UseG1GC",
+            #"-XX:+AggressiveHeap",
+            # non aggressive garbage collection
+            #"-XX:MinHeapFreeRatio=20",
+            #"-XX:MaxHeapFreeRatio=40",
+            #"-XX:GCTimeRatio=19",
+            #"-XX:AdaptiveSizePolicyWeight=90",
+            "-XX:+UseCGroupMemoryLimitForHeap",
+            # This issue says to use maxRAMFraction > 1
+            # https://github.com/akka/akka/issues/23499, but haven't found this
+            # to work v well
+            #"-XX:MaxRAMFraction=1",
+            "-XX:+PrintFlagsFinal",
+            "-XshowSettings:vm",
+            # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
+            # from the limits
+            #"-XX:MaxRAM=6500m",
+            # enable remote debug
+            "-Dcom.sun.management.jmxremote.rmi.port=8849",
+            "-Dcom.sun.management.jmxremote=false",
+            "-Dcom.sun.management.jmxremote.port=8849",
+            "-Dcom.sun.management.jmxremote.ssl=false",
+            "-Dcom.sun.management.jmxremote.authenticate=false",
+            "-Dcom.sun.management.jmxremote.local.only=false",
+            "-Djava.rmi.server.hostname=localhost",
+            # /enable remote debug
+            "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
+            "-Dquick_search.enabled=true",
+            "-Dskin.footer=",
+            "-Dskin.right_nav.whats_new_blurb=",
+            "-Dskin.quick_select_buttons=TCGA PanCancer Atlas Studies#*pan_can_atlas*;Curated set of non-redundant studies|158 studies that are manually curated including TCGA and non-TCGA studies with no overlapping samples#acbc_mskcc_2015,acc_tcga_pan_can_atlas_2018,acyc_fmi_2014,acyc_mda_2015,acyc_mgh_2016,acyc_mskcc_2013,acyc_sanger_2013,all_phase2_target_2018_pub,all_stjude_2016,aml_target_2018_pub,ampca_bcm_2016,angs_project_painter_2018,bfn_duke_nus_2015,blca_bgi,blca_cornell_2016,blca_dfarber_mskcc_2014,blca_mskcc_solit_2012,blca_mskcc_solit_2014,blca_tcga_pan_can_atlas_2018,brca_bccrc,brca_broad,brca_igr_2015,brca_mbcproject_wagle_2017,brca_metabric,brca_sanger,brca_tcga_pan_can_atlas_2018,ccrcc_irc_2014,ccrcc_utokyo_2013,cesc_tcga_pan_can_atlas_2018,chol_jhu_2013,chol_nccs_2013,chol_nus_2012,chol_tcga_pan_can_atlas_2018,cll_iuopa_2015,cllsll_icgc_2011,coadread_dfci_2016,coadread_genentech,coadread_mskcc,coadread_tcga_pan_can_atlas_2018,cscc_dfarber_2015,cscc_hgsc_bcm_2014,ctcl_columbia_2015,desm_broad_2015,dlbc_tcga_pan_can_atlas_2018,dlbcl_dfci_2018,dlbcl_duke_2017,egc_tmucih_2015,es_dfarber_broad_2014,es_iocurie_2014,esca_broad,esca_tcga_pan_can_atlas_2018,escc_icgc,escc_ucla_2014,gbc_shanghai_2014,gbm_tcga_pan_can_atlas_2018,glioma_msk_2018,hcc_inserm_fr_2015,hcc_msk_venturaa_2018,hnsc_broad,hnsc_jhu,hnsc_mdanderson_2013,hnsc_tcga_pan_can_atlas_2018,kich_tcga_pan_can_atlas_2018,kirc_bgi,kirc_tcga_pan_can_atlas_2018,kirp_tcga_pan_can_atlas_2018,laml_tcga_pan_can_atlas_2018,lcll_broad_2013,lgg_tcga_pan_can_atlas_2018,lgg_ucsf_2014,liad_inserm_fr_2014,lihc_amc_prv,lihc_riken,lihc_tcga_pan_can_atlas_2018,luad_broad,luad_tcga_pan_can_atlas_2018,luad_tsp,lung_msk_pdx,lusc_tcga_pan_can_atlas_2018,mbl_broad_2012,mbl_pcgp,mbl_sickkids_2016,mcl_idibips_2013,mds_tokyo_2011,mel_tsam_liang_2017,meso_tcga_pan_can_atlas_2018,mixed_allen_2018,mixed_pipseq_2017,mm_broad,mpnst_mskcc,mrt_bcgsc_2016,msk_impact_2017,nbl_amc_2012,nbl_target_2018_pub,nbl_ucologne_2015,nccrcc_genentech_2014,nepc_wcm_2016,nhl_bcgsc_2011,nhl_bcgsc_2013,npc_nusingapore,nsclc_unito_2016,ov_tcga_pan_can_atlas_2018,paac_jhu_2014,paad_qcmg_uq_2016,paad_tcga_pan_can_atlas_2018,paad_utsw_2015,pact_jhu_2011,panet_arcnet_2017,panet_jhu_2011,panet_shanghai_2013,pcnsl_mayo_2015,pcpg_tcga_pan_can_atlas_2018,pediatric_dkfz_2017,plmeso_nyu_2015,prad_broad,prad_eururol_2017,prad_fhcrc,prad_mich,prad_mpcproject_2018,prad_mskcc,prad_mskcc_cheny1_organoids_2014,prad_tcga_pan_can_atlas_2018,rms_nih_2014,rt_target_2018_pub,sarc_mskcc,sarc_tcga_pan_can_atlas_2018,scco_mskcc,sclc_cancercell_gardner_2017,sclc_jhu,sclc_ucologne_2015,skcm_broad,skcm_broad_brafresist_2012,skcm_tcga_pan_can_atlas_2018,skcm_ucla_2016,skcm_vanderbilt_mskcc_2015,skcm_yale,stad_pfizer_uhongkong,stad_tcga_pan_can_atlas_2018,stad_utokyo,summit_2018,tet_nci_2014,tgct_tcga_pan_can_atlas_2018,thca_tcga_pan_can_atlas_2018,thym_tcga_pan_can_atlas_2018,uccc_nih_2017,ucec_tcga_pan_can_atlas_2018,ucs_jhu_2014,ucs_tcga_pan_can_atlas_2018,um_qimr_2016,urcc_mskcc_2016,utuc_mskcc_2015,uvm_tcga_pan_can_atlas_2018,vsc_cuk_2018,wt_target_2018_pub,acyc_jhu_2016,histiocytosis_cobi_msk_2019,utuc_cornell_baylor_mdacc_2019,prad_su2c_2019",
+            "-Dskin.example_study_queries=tcga pancancer atlas\ntcga provisional\ntcga -provisional -pancancer\ntcga or icgc\nmsk-impact\n-\"cell line\"\nbreast\nesophageal OR stomach\nprostate msk\nserous",
+            "-Dapp.name=public-portal",
+            # connecting over dbcp
+            "-Ddbconnector=dbcp",
+            "-Dauthenticate=social_auth_microsoft,social_auth_google",
+            "-Dauthorization=false",
+            "-Ddb.user=$(DB_USER)",
+            "-Ddb.password=$(DB_PASSWORD)",
+            "-Ddb.host=$(DB_HOST)",
+            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Dtomcat.catalina.scope=runtime",
+            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
+            "-Dshow.civic=$(SHOW_CIVIC)",
+            "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
+            "-Dskin.email_contact=cbioportal@googlegroups.com",
+            "-Dskin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of provisional TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a> and updated quarterly.",
+            "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
+            "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google account to store your <a href=\"https://www.cbioportal.org/tutorials#virtual-studies\" target=\"_blank\">virtual studies</a> and <a href=\"https://www.cbioportal.org/tutorials#group-comparison\" target=\"_blank\">groups</a>. This will allow you to access your studies and groups from any computer. Login is optional and not required to access any of the other features of cBioPortal.",
+            "-Dskin.blurb=",
+            "-Dpriority_studies=PanCancer Studies#msk_impact_2017,nsclc_tcga_broad_2016,mixed_pipseq_2017;Cell lines#cellline_ccle_broad,cellline_nci60",
+            "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/genie_portal/",
+            "-Dsession.service.origin=*",
+            "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
+            "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
+            "-Dgoogle_analytics_profile_id=UA-17134933-2",
+            "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
+            "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            "-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
+            "-Dmicrosoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
+            "-Dbitly.url=$(BITLY_URL)",
+            "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
+            "-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
+            "-Ddb.suppress_schema_version_mismatch_errors=true",
+            "-Dsitemaps=false",
+            "-Doncokb.public_api.url=https://oncokb.org/api/v1",
+            "-Dgenomenexus.url=https://www.genomenexus.org",
+            # "-Dehcache.cache_enabled=true",
+            # "-Dehcache.xml_configuration=/ehcache.xml",
+            # "-Dehcache.statistics_enabled=true",
+            # "-Dcache.statistics_endpoint_enabled=true",
+            # "-Dehcache.general_repository_cache.max_mega_bytes_heap=1024",
+            # "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
+            # "-Dehcache.persistence_path=/ehcache",
+            # "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4096",
+            # "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
+            "-jar",
+            "/webapp-runner.jar",
+            # this addresses same issue as
+            # https://github.com/cBioPortal/cbioportal/issues/2328 one needs to
+            # set this if one doesn't want to forward https -> http -> https
+            # when logging in through google auth. Somehow this goes over http
+            # otherwise.
+            "--proxy-base-url",
+            "https://genie-beta.cbioportal.org",
+            "--max-threads",
+            "10",
+            "--session-store",
+            "redis",
+            "--session-store-operation-timeout",
+            "10000",
+            # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
+            "-AmaxHttpHeaderSize=16384",
+            "-AconnectionTimeout=20000",
+            "--enable-compression",
+            "--port",
+            "8888",
+            "/app.war"
+        ]
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /api/cancer-types
+            port: 8888
+          initialDelaySeconds: 45
+          timeoutSeconds: 1
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8888
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+          periodSeconds: 12
+          failureThreshold: 5
+        name: cbioportal-backend-genie
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        - containerPort: 8849
+          protocol: TCP
+        resources:
+          requests:
+              memory: 2Gi
+          limits:
+              memory: 10Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      # run on big memory machine
+      nodeSelector:
+         kops.k8s.io/instancegroup: large-mem
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: cbioportal-backend-genie
+  name: cbioportal-backend-genie
+  selfLink: /api/v1/namespaces/default/services/cbioportal-backend-genie
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  selector:
+    run: cbioportal-backend-genie
+  type: ClusterIP
