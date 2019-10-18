@@ -48,7 +48,7 @@ spec:
   - hosts:
     - oncokb.org
     - www.oncokb.org
-    - test.oncokb.org
+    - beta.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: v2.genomenexus.org
@@ -121,12 +121,12 @@ spec:
         backend:
           serviceName: oncokb
           servicePort: http
-  - host: test.oncokb.org
+  - host: beta.oncokb.org
     http:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-test
+          serviceName: oncokb-public
           servicePort: http
 ---
 apiVersion: extensions/v1beta1
