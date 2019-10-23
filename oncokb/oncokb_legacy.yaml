@@ -10,14 +10,14 @@ metadata:
   name: oncokb-legacy
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/oncokb-legacy
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: oncokb-legacy
   strategy:
     rollingUpdate:
-      maxSurge: 3
-      maxUnavailable: 1
+      maxSurge: 2
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
