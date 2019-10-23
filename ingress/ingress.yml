@@ -49,6 +49,7 @@ spec:
     - oncokb.org
     - www.oncokb.org
     - beta.oncokb.org
+    - legacy.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: v2.genomenexus.org
@@ -127,6 +128,13 @@ spec:
       - path: /
         backend:
           serviceName: oncokb-public
+          servicePort: http
+  - host: legacy.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-legacy
           servicePort: http
 ---
 apiVersion: extensions/v1beta1
