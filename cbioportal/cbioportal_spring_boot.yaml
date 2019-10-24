@@ -127,7 +127,7 @@ spec:
             "-Dehcache.cache_type=heap",
             "-Dehcache.xml_configuration=/ehcache.xml",
             "-Dcache.statistics_endpoint_enabled=true",
-            "-Dehcache.general_repository_cache.max_mega_bytes_heap=4096",
+            "-Dehcache.general_repository_cache.max_mega_bytes_heap=1024",
             "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=64",
             # "-Dehcache.persistence_path=/ehcache",
             # "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4097",
