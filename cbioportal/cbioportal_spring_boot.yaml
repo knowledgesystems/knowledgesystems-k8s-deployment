@@ -119,7 +119,7 @@ spec:
             "-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dsitemaps=true",
-            "-Doncokb.public_api.url=https://oncokb.org/api/v1",
+            "-Doncokb.public_api.url=https://legacy.oncokb.org/api/v1",
             "-Dgenomenexus.url=https://www.genomenexus.org",
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
