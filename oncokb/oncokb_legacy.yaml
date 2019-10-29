@@ -49,7 +49,7 @@ spec:
                   "-XshowSettings:vm",
                   # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
                   # from the limits
-                  "-XX:MaxRAM=750m",
+                  "-XX:MaxRAM=1024m",
                   "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
                   "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(DB_NAME)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
                   "-Djdbc.username=$(USER_NAME)",
@@ -90,10 +90,10 @@ spec:
           protocol: TCP
         resources:
             requests:
-                cpu: 100m
-                memory: 750Mi
+              cpu: 500m
+              memory: 1Gi
             limits:
-                memory: 1Gi
+              memory: 2Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
