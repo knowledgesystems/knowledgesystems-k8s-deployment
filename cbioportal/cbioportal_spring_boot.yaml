@@ -42,9 +42,9 @@ spec:
             "-Xms100m",
             "-Xmx25g",
             "-XX:+UnlockExperimentalVMOptions",
-            "-XX:+UseShenandoahGC",
-            "-XX:ShenandoahUncommitDelay=1000",
-            "-XX:ShenandoahGuaranteedGCInterval=10000",
+            #"-XX:+UseShenandoahGC",
+            #"-XX:ShenandoahUncommitDelay=1000",
+            #"-XX:ShenandoahGuaranteedGCInterval=10000",
             #"-XX:+AlwaysPreTouch",
             #"-XX:+UseTransparentHugePages",
             #"-XX:+UseNUMA",
@@ -59,6 +59,8 @@ spec:
             #"-XX:MaxHeapFreeRatio=40",
             #"-XX:GCTimeRatio=19",
             #"-XX:AdaptiveSizePolicyWeight=90",
+            "-XX:+UseConcMarkSweepGC",
+            "-XX:NewRatio=1",
             "-XX:+UseCGroupMemoryLimitForHeap",
             # This issue says to use maxRAMFraction > 1
             # https://github.com/akka/akka/issues/23499, but haven't found this
@@ -171,8 +173,9 @@ spec:
             port: 8888
           initialDelaySeconds: 90
           timeoutSeconds: 1
+          # full garbage collection sweeps will be tuned to be under this liveness horizon (12s * 20 = 240s = 4 minutes)
           periodSeconds: 12
-          failureThreshold: 5
+          failureThreshold: 20
         name: cbioportal-spring-boot
         ports:
         - containerPort: 8888
