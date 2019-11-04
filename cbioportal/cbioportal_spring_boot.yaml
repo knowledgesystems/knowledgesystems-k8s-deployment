@@ -40,11 +40,11 @@ spec:
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms100m",
-            "-Xmx25g",
+            "-Xmx14g",
             "-XX:+UnlockExperimentalVMOptions",
-            #"-XX:+UseShenandoahGC",
-            #"-XX:ShenandoahUncommitDelay=1000",
-            #"-XX:ShenandoahGuaranteedGCInterval=10000",
+            "-XX:+UseShenandoahGC",
+            "-XX:ShenandoahUncommitDelay=1000",
+            "-XX:ShenandoahGuaranteedGCInterval=10000",
             #"-XX:+AlwaysPreTouch",
             #"-XX:+UseTransparentHugePages",
             #"-XX:+UseNUMA",
@@ -59,8 +59,6 @@ spec:
             #"-XX:MaxHeapFreeRatio=40",
             #"-XX:GCTimeRatio=19",
             #"-XX:AdaptiveSizePolicyWeight=90",
-            "-XX:+UseConcMarkSweepGC",
-            "-XX:NewRatio=1",
             "-XX:+UseCGroupMemoryLimitForHeap",
             # This issue says to use maxRAMFraction > 1
             # https://github.com/akka/akka/issues/23499, but haven't found this
