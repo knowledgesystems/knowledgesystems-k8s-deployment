@@ -40,7 +40,7 @@ spec:
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms100m",
-            "-Xmx14g",
+            "-Xmx25g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
