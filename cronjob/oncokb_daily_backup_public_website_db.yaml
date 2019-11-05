@@ -1,0 +1,47 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: oncokb-daily-backup-public-website-db
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - envFrom:
+            - configMapRef:
+                name: aws-cli-credentials
+            - configMapRef:
+                name: oncokb-beta
+            name: oncokb-daily-backup-public-website-db
+            image: mysql:5.7
+            command: ["/bin/sh", "-c"]
+            args:
+              - echo "Install python";
+                apt update; apt install python3 -y;
+                echo "Done installing python\n\n";
+
+                echo "Install pip3";
+                apt install python3-pip -y;
+                echo "Done installing pip3\n\n";
+
+                echo "Install AWS CLI";
+                pip3 install awscli --upgrade;
+                echo "Done installing AWS CLI\n\n";
+
+                echo "Configure AWS CLI";
+                aws configure set aws_access_key_id ${ACCESS_KEY_ID};
+                aws configure set aws_secret_access_key ${SECRET_ACCESS_KEY};
+                aws configure set default.region ${AWS_REGION};
+                echo "Done configuring AWS CLI\n\n";
+
+                FILE_NAME=backup_$(date "+%m-%d-%Y-%H-%M-%S").sql.gz;
+                echo "Dump public database";
+                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_PUBLIC_PORTAL_DB_NAME} | gzip > ${FILE_NAME};
+                echo "Done dumping database\n\n";
+
+                echo "Move the data to s3 ";
+                aws s3api put-object --bucket oncokb --key public-website/database/backup/${FILE_NAME} --body ${FILE_NAME};
+                echo "Done moving the database dump\n\n";
+          restartPolicy: Never
