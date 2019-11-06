@@ -38,7 +38,7 @@ spec:
 
                 FILE_NAME=backup_$(date "+%m-%d-%Y-%H-%M-%S").sql.gz;
                 echo "Dump public database";
-                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_PUBLIC_PORTAL_DB_NAME} | gzip > ${FILE_NAME};
+                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_NAME} | gzip > ${FILE_NAME};
                 echo "Done dumping database\n\n";
 
                 echo "Move the data to s3 ";
