@@ -173,7 +173,7 @@ spec:
           timeoutSeconds: 1
           # full garbage collection sweeps will be tuned to be under this liveness horizon (12s * 20 = 240s = 4 minutes)
           periodSeconds: 12
-          failureThreshold: 20
+          failureThreshold: 5
         name: cbioportal-spring-boot
         ports:
         - containerPort: 8888
