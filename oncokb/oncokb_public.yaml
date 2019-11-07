@@ -35,11 +35,12 @@ spec:
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /api/v1/info
+              path: /
               port: 9095
-            initialDelaySeconds: 30
-            timeoutSeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 90
+            timeoutSeconds: 1
+            periodSeconds: 12
+            failureThreshold: 5
           resources:
             requests:
               memory: 1Gi
