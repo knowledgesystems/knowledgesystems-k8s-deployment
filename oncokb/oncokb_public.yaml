@@ -26,21 +26,21 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-beta
-#          readinessProbe:
-#            httpGet:
-#              path: /api/v1/info
-#              port: 9095
-#            initialDelaySeconds: 30
-#            timeoutSeconds: 10
-#            periodSeconds: 10
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 9095
-#            initialDelaySeconds: 90
-#            timeoutSeconds: 1
-#            periodSeconds: 12
-#            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/info
+              port: 9095
+            initialDelaySeconds: 90
+            timeoutSeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9095
+            initialDelaySeconds: 90
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 5
           resources:
             requests:
               memory: 1Gi
