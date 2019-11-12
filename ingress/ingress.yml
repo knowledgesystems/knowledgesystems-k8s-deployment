@@ -22,9 +22,6 @@ metadata:
 spec:
   tls:
   - hosts:
-    - v2.genomenexus.org
-    secretName: genome-nexus-v2-cert
-  - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
   - hosts:
@@ -52,13 +49,6 @@ spec:
     - legacy.oncokb.org
     secretName: oncokb-cert
   rules:
-  - host: v2.genomenexus.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus
-          servicePort: http
   - host: www.cbioportal.org
     http:
       paths:
@@ -157,4 +147,40 @@ spec:
       - path: /
         backend:
           serviceName: kube-prometheus-grafana
+          servicePort: http
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gn-ingress
+  namespace: genome-nexus
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # increae max response size to avoid 413 errors see
+    # https://github.com/kubernetes/ingress-nginx/issues/1824
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+spec:
+  tls:
+  - hosts:
+    - v2.genomenexus.org
+    secretName: genome-nexus-v2-cert
+  rules:
+  - host: v2.genomenexus.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: genome-nexus
           servicePort: http
