@@ -8,7 +8,7 @@ metadata:
   labels:
     run: gn-spring-boot
   name: gn-spring-boot
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/gn-spring-boot
+  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-spring-boot
 spec:
   replicas: 2
   selector:
@@ -30,20 +30,20 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot6-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-v0dot9-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:v1.0.0-150-gd714450-vep-by-region
+        image: genomenexus/gn-spring-boot:v1.0.0-263-g387164e
         imagePullPolicy: Always
-        command: [ "/usr/bin/java" ]
+        command: [ "java" ]
         args: [
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
             # this is to use VEP running inside K8s. Remove to use
             # grch37.rest.ensembl.org instead
-            "-Dgn_vep.region.url=http://gn-vep/vep/human/region/VARIANT",
+            # "-Dgn_vep.region.url=http://gn-vep/vep/human/region/VARIANT",
             "-jar",
             "/app.war"
         ]
@@ -75,7 +75,7 @@ metadata:
     run: gn-spring-boot
     app: gn-spring-boot
   name: genome-nexus
-  selfLink: /api/v1/namespaces/default/services/genome-nexus
+  selfLink: /api/v1/namespaces/genome-nexus/services/genome-nexus
 spec:
   ports:
   - port: 80
