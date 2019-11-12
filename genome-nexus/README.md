@@ -1,21 +1,22 @@
 # Genome Nexus
+Create a namespace specific to genome nexus:
+```
+kubectl create namespace genome-nexus
+```
+
 Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/):
 ```
-helm install --version 4.9.1 --name gn-mongo-v0dot6 --set securityContext.enabled=false,image.repository=genomenexus/gn-mongo,image.tag=v0.6,persistence.size=20Gi stable/mongodb
+helm install --version 4.9.1 --name gn-mongo-v0dot9 --set securityContext.enabled=false,image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=20Gi stable/mongodb --namespace=genome-nexus
 ```
 Deploy genome nexus app:
 ```
 kubectl apply -f gn_spring_boot.yaml
 ```
-Expose as service (actual domain name binding is handled in [../ingress/README.md](../ingress/README.md):
-```
-kubectl apply -f service.yaml
-```
 
 ## Sentry support
 If you want to enable sentry, you need to provide it as a secret:
 ```
-kubectl create secret generic genome-nexus-sentry-dsn --from-literal=dsn=https://sentry-key
+kubectl create secret generic genome-nexus-sentry-dsn --from-literal=dsn=https://sentry-key --namespace=genome-nexus
 ```
 It is referenced in the spring boot app [here](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/genome-nexus/gn_spring_boot.yaml#L34-L38)
 
@@ -26,8 +27,8 @@ Genome Nexus relies heavily on VEP. One can spin up their own version of VEP GRC
 kubectl apply -f vep/gn_vep.yaml
 ```
 
-It takes quite a while to start (~40m), because it downloads the VEP cache data
-first.
+It takes quite a while to start (~10m), because it downloads the VEP cache data
+from S3 first.
 
 ## Notes
 - alpine docker image doesn't play nice with kubernetes (https://twitter.com/inodb/status/999041628970127360)
