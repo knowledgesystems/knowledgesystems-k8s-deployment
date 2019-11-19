@@ -8,7 +8,7 @@ metadata:
   labels:
     run: gn-vep
   name: gn-vep
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/gn-vep
+  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-vep
 spec:
   replicas: 2
   selector:
@@ -56,6 +56,9 @@ spec:
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+      # run on genome nexus machines
+      nodeSelector:
+         kops.k8s.io/instancegroup: genome-nexus
       # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
       initContainers:
@@ -84,7 +87,7 @@ metadata:
     run: gn-vep
     app: gn-vep
   name: gn-vep
-  selfLink: /api/v1/namespaces/default/services/gn-vep
+  selfLink: /api/v1/namespaces/genome-nexus/services/gn-vep
 spec:
   ports:
   - port: 80
