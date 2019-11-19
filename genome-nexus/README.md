@@ -4,13 +4,14 @@ Create a namespace specific to genome nexus:
 kubectl create namespace genome-nexus
 ```
 
-Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/):
+Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes:
 ```
-helm install --version 4.9.1 --name gn-mongo-v0dot9 --set securityContext.enabled=false,image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=20Gi stable/mongodb --namespace=genome-nexus
+helm install --name gn-mongo-v0dot9 --version 3.0.4 --set image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=50Gi stable/mongodb --n
+amespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"=genome-nexus
 ```
 Deploy genome nexus app:
 ```
-kubectl apply -f gn_spring_boot.yaml
+kubectl apply -f gn_spring_boot.yaml --namespace=genome-nexus
 ```
 
 ## Sentry support

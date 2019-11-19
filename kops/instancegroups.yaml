@@ -1,6 +1,27 @@
 apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: 2019-11-19T14:49:29Z
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: genome-nexus
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2019-09-26
+  machineType: t2.large
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: genome-nexus
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1c
+
+---
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
   creationTimestamp: 2018-10-24T21:18:37Z
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
@@ -8,8 +29,8 @@ metadata:
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
   machineType: r5.xlarge
-  maxSize: 2
-  minSize: 2
+  maxSize: 3
+  minSize: 3
   nodeLabels:
     kops.k8s.io/instancegroup: large-mem
   role: Node
