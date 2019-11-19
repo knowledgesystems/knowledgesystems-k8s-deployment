@@ -6,8 +6,7 @@ kubectl create namespace genome-nexus
 
 Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes:
 ```
-helm install --name gn-mongo-v0dot9 --version 3.0.4 --set image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=50Gi stable/mongodb --n
-amespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"=genome-nexus
+helm install --name gn-mongo-v0dot9 --version 3.0.4 --set image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=50Gi stable/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"=genome-nexus
 ```
 Deploy genome nexus app:
 ```
@@ -25,11 +24,28 @@ It is referenced in the spring boot app [here](https://github.com/knowledgesyste
 Genome Nexus relies heavily on VEP. One can spin up their own version of VEP GRCh37 like this:
 
 ```
-kubectl apply -f vep/gn_vep.yaml
+kubectl apply -f vep/gn_vep.yaml --namespace=genome-nexus
 ```
 
 It takes quite a while to start (~10m), because it downloads the VEP cache data
 from S3 first.
+
+Note: we are currently only using our own VEP for the [GENIE instance of Genome
+Nexus](./gn_genie.yaml).
+
+## Genome Nexus GENIE instance
+Spin up the database:
+```
+helm install --name gn-mongo-v0dot9-genie --version 3.0.4 --set image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=50Gi stable/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"=genome-nexus
+```
+Set up VEP:
+```
+kubectl apply -f vep/gn_vep.yaml --namespace=genome-nexus
+```
+Run genome nexus app:
+```
+kubectl apply -f gn_genie.yaml --namespace=genome-nexus
+```
 
 ## Notes
 - alpine docker image doesn't play nice with kubernetes (https://twitter.com/inodb/status/999041628970127360)
