@@ -190,10 +190,18 @@ spec:
   tls:
   - hosts:
     - v2.genomenexus.org
+    - v1.genomenexus.org
     - genie.genomenexus.org
     secretName: genome-nexus-v2-cert
   rules:
   - host: v2.genomenexus.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: genome-nexus
+          servicePort: http
+  - host: v1.genomenexus.org
     http:
       paths:
       - path: /
