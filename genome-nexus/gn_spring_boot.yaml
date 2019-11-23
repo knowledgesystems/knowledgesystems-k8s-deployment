@@ -8,6 +8,7 @@ metadata:
   labels:
     run: gn-spring-boot
   name: gn-spring-boot
+  namespace: genome-nexus
   selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-spring-boot
 spec:
   replicas: 2

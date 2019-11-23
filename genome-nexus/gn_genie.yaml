@@ -8,6 +8,7 @@ metadata:
   labels:
     run: gn-genie
   name: gn-genie
+  namespace: genome-nexus
   selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-genie
 spec:
   replicas: 2
