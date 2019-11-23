@@ -34,6 +34,9 @@ spec:
     - genie-beta.cbioportal.org
     secretName: cbioportal-genie-beta-cert
   - hosts:
+    - genie-public-beta.cbioportal.org
+    secretName: cbioportal-genie-public-beta-cert
+  - hosts:
     - rc.cbioportal.org
     secretName: cbioportal-rc-cert
   - hosts:
@@ -70,6 +73,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-backend-genie
+          servicePort: http
+  - host: genie-public-beta.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-backend-genie-public
           servicePort: http
   - host: beta.cbioportal.org
     http:
@@ -189,11 +199,19 @@ metadata:
 spec:
   tls:
   - hosts:
+    - www.genomenexus.org
     - v2.genomenexus.org
     - v1.genomenexus.org
     - genie.genomenexus.org
     secretName: genome-nexus-v2-cert
   rules:
+  - host: www.genomenexus.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: genome-nexus
+          servicePort: http
   - host: v2.genomenexus.org
     http:
       paths:
