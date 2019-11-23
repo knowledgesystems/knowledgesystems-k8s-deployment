@@ -8,6 +8,7 @@ metadata:
   labels:
     run: gn-vep
   name: gn-vep
+  namespace: genome-nexus
   selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-vep
 spec:
   replicas: 2
