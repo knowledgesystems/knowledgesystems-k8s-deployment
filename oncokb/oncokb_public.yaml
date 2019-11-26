@@ -4,7 +4,7 @@ metadata:
   name: oncokb-public
   namespace: default
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: oncokb-public
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: cbioportal/oncokb-public:0.0.alpha.22
+          image: cbioportal/oncokb-public:0.0.alpha.23
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
