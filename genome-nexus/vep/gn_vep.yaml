@@ -88,6 +88,7 @@ metadata:
     run: gn-vep
     app: gn-vep
   name: gn-vep
+  namespace: genome-nexus
   selfLink: /api/v1/namespaces/genome-nexus/services/gn-vep
 spec:
   ports:
