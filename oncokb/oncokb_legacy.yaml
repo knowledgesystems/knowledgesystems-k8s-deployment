@@ -57,7 +57,7 @@ spec:
                   "-Ddata.version=v1.23",
                   "-Ddata.version_date=08/28/2019",
                   "-Dgenomenexus.api=https://www.genomenexus.org/",
-                  "-Dshow_sitemaps=true",
+                  "-Dshow_sitemaps=false",
                   "-jar",
                   "/webapp-runner.jar",
                   "--proxy-base-url",
