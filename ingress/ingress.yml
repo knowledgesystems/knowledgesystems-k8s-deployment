@@ -31,8 +31,11 @@ spec:
     - master.cbioportal.org
     secretName: cbioportal-master-cert
   - hosts:
-    - genie-beta.cbioportal.org
-    secretName: cbioportal-genie-beta-cert
+    - genie.cbioportal.org
+    secretName: cbioportal-genie-public-cert
+  - hosts:
+    - genie-private.cbioportal.org
+    secretName: cbioportal-genie-private-cert
   - hosts:
     - genie-public-beta.cbioportal.org
     secretName: cbioportal-genie-public-beta-cert
@@ -60,12 +63,19 @@ spec:
         backend:
           serviceName: cbioportal-backend-master
           servicePort: http
-  - host: genie-beta.cbioportal.org
+  - host: genie.cbioportal.org
     http:
       paths:
       - path: /
         backend:
-          serviceName: cbioportal-backend-genie
+          serviceName: cbioportal-backend-genie-public
+          servicePort: http
+  - host: genie-private.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-backend-genie-private
           servicePort: http
   - host: genie-public-beta.cbioportal.org
     http:
