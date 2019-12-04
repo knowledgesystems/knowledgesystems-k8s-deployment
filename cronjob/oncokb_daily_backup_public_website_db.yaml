@@ -2,6 +2,7 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: oncokb-daily-backup-public-website-db
+  namespace: oncokb
 spec:
   schedule: "0 0 * * *"
   jobTemplate:
