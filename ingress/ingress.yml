@@ -45,13 +45,6 @@ spec:
   - hosts:
     - session-service-beta.cbioportal.org
     secretName: cbioportal-session-service-beta-cert
-  - hosts:
-    - oncokb.org
-    - www.oncokb.org
-    - beta.oncokb.org
-    - legacy.oncokb.org
-    - test.oncokb.org
-    secretName: oncokb-cert
   rules:
   - host: www.cbioportal.org
     http:
@@ -108,48 +101,6 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-session-service-beta
-          servicePort: http
-  - host: oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb
-          servicePort: http
-  - host: www.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb
-          servicePort: http
-  - host: beta.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-public
-          servicePort: http
-  - host: test.oncokb.org
-    http:
-      paths:
-      - path: /api/v1
-        backend:
-          serviceName: oncokb-legacy
-          servicePort: http
-  - host: test.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-public
-          servicePort: http
-  - host: legacy.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-legacy
           servicePort: http
 ---
 apiVersion: extensions/v1beta1
