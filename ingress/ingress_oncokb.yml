@@ -1,0 +1,74 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: oncokb-ingress
+  namespace: oncokb
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # increae max response size to avoid 413 errors see
+    # https://github.com/kubernetes/ingress-nginx/issues/1824
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+spec:
+  tls:
+  - hosts:
+    - oncokb.org
+    - www.oncokb.org
+    - beta.oncokb.org
+    - legacy.oncokb.org
+    - test.oncokb.org
+    secretName: oncokb-cert
+  rules:
+  - host: oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb
+          servicePort: http
+  - host: www.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb
+          servicePort: http
+  - host: beta.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-public
+          servicePort: http
+  - host: test.oncokb.org
+    http:
+      paths:
+      - path: /api/v1
+        backend:
+          serviceName: oncokb-legacy
+          servicePort: http
+  - host: test.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-public
+          servicePort: http
+  - host: legacy.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-legacy
+          servicePort: http

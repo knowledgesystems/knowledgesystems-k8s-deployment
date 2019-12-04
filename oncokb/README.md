@@ -1,10 +1,15 @@
 # OncoKB
 
+Create a namespace specific to genome nexus:
+```
+kubectl create namespace oncokb
+```
+
 We use an external AWS MySQL db for OncoKB. Credentials are in
 `portal-configuration/k8s-config-vars/oncokb/config_map.yaml`. To store the configmap in the cluster:
 
 ```bash
-kubectl apply -f portal-configuration/k8s-config-vars/oncokb/config_map.yaml
+kubectl apply -f portal-configuration/k8s-config-vars/oncokb/config_map.yaml --namespace=oncokb
 ```
 
 To deploy OncoKB once the database has been initialized (see [Init or Update AWS db](#Init-or-Update-AWS-db)):
@@ -28,5 +33,5 @@ cat ./core/src/main/resources/spring/database/oncokb.sql | \
 
 ## OncoKB Public Redis
 ```bash
-helm install --name oncokb-public-redis stable/redis --set password=oncokb-public-redis-password --set cluster.enabled=true --set cluster.slaveCount=2 --set master.securityContext.enabled=false
+helm install --namespace=oncokb --name oncokb-public-redis stable/redis --set password=oncokb-public-redis-password --set cluster.enabled=true --set cluster.slaveCount=2 --set master.securityContext.enabled=false
 ```
