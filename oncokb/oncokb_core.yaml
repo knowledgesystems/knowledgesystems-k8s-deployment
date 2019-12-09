@@ -11,13 +11,13 @@ metadata:
   namespace: oncokb
   selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-core
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       run: oncokb-core
   strategy:
     rollingUpdate:
-      maxSurge: 3
+      maxSurge: 4
       maxUnavailable: 1
     type: RollingUpdate
   template:
@@ -31,7 +31,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core
-          image: cbioportal/oncokb:core-1.5.alpha.4
+          image: cbioportal/oncokb:core-1.5.alpha.5
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -56,7 +56,7 @@ spec:
             "-Djdbc.username=$(MYSQL_USER)",
             "-Djdbc.password=$(MYSQL_PASSWORD)",
             "-Ddata.version=v1.23",
-            "-Ddata.version_date=12/05/2019",
+            "-Ddata.version_date=12/09/2019",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
             "-Dshow_sitemaps=false",
