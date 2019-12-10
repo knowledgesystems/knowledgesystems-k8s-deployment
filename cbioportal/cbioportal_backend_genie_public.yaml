@@ -172,7 +172,9 @@ spec:
            tcpSocket:
              port: 8888
            initialDelaySeconds: 15
-           periodSeconds: 20
+           timeoutSeconds: 3
+           periodSeconds: 12
+           failureThreshold: 5 
         name: cbioportal-backend-genie-public
         ports:
         - containerPort: 8888
