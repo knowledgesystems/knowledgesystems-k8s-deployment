@@ -183,7 +183,7 @@ spec:
           requests:
               memory: 2Gi
           limits:
-              memory: 10Gi
+              memory: 26Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
