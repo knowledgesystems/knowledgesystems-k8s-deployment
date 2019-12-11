@@ -49,7 +49,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-public
+          serviceName: oncokb-public-beta
           servicePort: http
   - host: test.oncokb.org
     http:
