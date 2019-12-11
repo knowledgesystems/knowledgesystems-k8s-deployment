@@ -164,15 +164,23 @@ spec:
         ]
         imagePullPolicy: Always
         readinessProbe:
-           tcpSocket:
-             port: 8888
-           initialDelaySeconds: 5
-           periodSeconds: 10
+          # TODO: we should prolly change this to an endpoint that better
+          # indicates readiness/liveness
+          httpGet:
+            path: /login.jsp
+            port: 8888
+          initialDelaySeconds: 45
+          timeoutSeconds: 1
+          periodSeconds: 5
+          failureThreshold: 3
         livenessProbe:
-           tcpSocket:
-             port: 8888
-           initialDelaySeconds: 15
-           periodSeconds: 20
+          httpGet:
+            path: /login.jsp
+            port: 8888
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+          periodSeconds: 12
+          failureThreshold: 5
         name: cbioportal-backend-genie-private
         ports:
         - containerPort: 8888
