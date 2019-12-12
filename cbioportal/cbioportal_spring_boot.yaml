@@ -32,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:3.1.6-web-shenandoah
+        image: cbioportal/cbioportal:3.1.7-web-shenandoah
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
@@ -159,7 +159,7 @@ spec:
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
-            path: /api/cancer-types
+            path: /api/health
             port: 8888
           initialDelaySeconds: 45
           timeoutSeconds: 1
@@ -171,7 +171,6 @@ spec:
             port: 8888
           initialDelaySeconds: 90
           timeoutSeconds: 1
-          # full garbage collection sweeps will be tuned to be under this liveness horizon (12s * 20 = 240s = 4 minutes)
           periodSeconds: 12
           failureThreshold: 5
         name: cbioportal-spring-boot
