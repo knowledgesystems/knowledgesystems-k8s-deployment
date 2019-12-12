@@ -159,7 +159,7 @@ spec:
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
-            path: /api/health
+            path: /health
             port: 8888
           initialDelaySeconds: 45
           timeoutSeconds: 1

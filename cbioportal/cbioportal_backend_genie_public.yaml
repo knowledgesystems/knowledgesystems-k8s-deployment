@@ -164,10 +164,8 @@ spec:
         ]
         imagePullPolicy: Always
         readinessProbe:
-          # TODO: we should prolly change this to an endpoint that better
-          # indicates readiness/liveness
           httpGet:
-            path: /login.jsp
+            path: /health
             port: 8888
           initialDelaySeconds: 45
           timeoutSeconds: 1
