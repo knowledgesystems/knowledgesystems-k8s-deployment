@@ -32,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-private
-        image: cbioportal/cbioportal:3.1.7-web-shenandoah
+        image: cbioportal/cbioportal:3.1.8-web-shenandoah
         # volumeMounts:
         # - name: ehcache-volume
         #   mountPath: /ehcache
@@ -187,7 +187,7 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 2Gi
+              memory: 1Gi
           limits:
               memory: 26Gi
         terminationMessagePath: /dev/termination-log
