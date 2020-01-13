@@ -1,7 +1,27 @@
-apiVersion: kops/v1alpha2
+apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: 2019-11-19T14:49:29Z
+  creationTimestamp: "2020-01-13T17:17:04Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: genie
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2019-09-26
+  machineType: m5.2xlarge
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: genie
+  role: Node
+  subnets:
+  - us-east-1a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2019-11-19T14:49:29Z"
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: genome-nexus
@@ -19,10 +39,10 @@ spec:
 
 ---
 
-apiVersion: kops/v1alpha2
+apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: 2018-10-24T21:18:37Z
+  creationTimestamp: "2018-10-24T21:18:37Z"
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: large-mem
@@ -40,10 +60,10 @@ spec:
 
 ---
 
-apiVersion: kops/v1alpha2
+apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: 2018-08-06T18:29:31Z
+  creationTimestamp: "2018-08-06T18:29:31Z"
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: master-us-east-1a
@@ -60,10 +80,10 @@ spec:
 
 ---
 
-apiVersion: kops/v1alpha2
+apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: 2018-08-06T18:29:31Z
+  creationTimestamp: "2018-08-06T18:29:31Z"
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: nodes

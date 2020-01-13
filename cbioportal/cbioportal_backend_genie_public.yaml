@@ -32,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public
-        image: cbioportal/cbioportal:3.1.8-web-shenandoah
+        image: cbioportal/cbioportal:3.1.10-web-shenandoah
         # volumeMounts:
         # - name: ehcache-volume
         #   mountPath: /ehcache
@@ -41,8 +41,8 @@ spec:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",
             # "-Xmx14g",
-            "-Xms100m",
-            "-Xmx10g",
+            "-Xms1g",
+            "-Xmx25g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -194,7 +194,7 @@ spec:
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-         kops.k8s.io/instancegroup: large-mem
+         kops.k8s.io/instancegroup: genie
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
