@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-genie-private
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-private
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       run: cbioportal-backend-genie-private
@@ -32,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-private
-        image: cbioportal/cbioportal:3.1.10-web-shenandoah
+        image: cbioportal/cbioportal:3.1.8-web-shenandoah
         # volumeMounts:
         # - name: ehcache-volume
         #   mountPath: /ehcache
@@ -149,7 +149,7 @@ spec:
             "--proxy-base-url",
             "https://genie-private.cbioportal.org",
             "--max-threads",
-            "10",
+            "0",
             "--session-store",
             "redis",
             "--session-store-operation-timeout",
@@ -165,7 +165,7 @@ spec:
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
-            path: /api/health
+            path: /health
             port: 8888
           initialDelaySeconds: 45
           timeoutSeconds: 1
