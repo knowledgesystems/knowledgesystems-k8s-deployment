@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-genie-public
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-public
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       run: cbioportal-backend-genie-public
@@ -149,7 +149,7 @@ spec:
             "--proxy-base-url",
             "https://genie.cbioportal.org",
             "--max-threads",
-            "10",
+            "0",
             "--session-store",
             "redis",
             "--session-store-operation-timeout",
