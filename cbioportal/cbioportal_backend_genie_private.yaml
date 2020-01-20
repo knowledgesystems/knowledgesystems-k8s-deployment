@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-genie-private
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-private
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       run: cbioportal-backend-genie-private
@@ -32,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-private
-        image: cbioportal/cbioportal:3.1.8-web-shenandoah
+        image: cbioportal/cbioportal:release-3.2.0-web-shenandoah
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
@@ -130,16 +130,16 @@ spec:
             "-Dsitemaps=false",
             "-Doncokb.public_api.url=https://legacy.oncokb.org/api/v1",
             "-Dgenomenexus.url=https://www.genomenexus.org",
-            "-Dehcache.cache_enabled=true",
-            "-Dehcache.cache_type=hybrid",
-            "-Dehcache.xml_configuration=/ehcache.xml",
-            "-Dehcache.statistics_enabled=true",
-            "-Dcache.statistics_endpoint_enabled=true",
-            "-Dehcache.general_repository_cache.max_mega_bytes_heap=4096",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
-            "-Dehcache.persistence_path=/ehcache",
-            "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4098",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
+            "-Dehcache.cache_enabled=false",
+            #"-Dehcache.cache_type=hybrid",
+            #"-Dehcache.xml_configuration=/ehcache.xml",
+            #"-Dehcache.statistics_enabled=true",
+            #"-Dcache.statistics_endpoint_enabled=true",
+            #"-Dehcache.general_repository_cache.max_mega_bytes_heap=4096",
+            #"-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
+            #"-Dehcache.persistence_path=/ehcache",
+            #"-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4098",
+            #"-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
@@ -166,7 +166,7 @@ spec:
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
-            path: /health
+            path: /api/health
             port: 8888
           initialDelaySeconds: 45
           timeoutSeconds: 1
