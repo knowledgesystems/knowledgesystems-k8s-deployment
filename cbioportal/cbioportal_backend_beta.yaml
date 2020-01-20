@@ -146,7 +146,7 @@ spec:
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
-            path: /api/cancer-types
+            path: /api/health
             port: 8888
           initialDelaySeconds: 45
           timeoutSeconds: 1
