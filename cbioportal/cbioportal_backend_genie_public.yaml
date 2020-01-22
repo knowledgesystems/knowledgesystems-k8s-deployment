@@ -140,6 +140,11 @@ spec:
             #"-Dehcache.persistence_path=/ehcache",
             #"-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4098",
             #"-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
+            "-Ddat.unauth_users=anonymousUser",
+            "-Ddat.method=uuid",
+            "-Ddat.uuid.max_number_per_user=1",
+            "-Ddat.ttl_seconds=2592000",
+            "-Ddat.uuid.revoke_other_tokens=true",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
