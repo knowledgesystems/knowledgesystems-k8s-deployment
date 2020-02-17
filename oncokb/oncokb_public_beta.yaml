@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: cbioportal/oncokb-public:2.1.5.alpha.1
+          image: cbioportal/oncokb-public:2.2.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
