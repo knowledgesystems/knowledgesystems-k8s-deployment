@@ -113,7 +113,9 @@ metadata:
   selfLink: /api/v1/namespaces/oncokb/services/oncokb-demo
 spec:
   ports:
-    - port: 8888
+  - port: 80
+    name: http
+    targetPort: 8888
   selector:
     run: oncokb-demo
   type: ClusterIP
