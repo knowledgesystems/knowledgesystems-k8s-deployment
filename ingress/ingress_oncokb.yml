@@ -28,6 +28,7 @@ spec:
     - beta.oncokb.org
     - legacy.oncokb.org
     - test.oncokb.org
+    - demo.oncokb.org
     - v1.oncokb.org
     secretName: oncokb-cert
   rules:
@@ -58,6 +59,13 @@ spec:
       - path: /api/v1
         backend:
           serviceName: oncokb-legacy
+          servicePort: http
+  - host: demo.oncokb.org
+    http:
+      paths:
+      - path: /api/v1
+        backend:
+          serviceName: oncokb-demo
           servicePort: http
   - host: test.oncokb.org
     http:
