@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: oncokb-drug-matching
+  labels:
+    run: oncokb-drug-matching
+  namespace: oncokb
+  selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-drug-matching
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: oncokb-drug-matching
+  template:
+    metadata:
+      labels:
+        run: oncokb-drug-matching
+    spec:
+      containers:
+        - name: oncokb-drug-matching
+          image: victoria34/oncokb-drug-matching:0.0.5
+          ports:
+            - containerPort: 2333
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: oncokb-drug-matching
+  name: oncokb-drug-matching
+  namespace: oncokb
+  selfLink: /api/v1/namespaces/oncokb/services/oncokb-drug-matching
+spec:
+  ports:
+    - port: 2333
+      name: http
+      targetPort: 2333
+  selector:
+    run: oncokb-drug-matching
+  type: ClusterIP
