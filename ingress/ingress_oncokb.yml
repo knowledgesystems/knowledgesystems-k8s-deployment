@@ -58,7 +58,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-drug-matching
+          serviceName: clinical-trials-matching
           servicePort: http
   - host: demo.oncokb.org
     http:
