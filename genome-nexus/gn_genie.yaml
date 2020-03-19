@@ -6,15 +6,15 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: gn-genie
-  name: gn-genie
+    run: genome-nexus-genie
+  name: genome-nexus-genie
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-genie
+  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/genome-nexus-genie
 spec:
   replicas: 2
   selector:
     matchLabels:
-      run: gn-genie
+      run: genome-nexus-genie
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -24,22 +24,24 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: gn-genie
+        run: genome-nexus-genie
     spec:
       containers:
       - env:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot9-genie-mongodb:27017/annotator?connectTimeoutMS=120000
-        image: genomenexus/gn-spring-boot:v1.0.0-263-g387164e
+          value: mongodb://genie-gn-mongo-v0dot9-mongodb:27017/annotator?connectTimeoutMS=120000
+        image: genomenexus/gn-spring-boot:genie-gn-spring-boot-beta
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
             # this is to use VEP running inside K8s. Remove to use
             # grch37.rest.ensembl.org instead
-            "-Dgn_vep.region.url=http://gn-vep/vep/human/region/VARIANT",
+            "-Dgn_vep.region.url=http://genie-gn-vep/vep/human/region/VARIANT",
+            "-Dvep.max_page_size=5000",
+            "-Dgn_vep.timeout.siconds=300",
             "-jar",
             "/app.war"
         ]
@@ -50,20 +52,20 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 2
           periodSeconds: 5
-        name: gn-genie
+        name: genome-nexus-genie
         ports:
         - containerPort: 8888
           protocol: TCP
         resources:
           requests:
-              memory: 1.5Gi
+              memory: 3Gi
           limits:
-              memory: 2Gi
+              memory: 7Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
       nodeSelector:
-         kops.k8s.io/instancegroup: genome-nexus
+         kops.k8s.io/instancegroup: genie-genome-nexus
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -75,9 +77,10 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: gn-genie
-    app: gn-genie
+    run: genome-nexus-genie
+    app: genome-nexus-genie
   name: genome-nexus-genie
+  namespace: genome-nexus
   selfLink: /api/v1/namespaces/genome-nexus/services/genome-nexus-genie
 spec:
   ports:
@@ -88,5 +91,5 @@ spec:
     name: https
     targetPort: 8888
   selector:
-    run: gn-genie
+    run: genome-nexus-genie
   type: ClusterIP
