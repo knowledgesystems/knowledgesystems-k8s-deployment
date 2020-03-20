@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: genie-vep-pvc
+  namespace: genome-nexus
+spec:
+  accessModes:
+    - ReadWriteOnce # Access modes for volumes is defined under Persistent Volumes
+  resources:
+    requests:
+      storage: 35Gi # volume size requested
