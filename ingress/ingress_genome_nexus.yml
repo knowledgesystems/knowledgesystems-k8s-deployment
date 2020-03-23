@@ -26,6 +26,7 @@ spec:
     - www.genomenexus.org
     - v2.genomenexus.org
     - v1.genomenexus.org
+    - grch38.genomenexus.org
     - genie.genomenexus.org
     - beta.genomenexus.org
     secretName: genome-nexus-v2-cert
@@ -50,6 +51,13 @@ spec:
       - path: /
         backend:
           serviceName: genome-nexus
+          servicePort: http
+  - host: grch38.genomenexus.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: genome-nexus-grch38
           servicePort: http
   - host: beta.genomenexus.org
     http:
