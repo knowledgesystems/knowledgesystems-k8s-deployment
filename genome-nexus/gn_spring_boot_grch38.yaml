@@ -37,7 +37,7 @@ spec:
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot-grch38:v1.1.1-4-gc0e0210-8-jre
+        image: genomenexus/gn-spring-boot:v1.1.1-4-gc0e0210-8-jre
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
