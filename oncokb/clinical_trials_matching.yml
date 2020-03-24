@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: clinical-trials-matching
-          image: victoria34/clinical-trials-matching:0.0.1
+          image: victoria34/clinical-trials-matching:0.0.2
           ports:
             - containerPort: 2333
           imagePullPolicy: Always
