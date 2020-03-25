@@ -11,7 +11,7 @@ metadata:
   namespace: genome-nexus
   selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-spring-boot-beta
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: gn-spring-boot-beta
@@ -37,7 +37,7 @@ spec:
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:try-jvm-13
+        image: genomenexus/gn-spring-boot:add-nuc-context
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -56,6 +56,16 @@ spec:
           timeoutSeconds: 2
           periodSeconds: 5
         name: gn-spring-boot-beta
+        # TODO: create a better liveness probe (this is just readiness with
+        # more lenience)
+        livenessProbe:
+          httpGet:
+            path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+            port: 8888
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          periodSeconds: 10
+        name: gn-spring-boot
         ports:
         - containerPort: 8888
           protocol: TCP
