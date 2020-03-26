@@ -1,0 +1,2 @@
+FROM busybox
+COPY genie-private-cbioportal /themes/genie-private-cbioportal
