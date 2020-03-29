@@ -26,11 +26,11 @@ Notes:
 * The image referenced by the helm keycloak chart had to be modified to allow for a proper SSL channel between Keycloak and the AWS-RDS node (more information can be found in the [cbioportal-keycloak-dockerfile](./cbioportal-keycloak-dockerfile) in this repository).  Please use the following keycloak.image property values:
 ```
 keycloak.image.repository=cbioportal/keycloak
-keycloak.image.tag=cbioportal-keycloak-v1.0
+keycloak.image.tag=cbioportal-keycloak-v1.1
 ```
 * Custom login pages are packaged as Keycloak "themes" and made available via the use of extraInitContainers (see "Providing a Custom Theme" in [README.md](https://github.com/codecentric/helm-charts/tree/master/charts/keycloak) on codecentric github).  After cloning the repos and navigating to [this location](./) in the repos, the custom theme container image was made via the following docker commands:
 ```
 docker build -f ./cbioportal-keycloak-custom-themes-dockerfile ./themes
-docker tag <IMAGE_ID> cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.0
-docker push cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.0 
+docker tag <IMAGE_ID> cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
+docker push cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1 
 ```
