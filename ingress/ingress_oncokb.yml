@@ -37,7 +37,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-legacy
+          serviceName: oncokb-public
           servicePort: http
   - host: www.oncokb.org
     http:
