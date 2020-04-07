@@ -37,7 +37,8 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-public
+          # we still cannot point to oncokb-public yet since there are lots of portal installations are pointing to that
+          serviceName: oncokb-legacy
           servicePort: http
   - host: www.oncokb.org
     http:
