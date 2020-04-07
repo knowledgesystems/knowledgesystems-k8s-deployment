@@ -6,7 +6,7 @@ kubectl create namespace genome-nexus
 
 Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes:
 ```
-helm install --name gn-mongo-v0dot9 --version 3.0.4 --set image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=50Gi stable/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"=genome-nexus
+helm install --name gn-mongo-v0dot9 --version 3.0.4 -f genome-nexus/mongo/helm/mongo_default_config.yaml stable/mongodb --namespace genome-nexus
 ```
 Deploy genome nexus app:
 ```
@@ -36,7 +36,7 @@ Nexus](./gn_genie.yaml).
 ## Genome Nexus GENIE instance
 Spin up the database:
 ```
-helm install --name gn-mongo-v0dot9-genie --version 3.0.4 --set image.repository=genomenexus/gn-mongo,image.tag=v0.9,persistence.size=50Gi stable/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"=genome-nexus
+helm install --name gn-mongo-v0dot9-genie --version 3.0.4 -f genome-nexus/mongo/helm/mongo_default_config.yaml stable/mongodb --namespace genome-nexus
 ```
 Set up VEP:
 ```
