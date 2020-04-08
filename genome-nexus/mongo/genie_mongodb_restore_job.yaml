@@ -1,0 +1,40 @@
+  
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: genie-genome-nexus-mongorestore
+spec:
+  template:
+    spec:
+      containers:
+          - envFrom:
+            - configMapRef:
+                name: aws-cli-credentials
+            - configMapRef:
+                name: genie-genome-nexus-mongodump-config
+            name: genie-genome-nexus-mongorestore
+            image: bitnami/mongodb
+            command: ["/bin/bash", "-c"]
+            args:
+              - echo "Fetching latest mongo dump filename from s3 bucket...";
+                wget https://${AWS_S3_BUCKET_DUMP_DIR}.s3.amazonaws.com/${AWS_S3_BUCKET_DUMP_DIR}/latest_mongo_dump.txt;
+                LATEST_MONGODUMP_FILENAME=$(cat latest_mongo_dump.txt);
+                echo "Latest mongo dump filename found - ${LATEST_MONGODUMP_FILENAME}";
+
+                echo "Downloading latest mongodump from s3 bucket...";
+                wget https://${AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${AWS_S3_BUCKET_DUMP_DIR}/${LATEST_MONGODUMP_FILENAME};
+                echo "Finished downloading mongodump, extracting contents..."
+                tar -xzvf ${LATEST_MONGODUMP_FILENAME};
+                echo "Finished extracting contents of latest mongodump...\n\n"
+
+                echo "Restoring mongo database with latest dump...";
+                mongrestore --uri ${MONGODB_URI} --verbose /genie-mongodump;
+                echo "Finished running mongorestore\n\n";
+            volumeMounts:
+            - mountPath: "/genie-mongodump"
+              name: genie-mongodump
+      volumes:
+      - name: genie-mongodump
+        persistentVolumeClaim:
+          claimName: genie-genome-nexus-mongodump-pvc
+      restartPolicy: OnFailure
