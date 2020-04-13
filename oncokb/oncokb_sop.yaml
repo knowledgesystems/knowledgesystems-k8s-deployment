@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - env:
-          image: cbioportal/oncokb-sop:v0.0.3
+          image: cbioportal/oncokb-sop:v1.1.1
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
@@ -65,6 +65,9 @@ metadata:
   namespace: oncokb
 spec:
   ports:
-  - protocol: TCP
-    port: 80
+  - port: 80
+    name: http
     targetPort: 80
+  selector:
+    run: oncokb-test
+  type: ClusterIP
