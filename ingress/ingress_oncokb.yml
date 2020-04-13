@@ -30,7 +30,6 @@ spec:
     - test.oncokb.org
     - demo.oncokb.org
     - v1.oncokb.org
-    - sop.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: oncokb.org
@@ -48,13 +47,6 @@ spec:
         backend:
           serviceName: oncokb-public
           servicePort: http
-   - host: sop.oncokb.org
-     http:
-       paths:
-         - path: /
-           backend:
-             serviceName: oncokb-sop
-             servicePort: 80
   - host: beta.oncokb.org
     http:
       paths:
