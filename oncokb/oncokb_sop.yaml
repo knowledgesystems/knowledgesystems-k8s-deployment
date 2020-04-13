@@ -9,4 +9,4 @@ spec:
     port: 80
     targetPort: 80
   type: ExternalName
-  externalName: www.oncokb.org/content/files/OncoKB_Curation_Protocol_v1.0.pdf
+  externalName: oncokb.github.io/sop/
