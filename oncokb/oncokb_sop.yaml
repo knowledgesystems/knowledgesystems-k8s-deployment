@@ -69,5 +69,5 @@ spec:
     name: http
     targetPort: 80
   selector:
-    run: oncokb-test
+    run: oncokb-sop
   type: ClusterIP
