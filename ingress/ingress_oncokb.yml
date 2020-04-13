@@ -53,9 +53,8 @@ spec:
        paths:
          - path: /
            backend:
-             serviceName: oncokb-public
-             servicePort: http
-             serviceContext: /content/files/OncoKB_Curation_Protocol_v1.0.pdf
+             serviceName: oncokb-sop
+             servicePort: 80
   - host: beta.oncokb.org
     http:
       paths:
