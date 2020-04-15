@@ -32,6 +32,7 @@ spec:
     - v1.oncokb.org
     - sop.oncokb.org
     - msk.oncokb.org
+    - fda.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: oncokb.org
@@ -104,4 +105,11 @@ spec:
       - path: /
         backend:
           serviceName: oncokb-core-msk
+          servicePort: http
+  - host: fda.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-public-fda
           servicePort: http
