@@ -28,14 +28,36 @@ spec:
       volumes:
       - name: ehcache-volume
         emptyDir: {}
+      - name: cbioportal-htan-configmap-volume
+        configMap:
+          name: cbioportal-htan
+          items:
+          - key: portal.properties
+            path: portal.properties
+          - key: htan-cbioportal-saml-idp-metadata.xml
+            path: htan-cbioportal-saml-idp-metadata.xml
+          - key: cbioportal-saml-Keystore.jks
+            path: cbioportal-saml-Keystore.jks
       containers:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
+        env:
+        - name: PORTAL_HOME
+          value: /cbioportal/
         image: cbioportal/cbioportal:3.2.14-web-shenandoah
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
+        - name: cbioportal-htan-configmap-volume
+          mountPath: /cbioportal/portal.properties
+          subPath: portal.properties
+        - name: cbioportal-htan-configmap-volume
+          mountPath: /cbioportal/htan-cbioportal-saml-idp-metadata.xml
+          subPath: htan-cbioportal-saml-idp-metadata.xml
+        - name: cbioportal-htan-configmap-volume
+          mountPath: /cbioportal/cbioportal-saml-Keystore.jks
+          subPath: cbioportal-saml-Keystore.jks
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -45,25 +67,10 @@ spec:
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
             "-XX:ShenandoahGuaranteedGCInterval=10000",
-            #"-XX:+AlwaysPreTouch",
-            #"-XX:+UseTransparentHugePages",
-            #"-XX:+UseNUMA",
-            #"-XX:+PrintGCDetails",
-            #"-XX:+UseParallelGC",
-            #"-XX:+PrintGCDateStamps",
-            #"-XX:ParallelGCThreads=4",
-            #"-XX:+UseG1GC",
-            #"-XX:+AggressiveHeap",
-            # non aggressive garbage collection
-            #"-XX:MinHeapFreeRatio=20",
-            #"-XX:MaxHeapFreeRatio=40",
-            #"-XX:GCTimeRatio=19",
-            #"-XX:AdaptiveSizePolicyWeight=90",
             "-XX:+UseCGroupMemoryLimitForHeap",
             # This issue says to use maxRAMFraction > 1
             # https://github.com/akka/akka/issues/23499, but haven't found this
             # to work v well
-            #"-XX:MaxRAMFraction=1",
             "-XX:+PrintFlagsFinal",
             "-XshowSettings:vm",
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
@@ -89,7 +96,7 @@ spec:
             "-Dapp.name=public-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=social_auth_microsoft,social_auth_google",
+            "-Dauthenticate=saml",
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
@@ -111,10 +118,6 @@ spec:
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
             "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
-            "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
-            "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
-            "-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
-            "-Dmicrosoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
             "-Dbitly.url=$(BITLY_URL)",
             "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
             "-Dsentry.dsn=$(SENTRY_DSN)",
