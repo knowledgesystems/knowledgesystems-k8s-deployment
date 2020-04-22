@@ -13,13 +13,15 @@ keycloak:
       - hosts:
         - keycloak.cbioportal.org
         - genie-private-keycloak.cbioportal.org
+        - htan-keycloak.cbioportal.org
         secretName: cbioportal-keycloak-cert
     hosts:
       - keycloak.cbioportal.org
       - genie-private-keycloak.cbioportal.org
+      - htan-keycloak.cbioportal.org
   extraInitContainers: |
     - name: gene-private-cbioportal-theme-provider
-      image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.0
+      image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
       args:
@@ -27,11 +29,22 @@ keycloak:
       volumeMounts:
         - name: genie-private-cbioportal-theme
           mountPath: /genie-private-cbioportal-theme
+    - name: htan-cbioportal-theme-provider
+      image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh", "-c"]
+      args:
+        - cp -R /themes/htan-cbioportal/* /htan-cbioportal-theme
+      volumeMounts:
+        - name: htan-cbioportal-theme
+          mountPath: /htan-cbioportal-theme
   extraVolumes: |
     - name: aws-rds-tls-jks
       secret:
         secretName: aws-rds-tls-jks
     - name: genie-private-cbioportal-theme
+      emptyDir: {}
+    - name: htan-cbioportal-theme
       emptyDir: {}
   extraVolumeMounts: |
     - name: aws-rds-tls-jks
@@ -39,6 +52,8 @@ keycloak:
       readOnly: true
     - name: genie-private-cbioportal-theme
       mountPath: /opt/jboss/keycloak/themes/genie-private-cbioportal
+    - name: htan-cbioportal-theme
+      mountPath: /opt/jboss/keycloak/themes/htan-cbioportal
   extraEnv: |
     # setup ssl and use truststore containing AWS-RDS certs
     - name: JDBC_PARAMS
