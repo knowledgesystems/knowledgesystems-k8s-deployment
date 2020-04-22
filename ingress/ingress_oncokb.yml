@@ -30,6 +30,9 @@ spec:
     - test.oncokb.org
     - demo.oncokb.org
     - v1.oncokb.org
+    - sop.oncokb.org
+    - msk.oncokb.org
+    - fda.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: oncokb.org
@@ -37,6 +40,7 @@ spec:
       paths:
       - path: /
         backend:
+          # we still cannot point to oncokb-public yet since there are lots of portal installations are pointing to that
           serviceName: oncokb-legacy
           servicePort: http
   - host: www.oncokb.org
@@ -87,4 +91,25 @@ spec:
       - path: /
         backend:
           serviceName: oncokb-public-v1
+          servicePort: http
+  - host: sop.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-sop
+          servicePort: http
+  - host: msk.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-core-msk
+          servicePort: http
+  - host: fda.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-public-fda
           servicePort: http

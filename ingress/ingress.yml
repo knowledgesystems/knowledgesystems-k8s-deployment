@@ -31,6 +31,9 @@ spec:
     - master.cbioportal.org
     secretName: cbioportal-master-cert
   - hosts:
+    - htan.cbioportal.org
+    secretName: cbioportal-htan-cert
+  - hosts:
     - genie.cbioportal.org
     secretName: cbioportal-genie-public-cert
   - hosts:
@@ -62,6 +65,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-backend-master
+          servicePort: http
+  - host: htan.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-backend-htan
           servicePort: http
   - host: genie.cbioportal.org
     http:

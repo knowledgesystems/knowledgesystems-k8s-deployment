@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: oncokb-public
+  name: oncokb-public-fda
   namespace: oncokb
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: oncokb-public
+      app: oncokb-public-fda
       version: 'v1'
   strategy:
     rollingUpdate:
-      maxSurge: 4
-      maxUnavailable: 2
+      maxSurge: 2
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: oncokb-public
+        app: oncokb-public-fda
         version: 'v1'
     spec:
       containers:
-        - name: oncokb-public
-          image: cbioportal/oncokb-public:2.3.2
+        - name: oncokb-public-fda
+          image: cbioportal/oncokb-public:2.3.1-fda.3
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -30,7 +30,7 @@ spec:
               value: '-Xmx1024m -Xms512m'
           envFrom:
             - configMapRef:
-                name: oncokb-public
+                name: oncokb-public-fda
           readinessProbe:
             httpGet:
               path: /api/v1/info
@@ -61,13 +61,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: oncokb-public
+  name: oncokb-public-fda
   namespace: oncokb
   labels:
-    app: oncokb-public
+    app: oncokb-public-fda
 spec:
   selector:
-    app: oncokb-public
+    app: oncokb-public-fda
   type: ClusterIP
   ports:
     - name: http
