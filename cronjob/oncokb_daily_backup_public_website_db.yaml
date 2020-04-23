@@ -14,7 +14,7 @@ spec:
             - configMapRef:
                 name: aws-cli-credentials
             - configMapRef:
-                name: oncokb-beta
+                name: oncokb-public
             name: oncokb-daily-backup-public-website-db
             image: mysql:5.7
             command: ["/bin/sh", "-c"]
