@@ -113,6 +113,7 @@ metadata:
   selfLink: /api/v1/namespaces/oncokb/services/oncokb-core-public
 spec:
   ports:
+    - name: http
     - port: 8888
   selector:
     run: oncokb-core-public
