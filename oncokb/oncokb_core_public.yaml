@@ -6,15 +6,15 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: oncokb-demo
-  name: oncokb-demo
+    run: oncokb-core-public
+  name: oncokb-core-public
   namespace: oncokb
-  selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-demo
+  selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-core-public
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: oncokb-demo
+      run: oncokb-core-public
   strategy:
     rollingUpdate:
       maxSurge: 2
@@ -24,14 +24,14 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncokb-demo
+        run: oncokb-core-public
     spec:
       containers:
         - env:
           envFrom:
             - configMapRef:
-                name: oncokb-demo
-          image: cbioportal/oncokb:1.demo.1
+                name: oncokb-core-public
+          image: cbioportal/oncokb:2.5.0
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -55,8 +55,8 @@ spec:
             "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(MYSQL_DATABASE)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(MYSQL_USER)",
             "-Djdbc.password=$(MYSQL_PASSWORD)",
-            "-Ddata.version=v2.1",
-            "-Ddata.version_date=02/12/2020",
+            "-Ddata.version=v2.2",
+            "-Ddata.version_date=04/23/2020",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
             "-Dshow_sitemaps=false",
@@ -84,7 +84,7 @@ spec:
             initialDelaySeconds: 30
             timeoutSeconds: 300
             periodSeconds: 200
-          name: oncokb-demo
+          name: oncokb-core-public
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -107,15 +107,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncokb-demo
-  name: oncokb-demo
+    run: oncokb-core-public
+  name: oncokb-core-public
   namespace: oncokb
-  selfLink: /api/v1/namespaces/oncokb/services/oncokb-demo
+  selfLink: /api/v1/namespaces/oncokb/services/oncokb-core-public
 spec:
   ports:
-  - port: 80
-    name: http
-    targetPort: 8888
+    - port: 8888
   selector:
-    run: oncokb-demo
+    run: oncokb-core-public
   type: ClusterIP

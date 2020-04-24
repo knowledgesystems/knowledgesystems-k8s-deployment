@@ -6,15 +6,15 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: oncokb-legacy
-  name: oncokb-legacy
+    run: oncokb-core-legacy
+  name: oncokb-core-legacy
   namespace: oncokb
-  selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-legacy
+  selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-core-legacy
 spec:
   replicas: 2
   selector:
     matchLabels:
-      run: oncokb-legacy
+      run: oncokb-core-legacy
   strategy:
     rollingUpdate:
       maxSurge: 3
@@ -24,13 +24,13 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncokb-legacy
+        run: oncokb-core-legacy
     spec:
       containers:
       - env:
         envFrom:
           - configMapRef:
-              name: oncokb-legacy
+              name: oncokb-core-legacy
         image: cbioportal/oncokb:1.4.8.beta.5
         command: ["java"]
         args: [
@@ -85,7 +85,7 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 300
           periodSeconds: 200
-        name: oncokb-legacy
+        name: oncokb-core-legacy
         ports:
         - containerPort: 8888
           protocol: TCP
@@ -108,15 +108,15 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncokb-legacy
-  name: oncokb-legacy
+    run: oncokb-core-legacy
+  name: oncokb-core-legacy
   namespace: oncokb
-  selfLink: /api/v1/namespaces/oncokb/services/oncokb-legacy
+  selfLink: /api/v1/namespaces/oncokb/services/oncokb-core-legacy
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8888
   selector:
-    run: oncokb-legacy
+    run: oncokb-core-legacy
   type: ClusterIP
