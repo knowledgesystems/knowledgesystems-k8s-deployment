@@ -114,7 +114,7 @@ metadata:
 spec:
   ports:
     - name: http
-    - port: 8888
+      port: 8888
   selector:
     run: oncokb-core-public
   type: ClusterIP
