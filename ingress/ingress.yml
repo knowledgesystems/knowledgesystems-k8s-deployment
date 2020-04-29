@@ -51,6 +51,9 @@ spec:
   - hosts:
     - session-service-beta.cbioportal.org
     secretName: cbioportal-session-service-beta-cert
+  - hosts:
+    - webinar.cbioportal.org
+    secretName: cbioportal-webinar-cert
   rules:
   - host: www.cbioportal.org
     http:
@@ -107,6 +110,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-backend-rc
+          servicePort: http
+  - host: webinar.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-webinar
           servicePort: http
   - host: session-service.cbioportal.org
     http:
