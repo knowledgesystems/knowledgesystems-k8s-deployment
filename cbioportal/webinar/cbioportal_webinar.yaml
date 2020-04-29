@@ -148,7 +148,7 @@ spec:
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
             "--proxy-base-url",
-            "https://www.cbioportal.org",
+            "https://webinar.cbioportal.org",
             "--max-threads",
             "0",
             "--session-store",
