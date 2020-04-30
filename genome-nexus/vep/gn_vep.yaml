@@ -31,7 +31,7 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         # TODO change image
-        image: mandaewilson/dockerveptest:latest
+        image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
         imagePullPolicy: Always
         volumeMounts:
         - name: vep-data
@@ -67,7 +67,7 @@ spec:
       - name: download-vep-cache
         image: busybox:1.30.0
         command: ['sh', '-c',
-            'cd /vep_data; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://test-gn-vep-data.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://test-gn-vep-data.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_98_GRCh37.tar'
+            'cd /vep_data; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://genome-nexus-vep-data.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://genome-nexus-vep-data.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_98_GRCh37.tar'
         ]
         volumeMounts:
         - name: vep-data
