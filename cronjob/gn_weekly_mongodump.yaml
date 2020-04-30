@@ -5,6 +5,8 @@ metadata:
   namespace: genome-nexus
 spec:
   schedule: "0 0 * * 0"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
       template:
