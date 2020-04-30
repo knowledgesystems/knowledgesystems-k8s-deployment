@@ -30,7 +30,7 @@ spec:
       - env:
         - name: SERVER_PORT
           value: "8888"
-        image: genomenexus/gn-vep:gn-vep-beta
+        image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
         imagePullPolicy: Always
         volumeMounts:
         - name: vep-data
@@ -75,9 +75,6 @@ spec:
       - name: vep-data
         persistentVolumeClaim:
           claimName: genie-vep-pvc
-      #volumes:
-      #- name: vep-data
-      #  emptyDir: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
