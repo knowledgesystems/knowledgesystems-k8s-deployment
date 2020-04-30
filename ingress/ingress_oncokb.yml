@@ -105,7 +105,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-core-msk
+          serviceName: oncokb-public
           servicePort: http
   - host: fda.oncokb.org
     http:
