@@ -31,8 +31,8 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://genie-gn-mongo-v0dot9-mongodb:27017/annotator?connectTimeoutMS=120000
-        image: genomenexus/gn-spring-boot:genie-gn-spring-boot-beta
+          value: mongodb://genie-gn-mongo-mongodb:27017/annotator?connectTimeoutMS=120000
+        image: genomenexus/gn-spring-boot:669256de9811bbb0da78ae80ef20550f8b2b9370   
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -41,7 +41,7 @@ spec:
             # grch37.rest.ensembl.org instead
             "-Dgn_vep.region.url=http://genie-gn-vep/vep/human/region/VARIANT",
             "-Dvep.max_page_size=5000",
-            "-Dgn_vep.timeout.siconds=300",
+            "-Dgn_vep.timeout.seconds=300",
             "-jar",
             "/app.war"
         ]
