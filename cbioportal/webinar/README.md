@@ -11,3 +11,6 @@ Steps to set up a temp webinar instance
 2. Increase number of nodes in large-mem group (this requires kops access)
 3. Point db host parameters in this folder to the newly setup AWS RDS node
 4. kubectl apply the yaml in this folder
+
+
+NOTE: if you are setting up a new URL make sure to add it to the allowed redirects in google auth
