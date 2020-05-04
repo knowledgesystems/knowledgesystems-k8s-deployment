@@ -85,9 +85,9 @@ For more information on Genome Nexus, refer to documentation [here](https://gith
 ### Setting Up Mongo Backups
 In addition to storing data in persistent volumes, the GENIE Genome Nexus deployment also dumps and backs up the mongo cache on a weekly basis (once a week on Sunday). The mongo cache is dumped into a persistent volume and then uploaded to an S3 bucket. In the event a persistent volume is deleted, the dump can be used to manually restore the mongo cache.
 
-Make sure the corresponding configmap is deployed:
+Make sure the corresponding configmap is deployed (found in mercurial repo):
 ```
-kubectl apply -f
+kubectl apply -f portal-configuration/k8s-config-vars/mongodb/genie_config_map.yaml
 ```
 
 To deploy the mongodump cronjob:
