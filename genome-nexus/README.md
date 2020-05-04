@@ -37,9 +37,9 @@ Nexus](./gn_genie.yaml).
 The GENIE Genome Nexus instance includes changes to the default configuration/steps.
 
 ### Setting Up Persistent Volume Claims
-It uses persistent volume claims to store data (both the VEP cache data and mongo cache) and to ensure data persistence across restarts. These persistent volume claims must be created **first**. The deployment configurations for mongo/GENIE genome nexus specifically reference these existing persistent volume claims and will crash if they are not available.
+It uses persistent volume claims to store data (both the VEP cache data and mongo cache) and to ensure data persistence across restarts. These persistent volume claims must be created **before** installing the helm chart/or spinning up VEP. The deployment configurations for mongo/GENIE genome nexus specifically reference these existing persistent volume claims and will crash if they are not available.
 
-To spin up persistent volumes for:
+To create persistent volumes for:
 
 1. VEP FASTA cache (genie-vep-pvc): `kubectl apply -f vep/gn_vep_pvc.yaml`
 2. GENIE Mongo (VEP annotation) cache (genie-gn-mongo-pvc): `kubectl apply -f mongo/genie_gn_mongo_pvc.yaml`
@@ -63,7 +63,7 @@ helm install --name genie-gn-mongo --version 7.3.1  --set image.repository=genom
 ```
 
 ### Setting Up GENIE VEP
-The primary difference in the GENIE version of VEP is the use of a persistent volume to preserve data across restarts. Initial startup will take approximately ~10 minutes to download the cache from the S3 bucket onto the mounted persistent volume. Subsequent startups (e.g due to restarts) should take approximately ~30 seconds due to the cache being persisted.
+The primary difference in the GENIE version of VEP is the use of a persistent volume to preserve data across restarts. Initial startup will take ~10 minutes to download the cache from the S3 bucket onto the mounted persistent volume. Subsequent startups (e.g due to restarts) should take ~30 seconds due to the cache being persisted.
 
 VEP cached data has been preloaded into an existing S3 bucket (genome-nexus-vep-data). In the event of a build update that changes the cache, a new version of the cache must be uploaded into the S3 bucket.
 
