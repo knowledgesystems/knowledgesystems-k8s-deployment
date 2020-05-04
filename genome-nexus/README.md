@@ -63,7 +63,9 @@ helm install --name genie-gn-mongo --version 7.3.1  --set image.repository=genom
 ```
 
 ### Setting Up GENIE VEP
-The primary difference in the GENIE version of VEP is the use of a persistent volume to preserve data across restarts. Initial startup with take around ~10 minutes to download the cache from the S3 machine to the mounted persistent volume. Subsequent startups (e.g due to restarts) should take around ~30 seconds due to the cache being persisted.
+The primary difference in the GENIE version of VEP is the use of a persistent volume to preserve data across restarts. Initial startup with take around ~10 minutes to download the cache from the S3 bucket to the mounted persistent volume. Subsequent startups (e.g due to restarts) should take around ~30 seconds due to the cache being persisted.
+
+Cache data has already been preloaded into an existing S3 bucket (genome-nexus-vep-data). In the event of a build update that changes the cache, a new version of the cache must be uploaded into the S3 bucket.
 
 To set up a local instance of VEP, run: 
 ```
