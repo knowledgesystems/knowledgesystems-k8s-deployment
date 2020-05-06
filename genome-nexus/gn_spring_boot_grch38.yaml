@@ -37,10 +37,16 @@ spec:
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:v1.1.6
+        image: genomenexus/gn-spring-boot:v1.1.8
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
+            # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
+            # include shenandoah)
+            "-Xms100m",
+            "-Xmx6g",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseZGC",
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
             # this is to use VEP running inside K8s. Remove to use
             # rest.ensembl.org (grch38) instead
