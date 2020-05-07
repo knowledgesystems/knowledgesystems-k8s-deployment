@@ -6,7 +6,7 @@ kubectl create namespace genome-nexus
 
 Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes:
 ```
-helm install --name gn-mongo-v0dot12 --version 7.3.1 --set image.repository=genome-nexus/gn-mongo,image.tag=v0.12,persistence.size=50Gi bitnami/mongodb --namespace genome-nexus
+helm install --name gn-mongo-v0dot12 --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=v0.12,persistence.size=50Gi bitnami/mongodb --namespace genome-nexus
 ```
 Deploy genome nexus app:
 ```
