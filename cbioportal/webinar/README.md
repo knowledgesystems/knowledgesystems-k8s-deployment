@@ -29,3 +29,30 @@ These are the steps to increase overall compute power and set up the temp webina
 
 
 NOTE: if you are setting up a new URL (i.e. other than webinar.cbioportal.org) make sure to add it to the allowed redirects in google auth
+
+## Live monitoring
+For monitoring during the webinar I have a few windows/terminals open with following things running
+
+### Terminal
+
+- watch kubectl get po
+
+to see if all pods are alive
+
+- watch kubectl get po --namespace=genome-nexus
+
+see pods in genome nexus namespace
+
+### Browser windows:
+
+- cBioPortal Dashboard https://grafana.cbioportal.org/d/7R5LYe_iz/cbioportal-ingress-pod-stats?refresh=5s&orgId=1
+- Genome Nexus Dashboard https://grafana.cbioportal.org/d/vWTDoH6Wz/genome-nexus?refresh=5s&orgId=1
+
+For both of those, if u see memory spike a lot you can e.g. manually delete one of the pods with `kubectl delete po` to make sure the pods don't crash at the same time. Triggering a restart for the entire deployment can be helpful as well: `kubectl set env deployment cbioportal-spring-boot --env="LAST_RESTART=$(date)"`
+
+- Google Analytics https://analytics.google.com/analytics/web/?authuser=1#/realtime/rt-overview/a17134933w34760563p34065145/    
+Nice way to see how many people are active on the site
+
+- The webinar itself
+
+Of course you'll want to listen to the webinar itself to hear if anything crashed live on air :)
