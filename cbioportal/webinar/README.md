@@ -12,9 +12,17 @@ These are the steps to increase overall compute power and set up the temp webina
     - mysql conf should be the same as production db (that is it allows bigger packets etc). It's called cbioportla-mysql-conf or something. It should be on this one already if u restore but good to double check
     - everything else can stay at default
     - Create another instance in the same way. This way both the webinar instance and the public instance can have their own overpowered db instance.
-2. Increase number of nodes in large-mem group from 4 -> 6 (this requires kops access). (Optional) increase those for genome-nexus as well 2 -> 4
+2. Increase number of nodes in large-mem group from 4 -> 6. This is the group of nodes that cbioportal runs on (see [../cbioportal_spring_boot.yaml](../cbioportal_spring_boot.yaml)). Note that you need to be able to use kops for thiss:
+    ```
+    kops edit instancegroups large-mem
+    kops update cluster
+    # check output of update cluster, it should only add more nodes
+    # then apply the changes with
+    kops update cluster --yes
+    ```
+    (Optional) increase those for genome-nexus group as well from 2 -> 4 in the same way
 3. Point db host parameters in this folder to the newly setup AWS RDS node
-4. kubectl apply the yaml in this folder
+4. `kubectl apply -f cbioportal_webinar.yaml` to bring up the webinar instance. URL has already been configure
 5. Point [../cbioportal_sprint_boot.yaml](../cbioportal_sprint_boot.yaml) to use the newly setup AWS RDS node (should be different from 3.)
 5. (optional) increase number of replicas for [../cbioportal_sprint_boot.yaml](../cbioportal_sprint_boot.yaml)
 6. (optional) increase number of replicas for [../../genome-nexus/gn_spring_boot.yaml](../../genome-nexus/gn_spring_boot.yaml)
