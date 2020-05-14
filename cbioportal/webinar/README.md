@@ -7,7 +7,7 @@ These are the steps to increase overall compute power and set up the temp webina
 1. Create **2** new db instances on AWS RDS
     - Go to RDS page, click on snapshots, click on System, pick last public snapshot, click on action >
       restore
-    - Select a big database, i usually double it: db.r5.4xlarge
+    - Select a big database, i usually double it: db.r5.4xlarge. If expecting very big load try even bigger, e.g. db.r5.12xlarge
     - set security group is to allow connections from anywhere (or the k8s nodes). rds-launchwizard-5 seems to work. Prolly good to rename. I guess anything that allows 3306 access to the relevant IPs
     - mysql conf should be the same as production db (that is it allows bigger packets etc). It's called cbioportla-mysql-conf or something. It should be on this one already if u restore but good to double check
     - everything else can stay at default
