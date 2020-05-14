@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cbioportal-sync-release-3-3-0-database
+  name: cbioportal-sync-release-3-4-0-database
 spec:
   template:
     spec:
@@ -9,7 +9,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-importer
-        name: cbioportal-sync-release-3-3-0-database
+        name: cbioportal-sync-release-3-4-0-database
         image: mysql:5.7
         command: ["/bin/sh", "-c"]
         args:
@@ -22,7 +22,7 @@ spec:
             echo DROP DATABASE IF EXISTS ${DB_TEMP} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
             echo CREATE DATABASE ${DB_TEMP} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
 
-            echo "Copy public database to release-3.3.0 temp database";
+            echo "Copy public database to release-3.4.0 temp database";
             date;
             mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PUBLIC_PORTAL_DB_NAME} | mysql  -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_TEMP};
             date;
@@ -31,7 +31,7 @@ spec:
             OLD_VERSION=$(echo "select db_schema_version from info;" | mysql -h ${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_TEMP} | tail -n1);
 
             echo "Apply all migrations from version ${OLD_VERSION} until latest";
-            curl "https://raw.githubusercontent.com/cBioPortal/cbioportal/release-3.3.0/db-scripts/src/main/resources/migration.sql" | awk -vold_version=${OLD_VERSION} '{if (new_version) {print $0} else if ($0 ~ /UPDATE/ && $0 ~ /info/ && $0 ~ old_version) { new_version=1; } }' | mysql  -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_TEMP};
+            curl "https://raw.githubusercontent.com/cBioPortal/cbioportal/release-3.4.0/db-scripts/src/main/resources/migration.sql" | awk -vold_version=${OLD_VERSION} '{if (new_version) {print $0} else if ($0 ~ /UPDATE/ && $0 ~ /info/ && $0 ~ old_version) { new_version=1; } }' | mysql  -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_TEMP};
 
             echo Drop and create database ${DB_PUBLIC_RELEASE_PORTAL_DB_NAME};
             echo DROP DATABASE IF EXISTS ${DB_PUBLIC_RELEASE_PORTAL_DB_NAME} | mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD};
