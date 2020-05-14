@@ -12,6 +12,9 @@ These are the steps to increase overall compute power and set up the temp webina
     - mysql conf should be the same as production db (that is it allows bigger packets etc). It's called cbioportla-mysql-conf or something. It should be on this one already if u restore but good to double check
     - everything else can stay at default
     - Create another instance in the same way. This way both the webinar instance and the public instance can have their own overpowered db instance.
+    
+**NOTE: it takes a long time for the database to boot (~30m), so you can continue with next non-database related steps**
+
 2. After creation of database instances modify them to enable "performance insights" (not sure if one can do this during creation of the instances)
 3. Increase number of nodes in large-mem group from 4 -> 6. This is the group of nodes that cbioportal runs on (see [../cbioportal_spring_boot.yaml](../cbioportal_spring_boot.yaml)). Note that you need to be able to use kops for thiss:
     ```
