@@ -47,6 +47,10 @@ to see if all pods are alive
 
 see pods in genome nexus namespace
 
+- watch kubectl get events
+
+see if there are any events happening (e.g. failing liveness probes)
+
 ### Browser windows:
 
 - cBioPortal Dashboard https://grafana.cbioportal.org/d/7R5LYe_iz/cbioportal-ingress-pod-stats?refresh=5s&orgId=1
