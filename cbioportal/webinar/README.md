@@ -26,7 +26,7 @@ These are the steps to increase overall compute power and set up the temp webina
     ```
     (Optional) increase those for genome-nexus group as well from 2 -> 4 in the same way
 4. Point db host parameters in this folder to the newly setup AWS RDS node
-5. `kubectl apply -f cbioportal_webinar.yaml` to bring up the webinar instance. URL has already been configure
+5. `kubectl apply -f cbioportal_webinar.yaml` to bring up the webinar instance. URL has already been configured
 6. Point [../cbioportal_sprint_boot.yaml](../cbioportal_sprint_boot.yaml) to use the newly setup AWS RDS node (should be different from 3.)
 7. (optional) increase number of replicas for [../cbioportal_sprint_boot.yaml](../cbioportal_sprint_boot.yaml)
 8. (optional) increase number of replicas for [../../genome-nexus/gn_spring_boot.yaml](../../genome-nexus/gn_spring_boot.yaml)
