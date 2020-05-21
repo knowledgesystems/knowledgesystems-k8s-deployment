@@ -32,7 +32,7 @@ These are the steps to increase overall compute power and set up the temp webina
 8. (optional) increase number of replicas for [../../genome-nexus/gn_spring_boot.yaml](../../genome-nexus/gn_spring_boot.yaml)
 
 
-NOTE: if you are setting up a new URL (i.e. other than webinar.cbioportal.org) make sure to add it to the allowed redirects in google auth
+NOTE: if you are setting up a new URL (i.e. other than webinar.cbioportal.org) and you want to allow login with google, make sure to add it to the allowed redirects in google auth
 
 ## Live monitoring
 For monitoring during the webinar I have a few windows/terminals open with following things running
