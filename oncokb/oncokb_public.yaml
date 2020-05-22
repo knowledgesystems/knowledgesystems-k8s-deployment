@@ -28,6 +28,11 @@ spec:
               value: prod,no-liquibase
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
+            - name: SENTRY_DSN
+              valueFrom:
+                configMapKeyRef:
+                  name: oncokb-public
+                  key: SENTRY_DSN
           envFrom:
             - configMapRef:
                 name: oncokb-public
