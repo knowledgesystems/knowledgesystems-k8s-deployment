@@ -22,17 +22,12 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: cbioportal/oncokb-public:2.3.9
+          image: cbioportal/oncokb-public:2.3.10
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
-            - name: SENTRY_DSN
-              valueFrom:
-                configMapKeyRef:
-                  name: oncokb-public
-                  key: SENTRY_DSN
           envFrom:
             - configMapRef:
                 name: oncokb-public
