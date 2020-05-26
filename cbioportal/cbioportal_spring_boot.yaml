@@ -104,7 +104,7 @@ spec:
             "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google or Microsoft account to store your <a href=\"https://www.cbioportal.org/tutorials#virtual-studies\" target=\"_blank\">virtual studies</a> and <a href=\"https://www.cbioportal.org/tutorials#group-comparison\" target=\"_blank\">groups</a>. This will allow you to access your studies and groups from any computer, and cBioPortal will also remember your study view charts preferences for each study (i.e. order of the charts, type of charts and visibility). Login is optional and not required to access any of the other features of cBioPortal.",
             "-Dskin.blurb=",
             "-Dshow.mdacc.heatmap=true",
-            "-Dpriority_studies=PanCancer Studies#msk_impact_2017,nsclc_tcga_broad_2016,mixed_pipseq_2017;Cell lines#ccle_broad_2019,cellline_ccle_broad,cellline_nci60",
+            "-Dpriority_studies=PanCancer Studies#msk_impact_2017,metastatic_solid_tumors_mich_2017,mixed_allen_2018,summit_2018,tmb_mskcc_2018,ntrk_msk_2019;Pediatric Cancer Studies#pptc_2019,mixed_pipseq_2017,pediatric_dkfz_2017,mbl_pcgp,all_phase2_target_2018_pub,rt_target_2018_pub,wt_target_2018_pub,aml_target_2018_pub,nbl_target_2018_pub,es_dfarber_broad_2014;Cell lines#ccle_broad_2019,cellline_ccle_broad,cellline_nci60",
             "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
