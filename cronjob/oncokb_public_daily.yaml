@@ -1,10 +1,12 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: oncokb-public-beta-daily-crobjob
+  name: oncokb-public-beta-daily-cronjob
   namespace: oncokb
 spec:
-  schedule: "0 * * * *"
+  # Some of the daily tasks require sending emails,
+  # set the time to avoid sending emails during inappropriate time for majority of the users
+  schedule: "0 7 * * *"
   jobTemplate:
     spec:
       template:
@@ -13,7 +15,7 @@ spec:
           - envFrom:
             - configMapRef:
                 name: oncokb-public-beta-bot
-            name: oncokb-public-beta-daily-crobjob
+            name: oncokb-public-beta-daily-cronjob
             image: "ubuntu:latest"
             command: ["/bin/sh", "-c"]
             args: [
@@ -22,8 +24,8 @@ spec:
               echo 'Done installing curl\n\n';
 
               echo 'API call to send emails to all users whose account will be expired soon';
-              curl 'http://oncokb-public-beta:9095/api/crobjob/renew-tokens'  -H 'Authorization: Bear $(TOKEN)';
-              echo 'Done calling crobjob/renew-tokens\n\n';
+              curl 'http://oncokb-public-beta:9095/api/cronjob/renew-tokens'  -H 'Authorization: Bearer $(TOKEN)';
+              echo 'Done calling cronjob/renew-tokens\n\n';
 
               "
             ]
