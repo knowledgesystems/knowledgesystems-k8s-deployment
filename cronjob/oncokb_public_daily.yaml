@@ -1,0 +1,31 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: oncokb-public-beta-daily-crobjob
+  namespace: oncokb
+spec:
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - envFrom:
+            - configMapRef:
+                name: oncokb-public-beta-bot
+            name: oncokb-public-beta-daily-crobjob
+            image: "ubuntu:latest"
+            command: ["/bin/sh", "-c"]
+            args: [
+              "echo 'Install curl';
+              apt update; apt -y install curl;
+              echo 'Done installing curl\n\n';
+
+              echo 'API call to send emails to all users whose account will be expired soon';
+              curl 'http://oncokb-public-beta:9095/api/crobjob/renew-tokens'  -H 'Authorization: Bear $(TOKEN)';
+              echo 'Done calling crobjob/renew-tokens\n\n';
+
+              "
+            ]
+
+          restartPolicy: Never
