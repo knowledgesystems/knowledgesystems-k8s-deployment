@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: oncokb-public-beta-daily-cronjob
+  name: oncokb-public-daily-cronjob
   namespace: oncokb
 spec:
   # Some of the daily tasks require sending emails,
@@ -14,8 +14,8 @@ spec:
           containers:
           - envFrom:
             - configMapRef:
-                name: oncokb-public-beta-bot
-            name: oncokb-public-beta-daily-cronjob
+                name: oncokb-public-bot
+            name: oncokb-public-daily-cronjob
             image: "ubuntu:latest"
             command: ["/bin/sh", "-c"]
             args: [
