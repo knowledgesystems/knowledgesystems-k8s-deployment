@@ -31,7 +31,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core-public
-          image: cbioportal/oncokb:2.7.1-no-frontend
+          image: cbioportal/oncokb:2.7.3-no-frontend
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -55,8 +55,8 @@ spec:
             "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(MYSQL_DATABASE)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(MYSQL_USER)",
             "-Djdbc.password=$(MYSQL_PASSWORD)",
-            "-Ddata.version=v2.3",
-            "-Ddata.version_date=05/11/2020",
+            "-Ddata.version=v2.4",
+            "-Ddata.version_date=06/09/2020",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
             "-Dshow_sitemaps=false",
