@@ -59,7 +59,7 @@ helm search -l bitnami/mongodb
 
 To spin up the mongo database, run the following command:
 ```
-helm install --name genie-gn-mongo --version 7.3.1  --set image.repository=genome-nexus/gn-mongo,image.tag=v0.12,persistence.size=50Gi bitnami/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"='genie-genome-nexus'
+helm install --name genie-gn-mongo --version 7.3.1  --set image.repository=genomenexus/gn-mongo,image.tag=v0.12,persistence.size=50Gi bitnami/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"='genie-genome-nexus'
 ```
 
 ### Setting Up GENIE VEP
