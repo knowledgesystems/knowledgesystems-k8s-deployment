@@ -25,6 +25,10 @@ spec:
                 apt update; apt install python3 -y;
                 echo "Done installing python\n\n";
 
+                echo "Install curl";
+                apt install curl;
+                echo "Done installing\n\n";
+                
                 echo "Install pip3";
                 apt install python3-pip -y;
                 echo "Done installing pip3\n\n";
@@ -42,7 +46,7 @@ spec:
                 MONGODUMP_FILE_NAME=backup_$(date "+%m-%d-%Y-%H-%M-%S").tar.gz;
 
                 echo "Dump mongo database";
-                mongodump --uri ${MONGODB_URI} --verbose;
+                if ! mongodump --uri ${MONGODB_URI} --verbose; then echo "Dump of mongo database failed, exiting..."; curl -X POST -H "Content-type:application/json" --data '{"text":"Failed to dump genie mongo cache"}' "${MONGODB_NOTIFICATION_SLACK_URL}"; exit 1; fi;
                 echo "Done dumping database\n\n";
 
                 echo "Compressing mongo dump";
