@@ -1,0 +1,104 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "4"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    run: gnap-gn-vep
+  name: gnap-gn-vep
+  namespace: genome-nexus
+  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gnap-gn-vep
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: gnap-gn-vep
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: gnap-gn-vep
+    spec:
+      containers:
+      - env:
+        - name: SERVER_PORT
+          value: "8888"
+        image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: vep-data
+          subPath: cache
+          mountPath: /opt/vep/.vep
+        readinessProbe:
+          httpGet:
+            path: /vep/human/region/7:140453136-140453136:1/T
+            port: 8888
+          initialDelaySeconds: 10
+          timeoutSeconds: 15
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /vep/human/region/7:140453136-140453136:1/T
+            port: 8888
+          initialDelaySeconds: 30
+          timeoutSeconds: 60
+          periodSeconds: 30
+        name: gnap-gn-vep
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      # run on genome nexus machines
+      nodeSelector:
+         kops.k8s.io/instancegroup: gnap-genome-nexus
+      # download data from s3 bucket (takes ~6m).
+      # TODO: It might be better to create a volume from an existing snapshot.
+      initContainers:
+      - name: download-vep-cache
+        image: busybox:1.30.0
+        command: ['sh', '-c',
+            'cd /vep_data; if [ -d "cache" ]; then cd cache; if [ -f homo_sapiens/98_GRCh37/LRG_7/all_vars.gz.csi ]; then exit 0; fi; fi; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://genome-nexus-vep-data.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://genome-nexus-vep-data.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_98_GRCh37.tar'
+        ]
+        volumeMounts:
+        - name: vep-data
+          mountPath: /vep_data
+      volumes:
+      - name: vep-data
+        persistentVolumeClaim:
+          claimName: gnap-gn-vep-pvc
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gnap-gn-vep
+    app: gnap-gn-vep
+  name: gnap-gn-vep
+  namespace: genome-nexus
+  selfLink: /api/v1/namespaces/genome-nexus/services/gnap-gn-vep
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  - port: 443
+    name: https
+    targetPort: 8888
+  selector:
+    run: gnap-gn-vep
+  type: ClusterIP
