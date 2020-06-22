@@ -107,7 +107,7 @@ spec:
             "-Dskin.email_contact=cbioportal@googlegroups.com",
             "-Dskin.right_nav.show_data_sets=false",
             "-Dskin.right_nav.show_testimonials=false",
-            "-Dskin.login.contact_html=Please follow the \"First time user registration\" link below to request access. If you think you have received this message in error, please contact us at <a style=\"color:#FF0000\" href=\"mailto:info@aacrgenie.org\">info@aacrgenie.org</a>.",
+            "-Dskin.login.contact_html=Please follow the \"First time user registration\" link below to request access. If you think you have received this message in error, please contact us at <a style=\"color:#FF0000\" href=\"mailto:info@aacrgenie.org\">info@aacrgenie.org</a>. You will receive an email confirmation with login information within 15 minutes of registering.",
             "-Dskin.data_sets_footer=",
             "-Dskin.data_sets_header=The portal currently contains data from <NUM_CANCER_STUDIES> cancer genomics studies.  The table below lists the number of available samples per cancer study and data type.",
             "-Dskin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/genie-documentation/docs/",
