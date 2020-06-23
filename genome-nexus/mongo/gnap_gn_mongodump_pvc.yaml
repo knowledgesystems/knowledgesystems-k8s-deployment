@@ -4,8 +4,6 @@ metadata:
   name: gnap-genome-nexus-mongodump-pvc
   namespace: genome-nexus
 spec:
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 2
   accessModes:
   - ReadWriteOnce
   resources:
