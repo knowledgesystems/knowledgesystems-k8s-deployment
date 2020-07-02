@@ -1,0 +1,225 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "4"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    run: cbioportal-backend-genie-archive
+  name: cbioportal-backend-genie-archive
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-archive
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioportal-backend-genie-archive
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: cbioportal-backend-genie-archive
+    spec:
+      volumes:
+        - name: ehcache-volume
+          emptyDir: {}
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: cbioportal-genie-archive
+        image: cbioportal/cbioportal:3.4.1-web-shenandoah
+        volumeMounts:
+        - name: ehcache-volume
+          mountPath: /ehcache
+        command: [ "/usr/bin/java" ]
+        args: [
+            # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
+            # "-Xms5g",
+            # "-Xmx14g",
+            "-Xms1g",
+            "-Xmx25g",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseShenandoahGC",
+            "-XX:ShenandoahUncommitDelay=1000",
+            "-XX:ShenandoahGuaranteedGCInterval=10000",
+            #"-XX:+AlwaysPreTouch",
+            #"-XX:+UseTransparentHugePages",
+            #"-XX:+UseNUMA",
+            #"-XX:+PrintGCDetails",
+            #"-XX:+UseParallelGC",
+            #"-XX:+PrintGCDateStamps",
+            #"-XX:ParallelGCThreads=4",
+            #"-XX:+UseG1GC",
+            #"-XX:+AggressiveHeap",
+            # non aggressive garbage collection
+            #"-XX:MinHeapFreeRatio=20",
+            #"-XX:MaxHeapFreeRatio=40",
+            #"-XX:GCTimeRatio=19",
+            #"-XX:AdaptiveSizePolicyWeight=90",
+            # This issue says to use maxRAMFraction > 1
+            # https://github.com/akka/akka/issues/23499, but haven't found this
+            # to work v well
+            #"-XX:MaxRAMFraction=1",
+            "-XX:+PrintFlagsFinal",
+            "-XshowSettings:vm",
+            # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
+            # from the limits
+            #"-XX:MaxRAM=6500m",
+            # enable remote debug
+            "-Dcom.sun.management.jmxremote.rmi.port=8849",
+            "-Dcom.sun.management.jmxremote=false",
+            "-Dcom.sun.management.jmxremote.port=8849",
+            "-Dcom.sun.management.jmxremote.ssl=false",
+            "-Dcom.sun.management.jmxremote.authenticate=false",
+            "-Dcom.sun.management.jmxremote.local.only=false",
+            "-Djava.rmi.server.hostname=localhost",
+            # /enable remote debug
+            "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
+            "-Dquick_search.enabled=false",
+            "-Dskin.footer= | <a href=\"http://www.aacr.org/Research/Research/Pages/aacr-project-genie.aspx\">AACR Project GENIE</a>",
+            "-Dskin.right_nav.whats_new_blurb=",
+            "-Dskin.title=cBioPortal for GENIE",
+            "-Dskin.email_contact=info at aacrgenie dot org",
+            "-Dskin.tag_line_image=institutes/GENIE.png",
+            "-Dskin.right_logo=institutes/AACR.png",
+            "-Dskin.blurb=This portal contains genomic alteration data and clinical annotation from the <a href=\"http://www.aacr.org/Research/Research/Pages/aacr-project-genie.aspx\">AACR Project GENIE</a>. While the data is publicly available, all users must adhere to the <a href=\"https://github.com/cBioPortal/cbioportal/blob/genie-documentation/docs/News.md#aacr-project-genie-cbioportal-terms-of-use\">Terms of Use</a>.<p><b>Please cite</b> The AACR Project GENIE Consortium. AACR Project GENIE: Powering Precision Medicine Through An International Consortium, Cancer Discovery 2017.<br/><br/>The full data set is available for download from <a href=\"http://synapse.org/genie\">Synapse</a>.",
+            "-Dskin.examples_right_column_html=<ul><li><a href=\"results?cancer_study_list=genie_public&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=genie_mutations&data_priority=0&case_set_id=genie_public_all&case_ids=&patient_case_select=sample&gene_set_choice=user-defined-list&gene_list=KRAS%0D%0ANRAS%0D%0AHRAS%0D%0ABRAF&clinical_param_selection=null&tab_index=tab_visualize&Action=Submit&show_samples=false\">RAS/RAF mutations across the GENIE cohort</a></li><li><a href=\"results?cancer_study_list=genie_public&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=genie_mutations&data_priority=0&case_set_id=genie_public_all&case_ids=&patient_case_select=sample&gene_set_choice=user-defined-list&gene_list=ERBB2&clinical_param_selection=null&tab_index=tab_visualize&Action=Submit#mutations_details\">ERBB2 mutations</a></li><li><a href=\"results?cancer_study_list=genie_public&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=genie_mutations&genetic_profile_ids_PROFILE_COPY_NUMBER_ALTERATION=genie_cna&data_priority=0&case_set_id=genie_public_cnaseq&case_ids=&patient_case_select=sample&gene_set_choice=user-defined-list&gene_list=BRAF%3A+MUT+%3D+V600&clinical_param_selection=null&tab_index=tab_visualize&Action=Submit&show_samples=false#pancancer_study_summary\">BRAF V600 mutations across cancer types</a></li><li><a href=\"patient?studyId=genie_public&caseId=GENIE-MSK-P-0001296\">Lung cancer case with post-treatment T790M EGFR mutation</a></li></ul>",
+            "-Dskin.authorization_message=Welcome to the AACR Project GENIE cBioPortal.<br/><br/>If you are a new user, you will need to register and agree to the terms of use before you can use this portal. [<a href=\"https://docs.google.com/forms/d/e/1FAIpQLSdf4_G0DKgAWZI54A419BIGqXQ7kSN0t89LyMbZOvPZCLVaaA/viewform\">First time user registration</a>].",
+            "-Dapp.name=genie-archive-portal",
+            # connecting over dbcp
+            "-Ddbconnector=dbcp",
+            "-Dauthenticate=googleplus",
+            "-Dauthorization=true",
+            "-Ddb.user=$(DB_USER)",
+            "-Ddb.password=$(DB_PASSWORD)",
+            "-Ddb.host=$(DB_HOST)",
+            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Dtomcat.catalina.scope=runtime",
+            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
+            "-Dshow.civic=$(SHOW_CIVIC)",
+            "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
+            "-Dskin.email_contact=cbioportal@googlegroups.com",
+            "-Dskin.right_nav.show_data_sets=false",
+            "-Dskin.right_nav.show_testimonials=false",
+            "-Dskin.login.contact_html=Please follow the \"First time user registration\" link below to request access. If you think you have received this message in error, please contact us at <a style=\"color:#FF0000\" href=\"mailto:info@aacrgenie.org\">info@aacrgenie.org</a>.",
+            "-Dskin.data_sets_footer=",
+            "-Dskin.data_sets_header=The portal currently contains data from <NUM_CANCER_STUDIES> cancer genomics studies.  The table below lists the number of available samples per cancer study and data type.",
+            "-Dskin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/genie-documentation/docs/",
+            "-Dskin.documentation.skin.news=genie-news.md",
+            "-Dskin.query.max_tree_depth=0",
+            "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/genie_archive_portal/",
+            "-Dsession.service.origin=*",
+            "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
+            "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
+            "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
+            "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
+            "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            #"-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
+            #"-Dmicrosoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
+            "-Dbitly.url=$(BITLY_URL)",
+            "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
+            "-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
+            "-Ddb.suppress_schema_version_mismatch_errors=true",
+            "-Dsitemaps=false",
+            "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
+            "-Doncokb.token=$(ONCOKB_TOKEN)",
+            "-Dgenomenexus.url=https://www.genomenexus.org",
+            "-Dehcache.cache_enabled=false",
+            "-Dehcache.cache_type=hybrid",
+            "-Dehcache.xml_configuration=/ehcache.xml",
+            "-Dehcache.statistics_enabled=true",
+            "-Dcache.statistics_endpoint_enabled=true",
+            "-Dehcache.general_repository_cache.max_mega_bytes_heap=4096",
+            "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
+            "-Dehcache.persistence_path=/ehcache",
+            "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4098",
+            "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
+            "-Ddat.unauth_users=anonymousUser",
+            "-Ddat.method=uuid",
+            "-Ddat.uuid.max_number_per_user=1",
+            "-Ddat.ttl_seconds=2592000",
+            "-Ddat.uuid.revoke_other_tokens=true",
+            "-jar",
+            "/webapp-runner.jar",
+            # this addresses same issue as
+            # https://github.com/cBioPortal/cbioportal/issues/2328 one needs to
+            # set this if one doesn't want to forward https -> http -> https
+            # when logging in through google auth. Somehow this goes over http
+            # otherwise.
+            "--proxy-base-url",
+            "https://genie-beta.cbioportal.org",
+            "--max-threads",
+            "0",
+            "--session-store",
+            "redis",
+            "--session-store-operation-timeout",
+            "10000",
+            # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
+            "-AmaxHttpHeaderSize=16384",
+            "-AconnectionTimeout=20000",
+            "--enable-compression",
+            "--port",
+            "8888",
+            "/app.war"
+        ]
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8888
+          initialDelaySeconds: 45
+          timeoutSeconds: 1
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /login.jsp
+            port: 8888
+          initialDelaySeconds: 180
+          timeoutSeconds: 1
+          periodSeconds: 12
+          failureThreshold: 5
+        name: cbioportal-backend-genie-archive
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        - containerPort: 8849
+          protocol: TCP
+        resources:
+          requests:
+              memory: 1Gi
+          limits:
+              memory: 26Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      # run on big memory machine
+      nodeSelector:
+         kops.k8s.io/instancegroup: large-mem
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: cbioportal-backend-genie-archive
+  name: cbioportal-backend-genie-archive
+  selfLink: /api/v1/namespaces/default/services/cbioportal-backend-genie-archive
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  selector:
+    run: cbioportal-backend-genie-archive
+  type: ClusterIP
