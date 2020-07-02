@@ -153,7 +153,7 @@ spec:
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
             "--proxy-base-url",
-            "https://genie-beta.cbioportal.org",
+            "https://genie-archive.cbioportal.org",
             "--max-threads",
             "0",
             "--session-store",
