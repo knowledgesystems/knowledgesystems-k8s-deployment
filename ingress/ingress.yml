@@ -40,7 +40,7 @@ spec:
     - genie-private.cbioportal.org
     secretName: cbioportal-genie-private-cert
   - hosts:
-    - genie-beta.cbioportal.org
+    - genie-archive.cbioportal.org
     secretName: cbioportal-genie-archive-cert
   - hosts:
     - genie-public-beta.cbioportal.org
@@ -93,7 +93,7 @@ spec:
         backend:
           serviceName: cbioportal-backend-genie-private
           servicePort: http
-  - host: genie-beta.cbioportal.org
+  - host: genie-archive.cbioportal.org
     http:
       paths:
       - path: /
