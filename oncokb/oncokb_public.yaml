@@ -24,6 +24,8 @@ spec:
         - name: oncokb-public
           image: cbioportal/oncokb-public:2.5.0
           env:
+            # Database schema update takes a lot of especially when changing a table with a lot of table
+            # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
             - name: JAVA_OPTS
