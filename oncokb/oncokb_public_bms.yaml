@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-bms
-          image: cbioportal/oncokb-public:2.4.7
+          image: cbioportal/oncokb-public:2.5.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -37,14 +37,14 @@ spec:
               port: 9095
             initialDelaySeconds: 60
             timeoutSeconds: 10
-            periodSeconds: 10
+            periodSeconds: 60
           livenessProbe:
             httpGet:
               path: /
               port: 9095
             initialDelaySeconds: 90
-            timeoutSeconds: 1
-            periodSeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 60
             failureThreshold: 5
           resources:
             requests:
