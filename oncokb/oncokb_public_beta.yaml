@@ -25,7 +25,7 @@ spec:
           image: cbioportal/oncokb-public:2.5.0-alpha.0
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: prod
+              value: prod,no-liquibase
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
           envFrom:
