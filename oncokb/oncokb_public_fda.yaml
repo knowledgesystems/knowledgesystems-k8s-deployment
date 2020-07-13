@@ -33,7 +33,7 @@ spec:
                 name: oncokb-public-fda
           readinessProbe:
             httpGet:
-              path: /api/v1/info
+              path: /v2/api-docs
               port: 9095
             initialDelaySeconds: 60
             timeoutSeconds: 10
