@@ -74,18 +74,20 @@ spec:
             httpGet:
               path: /api/v1/utils/allActionableVariants
               port: 8888
-            initialDelaySeconds: 300
+            initialDelaySeconds: 15
             timeoutSeconds: 10
-            periodSeconds: 20
+            periodSeconds: 10
+            failureThreshold: 20
           livenessProbe:
             httpGet:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # We need to trigger the pod with the liveness probe, so the initial delay seconds is set way before the readiness probe
-            initialDelaySeconds: 30
+            initialDelaySeconds: 360
             # This needs to be the same as initialDelaySeconds
-            timeoutSeconds: 300
-            periodSeconds: 200
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
           name: oncokb-core
           ports:
             - containerPort: 8888
