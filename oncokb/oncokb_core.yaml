@@ -82,9 +82,8 @@ spec:
             httpGet:
               path: /api/v1/utils/allActionableVariants
               port: 8888
-            # We need to trigger the pod with the liveness probe, so the initial delay seconds is set way before the readiness probe
+            # wait for the pod is ready
             initialDelaySeconds: 360
-            # This needs to be the same as initialDelaySeconds
             timeoutSeconds: 10
             periodSeconds: 10
             failureThreshold: 5

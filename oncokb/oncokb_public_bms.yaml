@@ -33,11 +33,11 @@ spec:
                 name: oncokb-public-bms
           readinessProbe:
             httpGet:
-              path: /api/v1/info
+              path: /v2/api-docs
               port: 9095
             initialDelaySeconds: 60
             timeoutSeconds: 10
-            periodSeconds: 60
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /
