@@ -35,7 +35,7 @@ spec:
                 name: oncokb-public
           readinessProbe:
             httpGet:
-              path: /api/v1/info
+              path: /v2/api-docs
               port: 9095
             initialDelaySeconds: 60
             timeoutSeconds: 10
@@ -45,9 +45,9 @@ spec:
               path: /
               port: 9095
             initialDelaySeconds: 90
-            timeoutSeconds: 1
-            periodSeconds: 10
-            failureThreshold: 5
+            timeoutSeconds: 15
+            periodSeconds: 15
+            failureThreshold: 10
           resources:
             requests:
               memory: 1Gi

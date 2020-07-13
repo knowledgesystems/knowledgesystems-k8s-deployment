@@ -81,9 +81,9 @@ spec:
             httpGet:
               path: /api/v1/utils/allActionableVariants
               port: 8888
-            initialDelaySeconds: 30
-            timeoutSeconds: 300
-            periodSeconds: 200
+            initialDelaySeconds: 360
+            timeoutSeconds: 15
+            periodSeconds: 30
           name: oncokb-core
           ports:
             - containerPort: 8888
@@ -93,6 +93,7 @@ spec:
               cpu: 500m
               memory: 1Gi
             limits:
+              cpu: 4Gi
               memory: 2Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
