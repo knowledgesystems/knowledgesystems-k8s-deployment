@@ -83,8 +83,9 @@ spec:
               port: 8888
             # We need to trigger the pod with the liveness probe, so the initial delay seconds is set way before the readiness probe
             initialDelaySeconds: 30
-            timeoutSeconds: 15
-            periodSeconds: 30
+            # This needs to be the same as initialDelaySeconds
+            timeoutSeconds: 300
+            periodSeconds: 200
           name: oncokb-core
           ports:
             - containerPort: 8888
