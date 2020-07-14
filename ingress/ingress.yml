@@ -57,6 +57,9 @@ spec:
   - hosts:
     - webinar.cbioportal.org
     secretName: cbioportal-webinar-cert
+  - hosts:
+    - rho.cbioportal.org
+    secretName: cbioportal-rho-cert
   rules:
   - host: www.cbioportal.org
     http:
@@ -141,6 +144,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-session-service-beta
+          servicePort: http
+  - host: rho.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-redis-cache
           servicePort: http
 ---
 apiVersion: extensions/v1beta1
