@@ -32,6 +32,13 @@ cat ./core/src/main/resources/spring/database/oncokb.sql | \
 - The caching on boot takes quite a while which is why we need the long livenessProbe/readinessProbe.
 
 ## OncoKB Public Redis
+
+### Install
 ```bash
 helm install --namespace=oncokb --name oncokb-public-redis stable/redis --set password=oncokb-public-redis-password --set cluster.enabled=true --set cluster.slaveCount=2 --set master.securityContext.enabled=false
+```
+
+### Delete
+```
+helm del --purge oncokb-public-redis -n
 ```
