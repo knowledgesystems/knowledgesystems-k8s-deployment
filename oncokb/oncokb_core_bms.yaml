@@ -11,14 +11,14 @@ metadata:
   namespace: oncokb
   selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-core-bms
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: oncokb-core-bms
   strategy:
     rollingUpdate:
-      maxSurge: 3
-      maxUnavailable: 1
+      maxSurge: 2
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
