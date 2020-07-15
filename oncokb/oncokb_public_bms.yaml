@@ -4,15 +4,15 @@ metadata:
   name: oncokb-public-bms
   namespace: oncokb
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: oncokb-public-bms
       version: 'v1'
   strategy:
     rollingUpdate:
-      maxSurge: 2
-      maxUnavailable: 0
+      maxSurge: 3
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
