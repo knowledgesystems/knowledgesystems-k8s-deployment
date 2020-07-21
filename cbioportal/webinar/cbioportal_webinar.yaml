@@ -98,6 +98,7 @@ spec:
             "-Ddb.connection_string=jdbc:mysql://webinardb.cq26ederqvxp.us-east-1.rds.amazonaws.com:3306/",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
+            "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
             "-Dskin.email_contact=cbioportal@googlegroups.com",

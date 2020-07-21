@@ -32,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public
-        image: cbioportal/cbioportal:3.4.3-web-shenandoah
+        image: cbioportal/cbioportal:3.4.4-web-shenandoah
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
@@ -102,6 +102,7 @@ spec:
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
+            "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
             "-Dskin.email_contact=cbioportal@googlegroups.com",
