@@ -35,9 +35,10 @@ spec:
             httpGet:
               path: /v2/api-docs
               port: 9095
-            initialDelaySeconds: 60
-            timeoutSeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /
