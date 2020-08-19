@@ -1,84 +1,65 @@
-keycloak:
-  # lets use docker image with customized openjdk
-  image:
-    repository: PLACEHOLDER
-    tag: PLACEHOLDER
-    pullPolicy: IfNotPresent
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      certmanager.k8s.io/cluster-issuer: letsencrypt-prod
-    tls:
-      - hosts:
-        - keycloak.cbioportal.org
-        - genie-private-keycloak.cbioportal.org
-        - htan-keycloak.cbioportal.org
-        secretName: cbioportal-keycloak-cert
-    hosts:
-      - keycloak.cbioportal.org
-      - genie-private-keycloak.cbioportal.org
-      - htan-keycloak.cbioportal.org
-  extraInitContainers: |
-    - name: gene-private-cbioportal-theme-provider
-      image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
-      imagePullPolicy: IfNotPresent
-      command: ["/bin/sh", "-c"]
-      args:
-        - cp -R /themes/genie-private-cbioportal/* /genie-private-cbioportal-theme
-      volumeMounts:
-        - name: genie-private-cbioportal-theme
-          mountPath: /genie-private-cbioportal-theme
-    - name: htan-cbioportal-theme-provider
-      image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
-      imagePullPolicy: IfNotPresent
-      command: ["/bin/sh", "-c"]
-      args:
-        - cp -R /themes/htan-cbioportal/* /htan-cbioportal-theme
-      volumeMounts:
-        - name: htan-cbioportal-theme
-          mountPath: /htan-cbioportal-theme
-  extraVolumes: |
-    - name: aws-rds-tls-jks
-      secret:
-        secretName: aws-rds-tls-jks
-    - name: genie-private-cbioportal-theme
-      emptyDir: {}
-    - name: htan-cbioportal-theme
-      emptyDir: {}
-  extraVolumeMounts: |
-    - name: aws-rds-tls-jks
-      mountPath: /opt/aws-rds-tls-jks
-      readOnly: true
-    - name: genie-private-cbioportal-theme
-      mountPath: /opt/jboss/keycloak/themes/genie-private-cbioportal
-    - name: htan-cbioportal-theme
-      mountPath: /opt/jboss/keycloak/themes/htan-cbioportal
-  extraEnv: |
-    # setup ssl and use truststore containing AWS-RDS certs
-    - name: JDBC_PARAMS
-      value: useSSL=true&requireSSL=true&trustCertificateKeyStoreUrl=file:/opt/aws-rds-tls-jks/aws-rds-tls.jks&trustCertificateKeyStorePassword=changeit
-    # Tell keycloak we are already behind https
-    - name: PROXY_ADDRESS_FORWARDING
-      value: "true"
-  persistence:
-
-    # Disable deployment of the PostgreSQL chart
-    deployPostgres: false
-
-    # The database vendor. Can be either "postgres", "mysql", "mariadb", or "h2"
-    dbVendor: mysql
-
-    ## The following values only apply if "deployPostgres" is set to "false"
-
-    # Optionally specify an existing secret
-    #existingSecret: "my-database-password-secret"
-    #existingSecretKey: "password-key in-my-database-secret"
-
-    dbName: PLACEHOLDER
-    dbHost: PLACEHOLDER
-    dbPort: 3306
-    dbUser: PLACEHOLDER
-
-    # Only used if no existing secret is specified. In this case a new secret is created
-    dbPassword: PLACEHOLDER
+postgresql:
+  # Disable PostgreSQL dependency
+  enabled: false
+extraInitContainers: |
+  - name: gene-private-cbioportal-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/genie-private-cbioportal/* /genie-private-cbioportal-theme
+    volumeMounts:
+      - name: genie-private-cbioportal-theme
+        mountPath: /genie-private-cbioportal-theme
+  - name: htan-cbioportal-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/htan-cbioportal/* /htan-cbioportal-theme
+    volumeMounts:
+      - name: htan-cbioportal-theme
+        mountPath: /htan-cbioportal-theme
+extraVolumes: |
+  - name: aws-rds-tls-jks
+    secret:
+      secretName: aws-rds-tls-jks
+  - name: genie-private-cbioportal-theme
+    emptyDir: {}
+  - name: htan-cbioportal-theme
+    emptyDir: {}
+extraVolumeMounts: |
+  - name: aws-rds-tls-jks
+    mountPath: /opt/aws-rds-tls-jks
+    readOnly: true
+  - name: genie-private-cbioportal-theme
+    mountPath: /opt/jboss/keycloak/themes/genie-private-cbioportal
+  - name: htan-cbioportal-theme
+    mountPath: /opt/jboss/keycloak/themes/htan-cbioportal
+extraEnv: |
+  # setup ssl and use truststore containing AWS-RDS certs
+  - name: JDBC_PARAMS
+    value: useSSL=true&requireSSL=true&trustCertificateKeyStoreUrl=file:/opt/aws-rds-tls-jks/aws-rds-tls.jks&trustCertificateKeyStorePassword=changeit
+  # Tell keycloak we are already behind https
+  - name: PROXY_ADDRESS_FORWARDING
+    value: "true"
+  - name: DB_VENDOR
+    value: mysql 
+  - name: DB_ADDR
+    value: {{ .Values.DB_ADDR }}
+  - name: DB_PORT
+    value: "3306"
+  - name: DB_DATABASE
+    value: {{ .Values.DB_DATABASE }}
+  - name: DB_USER
+    value: {{ .Values.DB_USER }}
+  - name: DB_PASSWORD
+    value: {{ .Values.DB_PASSWORD }}
+  - name: KEYCLOAK_USER
+    value: {{ .Values.KEYCLOAK_USER }}
+  - name: KEYCLOAK_PASSWORD
+    value: {{ .Values.KEYCLOAK_PASSWORD }}
+  - name: KEYCLOAK_LOGLEVEL
+    value: ALL
+  - name: WILDFLY_LOGLEVEL
+    value: ALL
