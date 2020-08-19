@@ -40,6 +40,9 @@ spec:
     - genie-private.cbioportal.org
     secretName: cbioportal-genie-private-cert
   - hosts:
+    - keycloak.cbioportal.org
+    secretName: keycloak-cert
+  - hosts:
     - genie-archive.cbioportal.org
     secretName: cbioportal-genie-archive-cert
   - hosts:
@@ -95,6 +98,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-backend-genie-private
+          servicePort: http
+  - host: keycloak.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: keycloak-http
           servicePort: http
   - host: genie-archive.cbioportal.org
     http:
