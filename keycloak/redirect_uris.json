@@ -2,5 +2,5 @@
 "https://keycloak.cbioportal.org/auth/realms/genie-private/broker/synapse-oidc/endpoint",
 "https://keycloak.cbioportal.org/auth/realms/htan/broker/synapse-oidc/endpoint",
 "https://keycloak.cbioportal.org/auth/realms/master/broker/oidc/endpoint",
-"https://dev.keycloak.cbioportal.org/auth/realms/master/broker/oidc/endpoint"
+"https://dev-keycloak.cbioportal.org/auth/realms/master/broker/oidc/endpoint"
 ]
