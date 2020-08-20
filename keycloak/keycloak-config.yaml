@@ -3,7 +3,7 @@ postgresql:
   enabled: false
 extraInitContainers: |
   - name: gene-private-cbioportal-theme-provider
-    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.2
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
@@ -12,7 +12,7 @@ extraInitContainers: |
       - name: genie-private-cbioportal-theme
         mountPath: /genie-private-cbioportal-theme
   - name: htan-cbioportal-theme-provider
-    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.1
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.2
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
