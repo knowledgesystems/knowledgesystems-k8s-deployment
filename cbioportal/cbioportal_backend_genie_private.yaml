@@ -26,16 +26,38 @@ spec:
         run: cbioportal-backend-genie-private
     spec:
       volumes:
-        - name: ehcache-volume
-          emptyDir: {}
+      - name: ehcache-volume
+        emptyDir: {}
+      - name: cbioportal-genie-private-configmap-volume
+        configMap:
+          name: cbioportal-genie-private-keycloak-supp
+          items:
+          - key: portal.properties
+            path: portal.properties
+          - key: genie-private-cbioportal-saml-idp-metadata.xml
+            path: genie-private-cbioportal-saml-idp-metadata.xml
+          - key: cbioportal-saml-keystore.jks
+            path: cbioportal-saml-keystore.jks
       containers:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-private
+        env:
+        - name: PORTAL_HOME
+          value: /cbioportal/
         image: cbioportal/cbioportal:demo-genie-web-shenandoah
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
+        - name: cbioportal-genie-private-configmap-volume
+          mountPath: /cbioportal/portal.properties
+          subPath: portal.properties
+        - name: cbioportal-genie-private-configmap-volume
+          mountPath: /cbioportal/genie-private-cbioportal-saml-idp-metadata.xml
+          subPath: genie-private-cbioportal-saml-idp-metadata.xml
+        - name: cbioportal-genie-private-configmap-volume
+          mountPath: /cbioportal/cbioportal-saml-keystore.jks
+          subPath: cbioportal-saml-keystore.jks
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -85,7 +107,6 @@ spec:
             "-Dskin.footer= | <a href=\"http://www.aacr.org/Research/Research/Pages/aacr-project-genie.aspx\">AACR Project GENIE</a>",
             "-Dskin.right_nav.whats_new_blurb=",
             "-Dskin.title=cBioPortal for GENIE",
-            "-Dskin.email_contact=info at aacrgenie dot org",
             "-Dskin.tag_line_image=institutes/GENIE.png",
             "-Dskin.right_logo=institutes/AACR.png",
             "-Dskin.blurb=This portal contains genomic alteration data and clinical annotation from the <a href=\"http://www.aacr.org/Research/Research/Pages/aacr-project-genie.aspx\">AACR Project GENIE</a>. While the data is publicly available, all users must adhere to the <a href=\"https://github.com/cBioPortal/cbioportal/blob/genie-documentation/docs/News.md#aacr-project-genie-cbioportal-terms-of-use\">Terms of Use</a>.<p><b>Please cite</b> The AACR Project GENIE Consortium. AACR Project GENIE: Powering Precision Medicine Through An International Consortium, Cancer Discovery 2017.<br/><br/>The full data set is available for download from <a href=\"http://synapse.org/genie\">Synapse</a>.",
@@ -94,8 +115,8 @@ spec:
             "-Dapp.name=genie-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=googleplus",
-            "-Dauthorization=true",
+            "-Dauthenticate=saml",
+            "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
@@ -105,10 +126,10 @@ spec:
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
-            "-Dskin.email_contact=cbioportal@googlegroups.com",
+            "-Dskin.email_contact=genie-private@cbioportal.org",
             "-Dskin.right_nav.show_data_sets=false",
             "-Dskin.right_nav.show_testimonials=false",
-            "-Dskin.login.contact_html=Please follow the \"First time user registration\" link below to request access. If you think you have received this message in error, please contact us at <a style=\"color:#FF0000\" href=\"mailto:info@aacrgenie.org\">info@aacrgenie.org</a>.",
+            "-Dskin.login.contact_html=Please follow the \"First time user registration\" link below to request access. If you think you have received this message in error, please contact us at <a style=\"color:#FF0000\" href=\"mailto:genie-private-access@cbioportal.org\">genie-private-access@cbioportal.org</a>.",
             "-Dskin.data_sets_footer=",
             "-Dskin.data_sets_header=The portal currently contains data from <NUM_CANCER_STUDIES> cancer genomics studies.  The table below lists the number of available samples per cancer study and data type.",
             "-Dskin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/genie-documentation/docs/",
@@ -119,8 +140,8 @@ spec:
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
             "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
-            "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
-            "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            #"-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
+            #"-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             #"-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
             #"-Dmicrosoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
             "-Dbitly.url=$(BITLY_URL)",
@@ -180,7 +201,7 @@ spec:
           failureThreshold: 3
         livenessProbe:
           httpGet:
-            path: /login.jsp
+            path: /api/swagger-resources/configuration/ui
             port: 8888
           initialDelaySeconds: 180
           timeoutSeconds: 1
