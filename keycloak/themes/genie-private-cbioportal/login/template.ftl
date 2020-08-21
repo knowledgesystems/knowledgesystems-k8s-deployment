@@ -33,15 +33,18 @@
 
 <body class="${properties.kcBodyClass!}">
   <div style="margin-bottom: 10px; padding: 20px 0px 0px 0px; height: 90px; text-align: center;">
-  <img src="${url.resourcesPath}/img/cbioportal_logo.png" alt="cBioPortal Logo" height="90%"/>
-  <!--<img src="${url.resourcesPath}/img/aacr_logo.png" alt="AACR Logo" height="100%"/>-->
+    <img src="${url.resourcesPath}/img/cbioportal_logo.png" alt="cBioPortal Logo" height="90%"/>
+    <!--<img src="${url.resourcesPath}/img/aacr_logo.png" alt="AACR Logo" height="100%"/>-->
   </div>
   <div class="${properties.kcLoginClass!}">
     <div id="kc-header" class="${properties.kcHeaderClass!}">
       <div id="kc-header-wrapper" class="${properties.kcHeaderWrapperClass!}">${kcSanitize(msg("loginTitleHtml",(realm.displayNameHtml!'')))?no_esc}</div>
     </div>
     <div style="margin-bottom: 10px; font-size: 18px; font-family: 'Arial'; color: black; text-align: center;">
-    <a href="https://www.synapse.org/#!Synapse:syn7222066/wiki/410922">[First time user registration]</a>
+      <a href="https://www.synapse.org/#!Synapse:syn7222066/wiki/410922">[First time user registration]</a>
+    </div>
+    <div style="font-size: 16px; font-family: 'Arial'; color: darkslategray; text-align: center;">
+      If you have difficulties logging in, please visit <a href="https://docs.google.com/document/d/123HPojuFS4YK39qi7M5n49pprZwTP79E03vf5fu0Kew">this page</a>.
     </div>
     <div class="${properties.kcFormCardClass!} <#if displayWide>${properties.kcFormCardAccountClass!}</#if>">
       <header class="${properties.kcFormHeaderClass!}">
