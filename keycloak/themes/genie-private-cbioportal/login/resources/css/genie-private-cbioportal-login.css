@@ -24,14 +24,30 @@ div#kc-header::after {
     font-family: 'Arial';
 }
 
-/* between header::after and link-out to sage */
+/* hide the keycloak login form */
+div#kc-form-wrapper {
+    padding-right: 0px;
+    margin-right: 0px;
+    border-right: none;
+    visibility: hidden;
+    width: 25%;
+}
+
+/* hide the left border attached to the social options */
+div#kc-social-providers {
+    padding-left: 0px;
+    border-left: none;
+    margin: auto;
+}
+
+/* between header::after and link-out to synapse */
 @media (min-width: 768px) {
     .login-pf-page .login-pf-page-header {
         margin-bottom: 5px;
     }
 }
 
-/* margin between Log In form and link-out to sage */
+/* margin between Log In form and link-out to synapse */
 h1 {
     margin-top: 20px;
 }
@@ -69,28 +85,22 @@ a.zocial.oidc:before {
     display: none;
 }
 
-/* add sage images to various button states */
+/* add synapse images to various button states */
 a.zocial.oidc {
-    background: url("../img/sage-bionetworks-logo.svg") no-repeat center top;
-    height: 46px;
+    background: url("../img/synapse_logo_block.png") no-repeat center top;
+    height: 55px;
     width: auto;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #d1d1d1;
+    border: none;
 }
 a.zocial.oidc:hover {
-    background: url("../img/sage-bionetworks-logo.svg") no-repeat center top !important;
-    height: 46px;
+    background: url("../img/synapse_logo_block.png") no-repeat center top !important;
+    height: 55px;
     width: auto;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #d1d1d1;
+    border: none;
 }
 a.zocial.oidc:active {
-    background: url("../img/sage-bionetworks-logo.svg") no-repeat center top !important;
-    height: 46px;
+    background: url("../img/synapse_logo_block.png") no-repeat center top !important;
+    height: 55px;
     width: auto;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #d1d1d1;
+    border: none;
 }
