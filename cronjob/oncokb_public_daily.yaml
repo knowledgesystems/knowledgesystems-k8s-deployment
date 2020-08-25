@@ -32,6 +32,10 @@ spec:
               echo 'This call needs to be placed at the last since it takes a long time to generate new stats';
               curl 'http://oncokb-public:9095/api/cronjob/update-token-stats'  -H 'Authorization: Bearer $(TOKEN)';
               echo 'Done calling cronjob/update-token-stats\n\n';
+              
+              echo 'API call to check the trial accounts';
+              curl 'http://oncokb-public:9095/api/cronjob/check-trial-accounts'  -H 'Authorization: Bearer $(TOKEN)';
+              echo 'Done calling cronjob/check-trial-accounts\n\n';
 
               "
             ]
