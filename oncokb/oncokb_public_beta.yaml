@@ -4,14 +4,14 @@ metadata:
   name: oncokb-public-beta
   namespace: oncokb
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: oncokb-public-beta
       version: 'v1'
   strategy:
     rollingUpdate:
-      maxSurge: 3
+      maxSurge: 2
       maxUnavailable: 0
     type: RollingUpdate
   template:
@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: cbioportal/oncokb-public:2.5.4-alpha.0
+          image: cbioportal/oncokb-public:2.5.4-alpha.1
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
