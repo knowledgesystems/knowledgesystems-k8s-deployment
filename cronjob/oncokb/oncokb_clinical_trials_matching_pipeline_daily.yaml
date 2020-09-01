@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: clinical-trials-daily-matching-cronjob
+  namespace: oncokb
+spec:
+  schedule: "0 13 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - envFrom:
+            - configMapRef:
+                name: clinical-trials-matching-config
+            name: clinical-trials-daily-matching
+            image: oncokb/clinical-trials-matching-pipeline:0.0.1
+            args:
+            - /bin/bash
+            - -c
+            - date; python3 /code/scripts/main.py
+          restartPolicy: Never
