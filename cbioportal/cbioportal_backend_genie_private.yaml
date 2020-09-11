@@ -45,7 +45,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.4.10-web-shenandoah
+        image: cbioportal/cbioportal:3.4.11-web-shenandoah
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
