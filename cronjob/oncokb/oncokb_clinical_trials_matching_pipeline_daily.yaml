@@ -13,6 +13,8 @@ spec:
           - envFrom:
             - configMapRef:
                 name: clinical-trials-matching-config
+            - configMapRef:
+                name: aws-cli-credentials
             name: clinical-trials-daily-matching
             image: oncokb/clinical-trials-matching-pipeline:0.0.1
             args:
