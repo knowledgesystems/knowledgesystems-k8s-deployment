@@ -58,7 +58,6 @@ spec:
             "-Ddata.version=v1.24_patch_1",
             "-Ddata.version_date=12/16/2019",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
-            "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
             "-Dshow_sitemaps=false",
             "-jar",
             "/webapp-runner.jar",
