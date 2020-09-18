@@ -58,7 +58,6 @@ spec:
             "-Ddata.version=v2.8",
             "-Ddata.version_date=09/17/2020",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
-            "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
             "-Dshow_sitemaps=false",
             "-Dis_public_instance=true",
             "-jar",

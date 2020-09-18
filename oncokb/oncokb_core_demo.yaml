@@ -58,7 +58,6 @@ spec:
             "-Ddata.version=v2.8",
             "-Ddata.version_date=09/17/2020",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
-            "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
             "-Dshow_sitemaps=false",
             "-Dswagger_description=This website is for demonstration purpose. Only information of BRAF, TP53 and ROS1 are available.",
             "-jar",
