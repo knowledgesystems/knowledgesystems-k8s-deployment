@@ -31,7 +31,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core
-          image: oncokb/oncokb:2.8.2
+            - configMapRef:
+                name: aws-cli-credentials
+          image: oncokb/oncokb:2.8.3
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -58,6 +60,9 @@ spec:
             "-Ddata.version=v2.8",
             "-Ddata.version_date=09/17/2020",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
+            "-Daws.s3.accessKey=${ACCESS_KEY_ID}",
+            "-Daws.s3.secretKey=${SECRET_ACCESS_KEY}",
+            "-Daws.s3.region=${AWS_REGION}",
             "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
             "-Dshow_sitemaps=false",
             "-jar",
