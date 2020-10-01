@@ -32,7 +32,7 @@ spec:
           value: "8888"
         - name: MONGODB_URI
           value: mongodb://genie-gn-mongo-mongodb:27017/annotator?connectTimeoutMS=120000
-        image: genomenexus/gn-spring-boot:v1.1.14
+        image: genomenexus/gn-spring-boot:v1.1.16
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
