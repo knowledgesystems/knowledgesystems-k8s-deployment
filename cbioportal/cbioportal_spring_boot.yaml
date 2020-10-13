@@ -32,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:3.4.15-web-shenandoah
+        image: cbioportal/cbioportal:3.4.16-web-shenandoah
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
