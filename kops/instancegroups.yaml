@@ -1,16 +1,37 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: "2020-03-19T15:46:42Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: genie-genome-nexus
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: t2.xlarge
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: genie-genome-nexus
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
   creationTimestamp: "2019-11-19T14:49:29Z"
-  generation: 1
+  generation: 10
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: genome-nexus
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2019-09-26
   machineType: t3.xlarge
-  maxSize: 2
-  minSize: 2
+  maxSize: 3
+  minSize: 3
   nodeLabels:
     kops.k8s.io/instancegroup: genome-nexus
   role: Node
@@ -23,15 +44,80 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: "2020-07-16T18:46:49Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: genome-nexus-angelica-test
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: t2.medium
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: genome-nexus-angelica-test
+  role: Node
+  subnets:
+  - us-east-1a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2020-10-15T17:21:43Z"
+  generation: 2
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: genome-nexus-beta
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-07-20
+  machineType: t3.xlarge
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: genome-nexus-beta
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2020-06-15T20:00:57Z"
+  generation: 3
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: gnap-genome-nexus
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: t3.xlarge
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: gnap-genome-nexus
+  role: Node
+  subnets:
+  - us-east-1c
+  - us-east-1a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
   creationTimestamp: "2018-10-24T21:18:37Z"
+  generation: 20
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: large-mem
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
   machineType: r5.xlarge
-  maxSize: 3
-  minSize: 3
+  maxSize: 6
+  minSize: 6
   nodeLabels:
     kops.k8s.io/instancegroup: large-mem
   role: Node
@@ -45,15 +131,15 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2018-08-06T18:29:31Z"
-  generation: 1
+  generation: 2
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: master-us-east-1a
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
   machineType: t2.medium
-  maxSize: 2
-  minSize: 2
+  maxSize: 1
+  minSize: 1
   nodeLabels:
     kops.k8s.io/instancegroup: master-us-east-1a
   role: Master
@@ -66,6 +152,7 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2018-08-06T18:29:31Z"
+  generation: 2
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: nodes
@@ -76,6 +163,48 @@ spec:
   minSize: 4
   nodeLabels:
     kops.k8s.io/instancegroup: nodes
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2020-10-15T13:15:43Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: redis-cache
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-07-20
+  machineType: r5.xlarge
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: redis-cache
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2020-07-02T20:34:53Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: redis-persistence-cache
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: r5.xlarge
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: redis-persistence-cache
   role: Node
   subnets:
   - us-east-1a
