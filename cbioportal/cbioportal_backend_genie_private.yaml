@@ -26,8 +26,6 @@ spec:
         run: cbioportal-backend-genie-private
     spec:
       volumes:
-      - name: ehcache-volume
-        emptyDir: {}
       - name: cbioportal-genie-private-configmap-volume
         configMap:
           name: cbioportal-genie-private-keycloak-supp
@@ -45,10 +43,8 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.4.17-web-shenandoah
+        image: averyniceday/cbioportal:cbioportal-redis-persistence
         volumeMounts:
-        - name: ehcache-volume
-          mountPath: /ehcache
         - name: cbioportal-genie-private-configmap-volume
           mountPath: /cbioportal/portal.properties
           subPath: portal.properties
@@ -154,17 +150,15 @@ spec:
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://www.genomenexus.org",
-            "-Dehcache.cache_enabled=false",
-            "-Dehcache.cache_type=hybrid",
-            "-Dehcache.xml_configuration=/ehcache.xml",
-            "-Dehcache.statistics_enabled=true",
             "-Dcache.statistics_endpoint_enabled=true",
-            "-Dehcache.general_repository_cache.max_mega_bytes_heap=4096",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
-            "-Dehcache.persistence_path=/ehcache",
-            "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4098",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
             "-Ddat.unauth_users=anonymousUser",
+            "-Denable_persistent_cache=true",
+            #"-Dcache.statistics_endpoint_enabled=true",
+            "-Dpersistence.cache_type=redis",
+            "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
+            "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
+            "-Dredis.database=4",
+            "-Dredis.password=$(REDIS_PASSWORD)",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
