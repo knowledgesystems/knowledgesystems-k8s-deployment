@@ -37,7 +37,7 @@ spec:
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:v1.1.16
+        image: genomenexus/gn-spring-boot:v1.1.17
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -59,7 +59,7 @@ spec:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
             port: 8888
-          initialDelaySeconds: 30
+          initialDelaySeconds: 120
           timeoutSeconds: 5
           periodSeconds: 10
         # TODO: create a better liveness probe (this is just readiness with
@@ -68,7 +68,7 @@ spec:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
             port: 8888
-          initialDelaySeconds: 60
+          initialDelaySeconds: 120
           timeoutSeconds: 20
           periodSeconds: 30
         name: gn-spring-boot
