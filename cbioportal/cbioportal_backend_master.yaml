@@ -79,7 +79,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://frontend.cbioportal.org",
+            #"-Dfrontend.url=https://frontend.cbioportal.org",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
