@@ -16,7 +16,7 @@ spec:
             - configMapRef:
                 name: aws-cli-credentials
             name: clinical-trials-daily-matching
-            image: oncokb/clinical-trials-matching-pipeline:0.1.0
+            image: oncokb/clinical-trials-matching-pipeline:0.1.1
             args:
             - /bin/bash
             - -c
