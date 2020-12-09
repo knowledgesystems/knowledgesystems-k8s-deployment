@@ -37,6 +37,10 @@ spec:
               curl 'http://oncokb-public:9095/api/cronjob/check-trial-accounts'  -H 'Authorization: Bearer $(TOKEN)';
               echo 'Done calling cronjob/check-trial-accounts\n\n';
 
+              echo 'API call to check if oncokb tokens have been exposed';
+              curl 'http://oncokb-public:9095/api/cronjob/check-exposed-tokens'  -H 'Authorization: Bearer $(TOKEN)';
+              echo 'Done calling cronjob/check-exposed-tokens\n\n';
+
               "
             ]
 
