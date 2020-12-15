@@ -16,7 +16,7 @@ spec:
             - configMapRef:
                 name: oncokb-usage-analysis-config
             name: oncokb-daily-usage-analysis
-            image: oncokb/oncokb-usage-analysis:0.0.2
+            image: oncokb/oncokb-usage-analysis:0.0.3
             command: ["/bin/bash", "-c"]
             args:
               - service mysql start;
