@@ -79,7 +79,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://5fd7dad2764480000774347b--cbioportalfrontend.netlify.app",
+            "-Dfrontend.url=https://frontend.cbioportal.org",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=false",
             "-Dskin.footer= | <a href=\"http://www.aacr.org/Research/Research/Pages/aacr-project-genie.aspx\">AACR Project GENIE</a>",
