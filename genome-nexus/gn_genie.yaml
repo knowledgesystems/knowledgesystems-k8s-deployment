@@ -32,7 +32,7 @@ spec:
           value: "8888"
         - name: MONGODB_URI
           value: mongodb://genie-gn-mongo-mongodb:27017/annotator?connectTimeoutMS=120000
-        image: genomenexus/gn-spring-boot:v1.1.16
+        image: genomenexus/gn-spring-boot:v1.1.21-ignore-myvariantinfo-clinvar
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -42,6 +42,12 @@ spec:
             "-Dgn_vep.region.url=http://genie-gn-vep/vep/human/region/VARIANT",
             "-Dvep.max_page_size=5000",
             "-Dgn_vep.timeout.seconds=300",
+            "-Dmyvariantinfo.url=https://myvariant.info/v1/variant/VARIANT",
+            "-Dmyvariantinfo.max_page_size=10",
+            "-Dgenexrefs.url=http://grch37.rest.ensembl.org/xrefs/id/ACCESSION?content-type=application/json",
+            "-DmutationAssessor.url=http://mutationassessor.org/r3/?cm=var&var=VARIANT&frm=json&fts=input,rgaa,rgvt,msa,pdb,F_impact,F_score,vc_score,vs_score,info,var,gene,uprot,rsprot,gaps,msa_height,chr,rs_pos,rs_res,up_pos,up_res,cnt_cosmic,cnt_snps",
+            "-Dpdb.header_service_url=http://files.rcsb.org/header/PDB_ID.pdb",
+            "-Doncokb.url=https://www.oncokb.org/api/v1/annotate/mutations/byProteinChange?PROTEINCHANGE",
             "-jar",
             "/app.war"
         ]
