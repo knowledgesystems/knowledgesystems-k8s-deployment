@@ -216,7 +216,7 @@ spec:
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-         kops.k8s.io/instancegroup: large-mem
+         kops.k8s.io/instancegroup: genie-portals
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
