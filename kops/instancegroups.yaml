@@ -1,6 +1,27 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: "2020-10-30T18:22:17Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: cbioportal-performance-testing
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-07-20
+  machineType: r5.xlarge
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: cbioportal-performance-testing
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
   creationTimestamp: "2020-03-19T15:46:42Z"
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
@@ -22,16 +43,37 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: "2020-12-09T21:11:58Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: genie-portals
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-11-19
+  machineType: r5.xlarge
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: genie-portals
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
   creationTimestamp: "2019-11-19T14:49:29Z"
-  generation: 10
+  generation: 13
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: genome-nexus
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2019-09-26
   machineType: t3.xlarge
-  maxSize: 3
-  minSize: 3
+  maxSize: 5
+  minSize: 5
   nodeLabels:
     kops.k8s.io/instancegroup: genome-nexus
   role: Node
@@ -87,15 +129,15 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2018-10-24T21:18:37Z"
-  generation: 20
+  generation: 25
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: large-mem
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
   machineType: r5.xlarge
-  maxSize: 6
-  minSize: 6
+  maxSize: 5
+  minSize: 4
   nodeLabels:
     kops.k8s.io/instancegroup: large-mem
   role: Node
