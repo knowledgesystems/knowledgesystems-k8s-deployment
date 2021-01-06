@@ -161,6 +161,8 @@ spec:
             "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
             "-Dredis.database=4",
             "-Dredis.password=$(REDIS_PASSWORD)",
+            # compress on client side
+            "-Denable_request_body_gzip_compression=true",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
