@@ -134,6 +134,8 @@ spec:
             # "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=1025",
             # "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=65",
             # /ehcache settings
+            # compress on client side
+            "-Denable_request_body_gzip_compression=true",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
