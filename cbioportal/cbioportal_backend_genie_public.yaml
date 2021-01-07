@@ -25,17 +25,11 @@ spec:
       labels:
         run: cbioportal-backend-genie-public
     spec:
-      volumes:
-        - name: ehcache-volume
-          emptyDir: {}
       containers:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public
         image: cbioportal/cbioportal:3.5.4-web-shenandoah
-        volumeMounts:
-        - name: ehcache-volume
-          mountPath: /ehcache
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -133,21 +127,18 @@ spec:
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://www.genomenexus.org",
-            "-Dehcache.cache_enabled=false",
-            "-Dehcache.cache_type=hybrid",
-            "-Dehcache.xml_configuration=/ehcache.xml",
-            "-Dehcache.statistics_enabled=true",
-            "-Dcache.statistics_endpoint_enabled=true",
-            "-Dehcache.general_repository_cache.max_mega_bytes_heap=4096",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=30",
-            "-Dehcache.persistence_path=/ehcache",
-            "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=4098",
-            "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=32",
             "-Ddat.unauth_users=anonymousUser",
             "-Ddat.method=uuid",
             "-Ddat.uuid.max_number_per_user=1",
             "-Ddat.ttl_seconds=2592000",
             "-Ddat.uuid.revoke_other_tokens=true",
+            # cache settings (currently redis)
+            "-Dcache.statistics_endpoint_enabled=false",
+            "-Dpersistence.cache_type=redis",
+            "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
+            "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
+            "-Dredis.database=4",
+            "-Dredis.password=$(REDIS_PASSWORD)",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
             "-jar",

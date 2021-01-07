@@ -152,15 +152,16 @@ spec:
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://www.genomenexus.org",
-            "-Dcache.statistics_endpoint_enabled=true",
             "-Ddat.unauth_users=anonymousUser",
-            "-Denable_persistent_cache=true",
-            #"-Dcache.statistics_endpoint_enabled=true",
+            # cache settings (currently redis)
+            "-Dcache.statistics_endpoint_enabled=false",
             "-Dpersistence.cache_type=redis",
             "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
             "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
             "-Dredis.database=4",
             "-Dredis.password=$(REDIS_PASSWORD)",
+            # misc. frontend settings (this is NOT a persistence layer caching property!)
+            "-Denable_persistent_cache=true",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
             "-jar",
