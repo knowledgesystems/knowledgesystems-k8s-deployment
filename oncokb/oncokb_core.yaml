@@ -33,7 +33,7 @@ spec:
                 name: oncokb-core
             - configMapRef:
                 name: aws-cli-credentials
-          image: oncokb/oncokb:2.9.1
+          image: oncokb/oncokb:3.0.1
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -57,8 +57,8 @@ spec:
             "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(MYSQL_DATABASE)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(MYSQL_USER)",
             "-Djdbc.password=$(MYSQL_PASSWORD)",
-            "-Ddata.version=v2.10",
-            "-Ddata.version_date=12/17/2020",
+            "-Ddata.version=v3.0",
+            "-Ddata.version_date=01/14/2021",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
             "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",
@@ -88,10 +88,10 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 360
+            initialDelaySeconds: 540
             timeoutSeconds: 10
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 10
           name: oncokb-core
           ports:
             - containerPort: 8888
