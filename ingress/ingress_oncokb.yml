@@ -34,7 +34,6 @@ spec:
     - fda.oncokb.org
     - public.api.oncokb.org
     - bms.oncokb.org
-    - dxpx.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: oncokb.org
@@ -114,13 +113,6 @@ spec:
         - path: /
           backend:
             serviceName: oncokb-public-bms
-            servicePort: http
-  - host: dxpx.oncokb.org
-    http:
-      paths:
-        - path: /
-          backend:
-            serviceName: oncokb-public-dxpx
             servicePort: http
   - host: public.api.oncokb.org
     http:
