@@ -83,7 +83,7 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 360
+            initialDelaySeconds: 540
             timeoutSeconds: 10
             periodSeconds: 10
             failureThreshold: 5
