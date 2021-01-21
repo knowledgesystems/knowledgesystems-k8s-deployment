@@ -124,14 +124,15 @@ spec:
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # cache settings (currently redis)
-            "-Dcache.statistics_endpoint_enabled=false",
-            "-Dpersistence.cache_type=redis",
-            "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
-            "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
-            "-Dredis.database=4",
-            "-Dredis.password=$(REDIS_PASSWORD)",
+#            "-Dcache.statistics_endpoint_enabled=false",
+#            "-Dpersistence.cache_type=redis",
+#            "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
+#            "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
+#            "-Dredis.database=4",
+#            "-Dredis.password=$(REDIS_PASSWORD)",
+            "-Dehcache.cache_type=none",
             # misc frontend settings (this is NOT for backend persistence layer caching)
-            "-Denable_persistent_cache=true",
+            "-Denable_persistent_cache=false",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
             "-jar",
