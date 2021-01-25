@@ -41,6 +41,10 @@ spec:
               curl 'http://oncokb-public:9095/api/cronjob/check-exposed-tokens'  -H 'Authorization: Bearer $(TOKEN)';
               echo 'Done calling cronjob/check-exposed-tokens\n\n';
 
+              echo 'API call to update user suage analysis results';
+              curl 'http://oncokb-public:9095/api/cronjob/user-usage-analysis'  -H 'Authorization: Bearer $(TOKEN)';
+              echo 'Done calling cronjob/user-usage-analysis\n\n';
+
               "
             ]
 
