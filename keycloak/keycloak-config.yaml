@@ -1,3 +1,5 @@
+nodeSelector:
+  kops.k8s.io/instancegroup: indispensable
 postgresql:
   # Disable PostgreSQL dependency
   enabled: false
@@ -73,6 +75,6 @@ extraEnv: |
   - name: KEYCLOAK_PASSWORD
     value: {{ .Values.KEYCLOAK_PASSWORD }}
   - name: KEYCLOAK_LOGLEVEL
-    value: ALL
+    value: INFO
   - name: WILDFLY_LOGLEVEL
-    value: ALL
+    value: INFO
