@@ -128,6 +128,26 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: "2021-02-12T09:45:50Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: indispensable
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-11-19
+  machineType: t2.small
+  maxSize: 2
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: indispensable
+  role: Node
+  subnets:
+  - us-east-1a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
   creationTimestamp: "2018-10-24T21:18:37Z"
   generation: 25
   labels:
