@@ -27,10 +27,12 @@ spec:
     spec:
       containers:
         - env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,api-docs,no-liquibase
           envFrom:
             - configMapRef:
                 name: oncokb-transcript
-          image: oncokb/oncokb-transcript:0.0.1-alpha.2
+          image: oncokb/oncokb-transcript:0.0.1-alpha.3
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
