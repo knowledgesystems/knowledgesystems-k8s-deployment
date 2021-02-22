@@ -30,7 +30,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-transcript
-          image: cbioportal/oncokb-transcript:0.0.1-alpha.0
+          image: oncokb/oncokb-transcript:0.0.1-alpha.1
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
