@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:fusion-sv-migration-web-shenandoah
+        image: cbioportal/cbioportal:demo-fx-8407-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -73,7 +73,9 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://deploy-preview-3358--cbioportalfrontend.netlify.app",
+            "-Dfrontend.url=https://frontend.cbioportal.org",
+            # fusion pr frontend
+            #            "-Dfrontend.url=https://deploy-preview-3358--cbioportalfrontend.netlify.app",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
@@ -90,9 +92,9 @@ spec:
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
+            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
-            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
@@ -123,7 +125,7 @@ spec:
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # misc frontend settings
-            "-Denable_persistent_cache=true",
+            #"-Denable_persistent_cache=true",
             # ehcache settings
             "-Dehcache.cache_type=none",
             # "-Dehcache.xml_configuration=/ehcache.xml",
