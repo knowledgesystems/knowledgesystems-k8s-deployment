@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public
-        image: cbioportal/cbioportal:3.6.3-web-shenandoah
+        image: cbioportal/cbioportal:master-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -73,7 +73,8 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://frontend.cbioportal.org",
+            # "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Dfrontend.url=https://60429ba93d16580008ee1847--cbioportalfrontend.netlify.app",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=false",
             "-Dskin.footer= | <a href=\"http://www.aacr.org/Research/Research/Pages/aacr-project-genie.aspx\">AACR Project GENIE</a>",
