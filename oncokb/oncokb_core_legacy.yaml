@@ -31,7 +31,7 @@ spec:
         envFrom:
           - configMapRef:
               name: oncokb-core-legacy
-        image: cbioportal/oncokb:1.4.8.beta.5
+        image: oncokb/oncokb:1.4.8
         command: ["java"]
         args: [
                   # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
