@@ -31,7 +31,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core-beta
-          image: oncokb/oncokb:3.0.8-alpha.0
+          image: oncokb/oncokb:3.1.5
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
