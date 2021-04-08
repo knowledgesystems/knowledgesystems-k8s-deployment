@@ -16,3 +16,13 @@ spec:
             name: eks-demo
             port:
               number: 80
+  - host: "eks-session-service.cbioportal.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: cbioportal-session-service
+            port:
+              number: 80
