@@ -59,13 +59,6 @@ spec:
         backend:
           serviceName: oncokb-public-beta
           servicePort: http
-  - host: test.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: clinical-trials-matching
-          servicePort: http
   - host: demo.oncokb.org
     http:
       paths:
@@ -78,7 +71,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-public
+          serviceName: oncokb-public-test
           servicePort: http
   - host: legacy.oncokb.org
     http:
