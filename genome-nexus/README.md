@@ -95,6 +95,21 @@ To deploy the mongodump cronjob:
 kubectl apply -f cronjob/genie_gn_weekly_mongodump.yaml
 ```
 
+## Upgrading database version
+
+If you want to upgrade the version of the mongo database but keep the VEP cache, one can copy over the cache using `mongodump`. Some example commands that might be helpful are below (note this is moving from version 0.16 to 0.17):
+
+```
+# connect to the newly initalized mongo container
+kubectl exec  -it gn-mongo-v0dot17-mongodb-7d75667c58-g4flr --namespace=genome-nexus -- /bin/sh
+# make a dump from the previous mongo database inside the new db container
+mongodump --uri mongodb://gn-mongo-v0dot16-mongodb:27017/annotator?connectTimeoutMS=120000 --collection vep.annotation --gzip --out /tmp/v0d16-dump
+# now restore the cache
+mongorestore -d annotator -c vep.annotation --gzip /tmp/v0d16-dump/annotator/vep.annotation.bson.gz
+# delete the dump
+rm -rf /tmp/v0d16-dump
+```
+
 ## Notes
 - alpine docker image does not play nice with kubernetes (https://twitter.com/inodb/status/999041628970127360)
 - Genome Nexus mongo image doesn't work with chart version 4.0.0 (https://github.com/helm/charts/commit/84fcbc5e6b79111baba54ff9593378cb34cae6b7)
