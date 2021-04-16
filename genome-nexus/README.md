@@ -97,7 +97,7 @@ kubectl apply -f cronjob/genie_gn_weekly_mongodump.yaml
 
 ## Upgrading database version
 
-If you want to upgrade the version of the mongo database but keep the VEP cache, one can copy over the cache using `mongodump`. Some example commands that might be helpful are below (note this is moving from version 0.16 to 0.17):
+If you want to upgrade the version of the mongo database. First create a new database (same helm command as in the regular setup, but use the new mongo image). Then if you want to keep the VEP cache, one can copy over the cache using `mongodump`. Some example commands that might be helpful are below (note this is moving from version 0.16 to 0.17):
 
 ```
 # connect to the newly initalized mongo container
@@ -109,6 +109,8 @@ mongorestore -d annotator -c vep.annotation --gzip /tmp/v0d16-dump/annotator/vep
 # delete the dump
 rm -rf /tmp/v0d16-dump
 ```
+
+After that you can switch the `mongodb.uri` parameter in the genome nexus config. Might want to keep the old database running for a bit in case one needs to revert.
 
 ## Notes
 - alpine docker image does not play nice with kubernetes (https://twitter.com/inodb/status/999041628970127360)
