@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-test
-          image: oncokb/oncokb-public:3.3.0-alpha.4
+          image: oncokb/oncokb-public:3.3.0-alpha.5
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
