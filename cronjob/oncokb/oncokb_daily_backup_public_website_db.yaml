@@ -4,7 +4,8 @@ metadata:
   name: oncokb-daily-backup-public-website-db
   namespace: oncokb
 spec:
-  schedule: "0 0 * * *"
+  # this would trigger the run on 4pm EDT
+  schedule: "0 20 * * *"
   jobTemplate:
     spec:
       template:
@@ -37,11 +38,18 @@ spec:
                 aws configure set default.region ${AWS_REGION};
                 echo "Done configuring AWS CLI\n\n";
 
-                FILE_NAME=backup_$(date "+%m-%d-%Y-%H-%M-%S").sql.gz;
-                echo "Dump public database";
-                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_NAME} | gzip > ${FILE_NAME};
-                echo "Done dumping database\n\n";
+                FILE_NAME=schema_$(date "+%m-%d-%Y-%H-%M-%S").sql.gz;
+                echo "Dump public database schema";
+                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_NAME} -d | gzip > ${FILE_NAME};
+                echo "Done dumping database schema";
+                echo "Move the schema to s3 ";
+                aws s3api put-object --bucket oncokb --key public-website/database/backup/${FILE_NAME} --body ${FILE_NAME};
+                echo "Done moving the database schema\n\n";
 
+                FILE_NAME=data_$(date "+%m-%d-%Y-%H-%M-%S").sql.gz;
+                echo "Dump public database data except token stats";
+                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_NAME} --ignore-table=${DB_NAME}.token_stats --compact | gzip > ${FILE_NAME};
+                echo "Done dumping database data";
                 echo "Move the data to s3 ";
                 aws s3api put-object --bucket oncokb --key public-website/database/backup/${FILE_NAME} --body ${FILE_NAME};
                 echo "Done moving the database dump\n\n";
