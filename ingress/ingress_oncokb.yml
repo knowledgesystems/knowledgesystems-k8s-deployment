@@ -70,7 +70,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-public-test
+          serviceName: oncokb-transcript-test
           servicePort: http
   - host: legacy.oncokb.org
     http:

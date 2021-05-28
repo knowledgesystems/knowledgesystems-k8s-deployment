@@ -33,6 +33,7 @@ cat ./core/src/main/resources/spring/database/oncokb.sql | \
 
 ## OncoKB Public Redis
 
+## Leader/Follower
 ### Install
 ```bash
 helm install --namespace=oncokb --name oncokb-public-redis stable/redis --set password=oncokb-public-redis-password --set cluster.enabled=true --set cluster.slaveCount=2 --set master.securityContext.enabled=false
@@ -41,4 +42,10 @@ helm install --namespace=oncokb --name oncokb-public-redis stable/redis --set pa
 ### Delete
 ```
 helm del --purge oncokb-public-redis -n
+```
+
+## Sentinel
+### Install
+```bash
+helm install --namespace=oncokb oncokb-sentinel-redis bitnami/redis --set auth.password=oncokb-public-redis-password --set sentinel.enabled=true --set sentinel.masterSet=oncokb-master
 ```
