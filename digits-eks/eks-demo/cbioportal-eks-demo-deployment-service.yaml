@@ -26,11 +26,34 @@ spec:
         run: eks-demo
     spec:
       volumes:
+      - name: cbioportal-eks-configmap-volume
+        configMap:
+          name: cbioportal-eks-demo-keycloak-supp
+          items:
+          - key: portal.properties
+            path: portal.properties
+          - key: eks-demo-cbioportal-saml-idp-metadata.xml
+            path: eks-demo-cbioportal-saml-idp-metadata.xml
+          - key: cbioportal-saml-keystore.jks
+            path: cbioportal-saml-keystore.jks
       containers:
       - envFrom:
         - configMapRef:
             name: cbioportal-eks
-        image: cbioportal/cbioportal:3.6.3-web-shenandoah
+        env:
+        - name: PORTAL_HOME
+          value: /cbioportal/
+        image: cbioportal/cbioportal:release-genie-performance-redis-web-shenandoah
+        volumeMounts:
+        - name: cbioportal-eks-configmap-volume
+          mountPath: /cbioportal/portal.properties
+          subPath: portal.properties
+        - name: cbioportal-eks-configmap-volume
+          mountPath: /cbioportal/eks-demo-cbioportal-saml-idp-metadata.xml
+          subPath: eks-demo-cbioportal-saml-idp-metadata.xml
+        - name: cbioportal-eks-configmap-volume
+          mountPath: /cbioportal/cbioportal-saml-keystore.jks
+          subPath: cbioportal-saml-keystore.jks
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -81,10 +104,10 @@ spec:
             "-Dskin.example_study_queries=tcga pancancer atlas\ntcga -legacy -pancancer\ntcga or icgc\nmsk-impact\n-\"cell line\"\nbreast\nesophageal OR stomach\nprostate msk\nserous",
             "-Dskin.patientview.filter_genes_profiled_all_samples=false",
             "-Dinstallation_map_url=https://installationmap.netlify.app/",
-            "-Dapp.name=public-portal",
+            "-Dapp.name=eks-demo",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=social_auth_google",
+            "-Dauthenticate=saml",
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
@@ -102,7 +125,7 @@ spec:
             "-Dskin.blurb=",
             "-Dshow.mdacc.heatmap=true",
             "-Dpriority_studies=PanCancer Studies#msk_impact_2017,metastatic_solid_tumors_mich_2017,mixed_allen_2018,summit_2018,tmb_mskcc_2018,ntrk_msk_2019,msk_ch_2020;Pediatric Cancer Studies#pptc_2019,all_phase2_target_2018_pub,rt_target_2018_pub,wt_target_2018_pub,aml_target_2018_pub,nbl_target_2018_pub,pediatric_dkfz_2017,mixed_pipseq_2017,all_stjude_2016,all_stjude_2015,es_dfarber_broad_2014,es_iocurie_2014,mbl_pcgp;Immunogenomic Studies#gbm_columbia_2019,skcm_dfci_2015,skcm_mskcc_2014,mel_ucla_2016,nsclc_mskcc_2018,nsclc_mskcc_2015,tmb_mskcc_2018,ccrcc_dfci_2019;Cell lines#ccle_broad_2019,cellline_ccle_broad,cellline_nci60",
-            "-Dsession.service.url=https://eks-session-service.cbioportal.org/api/sessions/public_portal/",
+            "-Dsession.service.url=http://eks-session-service.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
@@ -143,7 +166,7 @@ spec:
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
             "--proxy-base-url",
-            "https://eks-demo.cbioportal.org",
+            "http://eks-demo.cbioportal.org",
             "--max-threads",
             "0",
             "--session-store",
