@@ -149,7 +149,7 @@ spec:
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
             "--proxy-base-url",
-            "https://demo-quantum-portal-1610712338.cbioportal.org/",
+            "$(GENIE_BETA_URL)",
             "--max-threads",
             "0",
             "--session-store",
