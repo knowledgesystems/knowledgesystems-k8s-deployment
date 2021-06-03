@@ -1,0 +1,10 @@
+master:
+  extraFlags:
+  - --maxmemory 8gb
+  - --maxmemory-policy volatile-ttl
+  nodeSelector:
+    kops.k8s.io/instancegroup: redis-persistence-cache
+slave:
+  extraFlags:
+  - --maxmemory 8gb
+  - --maxmemory-policy volatile-ttl
