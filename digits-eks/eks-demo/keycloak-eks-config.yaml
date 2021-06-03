@@ -1,5 +1,3 @@
-nodeSelector:
-  kops.k8s.io/instancegroup: indispensable
 postgresql:
   # Disable PostgreSQL dependency
   enabled: false
@@ -32,9 +30,6 @@ extraInitContainers: |
       - name: external-cbioportal-theme
         mountPath: /external-cbioportal-theme
 extraVolumes: |
-  - name: aws-rds-tls-jks
-    secret:
-      secretName: aws-rds-tls-jks
   - name: genie-private-cbioportal-theme
     emptyDir: {}
   - name: htan-cbioportal-theme
@@ -42,9 +37,6 @@ extraVolumes: |
   - name: external-cbioportal-theme
     emptyDir: {}
 extraVolumeMounts: |
-  - name: aws-rds-tls-jks
-    mountPath: /opt/aws-rds-tls-jks
-    readOnly: true
   - name: genie-private-cbioportal-theme
     mountPath: /opt/jboss/keycloak/themes/genie-private-cbioportal
   - name: htan-cbioportal-theme
@@ -53,8 +45,6 @@ extraVolumeMounts: |
     mountPath: /opt/jboss/keycloak/themes/external-cbioportal
 extraEnv: |
   # setup ssl and use truststore containing AWS-RDS certs
-  - name: JDBC_PARAMS
-    value: useSSL=true&requireSSL=true&trustCertificateKeyStoreUrl=file:/opt/aws-rds-tls-jks/aws-rds-tls.jks&trustCertificateKeyStorePassword=changeit
   # Tell keycloak we are already behind https
   - name: PROXY_ADDRESS_FORWARDING
     value: "true"
