@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:master-web-shenandoah
+        image: cbioportal/cbioportal:release-genie-performance-redis-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -73,7 +73,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://frontend.cbioportal.org",
+            #"-Dfrontend.url=https://frontend.cbioportal.org",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
@@ -124,12 +124,13 @@ spec:
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # cache settings (currently redis)
-            "-Dcache.statistics_endpoint_enabled=false",
+            #"-Dcache.statistics_endpoint_enabled=false",
             "-Dpersistence.cache_type=redis",
             "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
             "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
-            "-Dredis.database=4",
+            "-Dredis.database=1",
             "-Dredis.password=$(REDIS_PASSWORD)",
+            "-Dredis.clear_on_startup=false",
             # misc frontend settings (this is not the backend persistence caching!)
             "-Denable_persistent_cache=true",
             # compress on client side
