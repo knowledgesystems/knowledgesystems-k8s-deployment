@@ -30,7 +30,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:3.6.17-web-shenandoah
+        image: cbioportal/cbioportal:release-genie-performance-redis-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -125,14 +125,18 @@ spec:
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # cache settings (currently redis)
 #            "-Dcache.statistics_endpoint_enabled=false",
-#            "-Dpersistence.cache_type=redis",
-#            "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
-#            "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
-#            "-Dredis.database=4",
-#            "-Dredis.password=$(REDIS_PASSWORD)",
+            "-Dpersistence.cache_type=redis",
+            "-Dredis.leader_address=redis://redis-persistence-cache-master:6379",
+            "-Dredis.follower_address=redis://redis-persistence-cache-slave:6379",
+            "-Dredis.database=0",
+            "-Dredis.password=$(REDIS_PASSWORD)",
+            "-Dredis.clear_on_startup=false",
+
+
+
             "-Dehcache.cache_type=none",
             # misc frontend settings (this is NOT for backend persistence layer caching)
-            "-Denable_persistent_cache=false",
+            #"-Denable_persistent_cache=true",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
             "-jar",
