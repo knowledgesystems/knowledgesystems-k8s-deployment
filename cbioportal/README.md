@@ -86,8 +86,21 @@ article about setting the right `innodb_buffer_pool_size`:
 https://scalegrid.io/blog/calculating-innodb-buffer-pool-size-for-your-mysql-server/
 
 ### Redis
+
+#### session management
+
+To manage user sessions we use one redis instance: 
+
 ```bash
 helm install  --name cbioportal-redis  stable/redis --set master.securityContext.enabled=false --set password=picksomeredispassword --set slave.securityContext.enabled=false --set cluster.enabled=false
+```
+
+#### persistence cache 
+
+To manage persistence caching of e.g. API responses and database queries in the backend we use another redis instance:
+
+```bash
+helm install -f redis_cache_values.yaml cbioportal-persistence-redis --version 12.8.3 bitnami/redis --set password=picksomeredispassword
 ```
 
 ### Configuration
