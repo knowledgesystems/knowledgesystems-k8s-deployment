@@ -30,7 +30,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:3.6.19-redis-web-shenandoah
+        image: cbioportal/cbioportal:3.6.18-redis-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
