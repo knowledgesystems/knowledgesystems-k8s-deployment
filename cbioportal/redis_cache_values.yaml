@@ -5,10 +5,10 @@ master:
   nodeSelector:
     kops.k8s.io/instancegroup: redis-persistence-cache
   persistence:
-    size: 64Gi
+    enabled: false
 slave:
   extraFlags:
   - --maxmemory 8gb
   - --maxmemory-policy volatile-ttl
   persistence:
-    size: 64Gi
+    enabled: false
