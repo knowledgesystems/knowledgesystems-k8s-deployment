@@ -156,8 +156,8 @@ spec:
             # cache settings (currently redis)
             "-Dcache.statistics_endpoint_enabled=false",
             "-Dpersistence.cache_type=redis",
-            "-Dredis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379",
-            "-Dredis.follower_address=redis://cbioportal-genie-persistence-redis-slave:6379",
+            "-Dredis.leader_address=redis://cbioportal-persistence-redis-genie-master:6379",
+            "-Dredis.follower_address=redis://cbioportal-persistence-redis-genie-slave:6379",
             "-Dredis.database=8",
             "-Dredis.password=$(REDIS_PASSWORD)",
             # misc. frontend settings (this is NOT a persistence layer caching property!)
