@@ -17,7 +17,7 @@ spec:
       run: oncokb-core
   strategy:
     rollingUpdate:
-      maxSurge: 6
+      maxSurge: 2
       maxUnavailable: 2
     type: RollingUpdate
   template:
