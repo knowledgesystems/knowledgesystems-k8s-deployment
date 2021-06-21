@@ -36,11 +36,15 @@ spec:
               value: '$(AWS_REGION)'
             - name: APPLICATION_AWS_S3_SECRET_KEY
               value: '$(SECRET_ACCESS_KEY)'
+            - name: APPLICATION_GITHUB_TOKEN
+              value: '$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)'
           envFrom:
             - configMapRef:
                 name: oncokb-public
             - configMapRef:
                 name: aws-cli-credentials
+            - configMapRef:
+                name: oncokb-github
           readinessProbe:
             httpGet:
               path: /v2/api-docs

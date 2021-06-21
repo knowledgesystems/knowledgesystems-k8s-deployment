@@ -33,6 +33,8 @@ spec:
                 name: oncokb-core
             - configMapRef:
                 name: aws-cli-credentials
+            - configMapRef:
+                name: oncokb-github
           image: oncokb/oncokb:3.4.0
           command: ["java"]
           args: [
@@ -62,7 +64,7 @@ spec:
             "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
             "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",
             "-Daws.s3.region=$(AWS_REGION)",
-            "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
+            "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
             "-Dredis.enable=$(REDIS_ENABLE)",
             "-Dredis.type=$(REDIS_TYPE)",
