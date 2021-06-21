@@ -31,6 +31,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core-beta
+            - configMapRef:
+                name: oncokb-github
           image: oncokb/oncokb:3.4.0-alpha.2
           command: ["java"]
           args: [
@@ -59,7 +61,7 @@ spec:
             "-Ddata.version=v3.1",
             "-Ddata.version_date=02/10/2021",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
-            "-Doncokb_data.access_token=$(ONCOKB_DATA_ACCESS_TOKEN)",
+            "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
             "-Dredis.enable=$(REDIS_ENABLE)",
             "-Dredis.type=$(REDIS_TYPE)",
