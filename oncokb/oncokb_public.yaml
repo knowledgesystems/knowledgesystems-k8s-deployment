@@ -10,8 +10,9 @@ spec:
       app: oncokb-public
       version: 'v1'
   strategy:
+    # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
     rollingUpdate:
-      maxSurge: 2
+      maxSurge: 0
       maxUnavailable: 2
     type: RollingUpdate
   template:
