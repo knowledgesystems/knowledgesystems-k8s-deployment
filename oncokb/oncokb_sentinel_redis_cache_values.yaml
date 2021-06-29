@@ -4,9 +4,9 @@ sentinel:
 # For more eviction policy, please see https://docs.redislabs.com/latest/rs/administering/database-operations/eviction-policy/
 master:
   extraFlags:
-  - --maxmemory 5gb
+  - --maxmemory 2gb
   - --maxmemory-policy volatile-lfu
 replica:
   extraFlags:
-  - --maxmemory 5gb
+  - --maxmemory 2gb
   - --maxmemory-policy volatile-lfu
