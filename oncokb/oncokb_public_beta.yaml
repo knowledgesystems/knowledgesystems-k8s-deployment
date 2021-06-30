@@ -27,7 +27,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
             - name: APPLICATION_GITHUB_TOKEN
-              value: '$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)'
+              value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
           envFrom:
