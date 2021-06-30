@@ -35,6 +35,7 @@ spec:
     - public.api.oncokb.org
     - transcript.oncokb.org
     - grafana.oncokb.org
+    - infosec.oncokb.org
     secretName: oncokb-cert
   rules:
   - host: oncokb.org
@@ -93,6 +94,13 @@ spec:
       - path: /
         backend:
           serviceName: oncokb-public
+          servicePort: http
+  - host: infosec.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-public-infosec
           servicePort: http
   - host: fda.oncokb.org
     http:
