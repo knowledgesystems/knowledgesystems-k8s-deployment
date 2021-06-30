@@ -38,7 +38,7 @@ spec:
             - name: APPLICATION_AWS_S3_SECRET_KEY
               value: '$(SECRET_ACCESS_KEY)'
             - name: APPLICATION_GITHUB_TOKEN
-              value: '$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)'
+              value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
           envFrom:
             - configMapRef:
                 name: oncokb-public
