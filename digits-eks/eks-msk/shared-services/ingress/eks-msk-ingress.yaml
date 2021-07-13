@@ -10,6 +10,26 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
   rules:
+  - host: "triage.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-triage
+            port:
+              number: 80
+  - host: "triage.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-triage
+            port:
+              number: 80
   - host: "beta.cbioportal.aws.mskcc.org"
     http:
       paths:
