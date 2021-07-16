@@ -33,7 +33,7 @@ spec:
                 name: oncokb-core-beta
             - configMapRef:
                 name: oncokb-github
-          image: oncokb/oncokb:3.4.0-alpha.2
+          image: oncokb/oncokb:3.4.1
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -58,8 +58,6 @@ spec:
             "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(MYSQL_DATABASE)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(MYSQL_USER)",
             "-Djdbc.password=$(MYSQL_PASSWORD)",
-            "-Ddata.version=v3.1",
-            "-Ddata.version_date=02/10/2021",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
