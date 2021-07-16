@@ -36,7 +36,7 @@ spec:
                 name: aws-cli-credentials
             - configMapRef:
                 name: oncokb-github
-          image: oncokb/oncokb:3.4.1
+          image: oncokb/oncokb:3.4.2
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
