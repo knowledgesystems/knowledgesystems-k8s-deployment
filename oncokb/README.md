@@ -42,3 +42,9 @@ helm install -f oncokb_sentinel_redis_cache_values.yaml --namespace=oncokb oncok
 ```
 helm del --purge oncokb-public-redis -n
 ```
+
+### Grafana Redis Config
+Name: OncoKB Sentinel Redis  
+Address: redis://oncokb-sentinel-redis-headless:26379  
+Master Name: oncokb-master  
+Passwords are the same for Redis and Sentinel sections  
