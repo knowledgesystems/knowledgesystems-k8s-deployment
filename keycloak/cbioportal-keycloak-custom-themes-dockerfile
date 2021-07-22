@@ -2,3 +2,4 @@ FROM busybox
 COPY genie-private-cbioportal /themes/genie-private-cbioportal
 COPY external-cbioportal /themes/external-cbioportal
 COPY htan-cbioportal /themes/htan-cbioportal
+COPY sclc-cbioportal /themes/sclc-cbioportal
