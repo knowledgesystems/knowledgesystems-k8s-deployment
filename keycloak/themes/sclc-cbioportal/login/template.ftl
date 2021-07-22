@@ -130,7 +130,7 @@
           <#nested "form">
 
           <#if auth?has_content && auth.showTryAnotherWayLink() && showAnotherWayIfPresent>
-          <form id="kc-select-try-another-way-form" action="${url.loginAction}" method="post" <#if displayWide>class="${properties.kcContentWrapperClass!}"</#if>>
+          <form style="background-color:red" id="kc-select-try-another-way-form" action="${url.loginAction}" method="post" <#if displayWide>class="${properties.kcContentWrapperClass!}"</#if>>
               <div <#if displayWide>class="${properties.kcFormSocialAccountContentClass!} ${properties.kcFormSocialAccountClass!}"</#if>>
                   <div class="${properties.kcFormGroupClass!}">
                     <input type="hidden" name="tryAnotherWay" value="on" />
