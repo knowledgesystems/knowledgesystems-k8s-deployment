@@ -381,7 +381,6 @@ ul#kc-totp-supported-apps {
 }
 
 .kc-social-provider-logo {
-    display: none; /* Manda and Avery turned this off to hide all icons that keycloak randomly gives us */
     font-size: 23px;
     width: 30px;
     height: 25px;
@@ -400,7 +399,7 @@ ul#kc-totp-supported-apps {
     text-align: center;
 }
 
-/* social-google controls the google IDP icon */
+/* social-keycloak controls the google IDP icon*/
 a#social-google .kc-social-provider-name {
     background: url("../img/btn_google_signin_dark_normal_web.png") no-repeat;
     height: 46px;
@@ -412,11 +411,11 @@ a#social-google .kc-social-provider-name {
     color: transparent;
 }
 
-/* social-keycloak controls the google IDP icon */
+/* social-keycloak controls the PingId IDP icon*/
 a#social-pingId .kc-social-provider-name {
-    background: url("../img/synapse_logo_block.png") no-repeat;
+    background: url("../img/pingid_button.png") no-repeat;
     height: 46px;
-    width: 173px;
+    width: 175px;
     display: inline-block;
 }
 
