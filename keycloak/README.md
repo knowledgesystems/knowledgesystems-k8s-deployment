@@ -34,3 +34,5 @@ docker build -f ./cbioportal-keycloak-custom-themes-dockerfile ./themes
 docker tag <IMAGE_ID> cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.0
 docker push cbioportal/keycloak:cbioportal-keycloak-custom-themes-v1.0 
 ```
+
+* Custom login pages are created differently between Keycloak releases. We are currently using Keycloak 11 in the public cluster and Keycloak 12 in the eks cluster. Only the keycloak12-cbioportal theme is compatible with Keycloak 12. The other themes are only compatible with Keycloak 11. 
