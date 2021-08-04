@@ -4,7 +4,7 @@ metadata:
   name: oncokb-public-infosec
   namespace: oncokb
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: oncokb-public-infosec
@@ -12,7 +12,7 @@ spec:
   strategy:
     # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
     rollingUpdate:
-      maxUnavailable: 0
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
