@@ -30,7 +30,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:3.7.0-redis-web-shenandoah
+        image: cbioportal/cbioportal:demo-revert-rfc-56-redis-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -72,7 +72,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://revert-rfc56-pr-3848--cbioportalfrontend.netlify.app",
+            # "-Dfrontend.url=https://revert-rfc56-pr-3848--cbioportalfrontend.netlify.app",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
