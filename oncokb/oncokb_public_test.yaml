@@ -28,9 +28,17 @@ spec:
               value: prod,no-liquibase
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
+            - name: APPLICATION_REDIS_ADDRESS
+              value: '$(REDIS_ADDRESS)'
+            - name: APPLICATION_REDIS_PASSWORD
+              value: '$(REDIS_PASSWROD)'
+            - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
+              value: '$(REDIS_MASTERNAME)'
           envFrom:
             - configMapRef:
                 name: oncokb-public-test
+            - configMapRef:
+                name: oncokb-sentinel-redis-no-persistence
           readinessProbe:
             httpGet:
               path: /v2/api-docs
