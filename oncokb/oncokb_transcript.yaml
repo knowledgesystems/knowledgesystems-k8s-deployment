@@ -29,9 +29,19 @@ spec:
         - env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs,no-liquibase
+            - name: APPLICATION_REDIS_TYPE
+              value: '$(REDIS_TYPE)'
+            - name: APPLICATION_REDIS_ADDRESS
+              value: '$(REDIS_ADDRESS)'
+            - name: APPLICATION_REDIS_PASSWORD
+              value: '$(REDIS_PASSWROD)'
+            - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
+              value: '$(REDIS_MASTERNAME)'
           envFrom:
             - configMapRef:
                 name: oncokb-transcript
+            - configMapRef:
+                name: oncokb-sentinel-redis-no-persistence
           image: oncokb/oncokb-transcript:0.4.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
