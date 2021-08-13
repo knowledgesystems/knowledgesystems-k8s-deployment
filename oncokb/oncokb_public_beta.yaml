@@ -28,6 +28,12 @@ spec:
               value: prod,no-liquibase
             - name: APPLICATION_GITHUB_TOKEN
               value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
+            - name: APPLICATION_REDIS_ADDRESS
+              value: '$(REDIS_ADDRESS)'
+            - name: APPLICATION_REDIS_PASSWORD
+              value: '$(REDIS_PASSWROD)'
+            - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
+              value: '$(REDIS_MASTERNAME)'
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
           envFrom:
@@ -35,6 +41,8 @@ spec:
                 name: oncokb-public-beta
             - configMapRef:
                 name: oncokb-github
+            - configMapRef:
+                name: oncokb-sentinel-redis-no-persistence
           readinessProbe:
             httpGet:
               path: /v2/api-docs
