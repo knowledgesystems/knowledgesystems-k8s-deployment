@@ -4,7 +4,7 @@ metadata:
   name: oncokb-daily-usage-analysis-cronjob
   namespace: oncokb
 spec:
-  schedule: "0 1 * * 1"
+  schedule: "0 9 * * 4"
   jobTemplate:
     spec:
       template:
