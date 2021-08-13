@@ -34,8 +34,13 @@ cat ./core/src/main/resources/spring/database/oncokb.sql | \
 ## OncoKB Public Redis
 ## Sentinel
 ### Install
+####  With AOF persistence
 ```bash
 helm install -f oncokb_sentinel_redis_cache_values.yaml --namespace=oncokb oncokb-sentinel-redis bitnami/redis --set auth.password=oncokb-public-redis-password
+```
+####  Without any persistence
+```bash
+helm install -f oncokb_sentinel_redis_no_persistence_cache_values.yaml --namespace=oncokb oncokb-sentinel-redis-no-persistence bitnami/redis --set auth.password=oncokb-public-redis-password
 ```
 
 ### Delete

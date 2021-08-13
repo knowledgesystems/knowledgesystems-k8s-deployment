@@ -36,6 +36,8 @@ spec:
                 name: aws-cli-credentials
             - configMapRef:
                 name: oncokb-github
+            - configMapRef:
+                name: oncokb-sentinel-redis
           image: oncokb/oncokb:3.4.3
           command: ["java"]
           args: [
@@ -67,7 +69,7 @@ spec:
             "-Daws.s3.region=$(AWS_REGION)",
             "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-            "-Dredis.enable=$(REDIS_ENABLE)",
+            "-Dredis.enable=true",
             "-Dredis.type=$(REDIS_TYPE)",
             "-Dredis.address=$(REDIS_ADDRESS)",
             "-Dredis.password=$(REDIS_PASSWROD)",
