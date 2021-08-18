@@ -4,7 +4,7 @@ metadata:
   name: oncokb-daily-usage-analysis-cronjob
   namespace: oncokb
 spec:
-  schedule: "0 9 * * 4"
+  schedule: "0 6 * * 6"
   jobTemplate:
     spec:
       template:
@@ -16,7 +16,7 @@ spec:
             - configMapRef:
                 name: oncokb-usage-analysis-config
             name: oncokb-daily-usage-analysis
-            image: oncokb/oncokb-usage-analysis:0.0.3
+            image: oncokb/oncokb-usage-analysis:0.0.4
             command: ["/bin/bash", "-c"]
             args:
               - service mysql start;
