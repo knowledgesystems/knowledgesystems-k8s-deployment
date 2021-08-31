@@ -31,7 +31,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core-demo
-          image: oncokb/oncokb:3.4.3-no-frontend
+          image: oncokb/oncokb:3.4.4-no-frontend
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
