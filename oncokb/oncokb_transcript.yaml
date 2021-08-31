@@ -41,7 +41,7 @@ spec:
             - configMapRef:
                 name: oncokb-transcript
             - configMapRef:
-                name: oncokb-sentinel-redis-no-persistence
+                name: oncokb-sentinel-redis
           image: oncokb/oncokb-transcript:0.4.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything

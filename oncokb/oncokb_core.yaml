@@ -37,7 +37,7 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-sentinel-redis
+                name: oncokb-sentinel-redis-no-persistence
           image: oncokb/oncokb:3.4.4
           command: ["java"]
           args: [

@@ -42,7 +42,7 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-sentinel-redis-no-persistence
+                name: oncokb-sentinel-redis
           readinessProbe:
             httpGet:
               path: /v2/api-docs
