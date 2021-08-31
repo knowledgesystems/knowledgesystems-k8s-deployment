@@ -40,7 +40,7 @@ spec:
             - configMapRef:
                 name: oncokb-public-infosec
             - configMapRef:
-                name: oncokb-sentinel-redis-no-persistence
+                name: oncokb-sentinel-redis
           readinessProbe:
             httpGet:
               path: /v2/api-docs
