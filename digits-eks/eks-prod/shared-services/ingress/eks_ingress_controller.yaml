@@ -2,8 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"meta.helm.sh/release-name":"ingress","meta.helm.sh/release-namespace":"default","service.beta.kubernetes.io/aws-load-balancer-backend-protocol":"https","service.beta.kubernetes.io/aws-load-balancer-internal":"0.0.0.0/0","service.beta.kubernetes.io/aws-load-balancer-ssl-cert":"arn:aws:acm:us-east-1:666628074417:certificate/78af2316-9136-4ee4-8a8a-3f79b2033674","service.beta.kubernetes.io/aws-load-balancer-ssl-ports":"https"},"creationTimestamp":"2021-06-30T15:58:43Z","finalizers":["service.kubernetes.io/load-balancer-cleanup"],"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"ingress","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"ingress-nginx","app.kubernetes.io/version":"0.47.0","helm.sh/chart":"ingress-nginx-3.34.0"},"name":"ingress-ingress-nginx-controller","namespace":"default","resourceVersion":"8019939","selfLink":"/api/v1/namespaces/default/services/ingress-ingress-nginx-controller","uid":"7dcb9303-bb6a-4880-98ca-f00c833613ba"},"spec":{"clusterIP":"172.20.78.78","externalTrafficPolicy":"Cluster","ports":[{"name":"http","nodePort":30202,"port":80,"protocol":"TCP","targetPort":"http"},{"name":"https","nodePort":31925,"port":443,"protocol":"TCP","targetPort":80}],"selector":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"ingress","app.kubernetes.io/name":"ingress-nginx"},"sessionAffinity":"None","type":"LoadBalancer"},"status":{"loadBalancer":{"ingress":[{"hostname":"internal-a7dcb9303bb6a488098caf00c833613b-1468266926.us-east-1.elb.amazonaws.com"}]}}}
     meta.helm.sh/release-name: ingress
     meta.helm.sh/release-namespace: default
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
@@ -24,7 +22,7 @@ metadata:
   namespace: default
   resourceVersion: "8020460"
   selfLink: /api/v1/namespaces/default/services/ingress-ingress-nginx-controller
-  uid: 7dcb9303-bb6a-4880-98ca-f00c833613ba
+  uid: 04511050-706a-496a-86c6-98403f1d0b61
 spec:
   clusterIP: 172.20.78.78
   externalTrafficPolicy: Cluster
