@@ -7,9 +7,98 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/backend-protocol: "http"
     nginx.ingress.kubernetes.io/rewrite-target: /
+    # increae max response size to avoid 413 errors see
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
   rules:
+  - host: "acc.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-acc
+            port:
+              number: 80
+  - host: "glioma.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-glioma
+            port:
+              number: 80
+  - host: "immunotherapy.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-immunotherapy
+            port:
+              number: 80
+  - host: "kras.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-kras
+            port:
+              number: 80
+  - host: "pdx.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-pdx
+            port:
+              number: 80
+  - host: "poetic.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-poetic
+            port:
+              number: 80
+  - host: "prostate.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-prostate
+            port:
+              number: 80
+  - host: "su2c.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-su2c
+            port:
+              number: 80
   - host: "triage.cbioportal.aws.mskcc.org"
     http:
       paths:
@@ -78,6 +167,26 @@ spec:
         backend:
           service:
             name: eks-sclc
+            port:
+              number: 80
+  - host: "private.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-private
+            port:
+              number: 80
+  - host: "target.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-target
             port:
               number: 80
   - host: "session-service.cbioportal.aws.mskcc.org"
