@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.7.1-web-shenandoah
+        image: cbioportal/cbioportal:3.7.4-redis-web-shenandoah
         volumeMounts:
         - name: kras-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -87,6 +87,9 @@ spec:
             # from the limits
             #"-XX:MaxRAM=6500m",
             # enable remote debug
+            "-Dabout=about_us.html",
+            "-Dfaq=faq.html",
+            "-Dnews=news.html",
             "-Dfilter_groups_by_appname=false",
             "-Dcom.sun.management.jmxremote.rmi.port=8849",
             "-Dcom.sun.management.jmxremote=false",
@@ -95,11 +98,11 @@ spec:
             "-Dcom.sun.management.jmxremote.authenticate=false",
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
-            "-Dquick_search.enabled=true",
+            "-Dquick_search.enabled=false",
             "-Dskin.footer=",
             "-Dskin.right_nav.whats_new_blurb=",
             "-Dskin.example_study_queries=tcga pancancer atlas\ntcga -legacy -pancancer\ntcga or icgc\nmsk-impact\n-\"cell line\"\nbreast\nesophageal OR stomach\nprostate msk\nserous",
-            "-Dpriority_studies=PanCancer Studies#sclc_mskimpact_2017,msk_impact_2017,metastatic_solid_tumors_mich_2017,mixed_allen_2018,summit_2018,tmb_mskcc_2018,ntrk_msk_2019,msk_ch_2020;Pediatric Cancer Studies#pptc_2019,all_phase2_target_2018_pub,rt_target_2018_pub,wt_target_2018_pub,aml_target_2018_pub,nbl_target_2018_pub,pediatric_dkfz_2017,mixed_pipseq_2017,all_stjude_2016,all_stjude_2015,es_dfarber_broad_2014,es_iocurie_2014,mbl_pcgp;Immunogenomic Studies#gbm_columbia_2019,skcm_dfci_2015,skcm_mskcc_2014,mel_ucla_2016,nsclc_mskcc_2018,nsclc_mskcc_2015,tmb_mskcc_2018,ccrcc_dfci_2019;Cell lines#ccle_broad_2019,cellline_ccle_broad,cellline_nci60",
+            "-Dpriority_studies=",
             "-Dskin.patientview.filter_genes_profiled_all_samples=false",
             "-Dinstallation_map_url=https://installationmap.netlify.app/",
             "-Dapp.name=eks-kras",
@@ -112,15 +115,20 @@ spec:
             "-Ddb.host=$(DB_HOST)",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Ddb.portal_db_name=cgds_gdac",
+            "-Ddb.suppress_schema_version_mismatch_errors=true",
             #"-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
             "-Dskin.email_contact=cbioportal@googlegroups.com",
-            "-Dskin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of legacy TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a>, last updated 1/28/2016.",
-            "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
-            "-Dskin.authorization_message=Welcome to cBioPortal. Logging in will allow you to access your studies and groups from any computer, and cBioPortal will also remember your study view charts preferences for each study (i.e. order of the charts, type of charts and visibility). Login is optional and not required to access any of the other features of cBioPortal.",
-            "-Dskin.blurb=",
+            "-Dskin.data_sets_footer=",
+            "-Dskin.data_sets_header=The portal currently contains data from <NUM_CANCER_STUDIES> cancer genomics studies.  The table below lists the number of available samples per cancer study and data type.",
+            "-Dskin.examples_right_column_html=<a href=\"ln?q=KRAS:MUT\">KRAS mutations across lung cancer studies</a>",
+            "-Dskin.right_logo=su2c-kras.png",
+            "-Dskin.right_nav.show_testimonials=true",
+            "-Dskin.title=Targeting KRAS Mutant Lung Cancers",
+            "-Dskin.authorization_message=This instance of cBioPortal is currently only open to investigators involved in the SU2C KRAS Lung cancer Dream Team. All others please go to <a href=\"http://cbioportal.org\">cBioPortal.org</a> to browse and analyze publicly available su2c cancer data.  [<a href=\"https://docs.google.com/spreadsheet/viewform?formkey=dHpnWDRyT3pkUGtsOEp3V0c5N2lKVHc6MA#gid=0\">Request Access</a>].",
+            "-Dskin.blurb=This portal contains genomic data from several published and unpublished lung cancer studies. <p><b>Please cite</b> <a href=\"http://www.ncbi.nlm.nih.gov/pubmed/23550210\">Gao et al. <i>Sci. Signal.</i> 2013</a> &amp;  <a href=\"http://cancerdiscovery.aacrjournals.org/content/2/5/401.abstract\"> Cerami et al. <i>Cancer Discov.</i> 2012</a> when publishing results based on cBioPortal.",
             "-Dshow.mdacc.heatmap=true",
             "-Dsession.service.url=https://session-service.cbioportal.aws.mskcc.org/api/sessions/kras_portal/",
             "-Dsession.service.origin=*",
@@ -136,7 +144,6 @@ spec:
             "-Dsentry.dsn=$(SENTRY_DSN)",
             "-Dsentry.factory=org.cbioportal.logging.SentryClientFactory",
             #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
-            "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dsitemaps=true",
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
@@ -145,12 +152,15 @@ spec:
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # cache settings (currently redis)
 #            "-Dcache.statistics_endpoint_enabled=false",
-            "-Dpersistence.cache_type=none",
-#           "-Dredis.leader_address=redis://cbioasdfportal-persistence-redis-master:6379",
-#           "-Dredis.follower_address=redis://abccbioportal-persistence-redis-master:6379",
-#           "-Dredis.database=97",
-#           "-Dredis.password=$(REDIS_PASSWORD)",
-#           "-Dehcache.cache_type=none",
+            "-Dredis.database=6",
+            "-Dpersistence.cache_type=redis",
+            "-Dredis.leader_address=redis://cbioportal-persistence-redis-master:6379",
+            "-Dredis.follower_address=redis://cbioportal-persistence-redis-master:6379",
+            "-Dredis.password=$(REDIS_PASSWORD)",
+            "-Dehcache.cache_type=none",
+            "-Dcache.endpoint.api-key=$(CACHE_API_KEY)",
+            "-Dcache.endpoint.enabled=true",
+            "-Dredis.clear_on_startup=true",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             "-Denable_persistent_cache=false",
             # compress on client side
@@ -203,7 +213,7 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 1Gi
+              memory: 2Gi
           limits:
               memory: 4Gi
         terminationMessagePath: /dev/termination-log

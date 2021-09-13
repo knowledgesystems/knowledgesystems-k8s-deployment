@@ -37,13 +37,13 @@ spec:
         envFrom:
           - configMapRef:
               name: cbioportal-session-service-user-credentials
-        image: cbioportal/session-service:0.3.0
+        image: cbioportal/session-service:0.5.0
         command: ["java"]
         args: [
                   "-Dspring.data.mongodb.uri=mongodb://root:$(MONGODB_ROOT_PASSWORD)@cbioportal-session-service-mongo-mongodb:27017/session_service?authSource=admin",
                   "-Dsecurity.basic.enabled=true",
-                  "-Dsecurity.user.name=$(USER_NAME)",
-                  "-Dsecurity.user.password=$(USER_PASSWORD)",
+                  "-Dspring.security.user.name=$(USER_NAME)",
+                  "-Dspring.security.user.password=$(USER_PASSWORD)",
                   "-jar",
                   "/app.war"
         ]

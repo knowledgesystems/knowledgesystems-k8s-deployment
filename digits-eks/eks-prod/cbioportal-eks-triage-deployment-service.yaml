@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.7.1-redis-web-shenandoah
+        image: cbioportal/cbioportal:3.7.4-redis-web-shenandoah
         volumeMounts:
         - name: triage-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -114,6 +114,7 @@ spec:
             "-Ddb.host=$(DB_HOST)",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
@@ -139,7 +140,6 @@ spec:
             "-Dsentry.dsn=$(SENTRY_DSN)",
             "-Dsentry.factory=org.cbioportal.logging.SentryClientFactory",
             #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
-            "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dsitemaps=true",
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
@@ -148,12 +148,15 @@ spec:
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # cache settings (currently redis)
 #            "-Dcache.statistics_endpoint_enabled=false",
+            "-Dredis.database=3",
             "-Dpersistence.cache_type=redis",
             "-Dredis.leader_address=redis://cbioportal-persistence-redis-master:6379",
             "-Dredis.follower_address=redis://cbioportal-persistence-redis-master:6379",
-            "-Dredis.database=3",
             "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dehcache.cache_type=none",
+            "-Dcache.endpoint.api-key=$(CACHE_API_KEY)",
+            "-Dcache.endpoint.enabled=true",
+            "-Dredis.clear_on_startup=true",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             "-Denable_persistent_cache=false",
             # compress on client side
