@@ -29,7 +29,27 @@ spec:
             name: eks-acc
             port:
               number: 80
+  - host: "acc.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-acc
+            port:
+              number: 80
   - host: "glioma.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-glioma
+            port:
+              number: 80
+  - host: "glioma.cbioportal.mskcc.org"
     http:
       paths:
       - path: "/"
@@ -49,7 +69,27 @@ spec:
             name: eks-immunotherapy
             port:
               number: 80
+  - host: "immunotherapy.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-immunotherapy
+            port:
+              number: 80
   - host: "kras.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-kras
+            port:
+              number: 80
+  - host: "kras.cbioportal.mskcc.org"
     http:
       paths:
       - path: "/"
@@ -69,7 +109,27 @@ spec:
             name: eks-pdx
             port:
               number: 80
+  - host: "pdx.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-pdx
+            port:
+              number: 80
   - host: "poetic.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-poetic
+            port:
+              number: 80
+  - host: "poetic.cbioportal.mskcc.org"
     http:
       paths:
       - path: "/"
@@ -89,7 +149,27 @@ spec:
             name: eks-prostate
             port:
               number: 80
+  - host: "prostate.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-prostate
+            port:
+              number: 80
   - host: "su2c.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-su2c
+            port:
+              number: 80
+  - host: "su2c.cbioportal.mskcc.org"
     http:
       paths:
       - path: "/"
@@ -119,7 +199,8 @@ spec:
             name: eks-triage
             port:
               number: 80
-  - host: "beta.cbioportal.aws.mskcc.org"
+  # TODO : adjust this so that the main msk portal is accessed through "cbioportal.mskcc.org"
+  - host: "msk.cbioportal.aws.mskcc.org"
     http:
       paths:
       - path: "/"
@@ -129,7 +210,8 @@ spec:
             name: eks-msk
             port:
               number: 80
-  - host: "beta.cbioportal.mskcc.org"
+  # TODO : adjust this so that the main msk portal is accessed through "cbioportal.mskcc.org"
+  - host: "msk.cbioportal.mskcc.org"
     http:
       paths:
       - path: "/"
@@ -137,6 +219,26 @@ spec:
         backend:
           service:
             name: eks-msk
+            port:
+              number: 80
+  - host: "beta.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-msk-beta
+            port:
+              number: 80
+  - host: "beta.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-msk-beta
             port:
               number: 80
   - host: "keycloak.cbioportal.mskcc.org"
@@ -169,6 +271,16 @@ spec:
             name: eks-sclc
             port:
               number: 80
+  - host: "sclc.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-sclc
+            port:
+              number: 80
   - host: "private.cbioportal.aws.mskcc.org"
     http:
       paths:
@@ -179,7 +291,27 @@ spec:
             name: eks-private
             port:
               number: 80
+  - host: "private.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-private
+            port:
+              number: 80
   - host: "target.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-target
+            port:
+              number: 80
+  - host: "target.cbioportal.mskcc.org"
     http:
       paths:
       - path: "/"
