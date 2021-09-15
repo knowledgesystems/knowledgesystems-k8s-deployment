@@ -10,7 +10,7 @@ metadata:
   name: eks-msk
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: eks-msk
@@ -121,7 +121,6 @@ spec:
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
-            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dtomcat.catalina.scope=runtime",
