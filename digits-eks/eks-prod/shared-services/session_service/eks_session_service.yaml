@@ -67,7 +67,7 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       nodeSelector:
-        eks.amazonaws.com/nodegroup: msk-cbioportal
+        eks.amazonaws.com/nodegroup: essential-services
 status: {}
 ---
 apiVersion: v1

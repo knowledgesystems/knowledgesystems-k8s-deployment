@@ -110,7 +110,6 @@ spec:
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
-            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Ddb.portal_db_name=cgds_gdac",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             #"-Dtomcat.catalina.scope=runtime",
@@ -213,7 +212,7 @@ spec:
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: msk-cbioportal
+        eks.amazonaws.com/nodegroup: small-memory-portals
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
