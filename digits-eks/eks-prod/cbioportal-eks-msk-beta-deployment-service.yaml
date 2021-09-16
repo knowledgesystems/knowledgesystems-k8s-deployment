@@ -159,7 +159,7 @@ spec:
             "-Dredis.database=5",
             "-Dpersistence.cache_type=redis",
             "-Dredis.leader_address=redis://cbioportal-persistence-redis-master:6379",
-            "-Dredis.follower_address=redis://cbioportal-persistence-redis-master:6379",
+            "-Dredis.follower_address=redis://cbioportal-persistence-redis-replicas:6379",
             "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dehcache.cache_type=none",
             "-Dcache.endpoint.api-key=$(CACHE_API_KEY)",
