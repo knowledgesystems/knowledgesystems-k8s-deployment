@@ -152,7 +152,7 @@ spec:
             "-Dehcache.cache_type=none",
             "-Dcache.endpoint.api-key=$(CACHE_API_KEY)",
             "-Dcache.endpoint.enabled=true",
-            "-Dredis.clear_on_startup=true",
+            "-Dredis.clear_on_startup=false",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             "-Denable_persistent_cache=false",
             # compress on client side
