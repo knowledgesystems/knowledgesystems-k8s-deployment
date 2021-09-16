@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.7.5-web-shenandoah
+        image: cbioportal/cbioportal:demo-treatment-groups-web-shenandoah
         volumeMounts:
         - name: cbioportal-genie-private-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -164,6 +164,8 @@ spec:
             "-Denable_persistent_cache=true",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
+            # feature flags
+            "-Denable_treatment_groups=true",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
