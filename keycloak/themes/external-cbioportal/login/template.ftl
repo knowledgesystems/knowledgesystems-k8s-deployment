@@ -41,7 +41,7 @@
       <div id="kc-header-wrapper" class="${properties.kcHeaderWrapperClass!}">${kcSanitize(msg("loginTitleHtml",(realm.displayNameHtml!'')))?no_esc}</div>
     </div>
     <div style="font-size: 16px; font-family: 'Arial'; color: darkslategray; text-align: center;">
-      If you have difficulties logging in, please send an email to cbioportal-access@mskcc.org. 
+      If you have difficulties logging in, please send an email to cbioportal-access@cbioportal.org. 
     </div>
     <div class="${properties.kcFormCardClass!} <#if displayWide>${properties.kcFormCardAccountClass!}</#if>">
       <header class="${properties.kcFormHeaderClass!}">
