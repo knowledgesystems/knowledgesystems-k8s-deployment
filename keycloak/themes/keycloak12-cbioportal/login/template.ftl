@@ -41,9 +41,9 @@
       <div id="kc-header-wrapper" class="${properties.kcHeaderWrapperClass!}">${kcSanitize(msg("loginTitleHtml",(client.name!'')))?no_esc}</div>
     </div>
     <div style="font-size: 16px; font-family: 'Arial'; color: darkslategray; text-align: center;">
-      If you are a new user, you will need to register and agree to terms of use before you can use this portal:
+      To request access to specific studies, please send an email to:
       <br>
-	<a href="https://docs.google.com/forms/d/e/1FAIpQLSeSVmkIV5jWwqpUYOGXdm_26mnltXfDYXioKMu0LLYvIXXbgA/viewform">[First Time User Registration]</a>
+	cbioportal-access@cbioportal.org
       </br>
     </div>
     <div class="${properties.kcFormCardClass!} <#if displayWide>${properties.kcFormCardAccountClass!}</#if>">

@@ -5,7 +5,7 @@ postgresql:
   enabled: false
 extraInitContainers: |
   - name: genie-private-cbioportal-theme-provider
-    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.2
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
@@ -14,7 +14,7 @@ extraInitContainers: |
       - name: genie-private-cbioportal-theme
         mountPath: /genie-private-cbioportal-theme
   - name: htan-cbioportal-theme-provider
-    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.2
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
@@ -23,7 +23,7 @@ extraInitContainers: |
       - name: htan-cbioportal-theme
         mountPath: /htan-cbioportal-theme
   - name: external-cbioportal-theme-provider
-    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.2
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
@@ -32,7 +32,7 @@ extraInitContainers: |
       - name: external-cbioportal-theme
         mountPath: /external-cbioportal-theme
   - name: keycloak12-cbioportal-theme-provider
-    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.2
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
@@ -41,7 +41,7 @@ extraInitContainers: |
       - name: keycloak12-cbioportal-theme
         mountPath: /keycloak12-cbioportal-theme
   - name: keycloak12-sclc-theme-provider
-    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.2
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
