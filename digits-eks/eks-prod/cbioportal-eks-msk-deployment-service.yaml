@@ -43,7 +43,8 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.7.8-web-shenandoah
+        # this is master as of 10/12/21 + cis commit
+        image: cbioportal/cbioportal:demo-cis-web-shenandoah
         volumeMounts:
         - name: msk-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -116,7 +117,11 @@ spec:
             "-Dapp.name=mskcc-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=saml",
+            "-Dauthenticate=saml_plus_basic",
+            "-Dbasic.username=$(BASIC_USERNAME)",
+            "-Dbasic.password=$(BASIC_PASSWORD)",
+            "-Dbasic.authorities=$(BASIC_AUTHORITIES)",
+            "-Dmsk_entity_translation_enabled=true",
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
