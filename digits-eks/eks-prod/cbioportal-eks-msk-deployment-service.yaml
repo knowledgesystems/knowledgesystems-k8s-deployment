@@ -121,6 +121,8 @@ spec:
             "-Dbasic.username=$(BASIC_USERNAME)",
             "-Dbasic.password=$(BASIC_PASSWORD)",
             "-Dbasic.authorities=$(BASIC_AUTHORITIES)",
+            "-Dsample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID",
+            "-Dpatient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID",
             "-Dmsk_entity_translation_enabled=true",
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",

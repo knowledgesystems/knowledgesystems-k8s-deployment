@@ -40,7 +40,7 @@ spec:
             port:
               number: 80
   # TODO : adjust this so that the main msk portal is accessed through "cbioportal.mskcc.org"
-  - host: "msk.cbioportal.aws.mskcc.org"
+  - host: "cbioportal.aws.mskcc.org"
     http:
       paths:
       - path: "/"
@@ -51,7 +51,7 @@ spec:
             port:
               number: 80
   # TODO : adjust this so that the main msk portal is accessed through "cbioportal.mskcc.org"
-  - host: "msk.cbioportal.mskcc.org"
+  - host: "cbioportal.mskcc.org"
     http:
       paths:
       - path: "/"
