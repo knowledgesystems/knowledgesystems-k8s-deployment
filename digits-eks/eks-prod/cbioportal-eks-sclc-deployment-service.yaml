@@ -166,7 +166,7 @@ spec:
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
             "--proxy-base-url",
-            "https://sclc.cbioportal.aws.mskcc.org:443",
+            "https://sclc.cbioportal.mskcc.org:443",
             "--max-threads",
             "0",
             "--session-store",
