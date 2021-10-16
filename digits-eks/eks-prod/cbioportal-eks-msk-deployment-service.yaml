@@ -44,7 +44,7 @@ spec:
         - name: PORTAL_HOME
           value: /cbioportal/
         # this is master as of 10/12/21 + cis commit
-        image: cbioportal/cbioportal:demo-cis-web-shenandoah
+        image: cbioportal/cbioportal:demo-avery-w-latest-master-web-shenandoah
         volumeMounts:
         - name: msk-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -193,7 +193,7 @@ spec:
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
             "--proxy-base-url",
-            "https://msk.cbioportal.aws.mskcc.org",
+            "https://cbioportal.mskcc.org",
             "--max-threads",
             "0",
             "--session-store",
