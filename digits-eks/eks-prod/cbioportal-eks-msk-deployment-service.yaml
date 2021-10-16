@@ -44,7 +44,7 @@ spec:
         - name: PORTAL_HOME
           value: /cbioportal/
         # this is master as of 10/12/21 + cis commit
-        image: cbioportal/cbioportal:demo-avery-w-latest-master-web-shenandoah
+        image: cbioportal/cbioportal:demo-avery-w-latest-master-plus-cis-fix-web-shenandoah
         volumeMounts:
         - name: msk-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
