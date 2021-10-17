@@ -1,14 +1,16 @@
 sentinel:
   enabled: true
   masterSet: oncokb-master
+  quorum: 3
 # For more eviction policy, please see https://docs.redislabs.com/latest/rs/administering/database-operations/eviction-policy/
 master:
   extraFlags:
-  - --maxmemory 5gb
+  - --maxmemory 3gb
   - --maxmemory-policy volatile-lfu
 replica:
+  replicaCount: 5
   extraFlags:
-  - --maxmemory 5gb
+  - --maxmemory 3gb
   - --maxmemory-policy volatile-lfu
 commonConfiguration: |-
   # Enable AOF https://redis.io/topics/persistence#append-only-file
