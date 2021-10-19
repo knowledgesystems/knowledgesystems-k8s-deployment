@@ -40,6 +40,15 @@ extraInitContainers: |
     volumeMounts:
       - name: keycloak12-cbioportal-theme
         mountPath: /keycloak12-cbioportal-theme
+  - name: keycloak12-triage-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/keycloak12-triage/* /keycloak12-triage-theme
+    volumeMounts:
+      - name: keycloak12-triage-theme
+        mountPath: /keycloak12-triage-theme
   - name: keycloak12-sclc-theme-provider
     image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
     imagePullPolicy: IfNotPresent
@@ -61,6 +70,8 @@ extraVolumes: |
     emptyDir: {}
   - name: keycloak12-cbioportal-theme
     emptyDir: {}
+  - name: keycloak12-triage-theme
+    emptyDir: {}
   - name: keycloak12-sclc-theme
     emptyDir: {}
 extraVolumeMounts: |
@@ -75,6 +86,8 @@ extraVolumeMounts: |
     mountPath: /opt/jboss/keycloak/themes/external-cbioportal
   - name: keycloak12-cbioportal-theme
     mountPath: /opt/jboss/keycloak/themes/keycloak12-cbioportal
+  - name: keycloak12-triage-theme
+    mountPath: /opt/jboss/keycloak/themes/keycloak12-triage
   - name: keycloak12-sclc-theme
     mountPath: /opt/jboss/keycloak/themes/keycloak12-sclc
 extraEnv: |
