@@ -4,4 +4,5 @@ COPY external-cbioportal /themes/external-cbioportal
 COPY genie-private-cbioportal /themes/genie-private-cbioportal
 COPY htan-cbioportal /themes/htan-cbioportal
 COPY keycloak12-cbioportal /themes/keycloak12-cbioportal
+COPY keycloak12-triage /themes/keycloak12-triage
 COPY keycloak12-sclc /themes/keycloak12-sclc
