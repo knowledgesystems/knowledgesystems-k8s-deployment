@@ -35,7 +35,7 @@ spec:
                 name: oncokb-github
             - configMapRef:
                 name: oncokb-sentinel-redis-no-persistence
-          image: oncokb/oncokb:3.5.1
+          image: oncokb/oncokb:3.5.6
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
