@@ -1,27 +1,6 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: "2020-10-30T18:22:17Z"
-  labels:
-    kops.k8s.io/cluster: cbioportal.review.k8s.local
-  name: cbioportal-performance-testing
-spec:
-  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-07-20
-  machineType: r5.xlarge
-  maxSize: 2
-  minSize: 2
-  nodeLabels:
-    kops.k8s.io/instancegroup: cbioportal-performance-testing
-  role: Node
-  subnets:
-  - us-east-1a
-  - us-east-1c
-
----
-
-apiVersion: kops.k8s.io/v1alpha2
-kind: InstanceGroup
-metadata:
   creationTimestamp: "2020-03-19T15:46:42Z"
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
@@ -44,14 +23,15 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2020-12-09T21:11:58Z"
+  generation: 1
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: genie-portals
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-11-19
   machineType: r5.xlarge
-  maxSize: 2
-  minSize: 2
+  maxSize: 4
+  minSize: 4
   nodeLabels:
     kops.k8s.io/instancegroup: genie-portals
   role: Node
@@ -86,28 +66,8 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: "2020-07-16T18:46:49Z"
-  labels:
-    kops.k8s.io/cluster: cbioportal.review.k8s.local
-  name: genome-nexus-angelica-test
-spec:
-  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-01-17
-  machineType: t2.medium
-  maxSize: 2
-  minSize: 2
-  nodeLabels:
-    kops.k8s.io/instancegroup: genome-nexus-angelica-test
-  role: Node
-  subnets:
-  - us-east-1a
-
----
-
-apiVersion: kops.k8s.io/v1alpha2
-kind: InstanceGroup
-metadata:
   creationTimestamp: "2020-06-15T20:00:57Z"
-  generation: 3
+  generation: 6
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: gnap-genome-nexus
@@ -121,7 +81,6 @@ spec:
   role: Node
   subnets:
   - us-east-1c
-  - us-east-1a
 
 ---
 
