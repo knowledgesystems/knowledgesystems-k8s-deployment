@@ -151,15 +151,15 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2018-08-06T18:29:31Z"
-  generation: 2
+  generation: 3
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: nodes
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
   machineType: t2.medium
-  maxSize: 4
-  minSize: 4
+  maxSize: 5
+  minSize: 5
   nodeLabels:
     kops.k8s.io/instancegroup: nodes
   role: Node
