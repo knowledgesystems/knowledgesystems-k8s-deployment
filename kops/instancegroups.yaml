@@ -194,15 +194,15 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2020-07-02T20:34:53Z"
-  generation: 3
+  generation: 4
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: redis-persistence-cache
 spec:
   image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2020-01-17
   machineType: r5.xlarge
-  maxSize: 2
-  minSize: 2
+  maxSize: 3
+  minSize: 3
   nodeLabels:
     kops.k8s.io/instancegroup: redis-persistence-cache
   role: Node
