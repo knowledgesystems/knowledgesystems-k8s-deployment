@@ -6,14 +6,14 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: cdd
-  name: cdd
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cdd
+    run: oncotree
+  name: oncotree
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/oncotree
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: cdd
+      run: oncotree
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -23,32 +23,31 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: cdd
+        run: oncotree
     spec:
       containers:
       - envFrom:
         - configMapRef:
-            name: cdd-eks
-        image: averyniceday/cdd:cdd
+            name: oncotree-eks
+        image: mandaewilson/oncotree:oncotree
         command: [ "java" ]
-        args: ["-Dtopbraid.knowledgeSystems.serviceUrl=http://test.evn.mskcc.org/edg/tbl/sparql",
-        "-Dtopbraid.knowledgeSystems.loginUrl=http://test.evn.mskcc.org/edg/tbl/sparql",
-        "-Dtopbraid.knowledgeSystems.username=$(TOPBRAID_USERNAME)",
-        "-Dtopbraid.knowledgeSystems.password=$(TOPBRAID_PASSWORD)",
-        "-Dtopbraid.knowledgeSystems.cddNamespacePrefix=http://data.mskcc.org/ontologies/ClinicalDataDictionary#",
-        "-Dtopbraid.knowledgeSystems.cddGraphId=urn:x-evn-master:cdd",
-        "-Dtopbraid.mskVocabulary.serviceUrl=http://dev.evn.mskcc.org/edg/api/projects",
-        "-Dtopbraid.mskVocabulary.loginUrl=http://dev.evn.mskcc.org/edg/tbl/sparql",
-        "-Dtopbraid.mskVocabulary.username=$(TOPBRAID_USERNAME)",
-        "-Dtopbraid.mskVocabulary.password=$(TOPBRAID_PASSWORD)",
+        args: ["-Dspringfox.documentation.swagger.v2.path=/api-docs",
+        "-Dserver.port=8080",
+        "-Dtopbraid.url=http://test.evn.mskcc.org/edg/tbl/sparql",
+        "-Dtopbraid.username=$(TOPBRAID_USERNAME)",
+        "-Dtopbraid.password=$(TOPBRAID_PASSWORD)",
+        "-Dtopbraid.oncotree_namespace_prefix=http://data.mskcc.org/ontologies/oncotree#",
+        "-Dtopbraid.oncotree_version_namespace_prefix=http://data.mskcc.org/ontologies/OncoTreeVersion#",
+        "-Dtopbraid.oncotree_version_list_graph_id=urn:x-evn-master:oncotreeversionlist",
         "-Dslack.url=$(SLACK_URL)",
-        "-DmskVocabulary.studyIdList=msk_extract_cohort2_2019",
+        "-Dslack.channel=msk-pipeline-logs",
+        "-Drequired.oncotree.version=oncotree_latest_stable",
         "-jar", 
-        "cdd.jar"]
+        "oncotree.jar"]
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
-            path: /swagger-ui.html 
+            path: /
             port: 8080
           initialDelaySeconds: 100
           timeoutSeconds: 10
@@ -56,13 +55,13 @@ spec:
           failureThreshold: 3
         livenessProbe:
           httpGet:
-            path: /swagger-ui.html
+            path: /
             port: 8080
           initialDelaySeconds: 180
           timeoutSeconds: 10
           periodSeconds: 1
           failureThreshold: 5
-        name: cdd
+        name: oncotree
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -88,14 +87,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: cdd
-  name: cdd
-  selfLink: /api/v1/namespaces/default/services/cdd
+    run: oncotree
+  name: oncotree
+  selfLink: /api/v1/namespaces/default/services/oncotree
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: cdd
+    run: oncotree
   type: ClusterIP
