@@ -29,6 +29,8 @@ spec:
         - env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs,no-liquibase
+            - name: APPLICATION_REDIS_ENABLED
+              value: 'true'
             - name: APPLICATION_REDIS_TYPE
               value: '$(REDIS_TYPE)'
             - name: APPLICATION_REDIS_ADDRESS
@@ -42,7 +44,7 @@ spec:
                 name: oncokb-transcript
             - configMapRef:
                 name: oncokb-sentinel-redis
-          image: oncokb/oncokb-transcript:0.4.0
+          image: oncokb/oncokb-transcript:0.7.0-alpha.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
