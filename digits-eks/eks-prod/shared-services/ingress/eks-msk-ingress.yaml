@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: eks-prod-ingress
   annotations:
+    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/backend-protocol: "http"
@@ -59,6 +60,26 @@ spec:
         backend:
           service:
             name: eks-msk
+            port:
+              number: 80
+  - host: "cdd.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-cdd
+            port:
+              number: 80
+  - host: "cdd.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-cdd
             port:
               number: 80
   - host: "beta.cbioportal.aws.mskcc.org"
@@ -119,6 +140,26 @@ spec:
         backend:
           service:
             name: eks-sclc
+            port:
+              number: 80
+  - host: "oncotree.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-oncotree
+            port:
+              number: 80
+  - host: "oncotree.cbioportal.mskcc.org"
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: eks-oncotree
             port:
               number: 80
   - host: "private.cbioportal.aws.mskcc.org"

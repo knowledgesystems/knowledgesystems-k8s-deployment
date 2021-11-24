@@ -6,14 +6,14 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: oncotree
-  name: oncotree
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/oncotree
+    run: eks-oncotree
+  name: eks-oncotree
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-oncotree
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: oncotree
+      run: eks-oncotree
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -23,8 +23,12 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncotree
+        run: eks-oncotree
     spec:
+      volumes:
+      - name: oncotree-cache
+        persistentVolumeClaim:
+          claimName: oncotree-pvc
       containers:
       - envFrom:
         - configMapRef:
@@ -49,7 +53,7 @@ spec:
           httpGet:
             path: /
             port: 8080
-          initialDelaySeconds: 100
+          initialDelaySeconds: 10
           timeoutSeconds: 10
           periodSeconds: 5
           failureThreshold: 3
@@ -57,7 +61,7 @@ spec:
           httpGet:
             path: /
             port: 8080
-          initialDelaySeconds: 180
+          initialDelaySeconds: 10
           timeoutSeconds: 10
           periodSeconds: 1
           failureThreshold: 5
@@ -65,6 +69,9 @@ spec:
         ports:
         - containerPort: 8080
           protocol: TCP
+        volumeMounts:
+        - mountPath: "/data/ehcache/"
+          name: oncotree-cache
         resources:
           requests:
               cpu: 100m
@@ -87,14 +94,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncotree
-  name: oncotree
-  selfLink: /api/v1/namespaces/default/services/oncotree
+    run: eks-oncotree
+  name: eks-oncotree
+  selfLink: /api/v1/namespaces/default/services/eks-oncotree
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: oncotree
+    run: eks-oncotree
   type: ClusterIP
