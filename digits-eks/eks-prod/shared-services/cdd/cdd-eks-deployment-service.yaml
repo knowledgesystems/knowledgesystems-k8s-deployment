@@ -6,14 +6,14 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: cdd
-  name: cdd
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cdd
+    run: eks-cdd
+  name: eks-cdd
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-cdd
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: cdd
+      run: eks-cdd
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -23,8 +23,12 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: cdd
+        run: eks-cdd
     spec:
+      volumes:
+      - name: cdd-cache
+        persistentVolumeClaim:
+          claimName: cdd-pvc
       containers:
       - envFrom:
         - configMapRef:
@@ -50,7 +54,7 @@ spec:
           httpGet:
             path: /swagger-ui.html 
             port: 8080
-          initialDelaySeconds: 100
+          initialDelaySeconds: 10
           timeoutSeconds: 10
           periodSeconds: 5
           failureThreshold: 3
@@ -58,7 +62,7 @@ spec:
           httpGet:
             path: /swagger-ui.html
             port: 8080
-          initialDelaySeconds: 180
+          initialDelaySeconds: 10
           timeoutSeconds: 10
           periodSeconds: 1
           failureThreshold: 5
@@ -66,6 +70,9 @@ spec:
         ports:
         - containerPort: 8080
           protocol: TCP
+        volumeMounts:
+        - mountPath: "/data/ehcache/"
+          name: cdd-cache
         resources:
           requests:
               cpu: 100m
@@ -88,14 +95,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: cdd
-  name: cdd
-  selfLink: /api/v1/namespaces/default/services/cdd
+    run: eks-cdd
+  name: eks-cdd
+  selfLink: /api/v1/namespaces/default/services/eks-cdd
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: cdd
+    run: eks-cdd
   type: ClusterIP

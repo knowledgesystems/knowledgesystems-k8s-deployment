@@ -6,9 +6,9 @@ metadata:
     meta.helm.sh/release-namespace: default
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
     service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:666628074417:certificate/78af2316-9136-4ee4-8a8a-3f79b2033674
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:666628074417:certificate/04511050-706a-496a-86c6-98403f1d0b61
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
-  creationTimestamp: "2021-06-30T15:58:43Z"
+  creationTimestamp: "2021-10-21T02:22:21Z"
   finalizers:
   - service.kubernetes.io/load-balancer-cleanup
   labels:
@@ -16,24 +16,24 @@ metadata:
     app.kubernetes.io/instance: ingress
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/version: 0.47.0
-    helm.sh/chart: ingress-nginx-3.34.0
+    app.kubernetes.io/version: 1.0.4
+    helm.sh/chart: ingress-nginx-4.0.6
   name: ingress-ingress-nginx-controller
   namespace: default
-  resourceVersion: "8020460"
+  resourceVersion: "15420460"
   selfLink: /api/v1/namespaces/default/services/ingress-ingress-nginx-controller
-  uid: 04511050-706a-496a-86c6-98403f1d0b61
+  uid: d2c0ca84-2cdb-4d16-881f-66d1a59dbbac
 spec:
-  clusterIP: 172.20.78.78
+  clusterIP: 172.20.110.175
   externalTrafficPolicy: Cluster
   ports:
   - name: http
-    nodePort: 30202
+    nodePort: 30515
     port: 80
     protocol: TCP
     targetPort: http
   - name: https
-    nodePort: 31925
+    nodePort: 30862
     port: 443
     protocol: TCP
     targetPort: 80
@@ -46,4 +46,4 @@ spec:
 status:
   loadBalancer:
     ingress:
-    - hostname: internal-a7dcb9303bb6a488098caf00c833613b-1468266926.us-east-1.elb.amazonaws.com
+    - hostname: internal-ad2c0ca842cdb4d16881f66d1a59dbba-204230514.us-east-1.elb.amazonaws.com
