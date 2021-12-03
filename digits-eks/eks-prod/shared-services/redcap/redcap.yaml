@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: eks-redcap
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  clusterIP: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: eks-redcap
+subsets:
+- addresses:
+  - ip: 10.1.141.114
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
