@@ -33,10 +33,10 @@ spec:
       - envFrom:
         - configMapRef:
             name: cdd-eks
-        image: averyniceday/cdd:cdd
+        image: cbioportal/cdd:211130
         command: [ "java" ]
-        args: ["-Dtopbraid.knowledgeSystems.serviceUrl=http://test.evn.mskcc.org/edg/tbl/sparql",
-        "-Dtopbraid.knowledgeSystems.loginUrl=http://test.evn.mskcc.org/edg/tbl/sparql",
+        args: ["-Dtopbraid.knowledgeSystems.serviceUrl=http://evn.mskcc.org/edg/tbl/sparql",
+        "-Dtopbraid.knowledgeSystems.loginUrl=http://evn.mskcc.org/edg/tbl/sparql",
         "-Dtopbraid.knowledgeSystems.username=$(TOPBRAID_USERNAME)",
         "-Dtopbraid.knowledgeSystems.password=$(TOPBRAID_PASSWORD)",
         "-Dtopbraid.knowledgeSystems.cddNamespacePrefix=http://data.mskcc.org/ontologies/ClinicalDataDictionary#",

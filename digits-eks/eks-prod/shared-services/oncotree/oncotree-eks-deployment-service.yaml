@@ -33,11 +33,11 @@ spec:
       - envFrom:
         - configMapRef:
             name: oncotree-eks
-        image: mandaewilson/oncotree:oncotree
+        image: cbioportal/oncotree:211130
         command: [ "java" ]
         args: ["-Dspringfox.documentation.swagger.v2.path=/api-docs",
         "-Dserver.port=8080",
-        "-Dtopbraid.url=http://test.evn.mskcc.org/edg/tbl/sparql",
+        "-Dtopbraid.url=http://evn.mskcc.org/edg/tbl/sparql",
         "-Dtopbraid.username=$(TOPBRAID_USERNAME)",
         "-Dtopbraid.password=$(TOPBRAID_PASSWORD)",
         "-Dtopbraid.oncotree_namespace_prefix=http://data.mskcc.org/ontologies/oncotree#",
