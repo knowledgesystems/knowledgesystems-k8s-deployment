@@ -33,6 +33,7 @@ spec:
     - msk.oncokb.org
     - public.api.oncokb.org
     - transcript.oncokb.org
+    - beta.transcript.oncokb.org
     - grafana.oncokb.org
     secretName: oncokb-cert
   rules:
@@ -99,6 +100,13 @@ spec:
         - path: /
           backend:
             serviceName: oncokb-transcript
+            servicePort: http
+  - host: beta.transcript.oncokb.org
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: oncokb-transcript-beta
             servicePort: http
   - host: public.api.oncokb.org
     http:
