@@ -131,6 +131,8 @@ spec:
             "-Dredis.database=8",
             "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dredis.clear_on_startup=false",
+            "-Dcache.endpoint.enabled=true",
+            "-Dcache.endpoint.api-key=1kmfbftTb2iY",
             # disable ehcache
             "-Dehcache.cache_type=none",
             # misc frontend settings (this is NOT for backend persistence layer caching)
