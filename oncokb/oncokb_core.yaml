@@ -19,7 +19,7 @@ spec:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
       maxSurge: 0
-      maxUnavailable: 3
+      maxUnavailable: 4
     type: RollingUpdate
   template:
     metadata:
@@ -38,7 +38,7 @@ spec:
                 name: oncokb-github
             - configMapRef:
                 name: oncokb-sentinel-redis-no-persistence
-          image: oncokb/oncokb:3.5.11
+          image: oncokb/oncokb:3.5.12
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
