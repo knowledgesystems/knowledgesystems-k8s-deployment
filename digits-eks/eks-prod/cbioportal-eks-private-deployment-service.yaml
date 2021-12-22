@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.7.19-web-shenandoah
+        image: cbioportal/cbioportal:3.7.21-web-shenandoah
         volumeMounts:
         - name: private-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
