@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: oncokb-dev-ingress
+  namespace: oncokb-dev
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+spec:
+  tls:
+  - hosts:
+    - www.oncokb.dev
+    secretName: oncokb-dev-cert
+  rules:
+  - host: www.oncokb.dev
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-dev
+          servicePort: http
