@@ -56,8 +56,8 @@ spec:
               path: /
               port: 9095
             initialDelaySeconds: 90
-            timeoutSeconds: 1
-            periodSeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 5
             failureThreshold: 5
           resources:
             requests:
