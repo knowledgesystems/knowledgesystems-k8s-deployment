@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: oncokb-pod-deletion
+  namespace: oncokb
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "*/20 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: pod-deletion
+          containers:
+          - name: oncokb-pod-deletion
+            image: "bitnami/kubectl"
+            command: [ "/bin/sh", "-c" ]
+            # delete oncokb-core pods when the restart has been done more than 10 times and the status is 0/1
+            args: [
+                "kubectl get pods | grep oncokb-core |  awk '{ if( $2==\"0/1\" && $4 > 10) print $1}' | while read pod; do kubectl delete pod ${pod}; done"
+            ]
+          restartPolicy: Never
+      backoffLimit: 0
