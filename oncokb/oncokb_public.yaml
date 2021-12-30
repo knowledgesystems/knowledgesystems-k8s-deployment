@@ -4,7 +4,7 @@ metadata:
   name: oncokb-public
   namespace: oncokb
 spec:
-  replicas: 6
+  replicas: 10
   selector:
     matchLabels:
       app: oncokb-public
@@ -13,7 +13,7 @@ spec:
     # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
     rollingUpdate:
       maxSurge: 0
-      maxUnavailable: 3
+      maxUnavailable: 6
     type: RollingUpdate
   template:
     metadata:
@@ -59,7 +59,7 @@ spec:
               path: /v2/api-docs
               port: 9095
             initialDelaySeconds: 30
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             periodSeconds: 5
             failureThreshold: 6
           livenessProbe:
