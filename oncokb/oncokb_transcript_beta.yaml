@@ -9,13 +9,13 @@ metadata:
   name: oncokb-transcript-beta
   namespace: oncokb
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: oncokb-transcript-beta
   strategy:
     rollingUpdate:
-      maxSurge: 2
+      maxSurge: 4
       maxUnavailable: 0
     type: RollingUpdate
   template:
