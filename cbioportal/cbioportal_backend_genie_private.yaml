@@ -131,7 +131,7 @@ spec:
             "-Dskin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/genie-private-documentation/docs/",
             "-Dskin.documentation.skin.news=genie-news.md",
             "-Dskin.query.max_tree_depth=0",
-            "-Dsession.service.url=https://session-service-beta.cbioportal.org/api/sessions/genie_private_portal/",
+            "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/genie_private_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
