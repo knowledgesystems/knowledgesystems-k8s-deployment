@@ -76,7 +76,7 @@ spec:
               cpu: 500m
             limits:
               memory: 2Gi
-              cpu: 750m
+              cpu: 2Gi
           ports:
             - name: http
               containerPort: 9095
