@@ -39,9 +39,17 @@ spec:
               value: '$(REDIS_PASSWROD)'
             - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
               value: '$(REDIS_MASTERNAME)'
+            - name: SPRING_DATASOURCE_URL
+              value: '$(DB_URL)/oncokb_transcript'
+            - name: SPRING_DATASOURCE_USERNAME
+              value: '$(DB_USERNAME)'
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: '$(DB_PASSWORD)'
           envFrom:
             - configMapRef:
                 name: oncokb-transcript
+            - configMapRef:
+                name: oncokb-db-oncokb-transcript
             - configMapRef:
                 name: oncokb-sentinel-redis
           image: oncokb/oncokb-transcript:0.7.0-alpha.1
