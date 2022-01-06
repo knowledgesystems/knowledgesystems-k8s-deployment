@@ -142,6 +142,7 @@ spec:
             "-Dsitemaps=true",
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
+            "-Doncokb.merge_icons_by_default=false",
             "-Dgenomenexus.url=https://v1.genomenexus.org",
             "-Dshow.genomenexus.annotation_source=",
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
