@@ -159,6 +159,7 @@ spec:
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://v1.genomenexus.org",
+            "-Dshow.genomenexus.annotation_source=",
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             "-Dfilter_groups_by_appname=false",
