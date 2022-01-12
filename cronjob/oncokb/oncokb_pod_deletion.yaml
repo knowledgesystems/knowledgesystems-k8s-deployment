@@ -10,16 +10,19 @@ spec:
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 30
       template:
         spec:
           serviceAccountName: pod-deletion
           containers:
           - name: oncokb-pod-deletion
             image: "bitnami/kubectl"
-            command: [ "/bin/sh", "-c" ]
+            command:
+            - /bin/sh
+            - -c
             # delete oncokb-core pods when the restart has been done more than 10 times and the status is 0/1
-            args: [
-                "kubectl get pods | grep oncokb-core |  awk '{ if( $2==\"0/1\" && $4 > 10) print $1}' | while read pod; do kubectl delete pod ${pod}; done"
-            ]
+            - kubectl get pods | grep oncokb-core |  awk '{ if( $2=="0/1" && $4 > 10) print $1}' | while read pod; do print "Deleting $pod"; kubectl delete pod ${pod}; done
+            - echo "Done checking"
+            - exit
           restartPolicy: Never
-      backoffLimit: 0
+      backoffLimit: 5
