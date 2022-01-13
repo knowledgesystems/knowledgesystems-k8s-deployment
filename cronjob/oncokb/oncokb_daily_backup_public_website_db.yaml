@@ -6,6 +6,8 @@ metadata:
 spec:
   # this would trigger the run on 4pm EDT
   schedule: "0 20 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:

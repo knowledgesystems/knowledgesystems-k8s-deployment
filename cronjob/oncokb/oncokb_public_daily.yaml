@@ -8,6 +8,8 @@ spec:
   # set the time to avoid sending emails during inappropriate time for majority of the users
   # The time is in UTC
   schedule: "0 11 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
