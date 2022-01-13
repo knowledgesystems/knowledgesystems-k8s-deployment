@@ -5,6 +5,8 @@ metadata:
   namespace: oncokb
 spec:
   schedule: "0 13 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:

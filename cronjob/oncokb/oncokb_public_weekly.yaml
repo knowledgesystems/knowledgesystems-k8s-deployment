@@ -7,6 +7,8 @@ spec:
   # Trigger the event on Tuesday before weekly meeting
   # The time is in UTC
   schedule: "0 11 * * 2"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
