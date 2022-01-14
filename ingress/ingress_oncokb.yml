@@ -7,7 +7,12 @@ metadata:
     kubernetes.io/ingress.class: nginx
     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/limit-rps: "100"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    # the following has to be added due to an issue of from-to-www-redirect. https://github.com/kubernetes/ingress-nginx/issues/2043
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($host = 'oncokb.org' ) {
+        rewrite ^ https://www.oncokb.org$request_uri permanent;
+      }
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
@@ -23,6 +28,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
   tls:
+  # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
   - hosts:
     - oncokb.org
     - www.oncokb.org
@@ -38,13 +44,13 @@ spec:
     - grafana.oncokb.org
     secretName: oncokb-cert
   rules:
+  # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
   - host: oncokb.org
     http:
       paths:
       - path: /
         backend:
-          # we still cannot point to oncokb-public yet since there are lots of portal installations are pointing to that
-          serviceName: oncokb-core-legacy
+          serviceName: oncokb-public
           servicePort: http
   - host: www.oncokb.org
     http:
