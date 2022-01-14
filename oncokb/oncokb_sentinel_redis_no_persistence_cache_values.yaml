@@ -5,13 +5,13 @@ sentinel:
 # For more eviction policy, please see https://docs.redislabs.com/latest/rs/administering/database-operations/eviction-policy/
 master:
   extraFlags:
-  - --maxmemory 3gb
-  - --maxmemory-policy volatile-lfu
+  - --maxmemory 5gb
+  - --maxmemory-policy allkeys-lru
 replica:
   replicaCount: 5
   extraFlags:
-  - --maxmemory 3gb
-  - --maxmemory-policy volatile-lfu
+  - --maxmemory 5gb
+  - --maxmemory-policy allkeys-lru
 commonConfiguration: |-
   # Enable AOF https://redis.io/topics/persistence#append-only-file
   appendonly no
