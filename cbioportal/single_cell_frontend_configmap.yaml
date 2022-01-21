@@ -1,0 +1,35 @@
+apiVersion: v1
+data:
+  "frontendConfig.json": |
+    {
+
+        "custom_tabs": [
+
+            {
+                "title": "Single Cell Assays",
+                "location": "RESULTS_PAGE",
+                "mountCallbackName": "renderCustomTabSingleCellAssays",
+                "pathsToJs": ["https://single-cell.cbioportal.org/singlecelldata/custom-tabs/resources/single_cell_assays.js"],
+                "showWithMultipleStudies": false,
+                "unmountOnHide": false
+            },
+
+            {
+                "title": "Single Cell Data",
+                "location": "PATIENT_PAGE",
+                "mountCallbackName": "renderCustomTabSingleCellData",
+                "pathsToJs": ["https://single-cell.cbioportal.org/singlecelldata/custom-tabs/resources/single_cell_data.js"],
+                "showWithMultipleStudies": false,
+                "unmountOnHide": false
+            }
+
+        ]
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-01-21T20:55:39Z"
+  name: single-cell-frontend-config
+  namespace: default
+  resourceVersion: "421762709"
+  selfLink: /api/v1/namespaces/default/configmaps/single-cell-frontend-config
+  uid: 7d35aed8-7afc-11ec-a57d-124de1bb74c3
