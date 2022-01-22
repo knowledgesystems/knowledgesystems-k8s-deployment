@@ -8,6 +8,13 @@ master:
   - --maxmemory 5gb
   - --maxmemory-policy allkeys-lru
 replica:
+  livenessProbe:
+    initialDelaySeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 5
+  redinessProbe:
+    failureThreshold: 10
+    timeoutSeconds: 5
   replicaCount: 5
   extraFlags:
   - --maxmemory 5gb
