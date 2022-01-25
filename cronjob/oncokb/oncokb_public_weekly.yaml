@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: oncokb-public-weekly-cronjob
+  name: oncokb-cronjob-public-weekly-cronjob
   namespace: oncokb
 spec:
   # Trigger the event on Tuesday before weekly meeting
@@ -17,7 +17,7 @@ spec:
           - envFrom:
             - configMapRef:
                 name: oncokb-public-bot
-            name: oncokb-public-weekly-cronjob
+            name: main
             image: "ubuntu:latest"
             command: ["/bin/sh", "-c"]
             args: [
