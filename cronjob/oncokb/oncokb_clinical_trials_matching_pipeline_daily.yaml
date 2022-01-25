@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: clinical-trials-daily-matching-cronjob
+  name: oncokb-cronjob-clinical-trials-daily-matching
   namespace: oncokb
 spec:
   schedule: "0 13 * * *"
@@ -17,7 +17,7 @@ spec:
                 name: clinical-trials-matching-config
             - configMapRef:
                 name: aws-cli-credentials
-            name: clinical-trials-daily-matching
+            name: main
             image: oncokb/clinical-trials-matching-pipeline:0.1.1
             args:
             - /bin/bash

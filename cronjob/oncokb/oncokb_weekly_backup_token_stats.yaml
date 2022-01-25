@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: oncokb-weekly-backup-token-stats
+  name: oncokb-cronjob-weekly-backup-token-stats
   namespace: oncokb
 spec:
   # this would trigger the run on 8pm EDT on Saturday
@@ -18,7 +18,7 @@ spec:
                 name: aws-cli-credentials
             - configMapRef:
                 name: oncokb-public
-            name: oncokb-weekly-backup-token-stats
+            name: main
             image: mysql:5.7
             command: ["/bin/sh", "-c"]
             args:

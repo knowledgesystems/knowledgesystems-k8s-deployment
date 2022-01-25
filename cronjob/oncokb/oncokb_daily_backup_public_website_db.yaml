@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: oncokb-daily-backup-public-website-db
+  name: oncokb-cronjob-daily-backup-public-website-db
   namespace: oncokb
 spec:
   # this would trigger the run on 4pm EDT
@@ -18,7 +18,7 @@ spec:
                 name: aws-cli-credentials
             - configMapRef:
                 name: oncokb-public
-            name: oncokb-daily-backup-public-website-db
+            name: main
             image: mysql:5.7
             command: ["/bin/sh", "-c"]
             args:
