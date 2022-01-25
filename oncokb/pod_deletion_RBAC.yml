@@ -18,6 +18,9 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "delete", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list"]
 ---
 # bind the role to the service account
 apiVersion: rbac.authorization.k8s.io/v1
