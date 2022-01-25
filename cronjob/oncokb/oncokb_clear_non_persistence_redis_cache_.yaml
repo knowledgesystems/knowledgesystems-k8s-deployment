@@ -18,7 +18,7 @@ spec:
             image: "oncokb/k8s-with-tools:0.0.1-alpha.2"
             command: [ "/bin/bash", "-c" ]
             args:
-              - echo "Job Start...";
+              - echo "Job Starts...";
 
                 REDIS_INSTANCE=$(kubectl get configmap -n oncokb oncokb-sentinel-redis-no-persistence -o jsonpath="{.data.REDIS_ADDRESS}" | awk -F'[/:]+' '{print $2}' | awk -F'-headless' '{print $1}');
                 echo "Production no persistence redis instance is $REDIS_INSTANCE";
