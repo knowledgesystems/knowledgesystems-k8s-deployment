@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.6.3-alpha.2
+          image: oncokb/oncokb-public:3.6.6
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -36,6 +36,10 @@ spec:
               value: '$(REDIS_MASTERNAME)'
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
+            - name: SENTRY_EXCEPTION_RESOLVER_ORDER
+              value: '-2147483647'
+            - name: SENTRY_TRACES_SAMPLE_RATE
+              value: '.2'
           envFrom:
             - configMapRef:
                 name: oncokb-public-beta
