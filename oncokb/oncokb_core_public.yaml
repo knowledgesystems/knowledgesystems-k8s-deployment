@@ -61,7 +61,6 @@ spec:
             "-jar",
             "/webapp-runner.jar",
             "--enable-compression",
-            "--expand-war",
             "--port",
             "8888",
             "/app.war"
