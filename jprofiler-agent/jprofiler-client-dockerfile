@@ -1,0 +1,24 @@
+FROM centos:7
+
+ENV \
+ JPROFILER_DISTRO="jprofiler_agent_linux-x86_12_0_3.tar.gz" \
+ STAGING_DIR="/jprofiler-staging" \
+ HOME="/jprofiler"
+
+RUN yum -y update \
+ && yum -y install ca-certificates curl \
+ && mkdir -p ${HOME} ${STAGING_DIR} \
+ && cd ${STAGING_DIR} \
+ # curl is expected to be available; wget would work, too
+ && curl -v -OL "https://download-gcdn.ej-technologies.com/jprofiler/${JPROFILER_DISTRO}" \
+ && tar -xzf ${JPROFILER_DISTRO} \
+ && rm -f ${JPROFILER_DISTRO} \
+ # Eliminate the version-specific directory
+ && cp -R */* ${HOME} \
+ && rm -Rf ${STAGING_DIR} \
+ && chmod -R 0775 ${HOME} \
+ && yum clean all
+
+# chown and switch user as needed
+
+WORKDIR ${HOME}
