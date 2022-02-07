@@ -38,7 +38,7 @@ spec:
                 name: oncokb-github
             - configMapRef:
                 name: oncokb-sentinel-redis-no-persistence
-          image: oncokb/oncokb:3.6.2
+          image: oncokb/oncokb:3.6.3-alpha.1
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -75,6 +75,8 @@ spec:
             "-Dredis.password=$(REDIS_PASSWROD)",
             "-Dredis.masterName=$(REDIS_MASTERNAME)",
             "-Dredis.expiration=$(REDIS_EXPIRATION)",
+            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
+            "-Dsentry.sample.rate=0.1",
             "-Dshow_sitemaps=false",
             "-jar",
             "/webapp-runner.jar",
@@ -109,7 +111,7 @@ spec:
           resources:
             requests:
               cpu: 500m
-              memory: 1Gi
+              memory: 2Gi
             limits:
               cpu: 4Gi
               memory: 4Gi
