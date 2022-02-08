@@ -162,7 +162,7 @@ spec:
             name: eks-oncotree
             port:
               number: 80
-  - host: "oncotree.cbioportal.mskcc.org"
+  - host: "oncotree.info"
     http:
       paths:
       - path: "/"
