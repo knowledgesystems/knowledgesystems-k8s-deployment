@@ -26,6 +26,12 @@ spec:
         run: eks-oncotree
     spec:
       volumes:
+      - name: oncotree-ssl-volume
+        configMap:
+          name: oncotree-ssl
+          items:
+          - key: AwsSsl-truststore
+            path: AwsSssl-truststore
       - name: oncotree-cache
         persistentVolumeClaim:
           claimName: oncotree-pvc
@@ -36,8 +42,10 @@ spec:
         image: cbioportal/oncotree:211130
         command: [ "java" ]
         args: ["-Dspringfox.documentation.swagger.v2.path=/api-docs",
+	"-Djavax.net.ssl.trustStore=/oncotree-ssl/AwsSsl.truststore",
+	"-Djavax.net.ssl.trustStorePassword=$(AWS_TRUSTSTORE_PASSWORD)",
         "-Dserver.port=8080",
-        "-Dtopbraid.url=http://evn.mskcc.org/edg/tbl/sparql",
+        "-Dtopbraid.url=https://evn.mskcc.org/edg/tbl/sparql",
         "-Dtopbraid.username=$(TOPBRAID_USERNAME)",
         "-Dtopbraid.password=$(TOPBRAID_PASSWORD)",
         "-Dtopbraid.oncotree_namespace_prefix=http://data.mskcc.org/ontologies/oncotree#",
@@ -72,6 +80,9 @@ spec:
         volumeMounts:
         - mountPath: "/data/ehcache/"
           name: oncotree-cache
+        - name: oncotree-ssl-volume
+          mountPath: "/oncotree-ssl/"
+          subPath: AwsSsl-truststore
         resources:
           requests:
               cpu: 100m

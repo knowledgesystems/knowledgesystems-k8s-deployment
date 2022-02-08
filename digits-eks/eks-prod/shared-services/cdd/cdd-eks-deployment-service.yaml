@@ -26,6 +26,12 @@ spec:
         run: eks-cdd
     spec:
       volumes:
+      - name: cdd-ssl-volume
+        configMap:
+          name: cdd-ssl
+          items:
+          - key: AwsSsl-truststore
+            path: AwsSssl-truststore
       - name: cdd-cache
         persistentVolumeClaim:
           claimName: cdd-pvc
@@ -35,14 +41,16 @@ spec:
             name: cdd-eks
         image: cbioportal/cdd:211130
         command: [ "java" ]
-        args: ["-Dtopbraid.knowledgeSystems.serviceUrl=http://evn.mskcc.org/edg/tbl/sparql",
-        "-Dtopbraid.knowledgeSystems.loginUrl=http://evn.mskcc.org/edg/tbl/sparql",
+        args: ["-Dtopbraid.knowledgeSystems.serviceUrl=https://evn.mskcc.org/edg/tbl/sparql",
+	"-Djavax.net.ssl.trustStore=/cdd-ssl/AwsSsl.truststore",
+	"-Djavax.net.ssl.trustStorePassword=$(AWS_TRUSTSTORE_PASSWORD)",
+        "-Dtopbraid.knowledgeSystems.loginUrl=https://evn.mskcc.org/edg/tbl/sparql",
         "-Dtopbraid.knowledgeSystems.username=$(TOPBRAID_USERNAME)",
         "-Dtopbraid.knowledgeSystems.password=$(TOPBRAID_PASSWORD)",
         "-Dtopbraid.knowledgeSystems.cddNamespacePrefix=http://data.mskcc.org/ontologies/ClinicalDataDictionary#",
         "-Dtopbraid.knowledgeSystems.cddGraphId=urn:x-evn-master:cdd",
-        "-Dtopbraid.mskVocabulary.serviceUrl=http://dev.evn.mskcc.org/edg/api/projects",
-        "-Dtopbraid.mskVocabulary.loginUrl=http://dev.evn.mskcc.org/edg/tbl/sparql",
+        "-Dtopbraid.mskVocabulary.serviceUrl=https://evn.mskcc.org/edg/api/projects",
+        "-Dtopbraid.mskVocabulary.loginUrl=https://evn.mskcc.org/edg/tbl/sparql",
         "-Dtopbraid.mskVocabulary.username=$(TOPBRAID_USERNAME)",
         "-Dtopbraid.mskVocabulary.password=$(TOPBRAID_PASSWORD)",
         "-Dslack.url=$(SLACK_URL)",
@@ -73,6 +81,9 @@ spec:
         volumeMounts:
         - mountPath: "/data/ehcache/"
           name: cdd-cache
+        - name: cdd-ssl-volume
+          mountPath: "/cdd-ssl/"
+          subPath: AwsSsl-truststore
         resources:
           requests:
               cpu: 100m
