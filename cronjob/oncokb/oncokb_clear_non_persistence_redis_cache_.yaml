@@ -5,7 +5,7 @@ metadata:
   namespace: oncokb
 spec:
   concurrencyPolicy: Forbid
-  schedule: "0 * * * *"
+  schedule: "0/30 * * * *"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
