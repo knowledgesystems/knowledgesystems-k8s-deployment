@@ -8,8 +8,8 @@ spec:
   # set the time to avoid sending emails during inappropriate time for majority of the users
   # The time is in UTC
   schedule: "0 11 * * *"
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
       template:
@@ -42,6 +42,13 @@ spec:
               echo 'API call to check if oncokb tokens have been exposed';
               curl 'http://oncokb-public:9095/api/cronjob/check-exposed-tokens'  -H 'Authorization: Bearer $(TOKEN)';
               echo 'Done calling cronjob/check-exposed-tokens\n\n';
+
+              echo 'API call to move token stats to s3 and delete the data from SQL table';
+              SECONDS=0;
+              curl 'http://oncokb-public:9095/api/cronjob/move-token-stats-to-s3'  -H 'Authorization: Bearer $(TOKEN)';
+              DURATION=$SECONDS
+              echo \"It took $(($DURATION / 60)) minutes and $(($DURATION % 60)) seconds to finish.\"
+              echo 'Done calling cronjob/move-token-stats-to-s3\n\n';
 
               "
             ]
