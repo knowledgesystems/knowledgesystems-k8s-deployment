@@ -43,13 +43,6 @@ spec:
               curl 'http://oncokb-public:9095/api/cronjob/check-exposed-tokens'  -H 'Authorization: Bearer $(TOKEN)';
               echo 'Done calling cronjob/check-exposed-tokens\n\n';
 
-              echo 'API call to move token stats to s3 and delete the data from SQL table';
-              SECONDS=0;
-              curl 'http://oncokb-public:9095/api/cronjob/move-token-stats-to-s3'  -H 'Authorization: Bearer $(TOKEN)';
-              DURATION=$SECONDS
-              echo \"It took $(($DURATION / 60)) minutes and $(($DURATION % 60)) seconds to finish.\"
-              echo 'Done calling cronjob/move-token-stats-to-s3\n\n';
-
               "
             ]
 
