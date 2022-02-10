@@ -75,7 +75,7 @@ spec:
             "-Dredis.password=$(REDIS_PASSWROD)",
             "-Dredis.masterName=$(REDIS_MASTERNAME)",
             "-Dredis.expiration=$(REDIS_EXPIRATION)",
-            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
+            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
             "-Dsentry.sample.rate=0.1",
             "-Dshow_sitemaps=false",
             "-jar",
