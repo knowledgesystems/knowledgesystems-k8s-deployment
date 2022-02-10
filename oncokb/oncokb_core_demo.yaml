@@ -31,7 +31,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core-demo
-          image: oncokb/oncokb:3.6.2-no-frontend
+          image: oncokb/oncokb:3.6.3-no-frontend
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -58,6 +58,8 @@ spec:
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Dshow_sitemaps=false",
             "-Dswagger_description=This website is for demonstration purpose. Only information of BRAF, TP53 and ROS1 are available.",
+            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
+            "-Dsentry.sample.rate=0.1",
             "-jar",
             "/webapp-runner.jar",
             "--enable-compression",
