@@ -49,7 +49,7 @@ spec:
                   if (( $(bc <<< "$REDIS_USAGE_THRESHOLD < $USAGE_STATUS") ));
                   then
                     echo "Finding one oncokb-core instance, we need to pay attention to other instances with oncokb-core as prefix";
-                    POD_TO_DELETE=$(kubectl get pods -n oncokb | grep oncokb-core | awk -F'-' 'NF==4{print}{}' | awk '{print $1}' | head -n 1);
+                    POD_TO_DELETE=$(kubectl get pods -n oncokb --sort-by=.status.startTime | grep oncokb-core | awk -F'-' 'NF==4{print}{}' | awk '{print $1}' | head -n 1);
                     
                     if [[ -z "$POD_TO_DELETE" ]];
                     then
