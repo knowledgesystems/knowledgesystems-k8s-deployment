@@ -51,7 +51,7 @@ spec:
                 name: oncokb-db-oncokb-transcript
             - configMapRef:
                 name: oncokb-sentinel-redis
-          image: oncokb/oncokb-transcript:0.7.1
+          image: oncokb/oncokb-transcript:0.8.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
