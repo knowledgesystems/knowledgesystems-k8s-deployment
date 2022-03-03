@@ -34,7 +34,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:3.7.26-web-shenandoah
+        image: cbioportal/cbioportal:release-4.0.0-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
