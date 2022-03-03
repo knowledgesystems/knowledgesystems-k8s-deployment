@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:3.7.30-web-shenandoah
+        image: cbioportal/cbioportal:release-4.0.0-web-shenandoah
         volumeMounts:
         - name: triage-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
