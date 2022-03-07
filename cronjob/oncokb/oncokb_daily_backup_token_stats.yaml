@@ -1,0 +1,34 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: oncokb-cronjob-daily-backup-token-stats
+  namespace: oncokb
+spec:
+  # this is ran after the oncokb-cronjob-public-daily-cronjob
+  schedule: "0 12 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - envFrom:
+              - configMapRef:
+                name: oncokb-public-bot
+            name: main
+            image: "ubuntu:latest"
+            command: ["/bin/sh", "-c"]
+            args: [
+              "echo 'Install curl';
+              apt update; apt -y install curl;
+              echo 'Done installing curl\n\n';
+
+              echo 'API call to save the token stats of day prior to s3';
+              curl 'http://oncokb-public:9095/api/cronjob/move-token-stats-to-s3'  -H 'Authorization: Bearer $(TOKEN)';
+              echo 'Done calling cronjob/move-token-stats-to-s3\n\n';
+
+            "
+            ]
+
+          restartPolicy: Never
