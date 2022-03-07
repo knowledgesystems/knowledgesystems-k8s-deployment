@@ -13,8 +13,8 @@ spec:
       template:
         spec:
           containers:
-            - envFrom:
-              - configMapRef:
+          - envFrom:
+            - configMapRef:
                 name: oncokb-public-bot
             name: main
             image: "ubuntu:latest"
