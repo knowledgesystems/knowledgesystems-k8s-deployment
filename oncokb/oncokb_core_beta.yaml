@@ -35,7 +35,7 @@ spec:
                 name: oncokb-github
             - configMapRef:
                 name: oncokb-sentinel-redis-no-persistence
-          image: oncokb/oncokb:3.6.7
+          image: oncokb/oncokb:3.7.0-alpha.3
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -94,10 +94,10 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 540
+            initialDelaySeconds: 1800
             timeoutSeconds: 10
             periodSeconds: 10
-            failureThreshold: 10
+            failureThreshold: 20
           name: oncokb-core-beta
           ports:
             - containerPort: 8888
