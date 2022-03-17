@@ -38,6 +38,8 @@ spec:
                 name: oncokb-github
             - configMapRef:
                 name: oncokb-sentinel-redis-no-persistence
+            - configMapRef:
+                name: oncokb-db-genie-rds
           image: oncokb/oncokb:3.6.8
           command: ["java"]
           args: [
@@ -60,9 +62,9 @@ spec:
             "-XX:MaxRAM=1024m",
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(MYSQL_DATABASE)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-            "-Djdbc.username=$(MYSQL_USER)",
-            "-Djdbc.password=$(MYSQL_PASSWORD)",
+            "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.username=$(DB_USERNAME)",
+            "-Djdbc.password=$(DB_PASSWORD)",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
             "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",

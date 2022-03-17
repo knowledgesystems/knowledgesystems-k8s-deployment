@@ -40,6 +40,12 @@ spec:
               value: '-2147483647'
             - name: SENTRY_TRACES_SAMPLE_RATE
               value: '.2'
+            - name: SPRING_DATASOURCE_URL
+              value: '${DB_URL}/oncokb_public'
+            - name: SPRING_DATASOURCE_USERNAME
+              value: '${DB_USERNAME}'
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: '${DB_PASSWORD}'
           envFrom:
             - configMapRef:
                 name: oncokb-public-beta
@@ -47,6 +53,8 @@ spec:
                 name: oncokb-github
             - configMapRef:
                 name: oncokb-sentinel-redis
+            - configMapRef:
+                name: oncokb-db-genie-rds
           readinessProbe:
             httpGet:
               path: /v2/api-docs
