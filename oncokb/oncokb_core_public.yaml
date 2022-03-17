@@ -31,6 +31,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-core-public
+            - configMapRef:
+                name: oncokb-db-public-rds-oncokb-user
           image: oncokb/oncokb:3.6.8-no-frontend
           command: ["java"]
           args: [
@@ -52,9 +54,9 @@ spec:
             # from the limits
             "-XX:MaxRAM=1024m",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(MYSQL_DATABASE)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-            "-Djdbc.username=$(MYSQL_USER)",
-            "-Djdbc.password=$(MYSQL_PASSWORD)",
+            "-Djdbc.url=$(DB_URL)/oncokb_core_public?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.username=$(DB_USERNAME)",
+            "-Djdbc.password=$(DB_PASSWORD)",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Dshow_sitemaps=false",
             "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
