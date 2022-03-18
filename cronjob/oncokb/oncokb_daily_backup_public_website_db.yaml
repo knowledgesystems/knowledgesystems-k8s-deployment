@@ -6,8 +6,8 @@ metadata:
 spec:
   # this would trigger the run on 4pm EDT
   schedule: "0 20 * * *"
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
       template:
@@ -18,6 +18,8 @@ spec:
                 name: aws-cli-credentials
             - configMapRef:
                 name: oncokb-public
+            - configMapRef:
+                name: oncokb-db-genie-rds
             name: main
             image: mysql:5.7
             command: ["/bin/sh", "-c"]
@@ -40,9 +42,10 @@ spec:
                 aws configure set default.region ${AWS_REGION};
                 echo "Done configuring AWS CLI\n\n";
 
+                DB_HOST=$(echo "${DB_URL}" | sed -e's,^.*://\(.*\),\1,g' | cut -d":" -f1)
                 FILE_NAME=schema_$(date "+%m-%d-%Y-%H-%M-%S").sql.gz;
                 echo "Dump public database schema";
-                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_NAME} -d | gzip > ${FILE_NAME};
+                mysqldump -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} oncokb_public -d --no-tablespaces | gzip > ${FILE_NAME};
                 echo "Done dumping database schema";
                 echo "Move the schema to s3 ";
                 aws s3api put-object --bucket oncokb --key public-website/database/backup/${FILE_NAME} --body ${FILE_NAME};
@@ -50,7 +53,7 @@ spec:
 
                 FILE_NAME=data_$(date "+%m-%d-%Y-%H-%M-%S").sql.gz;
                 echo "Dump public database data except token stats";
-                mysqldump -h${DB_HOST} -u${SPRING_DATASOURCE_USERNAME} -p${SPRING_DATASOURCE_PASSWORD} ${DB_NAME} --ignore-table=${DB_NAME}.token_stats --compact --no-create-info | gzip > ${FILE_NAME};
+                mysqldump -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} oncokb_public --ignore-table=oncokb_public.token_stats --compact --no-create-info --no-tablespaces | gzip > ${FILE_NAME};
                 echo "Done dumping database data";
                 echo "Move the data to s3 ";
                 aws s3api put-object --bucket oncokb --key public-website/database/backup/${FILE_NAME} --body ${FILE_NAME};
