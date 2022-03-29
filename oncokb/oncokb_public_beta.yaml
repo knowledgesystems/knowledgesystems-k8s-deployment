@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.7.0-alpha.2
+          image: oncokb/oncokb-public:3.7.0-alpha.7
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -41,7 +41,7 @@ spec:
             - name: SENTRY_TRACES_SAMPLE_RATE
               value: '.2'
             - name: SPRING_DATASOURCE_URL
-              value: '${DB_URL}/oncokb_public'
+              value: '${DB_URL}/oncokb_public_beta'
             - name: SPRING_DATASOURCE_USERNAME
               value: '${DB_USERNAME}'
             - name: SPRING_DATASOURCE_PASSWORD
@@ -54,7 +54,7 @@ spec:
             - configMapRef:
                 name: oncokb-sentinel-redis
             - configMapRef:
-                name: oncokb-db-genie-rds
+                name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
             httpGet:
               path: /v2/api-docs
