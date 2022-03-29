@@ -36,8 +36,8 @@ spec:
             - configMapRef:
                 name: oncokb-sentinel-redis-no-persistence
             - configMapRef:
-                name: oncokb-db-genie-rds
-          image: oncokb/oncokb:3.7.0-alpha.3
+                name: oncokb-db-public-rds-oncokb-user
+          image: oncokb/oncokb:3.7.0-alpha.5
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -59,7 +59,7 @@ spec:
             "-XX:MaxRAM=1024m",
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.url=$(DB_URL)/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
             "-Djdbc.password=$(DB_PASSWORD)",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
