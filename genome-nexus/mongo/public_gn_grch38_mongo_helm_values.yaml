@@ -1,0 +1,17 @@
+image:
+  repository: genomenexus/gn-mongo
+  tag: v0.23_grch38_ensembl95
+persistence:
+  size: 200Gi
+replicaSet:
+  enabled: true
+  useHostnames: true
+  name: rs123
+  replicas:
+    secondary: 1
+    arbiter: 1
+  pdb:
+    enabled: true
+    minAvailable:
+      secondary: 1
+      arbiter: 1
