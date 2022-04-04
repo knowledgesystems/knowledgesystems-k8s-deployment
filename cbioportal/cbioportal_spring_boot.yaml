@@ -26,11 +26,17 @@ spec:
         run: cbioportal-spring-boot
     spec:
       volumes:
+      - name: cbioportal-frontend-config-volume
+        configMap:
+          name: single-cell-frontend-config
       containers:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
         image: cbioportal/cbioportal:4.1.0-web-shenandoah
+        volumeMounts:
+        - name: cbioportal-frontend-config-volume
+          mountPath: /cbioportal/
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -140,6 +146,8 @@ spec:
             #"-Denable_persistent_cache=true",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
+            # for single cell plugin
+			# "-Dfrontend.config=/cbioportal/frontendConfig.json",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
