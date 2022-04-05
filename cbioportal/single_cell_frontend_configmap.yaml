@@ -5,8 +5,8 @@ data:
 
         "custom_tabs": [
             {
-                "title": "Single Cell (beta)",
-                "id": "singleCell",
+                "title": "Single Cell Data (beta)",
+                "id": "customTab1",
                 "location": "PATIENT_PAGE",
                 "mountCallbackName": "renderCustomTabSingleCellData",
                 "pathsToJs": ["https://single-cell.cbioportal.org/singlecelldata/custom-tabs/resources/single_cell_data.js"],
