@@ -33,7 +33,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:4.0.1-web-shenandoah
+        image: cbioportal/cbioportal:4.1.2-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -146,7 +146,7 @@ spec:
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
             # for single cell plugin
-            "-Dfrontend.config=/cbioportal/frontendConfig.json",
+            #"-Dfrontend.config=/cbioportal/frontendConfig.json",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
