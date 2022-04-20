@@ -141,6 +141,9 @@ spec:
             "-Denable_persistent_cache=true",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
+            # comparison settings
+            # NA terms
+            "-Dcomparison.categorical_na_values=NA|Not documented in medical record|Test ordered, results not in chart|Test not done",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
