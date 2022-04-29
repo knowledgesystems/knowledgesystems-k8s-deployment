@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:4.1.4-web-shenandoah
+        image: cbioportal/cbioportal:release-4.1.5.hotfix-web-shenandoah
         volumeMounts:
         - name: sclc-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
