@@ -53,3 +53,11 @@ Name: OncoKB Sentinel Redis
 Address: redis://oncokb-sentinel-redis-headless:26379  
 Master Name: oncokb-master  
 Passwords are the same for Redis and Sentinel sections  
+
+## Creating a new subdomain
+To add a subdomain of oncokb.org, please follow the steps below:
+1. Add host under spec.hosts in ingress/ingress_oncokb.yml
+2. Under the same yaml file, add rule to handle traffic to the subdomain
+3. Add k8s Service and Deployment under oncokb folder. The service name should be the same as the step 2. You can use oncokb/oncokb_public.yaml file as an example
+4. Apply the Service/Deployment above by `kubectl apply -f [yaml file path you created above]`
+5. Apply the modified ingress `kubectl apply -f ingress/ingress_oncokb.yml`
