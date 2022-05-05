@@ -11,7 +11,14 @@ data:
                 "mountCallbackName": "renderCustomTabSingleCellData",
                 "pathsToJs": ["https://single-cell.cbioportal.org/singlecelldata/custom-tabs/resources/single_cell_data.js"],
                 "showWithMultipleStudies": false,
-                "unmountOnHide": false
+                "unmountOnHide": false,
+                "hideAsync":"() => {
+                        var includedStudyIds = ['gbm_cptac_2021'];
+                        var includedCaseIds = ['C3L-02705','C3L-03968','C3N-02783','C3N-01798','C3N-03186','C3L-03405','C3N-03184','C3N-02769','C3N-02190','C3N-01334','C3N-03188','C3N-01815','C3N-01814','C3N-00662','C3N-02784','C3N-02188','C3N-02181','C3N-01816'];
+                        var currentStudyId = window.patientViewPageStore.studyId;
+                        var currentCaseId = urlWrapper.query.caseId;
+                        return Promise.resolve(includedStudyIds.includes(currentStudyId) && includedCaseIds.includes(currentCaseId));
+                }"
             }
 
         ]
