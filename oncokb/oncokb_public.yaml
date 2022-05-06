@@ -4,7 +4,7 @@ metadata:
   name: oncokb-public
   namespace: oncokb
 spec:
-  replicas: 6
+  replicas: 5
   selector:
     matchLabels:
       app: oncokb-public
@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.7.6
+          image: oncokb/oncokb-public:3.7.7
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
