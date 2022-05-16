@@ -41,6 +41,8 @@ spec:
     - public.api.oncokb.org
     - transcript.oncokb.org
     - beta.transcript.oncokb.org
+    - curation.oncokb.org
+    - keycloak.oncokb.org
     - grafana.oncokb.org
     secretName: oncokb-cert
   rules:
@@ -114,6 +116,20 @@ spec:
         - path: /
           backend:
             serviceName: oncokb-transcript-beta
+            servicePort: http
+  - host: curation.oncokb.org
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: oncokb-curation
+            servicePort: http
+  - host: keycloak.oncokb.org
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: oncokb-keycloak-http
             servicePort: http
   - host: public.api.oncokb.org
     http:
