@@ -63,18 +63,18 @@ spec:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
             port: 8888
-          initialDelaySeconds: 30
-          timeoutSeconds: 5
-          periodSeconds: 10
+          initialDelaySeconds: 240
+          timeoutSeconds: 30
+          periodSeconds: 60
         # TODO: create a better liveness probe (this is just readiness with
         # more lenience)
         livenessProbe:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
             port: 8888
-          initialDelaySeconds: 60
-          timeoutSeconds: 20
-          periodSeconds: 30
+          initialDelaySeconds: 240
+          timeoutSeconds: 120
+          periodSeconds: 240
         name: gn-spring-boot-grch38
         ports:
         - containerPort: 8888
@@ -83,7 +83,7 @@ spec:
           requests:
               memory: 3Gi
           limits:
-              memory: 7Gi
+              memory: 11Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
