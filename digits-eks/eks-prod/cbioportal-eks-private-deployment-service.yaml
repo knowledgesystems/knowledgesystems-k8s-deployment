@@ -211,9 +211,9 @@ spec:
         resources:
           requests:
               cpu: 1500m
-              memory: 4Gi
+              memory: 10Gi
           limits:
-              memory: 8Gi
+              memory: 16Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
