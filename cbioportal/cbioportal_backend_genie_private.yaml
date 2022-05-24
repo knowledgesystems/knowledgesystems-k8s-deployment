@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:4.1.7-web-shenandoah
+        image: cbioportal/cbioportal:4.1.8-web-shenandoah
         volumeMounts:
         - name: cbioportal-genie-private-configmap-volume
           mountPath: /cbioportal/portal.properties
