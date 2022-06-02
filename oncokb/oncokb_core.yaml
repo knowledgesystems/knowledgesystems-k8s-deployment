@@ -44,7 +44,7 @@ spec:
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
-            "-Xms250m",
+            "-Xms500m",
             "-XX:+UseSerialGC",
             # aggressive garbage collection
             "-XX:MinHeapFreeRatio=20",
@@ -59,7 +59,7 @@ spec:
             "-XshowSettings:vm",
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
-            "-XX:MaxRAM=1024m",
+            "-XX:MaxRAM=2g",
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
             "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
