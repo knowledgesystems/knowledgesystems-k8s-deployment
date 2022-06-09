@@ -18,11 +18,8 @@ spec:
             - configMapRef:
                 name: oncokb-usage-analysis-config
             name: main
-            image: oncokb/oncokb-usage-analysis:0.0.4
+            image: oncokb/oncokb-usage-analysis:0.1.0
             command: ["/bin/bash", "-c"]
             args:
-              - service mysql start;
-                mysql -e "ALTER USER '${MYSQL_USER}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_PASSWORD}'";
-                mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -Bse "use mysql;update user set host = '%' where user = 'root' and host ='localhost';flush privileges;";
-                python3 src/main.py
+              - python3 src/main.py
           restartPolicy: Never
