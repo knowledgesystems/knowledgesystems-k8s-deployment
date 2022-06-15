@@ -217,6 +217,7 @@ kind: Service
 metadata:
   labels:
     run: cbioportal-spring-boot
+  # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
   name: cbioportal
   selfLink: /api/v1/namespaces/default/services/cbioportal-spring-boot
 spec:
