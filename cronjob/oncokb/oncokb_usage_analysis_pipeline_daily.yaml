@@ -4,7 +4,7 @@ metadata:
   name: oncokb-cronjob-daily-usage-analysis-cronjob
   namespace: oncokb
 spec:
-  schedule: "0 6 * * 6"
+  schedule: "0 6 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
