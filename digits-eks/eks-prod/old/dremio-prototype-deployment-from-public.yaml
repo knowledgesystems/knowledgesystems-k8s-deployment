@@ -33,7 +33,8 @@ spec:
       - envFrom:
         - configMapRef:
             name: dremio-prototype
-        image: cbioportal/cbioportal:4.1.6-web-shenandoah
+            #image: cbioportal/cbioportal:4.1.6-web-shenandoah
+        image: cbioportal/cbioportal:demo-dremio-prototype-web-shenandoah
         #volumeMounts:
         #- name: cbioportal-frontend-config-volume
         #mountPath: /cbioportal/
@@ -149,6 +150,11 @@ spec:
             "-Denable_request_body_gzip_compression=true",
             # for single cell plugin
             # "-Dfrontend.config=/cbioportal/frontendConfig.json",
+            # for dremio server
+            "-Ddremio.host=$(DREMIO_HOST)",
+            "-Ddremio.port=$(DREMIO_PORT)",
+            "-Ddremio.user=$(DREMIO_USER)",
+            "-Ddremio.password=$(DREMIO_PASSWORD)",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
