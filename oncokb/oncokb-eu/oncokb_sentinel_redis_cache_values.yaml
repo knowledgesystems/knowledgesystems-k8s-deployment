@@ -1,0 +1,13 @@
+sentinel:
+  enabled: true
+  masterSet: oncokb-master
+# For more eviction policy, please see https://docs.redislabs.com/latest/rs/administering/database-operations/eviction-policy/
+master:
+  extraFlags:
+    - --maxmemory 500mb
+    - --maxmemory-policy volatile-lfu
+replica:
+  replicaCount: 3
+  extraFlags:
+    - --maxmemory 500mb
+    - --maxmemory-policy volatile-lfu
