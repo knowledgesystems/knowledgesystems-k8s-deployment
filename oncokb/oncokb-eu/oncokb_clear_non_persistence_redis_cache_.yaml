@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: oncokb-cronjob-clear-no-persistence-redis-cache
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0/5 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: pod-deletion
+          containers:
+          - name: main
+            image: "oncokb/k8s-with-tools:0.0.1-alpha.2"
+            command: [ "/bin/bash", "-c" ]
+            args:
+              - echo "Job Starts...";
+
+                REDIS_INSTANCE=$(kubectl get configmap  oncokb-sentinel-redis-no-persistence -o jsonpath="{.data.REDIS_ADDRESS}" | awk -F'[/:]+' '{print $2}' | awk -F'-headless' '{print $1}');
+                echo "Production no persistence redis instance is $REDIS_INSTANCE";
+
+                REDIS_PASSWORD=$(kubectl get secret "$REDIS_INSTANCE" -o jsonpath="{.data.redis-password}" | base64 --decode);
+
+                MAX_MEMORY=$(redis-cli -h "$REDIS_INSTANCE" -p 6379 -a "$REDIS_PASSWORD" info memory | grep 'maxmemory:' | awk '{split($0,a,":"); print a[2]}' | tr -dc '0-9');
+                echo "Max Memory is $MAX_MEMORY";
+
+                USED_MEMORY=$(redis-cli -h "$REDIS_INSTANCE" -p 6379 -a "$REDIS_PASSWORD" info memory | grep 'used_memory:' | awk '{split($0,a,":"); print a[2]}' | tr -dc '0-9');
+                echo "Used Memory is $USED_MEMORY";
+
+                SYSTEM_MEMORY=$(redis-cli -h "$REDIS_INSTANCE" -p 6379 -a "$REDIS_PASSWORD" info memory | grep 'total_system_memory:' | awk '{split($0,a,":"); print a[2]}' | tr -dc '0-9');
+                echo "System Memory is $SYSTEM_MEMORY";
+                
+                if (( MAX_MEMORY>0 && USED_MEMORY>0 && SYSTEM_MEMORY>0 ));
+                then
+                  if (( MAX_MEMORY > SYSTEM_MEMORY ));
+                  then
+                    DIVIDER=$SYSTEM_MEMORY;
+                  else
+                    DIVIDER=$MAX_MEMORY;
+                  fi;
+                  USAGE_STATUS=$(echo "$USED_MEMORY $DIVIDER" | awk '{printf "%f", $1 / $2}');
+                  REDIS_USAGE_THRESHOLD=0.7;
+                  echo "Redis cache usage threshold is $REDIS_USAGE_THRESHOLD, current is $USAGE_STATUS";
+
+                  if (( $(bc <<< "$REDIS_USAGE_THRESHOLD < $USAGE_STATUS") ));
+                  then
+                    echo "Finding one oncokb-core instance, we need to pay attention to other instances with oncokb-core as prefix";
+                    POD_TO_DELETE=$(kubectl get pods --sort-by=.status.startTime | grep oncokb-core | awk -F'-' 'NF==4{print}{}' | awk '{print $1}' | head -n 1);
+                    
+                    if [[ -z "$POD_TO_DELETE" ]];
+                    then
+                      echo "No pod is available";
+                    else
+                      echo "Deleting pod $POD_TO_DELETE";
+                      kubectl delete pod "$POD_TO_DELETE";
+                    fi;
+                  fi;
+                else
+                  echo "Memory is 0 or unknown";
+                fi;
+                echo "Job Done";
+          restartPolicy: Never
+      backoffLimit: 5
