@@ -50,7 +50,7 @@ spec:
                 echo "Done dumping database\n\n";
 
                 echo "Compressing mongo dump";
-                tar -zcvf ${MONGODUMP_FILE_NAME} /gnap-mongodump;
+                tar -zcvf ${MONGODUMP_FILE_NAME} ./dump;
                 echo "Done compressing mongo dump\n\n";
 
                 echo "Move the data to s3";
