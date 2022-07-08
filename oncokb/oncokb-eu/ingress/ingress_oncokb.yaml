@@ -8,6 +8,7 @@ spec:
   tls:
     - hosts:
         - eucentral.oncokb.org
+        - grafana.eucentral.oncokb.org
       secretName: letsencrypt-nginx-private-key
   rules:
     - host: "eucentral.oncokb.org"
@@ -20,4 +21,14 @@ spec:
                 name: oncokb-public
                 port:
                   number: 9095
+    - host: "grafana.eucentral.oncokb.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-grafana
+                port:
+                  number: 80
   ingressClassName: nginx
