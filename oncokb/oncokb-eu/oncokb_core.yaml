@@ -10,7 +10,7 @@ metadata:
   name: oncokb-core
   selfLink: /apis/apps/v1/oncokb/deployments/oncokb-core
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: oncokb-core
@@ -18,7 +18,7 @@ spec:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
       maxSurge: 0
-      maxUnavailable: 3
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
@@ -39,7 +39,7 @@ spec:
                 name: oncokb-sentinel-redis-no-persistence
             - configMapRef:
                 name: oncokb-db-eucentral-rds
-          image: oncokb/oncokb:3.9.2
+          image: oncokb/oncokb:3.9.4-alpha.0
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
