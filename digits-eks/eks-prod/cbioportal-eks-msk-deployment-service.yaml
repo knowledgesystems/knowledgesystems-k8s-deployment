@@ -44,7 +44,7 @@ spec:
         - name: PORTAL_HOME
           value: /cbioportal/
         # this is master as of 10/12/21 + cis commit
-        image: cbioportal/cbioportal:4.1.16-web-shenandoah
+        image: cbioportal/cbioportal:4.1.17-web-shenandoah
         volumeMounts:
         - name: msk-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
