@@ -11,8 +11,8 @@ spec:
   strategy:
     # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 3
+      maxSurge: 2
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.7.17
+          image: oncokb/oncokb-public:3.7.20
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
