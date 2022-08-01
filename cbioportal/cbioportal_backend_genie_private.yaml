@@ -219,7 +219,7 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 1Gi
+              memory: 11Gi
           limits:
               memory: 26Gi
         terminationMessagePath: /dev/termination-log
