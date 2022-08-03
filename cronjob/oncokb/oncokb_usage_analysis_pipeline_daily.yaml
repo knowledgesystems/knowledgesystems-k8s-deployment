@@ -18,7 +18,7 @@ spec:
             - configMapRef:
                 name: oncokb-usage-analysis-config
             name: main
-            image: oncokb/oncokb-usage-analysis:0.1.5
+            image: oncokb/oncokb-usage-analysis:0.1.7
             command: ["/bin/bash", "-c"]
             args:
               - python3 src/main.py
