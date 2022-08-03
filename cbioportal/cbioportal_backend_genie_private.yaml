@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:4.1.17-web-shenandoah
+        image: cbioportal/cbioportal:4.1.18-web-shenandoah
         volumeMounts:
         - name: cbioportal-genie-private-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -219,7 +219,7 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 1Gi
+              memory: 11Gi
           limits:
               memory: 26Gi
         terminationMessagePath: /dev/termination-log
