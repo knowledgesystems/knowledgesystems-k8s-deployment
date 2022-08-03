@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  rds-combined-ca-bundle.pem: |
+    *****
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-08-03T06:19:14Z"
+  name: gn-documentdb-config
+  namespace: genome-nexus
+  resourceVersion: "1625013"
+  selfLink: /api/v1/namespaces/genome-nexus/configmaps/gn-documentdb-config
+  uid: 32226876-12f4-11ed-a05d-12f6704413b1
+
+
+# create a new configmap
+kubectl create configmap gn-documentdb-config --from-file=rds-combined-ca-bundle.pem
+
+# create configmap from yaml
+kubectl create -f gn_documentdb_configmap.yaml

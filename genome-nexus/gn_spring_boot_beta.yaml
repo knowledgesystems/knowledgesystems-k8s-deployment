@@ -26,18 +26,25 @@ spec:
       labels:
         run: gn-spring-boot-beta
     spec:
+      volumes:
+        - name: gn-documentdb-config-volume
+          configMap:
+            name: gn-documentdb-config
       containers:
       - env:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot13-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gnadmin:*****@genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator?ssl=true
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:test-fix-del-and-indel
+        volumeMounts:
+          - name: gn-documentdb-config-volume
+            mountPath: /documentdb/
+        image: genomenexus/gn-spring-boot:v1.1.49
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
