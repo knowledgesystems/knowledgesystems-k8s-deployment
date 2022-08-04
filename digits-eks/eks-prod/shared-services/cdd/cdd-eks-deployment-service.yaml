@@ -30,8 +30,8 @@ spec:
         configMap:
           name: cdd-ssl
           items:
-          - key: AwsSsl-truststore
-            path: AwsSssl-truststore
+          - key: AwsTopbraidSsl-truststore
+            path: AwsTopbraidSsl-truststore
       - name: cdd-cache
         persistentVolumeClaim:
           claimName: cdd-pvc
@@ -39,10 +39,10 @@ spec:
       - envFrom:
         - configMapRef:
             name: cdd-eks
-        image: cbioportal/cdd:211130
+        image: cbioportal/cdd:20220804
         command: [ "java" ]
         args: ["-Dtopbraid.knowledgeSystems.serviceUrl=https://evn.mskcc.org/edg/tbl/sparql",
-	"-Djavax.net.ssl.trustStore=/cdd-ssl/AwsSsl.truststore",
+	"-Djavax.net.ssl.trustStore=/cdd-ssl/AwsTopbraidSsl-truststore",
 	"-Djavax.net.ssl.trustStorePassword=$(AWS_TRUSTSTORE_PASSWORD)",
         "-Dtopbraid.knowledgeSystems.loginUrl=https://evn.mskcc.org/edg/tbl/sparql",
         "-Dtopbraid.knowledgeSystems.username=$(TOPBRAID_USERNAME)",
@@ -82,8 +82,8 @@ spec:
         - mountPath: "/data/ehcache/"
           name: cdd-cache
         - name: cdd-ssl-volume
-          mountPath: "/cdd-ssl/"
-          subPath: AwsSsl-truststore
+          mountPath: "/cdd-ssl/AwsTopbraidSsl-truststore"
+          subPath: AwsTopbraidSsl-truststore
         resources:
           requests:
               cpu: 100m
