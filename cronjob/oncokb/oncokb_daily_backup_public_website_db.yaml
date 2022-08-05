@@ -21,7 +21,7 @@ spec:
             - configMapRef:
                 name: oncokb-db-genie-rds
             name: main
-            image: mysql:5.7
+            image: mysql:5.7-debian
             command: ["/bin/sh", "-c"]
             args:
               - echo "Install python";
