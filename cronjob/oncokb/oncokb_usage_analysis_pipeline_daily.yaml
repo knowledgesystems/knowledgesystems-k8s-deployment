@@ -21,5 +21,6 @@ spec:
             image: oncokb/oncokb-usage-analysis:0.1.7
             command: ["/bin/bash", "-c"]
             args:
-              - python3 src/main.py
+              - cd src;
+                python3 main.py;
           restartPolicy: Never
