@@ -111,7 +111,7 @@ spec:
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
-            "-Ddb.portal_db_name=cgds_gdac",
+            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             #"-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
