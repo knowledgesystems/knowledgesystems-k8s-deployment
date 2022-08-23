@@ -11,7 +11,7 @@ metadata:
   namespace: oncokb
   selfLink: /apis/extensions/v1beta1/namespaces/oncokb/deployments/oncokb-core
 spec:
-  replicas: 5
+  replicas: 8
   selector:
     matchLabels:
       run: oncokb-core
@@ -19,7 +19,7 @@ spec:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
       maxSurge: 0
-      maxUnavailable: 3
+      maxUnavailable: 4
     type: RollingUpdate
   template:
     metadata:
