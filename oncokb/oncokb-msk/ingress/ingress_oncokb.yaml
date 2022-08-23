@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oncokb-ingress
+spec:
+  tls:
+    - hosts:
+        - www.oncokb.dev.aws.mskcc.org
+        - oncokb.dev.aws.mskcc.org
+        - grafana.oncokb.dev.aws.mskcc.org
+  rules:
+    - host: "www.oncokb.dev.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-hello
+                port:
+                  number: 80
+    - host: "oncokb.dev.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-hello
+                port:
+                  number: 80
+    - host: "grafana.oncokb.dev.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-grafana
+                port:
+                  number: 80
+  ingressClassName: nginx
