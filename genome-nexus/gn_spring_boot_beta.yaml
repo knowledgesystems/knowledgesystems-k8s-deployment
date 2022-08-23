@@ -26,25 +26,36 @@ spec:
       labels:
         run: gn-spring-boot-beta
     spec:
-      volumes:
-        - name: gn-documentdb-config-volume
-          configMap:
-            name: gn-documentdb-config
+      # volumes:
+      #   - name: gn-documentdb-config-volume
+      #     configMap:
+      #       name: gn-documentdb-config
       containers:
       - env:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gnadmin:*****@genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator?ssl=true
+          # working version
+          # value: mongodb://gnadmin:supersecretpwforgn@genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator?replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false
+          value: mongodb://gn-mongo-v0dot21-mongodb:27017/annotator?connectTimeoutMS=120000
+
+          # test
+          # value: mongodb://gnadmin:supersecretpwforgn@genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator?replicaSet=rs0
+
+          # value: mongodb://genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator
+          # value: mongodb://gnadmin:supersecretpwforgn@genome-nexus-db.cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017,genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator?replicaSet=rs0
+          # value: mongodb://gnadmin:supersecretpwforgn@genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator?replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false
+          # value: mongodb://gnadmin:supersecretpwforgn@genome-nexus-db.cluster-cq26ederqvxp.us-east-1.docdb.amazonaws.com:27017/annotator?ssl=true&ssl_ca_certs=/documentdb/rds-ca-2019-root.pem
+          # value: mongodb://gn-mongo-v0dot21-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        volumeMounts:
-          - name: gn-documentdb-config-volume
-            mountPath: /documentdb/
-        image: genomenexus/gn-spring-boot:v1.1.49
+        # volumeMounts:
+        #   - name: gn-documentdb-config-volume
+        #     mountPath: /documentdb/
+        image: leexdocker/gn-spring-boot:test-documentdb-log-fetch-one-by-one-variant
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -83,9 +94,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 3Gi
+              memory: 10Gi
           limits:
-              memory: 9Gi
+              memory: 20Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
