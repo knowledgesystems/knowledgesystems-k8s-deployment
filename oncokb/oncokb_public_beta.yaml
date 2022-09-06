@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.7.19
+          image: oncokb/oncokb-public:3.8.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -34,6 +34,12 @@ spec:
               value: '$(REDIS_PASSWROD)'
             - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
               value: '$(REDIS_MASTERNAME)'
+            - name: APPLICATION_AWS_S3_ACCESS_KEY
+              value: '$(ACCESS_KEY_ID)'
+            - name: APPLICATION_AWS_S3_REGION
+              value: '$(AWS_REGION)'
+            - name: APPLICATION_AWS_S3_SECRET_KEY
+              value: '$(SECRET_ACCESS_KEY)'
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
@@ -55,6 +61,8 @@ spec:
                 name: oncokb-sentinel-redis
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-public
+            - configMapRef:
+                name: aws-cli-credentials
           readinessProbe:
             httpGet:
               path: /v2/api-docs
