@@ -168,7 +168,7 @@ spec:
             "-Denable_request_body_gzip_compression=true",
             # comparison settings
             # NA terms
-            "-Dcomparison.categorical_na_values=NA|Not documented in medical record|Test ordered, results not in chart|Test not done",
+            "-Dcomparison.categorical_na_values=Unknown|NA|Not documented in medical record|Test ordered, results not in chart|Test not done",
             # feature flags
             "-Denable_treatment_groups=true",
             "-jar",
