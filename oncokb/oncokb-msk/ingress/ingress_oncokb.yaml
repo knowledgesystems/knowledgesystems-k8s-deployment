@@ -8,6 +8,7 @@ spec:
         - www.oncokb.dev.aws.mskcc.org
         - oncokb.dev.aws.mskcc.org
         - grafana.oncokb.dev.aws.mskcc.org
+        - beta.oncokb.dev.aws.mskcc.org
   rules:
     - host: "www.oncokb.dev.aws.mskcc.org"
       http:
@@ -16,7 +17,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nginx-hello
+                name: oncokb-test
                 port:
                   number: 80
     - host: "oncokb.dev.aws.mskcc.org"
@@ -26,9 +27,19 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nginx-hello
+                name: oncokb-test
                 port:
                   number: 80
+    - host: "beta.oncokb.dev.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core-beta-cluster
+                port:
+                  number: 8888
     - host: "grafana.oncokb.dev.aws.mskcc.org"
       http:
         paths:
