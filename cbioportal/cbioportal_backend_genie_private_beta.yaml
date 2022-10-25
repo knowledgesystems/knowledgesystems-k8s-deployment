@@ -128,6 +128,7 @@ spec:
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://www.genomenexus.org",
+            "-Dgenomenexus.isoform_override_source=uniprot",
             "-Ddat.unauth_users=anonymousUser",
             # cache settings (currently redis)
             "-Dmybatis.cache.enabled=true",

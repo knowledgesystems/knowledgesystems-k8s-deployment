@@ -127,6 +127,7 @@ spec:
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://www.genomenexus.org",
+            "-Dgenomenexus.isoform_override_source=uniprot",
             "-Dshow.genomenexus.annotation_sources=mutation_assessor",
             "-Ddat.unauth_users=anonymousUser",
             "-Ddat.method=uuid",
