@@ -1,6 +1,6 @@
 redis:
   configmap: |-
-    maxmemory 2Gb
+    maxmemory 1Gb
     maxmemory-policy allkeys-lru
   livenessProbe:
     initialDelaySeconds: 60

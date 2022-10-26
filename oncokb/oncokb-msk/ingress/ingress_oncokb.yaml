@@ -8,7 +8,7 @@ spec:
         - www.oncokb.dev.aws.mskcc.org
         - oncokb.dev.aws.mskcc.org
         - grafana.oncokb.dev.aws.mskcc.org
-        - beta.oncokb.dev.aws.mskcc.org
+        - beta.core.oncokb.dev.aws.mskcc.org
   rules:
     - host: "www.oncokb.dev.aws.mskcc.org"
       http:
@@ -30,7 +30,7 @@ spec:
                 name: oncokb-test
                 port:
                   number: 80
-    - host: "beta.oncokb.dev.aws.mskcc.org"
+    - host: "beta.core.oncokb.dev.aws.mskcc.org"
       http:
         paths:
           - path: "/"
