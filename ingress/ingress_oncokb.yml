@@ -33,6 +33,7 @@ spec:
     - oncokb.org
     - www.oncokb.org
     - beta.oncokb.org
+    - beta.core.oncokb.org
     - legacy.oncokb.org
     - test.oncokb.org
     - demo.oncokb.org
@@ -68,6 +69,13 @@ spec:
         backend:
           serviceName: oncokb-public-beta
           servicePort: http
+  - host: beta.core.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-core-beta
+          servicePort: 8888
   - host: demo.oncokb.org
     http:
       paths:
