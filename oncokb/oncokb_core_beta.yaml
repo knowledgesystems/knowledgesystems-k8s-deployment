@@ -34,10 +34,10 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-sentinel-redis-no-persistence
+                name: oncokb-redis-cluster
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.10.0
+          image: oncokb/oncokb:3.11.0
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -69,8 +69,8 @@ spec:
             "-Dredis.type=$(REDIS_TYPE)",
             "-Dredis.address=$(REDIS_ADDRESS)",
             "-Dredis.password=$(REDIS_PASSWROD)",
-            "-Dredis.masterName=$(REDIS_MASTERNAME)",
             "-Dredis.expiration=$(REDIS_EXPIRATION)",
+            "-Dswagger_url=https://beta.oncokb.org",
             "-Dshow_sitemaps=false",
             "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
             "-Dsentry.sample.rate=1",
