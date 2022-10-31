@@ -17,7 +17,6 @@ spec:
   strategy:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
-      maxSurge: 0
       maxUnavailable: 1
     type: RollingUpdate
   template:
@@ -39,7 +38,7 @@ spec:
                 name: oncokb-sentinel-redis-no-persistence
             - configMapRef:
                 name: oncokb-db-eucentral-rds
-          image: oncokb/oncokb:3.9.5
+          image: oncokb/oncokb:3.11.0
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -76,6 +75,7 @@ spec:
               "-Dredis.password=$(REDIS_PASSWROD)",
               "-Dredis.masterName=$(REDIS_MASTERNAME)",
               "-Dredis.expiration=$(REDIS_EXPIRATION)",
+              "-Dswagger_url=https://eucentral.oncokb.org",
               "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
               "-Dsentry.sample.rate=0.5",
               "-Dshow_sitemaps=false",
