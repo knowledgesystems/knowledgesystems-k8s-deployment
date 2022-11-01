@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public
-        image: cbioportal/cbioportal:5.1.5-web-shenandoah
+        image: cbioportal/cbioportal:5.1.6-web-shenandoah
         command: [ "/usr/bin/java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
