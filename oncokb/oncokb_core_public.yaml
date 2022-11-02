@@ -33,7 +33,7 @@ spec:
                 name: oncokb-core-public
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.10.0-no-frontend
+          image: oncokb/oncokb:3.11.0-no-frontend
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -59,6 +59,7 @@ spec:
             "-Djdbc.password=$(DB_PASSWORD)",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Dshow_sitemaps=false",
+            "-Dswagger_url=https://public.api.oncokb.org",
             "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
             "-Dsentry.sample.rate=0.1",
             "-Dis_public_instance=true",
