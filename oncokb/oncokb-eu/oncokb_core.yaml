@@ -9,7 +9,7 @@ metadata:
     run: oncokb-core
   name: oncokb-core
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       run: oncokb-core
@@ -34,7 +34,7 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-sentinel-redis-no-persistence
+                name: oncokb-redis-cluster
             - configMapRef:
                 name: oncokb-db-eucentral-rds
           image: oncokb/oncokb:3.11.0
