@@ -8,7 +8,6 @@ metadata:
   labels:
     run: oncokb-core
   name: oncokb-core
-  selfLink: /apis/apps/v1/oncokb/deployments/oncokb-core
 spec:
   replicas: 2
   selector:
@@ -63,8 +62,8 @@ spec:
               "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
-              "-Dgenome_nexus.grch37.url=http://gn-spring-boot",
-              "-Dgenome_nexus.grch38.url=http://gn-spring-boot-grch38",
+              "-Dgenome_nexus.grch37.url=http://genome-nexus",
+              "-Dgenome_nexus.grch38.url=http://genome-nexus-grch38",
               "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
               "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",
               "-Daws.s3.region=$(AWS_REGION)",
@@ -132,7 +131,6 @@ metadata:
   labels:
     run: oncokb-core
   name: oncokb-core
-  selfLink: /api/v1/services/oncokb-core
 spec:
   ports:
     - port: 8888
