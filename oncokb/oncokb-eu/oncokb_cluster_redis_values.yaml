@@ -1,0 +1,15 @@
+redis:
+  configmap: |-
+    maxmemory 3Gb
+    maxmemory-policy allkeys-lru
+  livenessProbe:
+    initialDelaySeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 10
+    timeoutSeconds: 5
+
+cluster:
+  nodes: 6
+  replicas: 1

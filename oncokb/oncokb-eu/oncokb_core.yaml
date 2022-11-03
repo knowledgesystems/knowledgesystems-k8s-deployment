@@ -8,9 +8,8 @@ metadata:
   labels:
     run: oncokb-core
   name: oncokb-core
-  selfLink: /apis/apps/v1/oncokb/deployments/oncokb-core
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       run: oncokb-core
@@ -35,7 +34,7 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-sentinel-redis-no-persistence
+                name: oncokb-redis-cluster
             - configMapRef:
                 name: oncokb-db-eucentral-rds
           image: oncokb/oncokb:3.11.0
@@ -63,7 +62,8 @@ spec:
               "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
-              "-Dgenomenexus.api=https://www.genomenexus.org/",
+              "-Dgenome_nexus.grch37.url=http://genome-nexus",
+              "-Dgenome_nexus.grch38.url=http://genome-nexus-grch38",
               "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
               "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",
               "-Daws.s3.region=$(AWS_REGION)",
@@ -131,7 +131,6 @@ metadata:
   labels:
     run: oncokb-core
   name: oncokb-core
-  selfLink: /api/v1/services/oncokb-core
 spec:
   ports:
     - port: 8888
