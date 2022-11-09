@@ -32,7 +32,7 @@ spec:
           value: "true"
         - name: VEP_ASSEMBLY
           value: "GRCh37"
-        image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
+        image: genomenexus/genome-nexus-vep:v0.0.1
         imagePullPolicy: Always
         volumeMounts:
         - name: vep-data
