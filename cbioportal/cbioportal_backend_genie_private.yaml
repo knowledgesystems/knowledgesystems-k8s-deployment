@@ -54,7 +54,7 @@ spec:
         - name: cbioportal-genie-private-configmap-volume
           mountPath: /cbioportal/cbioportal-saml-keystore.jks
           subPath: cbioportal-saml-keystore.jks
-        command: [ "/usr/bin/java" ]
+        command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",

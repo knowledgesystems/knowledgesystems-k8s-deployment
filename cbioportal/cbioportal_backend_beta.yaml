@@ -25,7 +25,6 @@ spec:
       labels:
         run: cbioportal-backend-beta
     spec:
-    spec:
       volumes:
       - name: cbioportal-frontend-config-volume
         configMap:
@@ -38,7 +37,7 @@ spec:
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
-        command: [ "/usr/bin/java" ]
+        command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",
