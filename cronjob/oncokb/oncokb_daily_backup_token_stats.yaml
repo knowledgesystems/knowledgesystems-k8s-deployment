@@ -5,7 +5,7 @@ metadata:
   namespace: oncokb
 spec:
   # this is ran after the oncokb-cronjob-public-daily-cronjob
-  schedule: "0 12 * * *"
+  schedule: "0 6 * * *"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:

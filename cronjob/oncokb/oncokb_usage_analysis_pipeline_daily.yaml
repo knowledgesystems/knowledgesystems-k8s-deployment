@@ -4,7 +4,7 @@ metadata:
   name: oncokb-cronjob-daily-usage-analysis-cronjob
   namespace: oncokb
 spec:
-  schedule: "0 6 * * *"
+  schedule: "0 12 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -18,7 +18,7 @@ spec:
             - configMapRef:
                 name: oncokb-usage-analysis-config
             name: main
-            image: oncokb/oncokb-usage-analysis:0.1.7
+            image: oncokb/oncokb-usage-analysis:0.1.8
             command: ["/bin/bash", "-c"]
             args:
               - cd src;
