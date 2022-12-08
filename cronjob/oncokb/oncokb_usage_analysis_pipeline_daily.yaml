@@ -18,7 +18,7 @@ spec:
             - configMapRef:
                 name: oncokb-usage-analysis-config
             name: main
-            image: oncokb/oncokb-usage-analysis:0.1.8
+            image: oncokb/oncokb-usage-analysis:0.1.9
             command: ["/bin/bash", "-c"]
             args:
               - cd src;
