@@ -48,6 +48,12 @@ helm install -f oncokb_sentinel_redis_no_persistence_cache_values.yaml --namespa
 helm del --purge oncokb-public-redis -n
 ```
 
+## Cluster
+### Install
+```bash
+helm install -n oncokb oncokb-redis-cluster -f oncokb_cluster_redis_values.yaml bitnami/redis-cluster --set password=<password>
+```
+
 ### Grafana Redis Config
 Name: OncoKB Sentinel Redis  
 Address: redis://oncokb-sentinel-redis-headless:26379  
