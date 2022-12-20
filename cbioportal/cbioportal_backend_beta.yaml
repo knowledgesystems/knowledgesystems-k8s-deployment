@@ -34,11 +34,11 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:5.2.0-web-shenandoah
+        image: cbioportal/cbioportal:5.2.2-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
-        command: [ "/usr/bin/java" ]
+        command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",
