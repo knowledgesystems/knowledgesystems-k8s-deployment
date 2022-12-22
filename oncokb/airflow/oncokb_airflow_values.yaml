@@ -1,0 +1,21 @@
+## Configure Git to pull dags and plugins
+git:
+  dags:
+    enabled: true
+    repositories:
+      - repository: https://oncokbdev:${ONCOKBDEV_PRIVATE_ACCESS_TOKEN}@github.com/oncokb/oncokb-pipeline
+        branch: airflow-examples
+        name: oncokb-airflow-dags
+        path: /oncokb-airflow
+  clone:
+    extraEnvVarsCM: oncokb-github
+  sync:
+    extraEnvVarsCM: oncokb-github
+
+serviceAccount:
+  name: "oncokb-airflow-serviceaccount"
+
+# Passing this to PYTHONPATH helps resolve some import errors in python files.
+extraEnvVars:
+  - name: PYTHONPATH
+    value: "/opt/bitnami/airflow/dags/git_oncokb-airflow-dags/"
