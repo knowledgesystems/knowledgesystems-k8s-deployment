@@ -13,7 +13,7 @@ git:
     extraEnvVarsCM: oncokb-github
 
 serviceAccount:
-  name: "oncokb-airflow-serviceaccount"
+  name: "oncokb-airflow-service-account"
 
 # Passing this to PYTHONPATH helps resolve some import errors in python files.
 extraEnvVars:

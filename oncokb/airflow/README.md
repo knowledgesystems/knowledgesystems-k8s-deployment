@@ -12,6 +12,6 @@ helm upgrade oncokb-airflow bitnami/airflow -f airflow/oncokb_airflow_values.yam
 ```
 
 ### Service Account
-Some of our DAGs uses the [Kubernetes Client](https://github.com/kubernetes-client/python) for Python, which requires a ServiceAccount when accessing the K8s api. Modify the `oncokb-airflow-serviceaccount` to give proper permissions.
+Some of our DAGs uses the [Kubernetes Client](https://github.com/kubernetes-client/python) for Python, which requires a ServiceAccount when accessing the K8s api. Modify the `oncokb-airflow-service-account` to give proper permissions.
 
 
