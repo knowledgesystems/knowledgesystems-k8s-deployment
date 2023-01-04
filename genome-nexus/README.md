@@ -1,14 +1,33 @@
 # Genome Nexus
-Create a namespace specific to genome nexus:
+**Create a namespace specific to genome nexus**
 ```
 kubectl create namespace genome-nexus
 ```
+**Create mongodb**
+Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes.
 
-Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes:
+If you are using helm v2:
 ```
-helm install --name gn-mongo-v0dot19 --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=v0.19,persistence.size=50Gi bitnami/mongodb --namespace genome-nexus
+helm install --name gn-mongo-v0dot25 --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.25,persistence.size=100Gi bitnami/mongodb --namespace genome-nexus
 ```
-Deploy genome nexus app:
+
+If you are using helm v3:
+```
+helm install gn-mongo-v0dot25 bitnami/mongodb --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.25,persistence.size=100Gi --namespace genome-nexus
+```
+
+**Troubleshooting**
+If you are on a newer version of Bitnami, you might facing a problem that `mongodb` is not available in `index.yaml`. See https://github.com/bitnami/charts/issues/10539. 
+
+Workaround for previous versions is manually using `helm repo add` to add full index
+```
+$ helm repo add bitnami-full-index https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+"bitnami-full-index" has been added to your repositories
+```
+Then setting up database follow instructions above, remember to change `... bitnami/mongodb ...` to `... bitnami-full-index/mongodb ...`
+
+**Deploy genome nexus app**
+Make sure your currently location is under `./genome_nexue/`
 ```
 kubectl apply -f gn_spring_boot.yaml --namespace=genome-nexus
 ```
@@ -111,6 +130,17 @@ rm -rf /tmp/v0d16-dump
 ```
 
 After that you can switch the `mongodb.uri` parameter in the genome nexus config. Might want to keep the old database running for a bit in case one needs to revert.
+
+## Delete old database
+If you are using helm v2 (e.g. delete `gn-mongo-v0dot15`):
+```
+helm del --purge gn-mongo-v0dot15
+```
+
+If you are using helm v3 (e.g. delete `gn-mongo-v0dot15`):
+```
+helm delete gn-mongo-v0dot15 --namespace=genome-nexus
+```
 
 ## Notes
 - alpine docker image does not play nice with kubernetes (https://twitter.com/inodb/status/999041628970127360)
