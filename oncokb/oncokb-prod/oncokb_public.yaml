@@ -99,6 +99,16 @@ spec:
           effect: "NoSchedule"
       nodeSelector:
         kops.k8s.io/instancegroup: oncokb
+          volumeMounts:
+          # The subPath is needed so that mounting the secret as a single file doesn't override
+          # the contents of the existing directory. 
+          - mountPath: /app/resources/config/recaptcha/oncokb-recaptcha-credentials.json
+            subPath: oncokb-recaptcha-credentials.json
+            name: recaptcha-credentials
+      volumes:
+      - name: recaptcha-credentials
+        secret:
+          secretName: oncokb-recaptcha-credentials
 
 ---
 apiVersion: v1
