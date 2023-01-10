@@ -162,6 +162,7 @@ spec:
             "-Denable_persistent_cache=false",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
+            "-Dmsk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
