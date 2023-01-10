@@ -95,7 +95,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://deploy-preview-4332--cbioportalfrontend.netlify.app/",
+            "-Dfrontend.url=https://frontend.cbioportal.org",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dabout=about_us.html",
@@ -155,7 +155,7 @@ spec:
             "-Dsentry.dsn=$(SENTRY_DSN)",
             "-Dsentry.factory=org.cbioportal.logging.SentryClientFactory",
             #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
-            "-Dsitemaps=true",
+            "-Dsitemaps=false",
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Doncokb.merge_icons_by_default=false",
