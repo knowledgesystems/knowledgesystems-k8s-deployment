@@ -6,7 +6,7 @@ git:
       # More information on getting DAG files from GitHub:
       # https://github.com/bitnami/charts/tree/main/bitnami/airflow#option-2-get-your-dag-files-from-a-git-repository
       - repository: https://oncokbdev:${ONCOKBDEV_PRIVATE_ACCESS_TOKEN}@github.com/oncokb/oncokb-pipeline
-        branch: airflow-examples
+        branch: master
         name: oncokb-airflow-dags
         path: /oncokb-airflow
   clone:
@@ -15,6 +15,9 @@ git:
   sync:
     # By default airflow syncs with the repo every 60s.
     extraEnvVarsCM: oncokb-github
+
+auth:
+  username: admin
 
 serviceAccount:
   name: "oncokb-airflow-service-account"
