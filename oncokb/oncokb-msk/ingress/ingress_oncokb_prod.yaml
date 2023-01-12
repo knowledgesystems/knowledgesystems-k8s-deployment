@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oncokb-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+spec:
+#  tls:
+#    - hosts:
+#      - www.oncokb.aws.mskcc.org
+#      secretName: wildcard-cert
+  rules:
+    - host: "www.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core-beta
+                port:
+                  number: 8888
+    - host: "beta-core.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core-beta
+                port:
+                  number: 8888
+  ingressClassName: nginx
