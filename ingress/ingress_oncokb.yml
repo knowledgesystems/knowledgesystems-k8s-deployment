@@ -45,6 +45,7 @@ spec:
     - curation.oncokb.org
     - keycloak.oncokb.org
     - grafana.oncokb.org
+    - airflow.oncokb.org
     secretName: oncokb-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
@@ -153,3 +154,10 @@ spec:
         backend:
           serviceName: oncokb-grafana
           servicePort: 80
+  - host: airflow.oncokb.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oncokb-airflow
+          servicePort: 8080
