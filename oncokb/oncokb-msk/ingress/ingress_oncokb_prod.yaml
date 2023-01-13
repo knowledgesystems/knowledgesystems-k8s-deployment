@@ -5,10 +5,12 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
 spec:
-#  tls:
-#    - hosts:
-#      - www.oncokb.aws.mskcc.org
-#      secretName: wildcard-cert
+  tls:
+    - hosts:
+      - www.oncokb.aws.mskcc.org
+      - beta-core.oncokb.aws.mskcc.org
+      - mm.oncokb.aws.mskcc.org
+      secretName: wildcard-cert
   rules:
     - host: "www.oncokb.aws.mskcc.org"
       http:
