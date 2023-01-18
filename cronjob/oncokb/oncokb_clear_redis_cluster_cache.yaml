@@ -5,7 +5,7 @@ metadata:
   namespace: oncokb
 spec:
   concurrencyPolicy: Forbid
-  schedule: "*/15 * * * *"
+  schedule: "*/5 * * * *"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -20,10 +20,25 @@ spec:
             args:
               - echo "Job Starts...";
 
-                REDIS_INSTANCE=$(kubectl get configmap oncokb-redis-cluster -o jsonpath="{.data.REDIS_ADDRESS}" | awk -F'[/:]+' '{print $2}' | awk -F'-headless' '{print $1}');
+                CURRENT_REDIS_IN_USE=$(kubectl -n oncokb get deployment oncokb-core -o jsonpath='{.spec.template.spec.containers[0].envFrom[?(@.configMapRef.name=="oncokb-redis-cluster")].configMapRef.name}');
+                if [ -z "$CURRENT_REDIS_IN_USE" ];
+                then
+                  CURRENT_REDIS_IN_USE=$(kubectl -n oncokb get deployment oncokb-core -o jsonpath='{.spec.template.spec.containers[0].envFrom[?(@.configMapRef.name=="oncokb-redis-cluster-backup")].configMapRef.name}');
+                  if [ -z "$CURRENT_REDIS_IN_USE" ];
+                  then
+                    echo "oncokb-core is not using redis cluster";
+                    exit 0;
+                  else
+                    echo "oncokb-core is currently using oncokb-redis-cluster-backup";
+                  fi;
+                else
+                  echo "oncokb-core is currently using oncokb-redis-cluster";
+                fi;
+
+                REDIS_INSTANCE=$(kubectl -n oncokb get configmap "$CURRENT_REDIS_IN_USE" -o jsonpath="{.data.REDIS_ADDRESS}" | awk -F'[/:]+' '{print $2}' | awk -F'-headless' '{print $1}');
                 echo "Production redis cluster instance is $REDIS_INSTANCE";
 
-                REDIS_PASSWORD=$(kubectl get secret "$REDIS_INSTANCE" -o jsonpath="{.data.redis-password}" | base64 --decode);
+                REDIS_PASSWORD=$(kubectl -n oncokb get secret "$REDIS_INSTANCE" -o jsonpath="{.data.redis-password}" | base64 --decode);
 
                 MAX_MEMORY=$(redis-cli -h "$REDIS_INSTANCE" -p 6379 -a "$REDIS_PASSWORD" info memory | grep 'maxmemory:' | awk '{split($0,a,":"); print a[2]}' | tr -dc '0-9');
                 echo "Max Memory is $MAX_MEMORY";
@@ -49,14 +64,14 @@ spec:
                   if (( $(bc <<< "$REDIS_USAGE_THRESHOLD < $USAGE_STATUS") ));
                   then
                     echo "Finding one oncokb-core instance, we need to pay attention to other instances with oncokb-core as prefix";
-                    POD_TO_DELETE=$(kubectl get pods --sort-by=.status.startTime | grep oncokb-core | awk -F'-' 'NF==4{print}{}' | awk '{print $1}' | head -n 1);
+                    POD_TO_DELETE=$(kubectl -n oncokb get pods --sort-by=.status.startTime | grep oncokb-core | awk -F'-' 'NF==4{print}{}' | awk '{print $1}' | head -n 1);
                     
                     if [[ -z "$POD_TO_DELETE" ]];
                     then
                       echo "No pod is available";
                     else
                       echo "Deleting pod $POD_TO_DELETE";
-                      kubectl delete pod "$POD_TO_DELETE";
+                      kubectl -n oncokb delete pod "$POD_TO_DELETE";
                     fi;
                   fi;
                 else
