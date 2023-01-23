@@ -118,7 +118,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: cbioportal-backend-genie-public
+          serviceName: cbioportal-backend-genie-public-beta
           servicePort: http
   - host: beta.cbioportal.org
     http:
