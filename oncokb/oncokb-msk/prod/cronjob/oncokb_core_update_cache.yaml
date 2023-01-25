@@ -24,7 +24,7 @@ spec:
               - echo "Job Starts...";
                 
                 echo "Getting last data update...";
-                LAST_DATA_UPDATE_STR=$(echo "select last_data_update from info;" | mysql -h "$DB_URL" oncokb_core -u${DB_USERNAME} -p${DB_PASSWORD} | tail -n1);
+                LAST_DATA_UPDATE_STR=$(echo "select last_data_update from info;" | mysql -h "$DB_HOST" oncokb_core -u${DB_USERNAME} -p${DB_PASSWORD} | tail -n1);
                 echo "Last data update was $LAST_DATA_UPDATE_STR";
                 
                 if [ -z "$LAST_DATA_UPDATE_STR" ];

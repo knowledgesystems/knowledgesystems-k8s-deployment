@@ -6,29 +6,29 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: oncokb-core-beta
-  name: oncokb-core-beta
+    run: oncokb-core
+  name: oncokb-core
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
-      run: oncokb-core-beta
+      run: oncokb-core
   strategy:
     rollingUpdate:
-      maxSurge: 2
-      maxUnavailable: 0
+      maxSurge: 5
+      maxUnavailable: 3
     type: RollingUpdate
   template:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncokb-core-beta
+        run: oncokb-core
     spec:
       containers:
         - env:
           envFrom:
             - configMapRef:
-                name: oncokb-core-beta
+                name: oncokb-core
             - configMapRef:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
@@ -38,7 +38,7 @@ spec:
           args: [
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=jdbc:mysql://$(DB_HOST):${DB_PORT}/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.url=jdbc:mysql://$(DB_HOST):${DB_PORT}/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
             "-Djdbc.password=$(DB_PASSWORD)",
             "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
@@ -77,7 +77,7 @@ spec:
             timeoutSeconds: 10
             periodSeconds: 10
             failureThreshold: 20
-          name: oncokb-core-beta
+          name: oncokb-core
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -101,11 +101,11 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncokb-core-beta
-  name: oncokb-core-beta
+    run: oncokb-core
+  name: oncokb-core
 spec:
   ports:
     - port: 8888
   selector:
-    run: oncokb-core-beta
+    run: oncokb-core
   type: ClusterIP
