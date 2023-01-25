@@ -22,7 +22,41 @@ auth:
 serviceAccount:
   name: "oncokb-airflow-service-account"
 
-# Passing this to PYTHONPATH helps resolve some import errors in python files.
 extraEnvVars:
+  # Passing this to PYTHONPATH helps resolve some import errors in python files.
   - name: PYTHONPATH
     value: "/opt/bitnami/airflow/dags/git_oncokb-airflow-dags/"
+  # Enabling xcom pickling allows objects to be serialized. https://docs.python.org/3/library/pickle.html
+  - name: AIRFLOW__CORE__ENABLE_XCOM_PICKLING
+    value: "true"
+  # The base url for airflow web. This is used so we get the correct log urls. https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#base-url
+  - name: AIRFLOW__WEBSERVER__BASE_URL
+    value: "http://airflow.oncokb.org"
+
+# Installing extra python packages - https://github.com/bitnami/charts/tree/main/bitnami/airflow#install-extra-python-packages
+web:
+  extraVolumeMounts:
+    - name: requirements
+      mountPath: /bitnami/python/
+  extraVolumes:
+    - name: requirements
+      configMap:
+        name: oncokb-airflow-requirements
+
+scheduler:
+  extraVolumeMounts:
+    - name: requirements
+      mountPath: /bitnami/python/
+  extraVolumes:
+    - name: requirements
+      configMap:
+        name: oncokb-airflow-requirements
+        
+worker:
+  extraVolumeMounts:
+    - name: requirements
+      mountPath: /bitnami/python/
+  extraVolumes:
+    - name: requirements
+      configMap:
+        name: oncokb-airflow-requirements
