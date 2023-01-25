@@ -31,39 +31,22 @@ spec:
                 name: oncokb-core-beta
             - configMapRef:
                 name: oncokb-db-msk-prod-rds
-          image: oncokb/oncokb:3.10.0
+            - configMapRef:
+                name: oncokb-redis-cluster
+          image: oncokb/oncokb:3.12.1
           command: ["java"]
           args: [
-            # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
-            "-Xms250m",
-            "-XX:+UseSerialGC",
-            # aggressive garbage collection
-            "-XX:MinHeapFreeRatio=20",
-            "-XX:MaxHeapFreeRatio=40",
-            "-XX:GCTimeRatio=4",
-            "-XX:AdaptiveSizePolicyWeight=90",
-            "-XX:+UnlockExperimentalVMOptions",
-            "-XX:+UseCGroupMemoryLimitForHeap",
-            # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
-            "-XX:MaxRAMFraction=2",
-            "-XX:+PrintFlagsFinal",
-            "-XshowSettings:vm",
-            # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
-            # from the limits
-            "-XX:MaxRAM=1024m",
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
             "-Djdbc.url=$(DB_URL)/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
             "-Djdbc.password=$(DB_PASSWORD)",
-            "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-            "-Dredis.enable=false",
+            "-Dredis.enable=true",
             "-Dredis.type=$(REDIS_TYPE)",
             "-Dredis.address=$(REDIS_ADDRESS)",
-            "-Dredis.password=$(REDIS_PASSWROD)",
-            "-Dredis.masterName=$(REDIS_MASTERNAME)",
+            "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dredis.expiration=$(REDIS_EXPIRATION)",
             "-Dshow_sitemaps=false",
             "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
