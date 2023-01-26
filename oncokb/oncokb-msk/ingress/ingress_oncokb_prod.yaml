@@ -9,6 +9,8 @@ spec:
     - hosts:
       - www.oncokb.aws.mskcc.org
       - beta-core.oncokb.aws.mskcc.org
+      - core.oncokb.aws.mskcc.org
+      - curation.oncokb.aws.mskcc.org
       - mm.oncokb.aws.mskcc.org
       secretName: wildcard-cert
   rules:
@@ -30,6 +32,26 @@ spec:
             backend:
               service:
                 name: oncokb-core-beta
+                port:
+                  number: 8888
+    - host: "core.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core
+                port:
+                  number: 8888
+    - host: "curation.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-curation
                 port:
                   number: 8888
     - host: "mm.oncokb.aws.mskcc.org"
