@@ -29,7 +29,7 @@ spec:
         - envFrom:
             - configMapRef:
                 name: cbioportal-genie-public
-          image: cbioportal/cbioportal:5.2.4-web-shenandoah
+          image: cbioportal/cbioportal:demo-genie-treatments-fix-web-shenandoah
           command: [ "java" ]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -139,11 +139,11 @@ spec:
             "-Ddat.uuid.revoke_other_tokens=true",
             # cache settings (currently redis)
             "-Dcache.statistics_endpoint_enabled=false",
-            "-Dpersistence.cache_type=redis",
-            "-Dredis.leader_address=redis://cbioportal-persistence-redis-genie-master:6379",
-            "-Dredis.follower_address=redis://cbioportal-persistence-redis-genie-slave:6379",
-            "-Dredis.database=9",
-            "-Dredis.password=$(REDIS_PASSWORD)",
+            "-Dpersistence.cache_type=no-cache",
+            # "-Dredis.leader_address=redis://cbioportal-persistence-redis-genie-master:6379",
+            # "-Dredis.follower_address=redis://cbioportal-persistence-redis-genie-slave:6379",
+            # "-Dredis.database=9",
+            # "-Dredis.password=$(REDIS_PASSWORD)",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
             # comparison settings
