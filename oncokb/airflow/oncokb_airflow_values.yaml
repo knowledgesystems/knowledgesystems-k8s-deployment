@@ -32,6 +32,9 @@ extraEnvVars:
   # The base url for airflow web. This is used so we get the correct log urls. https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#base-url
   - name: AIRFLOW__WEBSERVER__BASE_URL
     value: "http://airflow.oncokb.org"
+  # Should be disabled in production. https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#load-default-connections
+  - name: AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS
+    value: "false"
 
 # Installing extra python packages - https://github.com/bitnami/charts/tree/main/bitnami/airflow#install-extra-python-packages
 web:
