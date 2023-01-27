@@ -3,6 +3,7 @@
 ## Install
 ```
 kubectl apply -f airflow/oncokb_airflow_service_account.yaml
+kubectl apply -f airflow/oncokb_airflow_requirements.yaml
 
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install oncokb-airflow bitnami/airflow -f airflow/oncokb_airflow_values.yaml --set auth.password=your-password
