@@ -10,6 +10,7 @@ spec:
       - www.oncokb.dev.aws.mskcc.org
       - grafana.oncokb.dev.aws.mskcc.org
       - beta-core.oncokb.dev.aws.mskcc.org
+      - airflow.oncokb.dev.aws.mskcc.org
       secretName: wildcard-cert
   rules:
     - host: "www.oncokb.dev.aws.mskcc.org"
@@ -42,4 +43,14 @@ spec:
                 name: oncokb-grafana
                 port:
                   number: 80
+    - host: "airflow.oncokb.dev.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: airflow
+                port:
+                  number: 8080
   ingressClassName: nginx
