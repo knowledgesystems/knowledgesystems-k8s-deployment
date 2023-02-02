@@ -4,7 +4,7 @@ metadata:
   name: oncokb-cronjob-update-core-cache
 spec:
   concurrencyPolicy: Forbid
-  schedule: "*/1 * * * *"
+  schedule: "*/5 * * * *"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -32,15 +32,18 @@ spec:
                   echo "No last data update available";
                   sleep 60;
                 else
-                  THRESHOLD_IN_MIN=5;
-                  LAST_DATA_UPDATE=$(date -d "$LAST_DATA_UPDATE_STR 7days + $THRESHOLD_IN_MIN mins" +%s);
+                  THRESHOLD=5mins;
+                  LAST_DATA_UPDATE_WITH_THRESHOLD=$(date -d "$LAST_DATA_UPDATE_STR today + $THRESHOLD" --utc +%s);
                   CURRENT_DATE=$(date --utc +%s);
-                  
-                  if [ "$LAST_DATA_UPDATE" -gt "$CURRENT_DATE" ];
+                
+                  echo "Threshold $THRESHOLD";
+                  echo "Comparison with threshold $LAST_DATA_UPDATE_WITH_THRESHOLD -gt $CURRENT_DATE";
+                  if [ "$LAST_DATA_UPDATE_WITH_THRESHOLD" -gt "$CURRENT_DATE" ];
                   then
                     kubectl set env deployment oncokb-core --env="LAST_RESTART=$(date)";
+                    kubectl set env deployment oncokb-cbx --env="LAST_RESTART=$(date)";
                   else
-                    echo "Not data update within $THRESHOLD_IN_MIN mins";
+                    echo "Not data update within $THRESHOLD";
                   fi;
                   echo "Job Done";
                 fi
