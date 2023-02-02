@@ -34,7 +34,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:demo-genie-treatments-fix-web-shenandoah
+        image: cbioportal/cbioportal:demo-pr-9949-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
