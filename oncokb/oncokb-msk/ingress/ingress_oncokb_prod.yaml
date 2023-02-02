@@ -13,6 +13,7 @@ spec:
       - curation.oncokb.aws.mskcc.org
       - mm.oncokb.aws.mskcc.org
       - cbx.oncokb.aws.mskcc.org
+      - grafana.oncokb.aws.mskcc.org
       secretName: wildcard-cert
   rules:
     - host: "www.oncokb.aws.mskcc.org"
@@ -75,4 +76,14 @@ spec:
                 name: oncokb-mm
                 port:
                   number: 8888
+    - host: "grafana.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-grafana
+                port:
+                  number: 80
   ingressClassName: nginx
