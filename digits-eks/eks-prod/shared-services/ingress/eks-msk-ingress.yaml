@@ -72,6 +72,13 @@ spec:
             name: eks-msk
             port:
               number: 80
+      - path: "/study/summary?id=paired_bladder_2022"
+        pathType: Exact
+        backend:
+          service:
+            name: eks-redirect-paired-bladder-2022
+            port:
+              number: 80
   - host: "cdd.cbioportal.aws.mskcc.org"
     http:
       paths:
