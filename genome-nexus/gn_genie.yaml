@@ -55,9 +55,18 @@ spec:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
             port: 8888
-          initialDelaySeconds: 30
-          timeoutSeconds: 2
-          periodSeconds: 5
+          initialDelaySeconds: 240
+          timeoutSeconds: 30
+          periodSeconds: 60
+        # TODO: create a better liveness probe (this is just readiness with
+        # more lenience)
+        livenessProbe:
+          httpGet:
+            path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+            port: 8888
+          initialDelaySeconds: 240
+          timeoutSeconds: 120
+          periodSeconds: 240
         name: genome-nexus-genie
         ports:
         - containerPort: 8888
