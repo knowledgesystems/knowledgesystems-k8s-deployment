@@ -9,14 +9,13 @@ metadata:
     run: oncokb-core
   name: oncokb-core
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       run: oncokb-core
   strategy:
     rollingUpdate:
-      maxSurge: 5
-      maxUnavailable: 1
+      maxSurge: 3
     type: RollingUpdate
   template:
     metadata:
