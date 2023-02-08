@@ -24,9 +24,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: oncokb-core
+                name: oncokb-public
                 port:
-                  number: 8888
+                  number: 9095
     - host: "beta-core.oncokb.aws.mskcc.org"
       http:
         paths:

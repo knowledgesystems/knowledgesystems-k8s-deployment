@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: oncokb-core
+  name: oncokb-public
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-public
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-public
+    spec:
+      containers:
+        - name: oncokb-public
+          image: oncokb/oncokb-public:3.8.15-alpha.0
+          env:
+            # Database schema update takes a lot of especially when changing a table with a lot of table
+            # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,no-liquibase
+            - name: JAVA_OPTS
+              value: "-Xmx1024m -Xms512m"
+            - name: APPLICATION_FRONTEND_ENABLE_AUTH
+              value: "FALSE"
+            - name: APPLICATION_REDIS_TYPE
+              value: "$(REDIS_TYPE)"
+            - name: APPLICATION_REDIS_ADDRESS
+              value: "$(REDIS_ADDRESS)"
+            - name: APPLICATION_REDIS_PASSWORD
+              value: "$(REDIS_PASSWORD)"
+            - name: APPLICATION_TOKENUSAGECHECK
+              value: ""
+            - name: SENTRY_EXCEPTION_RESOLVER_ORDER
+              value: "-2147483647"
+            - name: SENTRY_TRACES_SAMPLE_RATE
+              value: ".2"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_public"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "${DB_USERNAME}"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "${DB_PASSWORD}"
+          envFrom:
+            - configMapRef:
+                name: oncokb-public
+            - configMapRef:
+                name: oncokb-redis-cluster
+            - configMapRef:
+                name: oncokb-db-msk-prod-rds
+          readinessProbe:
+            httpGet:
+              path: /v2/api-docs
+              port: 9095
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9095
+            initialDelaySeconds: 90
+            timeoutSeconds: 15
+            periodSeconds: 15
+            failureThreshold: 10
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "0.5"
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+          ports:
+            - name: http
+              containerPort: 9095
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-public
+  labels:
+    run: oncokb-public
+spec:
+  selector:
+    run: oncokb-public
+  type: ClusterIP
+  ports:
+    - port: 9095
