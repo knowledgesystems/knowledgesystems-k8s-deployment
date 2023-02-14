@@ -6,8 +6,8 @@ Install redis cluster through helm
 https://docs.redis.com/latest/ri/installing/install-k8s/#helm-chart-experimental
 
 ### Redis database configuration usually looks like
-Host: oncokb-redis-cluster
-Port: 6379
-Name: oncokb-redis-cluster
-Username: (default, leave it empty)
-Password: 
+Host: oncokb-redis-cluster  
+Port: 6379  
+Name: oncokb-redis-cluster  
+Username: (default, leave it empty)  
+Password:   
