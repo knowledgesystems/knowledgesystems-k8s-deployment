@@ -65,7 +65,7 @@ spec:
             - configMapRef:
                 name: oncokb-sentinel-redis
             - configMapRef:
-                name: oncokb-db-genie-rds
+                name: oncokb-db-eucentral-rds
           readinessProbe:
             httpGet:
               path: /v2/api-docs
