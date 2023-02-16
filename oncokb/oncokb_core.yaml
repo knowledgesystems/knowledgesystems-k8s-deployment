@@ -38,7 +38,7 @@ spec:
             - configMapRef:
                 name: oncokb-redis-cluster-backup
             - configMapRef:
-                name: oncokb-db-genie-rds
+                name: oncokb-db-public-rds-oncokb-user
           image: oncokb/oncokb:3.12.6
           command: ["java"]
           args: [
