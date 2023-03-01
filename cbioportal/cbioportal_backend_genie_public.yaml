@@ -106,7 +106,7 @@ spec:
             "-Dskin.data_sets_footer=",
             "-Dskin.data_sets_header=The portal currently contains data from <NUM_CANCER_STUDIES> cancer genomics studies.  The table below lists the number of available samples per cancer study and data type.",
             "-Dskin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/genie-documentation/docs/",
-            "-Dskin.documentation.skin.news=genie-news.md",
+            "-Dskin.documentation.news=https://docs.cbioportal.org/news-genie/",
             "-Dskin.query.max_tree_depth=0",
             "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/genie_portal/",
             "-Dsession.service.origin=*",
