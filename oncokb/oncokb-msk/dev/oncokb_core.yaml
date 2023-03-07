@@ -30,7 +30,7 @@ spec:
                 name: oncokb-core
             - configMapRef:
                 name: oncokb-db-msk-dev-rds
-          image: oncokb/oncokb:3.12.6
+          image: oncokb/oncokb:3.12.6-no-frontend
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
@@ -69,7 +69,7 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 1800
+            initialDelaySeconds: 600
             timeoutSeconds: 10
             periodSeconds: 10
             failureThreshold: 20
@@ -83,7 +83,7 @@ spec:
               memory: 1Gi
             limits:
               cpu: 2
-              memory: 1Gi
+              memory: 2Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
