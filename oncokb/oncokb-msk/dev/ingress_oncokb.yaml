@@ -9,7 +9,6 @@ spec:
     - hosts:
       - www.oncokb.dev.aws.mskcc.org
       - grafana.oncokb.dev.aws.mskcc.org
-      - beta-core.oncokb.dev.aws.mskcc.org
       - airflow.oncokb.dev.aws.mskcc.org
       secretName: wildcard-cert
   rules:
@@ -20,17 +19,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: oncokb-test
-                port:
-                  number: 80
-    - host: "beta-core.oncokb.dev.aws.mskcc.org"
-      http:
-        paths:
-          - path: "/"
-            pathType: Prefix
-            backend:
-              service:
-                name: oncokb-core-beta-cluster
+                name: oncokb-core
                 port:
                   number: 8888
     - host: "grafana.oncokb.dev.aws.mskcc.org"
