@@ -93,7 +93,7 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             periodSeconds: 10
             failureThreshold: 60
           livenessProbe:
