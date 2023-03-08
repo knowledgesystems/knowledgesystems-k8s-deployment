@@ -9,6 +9,8 @@ redis:
   readinessProbe:
     failureThreshold: 10
     timeoutSeconds: 5
+  nodeSelector:
+    kops.k8s.io/instancegroup: large-mem
 
 cluster:
   # To successfully set the cluster up, it will need to have at least 3 master nodes. 
