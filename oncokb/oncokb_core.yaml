@@ -94,7 +94,7 @@ spec:
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
-            periodSeconds: 10
+            periodSeconds: 20
             failureThreshold: 60
           livenessProbe:
             httpGet:
