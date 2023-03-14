@@ -36,7 +36,7 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-redis-cluster-backup
+                name: oncokb-redis-cluster
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
           image: oncokb/oncokb:3.12.6
