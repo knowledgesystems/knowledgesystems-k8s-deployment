@@ -79,6 +79,7 @@ spec:
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
             "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
