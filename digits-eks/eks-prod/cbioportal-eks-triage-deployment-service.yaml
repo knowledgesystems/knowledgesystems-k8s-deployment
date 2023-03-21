@@ -149,7 +149,8 @@ spec:
             "-Dshow.genomenexus.annotation_sources=mutation_assessor",
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
-            # cache settings (currently redis)
+            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
+          # cache settings (currently redis)
 #            "-Dcache.statistics_endpoint_enabled=false",
             "-Dredis.database=3",
             "-Dpersistence.cache_type=redis",
