@@ -104,6 +104,7 @@ spec:
             "-Dskin.patientview.filter_genes_profiled_all_samples=false",
             "-Dinstallation_map_url=https://installationmap.netlify.app/",
             "-Dapp.name=eks-private",
+            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
             "-Dauthenticate=saml",

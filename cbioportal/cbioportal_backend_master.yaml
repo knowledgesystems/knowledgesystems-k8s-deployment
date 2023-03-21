@@ -122,7 +122,7 @@ spec:
             "-Dmicrosoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
             "-Dbitly.url=$(BITLY_URL)",
             "-Dbitly.access.token=$(BITLY_ACCESS_TOKEN)",
-            #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
+          #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "-Dsentry.factory=org.cbioportal.logging.SentryClientFactory",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dsitemaps=false",

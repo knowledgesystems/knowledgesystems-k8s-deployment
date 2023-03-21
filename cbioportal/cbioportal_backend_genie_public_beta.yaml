@@ -128,6 +128,7 @@ spec:
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dsitemaps=false",
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
+            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://www.genomenexus.org",
             "-Dgenomenexus.isoform_override_source=uniprot",
