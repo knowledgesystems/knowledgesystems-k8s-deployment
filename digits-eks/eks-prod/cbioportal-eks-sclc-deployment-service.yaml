@@ -114,6 +114,7 @@ spec:
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             #"-Dtomcat.catalina.scope=runtime",
+            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
