@@ -32,12 +32,10 @@ spec:
             - configMapRef:
                 name: oncokb-core-beta
             - configMapRef:
-                name: oncokb-github
-            - configMapRef:
                 name: oncokb-redis-cluster-genie
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.12.7
+          image: oncokb/oncokb:3.13.0-actionable-gene-1
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
@@ -68,21 +66,21 @@ spec:
           # use actionable variants endpoint to cache everything
           readinessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /api/v1/utils/allActionableGenes
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
+            periodSeconds: 20
+            failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /api/v1/utils/allActionableGenes
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 1800
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 60
           name: oncokb-core-beta
           ports:
             - containerPort: 8888
