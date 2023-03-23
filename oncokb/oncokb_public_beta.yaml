@@ -26,20 +26,14 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
-            - name: APPLICATION_GITHUB_TOKEN
-              value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
             - name: APPLICATION_REDIS_ADDRESS
               value: '$(REDIS_ADDRESS)'
             - name: APPLICATION_REDIS_PASSWORD
               value: '$(REDIS_PASSWROD)'
             - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
               value: '$(REDIS_MASTERNAME)'
-            - name: APPLICATION_AWS_S3_ACCESS_KEY
-              value: '$(ACCESS_KEY_ID)'
-            - name: APPLICATION_AWS_S3_REGION
-              value: '$(AWS_REGION)'
-            - name: APPLICATION_AWS_S3_SECRET_KEY
-              value: '$(SECRET_ACCESS_KEY)'
+            - name: APPLICATION_DB_READ_ONLY
+              value: 'true'
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
@@ -47,7 +41,7 @@ spec:
             - name: SENTRY_TRACES_SAMPLE_RATE
               value: '.2'
             - name: SPRING_DATASOURCE_URL
-              value: '${DB_URL}/oncokb_public_beta'
+              value: '${DB_URL}/oncokb_public'
             - name: SPRING_DATASOURCE_USERNAME
               value: '${DB_USERNAME}'
             - name: SPRING_DATASOURCE_PASSWORD
@@ -56,13 +50,9 @@ spec:
             - configMapRef:
                 name: oncokb-public-beta
             - configMapRef:
-                name: oncokb-github
-            - configMapRef:
                 name: oncokb-sentinel-redis
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-public
-            - configMapRef:
-                name: aws-cli-credentials
           readinessProbe:
             httpGet:
               path: /v2/api-docs
