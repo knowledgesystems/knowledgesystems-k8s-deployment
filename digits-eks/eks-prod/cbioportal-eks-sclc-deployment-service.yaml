@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:5.2.11-web-shenandoah
+        image: cbioportal/cbioportal:5.3.0-web-shenandoah
         volumeMounts:
         - name: sclc-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -95,7 +95,7 @@ spec:
             "-Dcom.sun.management.jmxremote.authenticate=false",
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
-            # "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Dfrontend.url=https://frontend.cbioportal.org",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
             "-Dskin.right_nav.whats_new_blurb=",
