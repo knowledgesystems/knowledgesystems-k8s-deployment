@@ -79,6 +79,13 @@ spec:
           ports:
             - name: http
               containerPort: 9095
+      tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "oncokb"
+        effect: "NoSchedule"
+      nodeSelector:
+        kops.k8s.io/instancegroup: oncokb
 
 ---
 apiVersion: v1
