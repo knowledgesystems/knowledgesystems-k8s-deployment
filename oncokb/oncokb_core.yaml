@@ -118,13 +118,18 @@ spec:
               memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-      nodeSelector:
-        kops.k8s.io/instancegroup: large-mem
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "oncokb"
+          effect: "NoSchedule"
+      nodeSelector:
+        kops.k8s.io/instancegroup: oncokb
 status: {}
 ---
 apiVersion: v1
