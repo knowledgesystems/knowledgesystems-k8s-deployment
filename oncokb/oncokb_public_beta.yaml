@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.8.18
+          image: oncokb/oncokb-public:3.9.0-actionable-gene-0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -33,7 +33,7 @@ spec:
             - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
               value: '$(REDIS_MASTERNAME)'
             - name: APPLICATION_DB_READ_ONLY
-              value: 'true'
+              value: 'false'
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
@@ -41,7 +41,7 @@ spec:
             - name: SENTRY_TRACES_SAMPLE_RATE
               value: '.2'
             - name: SPRING_DATASOURCE_URL
-              value: '${DB_URL}/oncokb_public'
+              value: '${DB_URL}/oncokb_public_beta'
             - name: SPRING_DATASOURCE_USERNAME
               value: '${DB_USERNAME}'
             - name: SPRING_DATASOURCE_PASSWORD
@@ -50,7 +50,7 @@ spec:
             - configMapRef:
                 name: oncokb-public-beta
             - configMapRef:
-                name: oncokb-sentinel-redis
+                name: oncokb-sentinel-redis-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
