@@ -56,6 +56,13 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "oncokb"
+          effect: "NoSchedule"
+      nodeSelector:
+        kops.k8s.io/instancegroup: oncokb
 status: {}
 ---
 apiVersion: v1
