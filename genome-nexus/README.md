@@ -4,6 +4,7 @@
 kubectl create namespace genome-nexus
 ```
 **Create mongodb**
+### Standalone instance
 Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes.
 
 If you are using helm v2:
@@ -25,6 +26,47 @@ $ helm repo add bitnami-full-index https://raw.githubusercontent.com/bitnami/cha
 "bitnami-full-index" has been added to your repositories
 ```
 Then setting up database follow instructions above, remember to change `... bitnami/mongodb ...` to `... bitnami-full-index/mongodb ...`
+
+### Replica set
+1. Create a new replica set MongoDB
+```
+helm install gn-mongo-v0dot25 --version 7.3.1 --values=/path_to/gn_mongo_helm_values.yaml bitnami/mongodb --namespace genome-nexus
+```
+
+2. Export the MongoDB root password
+```
+export MONGODB_ROOT_PASSWORD=$(kubectl get secret --namespace genome-nexus genome-nexus-mongo-secret -o jsonpath="{.data.mongodb-root-password}" | base64 --decode)
+```
+This command will retrieve the MongoDB root password from the Kubernetes secret and set it as an environment variable.
+
+3. Import data
+Define MONGO_URI by running
+```
+export MONGO_URI="mongodb://root:$MONGODB_ROOT_PASSWORD@127.0.0.1:27017/annotator?authSource=admin"
+```
+Navigate to genome-nexus-importer
+```
+sh ./scripts/import_mongo.sh
+```
+
+4. Forward port to local
+```
+kubectl port-forward --namespace genome-nexus svc/gn-mongo-test-replica-mongodb 27017:27017
+```
+This command will forward the MongoDB port to the local machine, allowing local access to the MongoDB instance.
+5. Restore data to the database
+First run mongodump from existing database instances to make a copy of collections. 
+`vep.annotation` collection is required because VEP limits how many queries you could send, vep.annotation contains VEP cache from previous annotations and reduces number of new variants send to VEP server. 
+`index` collection provides quick responses for genome nexus website homepage search box, it doesn't affect other annotation jobs.
+
+```
+mongorestore --uri mongodb://root:${MONGODB_ROOT_PASSWORD}@127.0.0.1:27017/annotator?authSource=admin --db=annotator --collection=vep.annotation --writeConcern '{w:0}' --gzip /path_to/vep.annotation.bson.gz
+```
+6. Unset the environment variable
+To unset the environment variable, execute the following command:
+```
+unset MONGODB_ROOT_PASSWORD
+```
 
 **Deploy genome nexus app**
 Make sure your currently location is under `./genome_nexue/`
