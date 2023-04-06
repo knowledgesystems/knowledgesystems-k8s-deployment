@@ -13,7 +13,8 @@ Deploy session service app:
 ```bash
 kubectl apply -f session-service/session_service.yaml
 ```
-
+Note:
+* in the public kubernetes cluster, the version of mongodb deployed via helm proved to be difficult to upgrade or maintain. The version of the helm chart being used was 4.0.4, and the deployment was from an old (pre-v3) version of helm. See [problems_managing_session_service.md](problems_managing_session_service.md)
 ### How to migrate one mongo database to mongo db in kubernetes
 
 Run on the database you'd like to copy (change `${}` variables accordingly):
