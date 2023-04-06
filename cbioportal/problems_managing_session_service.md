@@ -5,7 +5,7 @@
 In April 2023, an attempt was made to adjust the nodeSelector for the cbioportal session service mongoDB installation for the public portal. It was abandoned after encountering a number of difficulties.
 
 * the version of mongodb which we are running was installed originally with an older version of helm than what we are currently running. It is suspected that we have lost track of which version was used.
-* problems were reported with the cluster configuration parameters an the persistence mode, but even after attempting to set (--set persistence.accessMode=ReadWriteOnce) or disable persistence alltogether, errors were still seen when attempting to install the chart:
+* problems were reported with the cluster configuration parameters and the persistence mode, but even after attempting to set (--set persistence.accessMode=ReadWriteOnce) or disable persistence alltogether, errors were still seen when attempting to install the chart:
 
 Here is a rough timeline:
 1. the installations were not visible in the helm v3 client we have upgraded to, so helm cli 2.12.2 was installed
@@ -15,5 +15,4 @@ Here is a rough timeline:
 1. a fresh install under a new release name (used for the first time) also failed with the same "persistent volume clame exists" error: helm2 install --name test-mission-critical-mongo2 bitnami-full-index/mongodb --version 4.0.4 --set persistence.size=1Gi --set tolerances=mission-critical --set nodeselector=mission-critical --set spec.accessModes=ReadWriteMany --set persistence.accessMode=ReadWriteOnce --> Error: release test-mission-critical-mongo2 failed: persistentvolumeclaims "test-mission-critical-mongo2-mongodb" already exists
 
 At this point, the attempt to install (for testing of upgrade) mongodb of the currently deployed version (4.0.4) was abandoned. A general upgrade of helm / kubernetes and mongo was contemplated.
-Error: release test-mission-critical-mongo failed: persistentvolumeclaims "test-mission-critical-mongo-mongodb" already exists
 ```
