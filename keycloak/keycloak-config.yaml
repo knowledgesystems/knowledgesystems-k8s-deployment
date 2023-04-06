@@ -1,5 +1,10 @@
 nodeSelector:
-  kops.k8s.io/instancegroup: indispensable
+  kops.k8s.io/instancegroup: mission-critical
+tolerations:
+  - effect: NoSchedule
+    key: dedicated
+    operator: Equal
+    value: mission-critical
 postgresql:
   # Disable PostgreSQL dependency
   enabled: false
@@ -59,7 +64,7 @@ extraEnv: |
   - name: PROXY_ADDRESS_FORWARDING
     value: "true"
   - name: DB_VENDOR
-    value: mysql 
+    value: mysql
   - name: DB_ADDR
     value: {{ .Values.DB_ADDR }}
   - name: DB_PORT
