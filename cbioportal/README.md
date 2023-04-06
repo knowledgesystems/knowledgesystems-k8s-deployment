@@ -88,12 +88,22 @@ https://scalegrid.io/blog/calculating-innodb-buffer-pool-size-for-your-mysql-ser
 ### Redis
 
 #### session management
+Notes:
+* the current version of helm which is used at msk for this deployment in our public kubernetes cluster is v2.12.2 - if you are creating or upgrading the public cluster deployment, use this version of the helm client.
+* the current version of helm which is used at msk for this deployment in our internal kubernetes cluster is v3.6.0 - if you are creating or upgrading the internal cluster deployment, use this version of the helm client.
 
 To manage user sessions we use one redis instance: 
 
+For the internal cluster:
 ```bash
-helm install  --name cbioportal-redis  stable/redis --set master.securityContext.enabled=false --set password=picksomeredispassword --set slave.securityContext.enabled=false --set cluster.enabled=false
+helm install  --name cbioportal-redis stable/redis --set master.securityContext.enabled=false --set password=picksomeredispassword --set slave.securityContext.enabled=false --set cluster.enabled=false
 ```
+For the public cluster:
+```bash
+helm2 install --name cbioportal-redis stable/redis --version 6.1.4 --set master.nodeSelector."kops\.k8s\.io/instancegroup"=mission-critical --set master.tolerations[0].key=dedicated,master.tolerations[0].operator=Equal,master.tolerations[0].value=mission-critical,master.tolerations[0].effect=NoSchedule --set master.securityContext.enabled=false --set password=picksomeredispassword --set slave.securityContext.enabled=false --set cluster.enabled=false
+```
+Notes:
+* the public cluster has a dedicated instance group named 'mission-critical' which is specified in the nodeSelector argument for the public cluster and a taint toleration for 'dedicated: mission-critical' is also specified.
 
 #### persistence cache 
 
