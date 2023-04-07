@@ -88,27 +88,6 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: "2023-03-20T18:50:54Z"
-  generation: 10
-  labels:
-    kops.k8s.io/cluster: cbioportal.review.k8s.local
-  name: keycloak-nodes
-spec:
-  image: ami-07da2113ae620c406
-  machineType: t3.large
-  maxSize: 2
-  minSize: 2
-  nodeLabels:
-    kops.k8s.io/instancegroup: keycloak-nodes
-  role: Node
-  subnets:
-  - us-east-1a
-
----
-
-apiVersion: kops.k8s.io/v1alpha2
-kind: InstanceGroup
-metadata:
   creationTimestamp: "2018-10-24T21:18:37Z"
   generation: 26
   labels:
@@ -215,28 +194,6 @@ spec:
   - us-east-1c
   taints:
   - dedicated=oncokb:NoSchedule
-
----
-
-apiVersion: kops.k8s.io/v1alpha2
-kind: InstanceGroup
-metadata:
-  creationTimestamp: "2020-10-15T13:15:43Z"
-  generation: 3
-  labels:
-    kops.k8s.io/cluster: cbioportal.review.k8s.local
-  name: redis-cache
-spec:
-  image: ami-0f293df54ee95c693
-  machineType: r5.xlarge
-  maxSize: 1
-  minSize: 1
-  nodeLabels:
-    kops.k8s.io/instancegroup: redis-cache
-  role: Node
-  subnets:
-  - us-east-1a
-  - us-east-1c
 
 ---
 
