@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
-  replicas: 3
+  replicas: 5
   selector:
     matchLabels:
       run: cbioportal-spring-boot
@@ -95,8 +95,8 @@ spec:
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            "-Ddb.host=$(DB_HOST)",
-            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
+            "-Ddb.host=cbioportal-public-db-aacr-double.cq26ederqvxp.us-east-1.rds.amazonaws.com",
+            "-Ddb.connection_string=jdbc:mysql://cbioportal-public-db-aacr-double.cq26ederqvxp.us-east-1.rds.amazonaws.com:3306/",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
