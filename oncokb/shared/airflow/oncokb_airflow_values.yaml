@@ -35,6 +35,15 @@ extraEnvVars:
   # Should be disabled in production. https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#load-default-connections
   - name: AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS
     value: "false"
+  # These variables are used to configure Airflow remote logging
+  # - name: AIRFLOW__LOGGING__REMOTE_LOGGING
+  #   value: "true"
+  # - name: AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER
+  #   value: "s3://oncokb/airflow-logs/msk-dev/"
+  # - name: AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID
+  #   value: "aws-cli"
+  # - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
+  #   value: "false"
 
 # Installing extra python packages - https://github.com/bitnami/charts/tree/main/bitnami/airflow#install-extra-python-packages
 web:
@@ -63,3 +72,16 @@ worker:
     - name: requirements
       configMap:
         name: oncokb-airflow-requirements
+  autoscaling:
+    enabled: true
+    resources:
+      requests:
+        cpu: 1
+        memory: 5Gi
+      limits:
+        cpu: 2
+        memory: 8Gi
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPU: 80
+    targetMemory: 80
