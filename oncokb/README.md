@@ -68,6 +68,6 @@ To add a subdomain of oncokb.org, please follow the steps below:
 4. Apply the Service/Deployment above by `kubectl apply -f [yaml file path you created above]`
 5. Apply the modified ingress `kubectl apply -f ingress/ingress_oncokb.yml`
 
-## AWS Architecture
-![OncoKB AWS Architecture Diagram - OncoKB Arch - Full Preview.jpg](assets/OncoKB_AWS_Architecture_Diagram.jpg)  
+## System Architecture
+![OncoKB Architecture Diagram - OncoKB Arch - Full Preview.jpg](assets/OncoKB_Architecture_Diagram.jpg)  
 Editable board is located here https://miro.com/app/board/uXjVMTJ_gKI=/
