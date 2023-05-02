@@ -10,7 +10,12 @@ redis:
     failureThreshold: 10
     timeoutSeconds: 5
   nodeSelector:
-    kops.k8s.io/instancegroup: large-mem
+    kops.k8s.io/instancegroup: oncokb
+  tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "oncokb"
+    effect: "NoSchedule"
 
 cluster:
   # To successfully set the cluster up, it will need to have at least 3 master nodes. 

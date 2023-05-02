@@ -159,5 +159,5 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: oncokb-airflow
+          serviceName: oncokb-airflow-ng
           servicePort: 8080
