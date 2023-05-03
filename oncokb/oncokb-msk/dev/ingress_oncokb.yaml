@@ -19,9 +19,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: oncokb-core
+                name: oncokb-public
                 port:
-                  number: 8888
+                  number: 9095
     - host: "grafana.oncokb.dev.aws.mskcc.org"
       http:
         paths:
