@@ -4,6 +4,7 @@ metadata:
   name: oncokb-ingress
   annotations:
     nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   tls:
     - hosts:
@@ -22,6 +23,16 @@ spec:
                 name: oncokb-public
                 port:
                   number: 9095
+    - host: "core.oncokb.dev.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core
+                port:
+                  number: 8888
     - host: "grafana.oncokb.dev.aws.mskcc.org"
       http:
         paths:
