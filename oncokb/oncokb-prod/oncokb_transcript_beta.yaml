@@ -9,13 +9,13 @@ metadata:
   name: oncokb-transcript-beta
   namespace: oncokb
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: oncokb-transcript-beta
   strategy:
     rollingUpdate:
-      maxSurge: 4
+      maxSurge: 2
       maxUnavailable: 0
     type: RollingUpdate
   template:
@@ -37,8 +37,6 @@ spec:
               value: '$(REDIS_ADDRESS)'
             - name: APPLICATION_REDIS_PASSWORD
               value: '$(REDIS_PASSWROD)'
-            - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
-              value: '$(REDIS_MASTERNAME)'
             - name: SPRING_DATASOURCE_URL
               value: '$(DB_URL)/oncokb_transcript_beta'
             - name: SPRING_DATASOURCE_USERNAME
@@ -51,8 +49,8 @@ spec:
             - configMapRef:
                 name: oncokb-db-oncokb-transcript
             - configMapRef:
-                name: oncokb-sentinel-redis
-          image: oncokb/oncokb-transcript:0.7.0-alpha.3
+                name: oncokb-redis-cluster-ng
+          image: oncokb/oncokb-transcript:0.9.4
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
