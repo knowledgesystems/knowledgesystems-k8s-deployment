@@ -30,7 +30,7 @@ spec:
                 name: oncokb-core
             - configMapRef:
                 name: oncokb-db-msk-dev-rds
-          image: oncokb/oncokb:3.12.6-no-frontend
+          image: oncokb/oncokb:3.12.6
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
