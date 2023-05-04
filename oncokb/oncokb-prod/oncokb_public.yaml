@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.8.21
+          image: oncokb/oncokb-public:3.9.0-alpha.0
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -39,12 +39,14 @@ spec:
               value: '$(SECRET_ACCESS_KEY)'
             - name: APPLICATION_GITHUB_TOKEN
               value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
+            - name: APPLICATION_REDIS_TYPE
+              value: '$(REDIS_TYPE)'
             - name: APPLICATION_REDIS_ADDRESS
               value: '$(REDIS_ADDRESS)'
             - name: APPLICATION_REDIS_PASSWORD
               value: '$(REDIS_PASSWROD)'
-            - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
-              value: '$(REDIS_MASTERNAME)'
+            - name: APPLICATION_REDIS_EXPIRATION
+              value: '$(REDIS_EXPIRATION)'
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
               value: '-2147483647'
             - name: SENTRY_TRACES_SAMPLE_RATE
@@ -63,7 +65,7 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-sentinel-redis-ng
+                name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
@@ -92,6 +94,12 @@ spec:
           ports:
             - name: http
               containerPort: 9095
+          volumeMounts:
+            # The subPath is needed so that mounting the secret as a single file doesn't override
+            # the contents of the existing directory.
+            - mountPath: /app/resources/config/recaptcha/oncokb-recaptcha-credentials.json
+              subPath: oncokb-recaptcha-credentials.json
+              name: recaptcha-credentials
       tolerations:
         - key: "dedicated"
           operator: "Equal"
@@ -99,12 +107,6 @@ spec:
           effect: "NoSchedule"
       nodeSelector:
         kops.k8s.io/instancegroup: oncokb
-          volumeMounts:
-          # The subPath is needed so that mounting the secret as a single file doesn't override
-          # the contents of the existing directory. 
-          - mountPath: /app/resources/config/recaptcha/oncokb-recaptcha-credentials.json
-            subPath: oncokb-recaptcha-credentials.json
-            name: recaptcha-credentials
       volumes:
       - name: recaptcha-credentials
         secret:
