@@ -1,14 +1,13 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: "2020-03-19T15:46:42Z"
-  generation: 1
+  creationTimestamp: "2023-05-05T06:32:48Z"
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: genie-genome-nexus
 spec:
-  image: ami-033814661676c4595
-  machineType: t2.xlarge
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
+  machineType: t3.xlarge
   maxSize: 2
   minSize: 2
   nodeLabels:
@@ -24,12 +23,12 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2020-12-09T21:11:58Z"
-  generation: 2
+  generation: 3
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: genie-portals
 spec:
-  image: ami-020b8ffb1f0f566bd
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: r5.xlarge
   maxSize: 4
   minSize: 4
@@ -46,15 +45,15 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2019-11-19T14:49:29Z"
-  generation: 14
+  generation: 16
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: genome-nexus
 spec:
-  image: ami-00df8fdd204d6985d
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: t3.xlarge
-  maxSize: 5
-  minSize: 5
+  maxSize: 4
+  minSize: 4
   nodeLabels:
     kops.k8s.io/instancegroup: genome-nexus
   role: Node
@@ -67,13 +66,13 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: "2020-06-15T20:00:57Z"
-  generation: 7
+  creationTimestamp: "2023-05-05T04:53:04Z"
+  generation: 1
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: gnap-genome-nexus
 spec:
-  image: ami-033814661676c4595
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: t3.xlarge
   maxSize: 2
   minSize: 2
@@ -81,6 +80,7 @@ spec:
     kops.k8s.io/instancegroup: gnap-genome-nexus
   role: Node
   subnets:
+  - us-east-1a
   - us-east-1c
 
 ---
@@ -89,12 +89,12 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2018-10-24T21:18:37Z"
-  generation: 26
+  generation: 27
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: large-mem
 spec:
-  image: ami-03b850a018c8cd25e
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: r5.xlarge
   maxSize: 5
   minSize: 4
@@ -111,13 +111,13 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2018-08-06T18:29:31Z"
-  generation: 3
+  generation: 8
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: master-us-east-1a
 spec:
-  image: ami-0335054bb7a81bf6f
-  machineType: t2.medium
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
+  machineType: t3.medium
   maxSize: 1
   minSize: 1
   nodeLabels:
@@ -131,12 +131,53 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: "2023-05-05T05:08:34Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: master-us-east-1b
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-us-east-1b
+  role: Master
+  subnets:
+  - us-east-1b
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2023-05-05T05:08:44Z"
+  labels:
+    kops.k8s.io/cluster: cbioportal.review.k8s.local
+  name: master-us-east-1c
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-us-east-1c
+  role: Master
+  subnets:
+  - us-east-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
   creationTimestamp: "2023-03-30T21:50:55Z"
+  generation: 1
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: mission-critical
 spec:
-  image: ami-03b850a018c8cd25e
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: r5.xlarge
   maxSize: 3
   minSize: 2
@@ -155,15 +196,15 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2018-08-06T18:29:31Z"
-  generation: 4
+  generation: 6
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: nodes
 spec:
-  image: ami-03b850a018c8cd25e
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: t2.medium
-  maxSize: 5
-  minSize: 5
+  maxSize: 3
+  minSize: 3
   nodeLabels:
     kops.k8s.io/instancegroup: nodes
   role: Node
@@ -177,12 +218,12 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2023-03-16T17:36:46Z"
-  generation: 3
+  generation: 4
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: oncokb
 spec:
-  image: ami-03b850a018c8cd25e
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: r5.2xlarge
   maxSize: 2
   minSize: 2
@@ -201,12 +242,12 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   creationTimestamp: "2020-07-02T20:34:53Z"
-  generation: 5
+  generation: 6
   labels:
     kops.k8s.io/cluster: cbioportal.review.k8s.local
   name: redis-persistence-cache
 spec:
-  image: ami-033814661676c4595
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20230302
   machineType: r5.xlarge
   maxSize: 3
   minSize: 3
