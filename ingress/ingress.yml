@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Ingress
 metadata:
   name: genome-nexus-ingress
@@ -163,7 +163,7 @@ spec:
           serviceName: cbioportal-redis-cache
           servicePort: http
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Ingress
 metadata:
   name: monitoring-ingress
