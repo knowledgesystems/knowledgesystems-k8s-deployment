@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: genome-nexus-ingress
@@ -30,6 +30,9 @@ spec:
   - hosts:
     - master.cbioportal.org
     secretName: cbioportal-master-cert
+  - hosts:
+    - master-noredis.cbioportal.org
+    secretName: cbioportal-master-noredis-cert
   - hosts:
     - htan.cbioportal.org
     secretName: cbioportal-htan-cert
@@ -77,6 +80,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-backend-master
+          servicePort: http
+  - host: master-noredis.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-backend-master-noredis
           servicePort: http
   - host: htan.cbioportal.org
     http:
@@ -163,7 +173,7 @@ spec:
           serviceName: cbioportal-redis-cache
           servicePort: http
 ---
-apiVersion: apps/v1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: monitoring-ingress
