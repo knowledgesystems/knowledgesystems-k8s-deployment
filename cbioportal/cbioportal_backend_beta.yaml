@@ -34,7 +34,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:demo-pr-9949-web-shenandoah
+        image: cbioportal/cbioportal:demo-clickhouse-k8s-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -100,6 +100,9 @@ spec:
             "-Ddb.host=$(DB_HOST)",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Ddb.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "-Ddb.clickhouse.user=$(DB_CLICKHOUSE_USER)",
+            "-Ddb.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
