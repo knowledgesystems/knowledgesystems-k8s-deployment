@@ -134,12 +134,12 @@ spec:
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
             # cache settings (currently redis)
             #"-Dcache.statistics_endpoint_enabled=false",
-            "-Dpersistence.cache_type=redis",
-            "-Dredis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
-            "-Dredis.follower_address=redis://cbioportal-public-persistence-redis-slave:6379",
-            "-Dredis.database=11",
-            "-Dredis.password=$(REDIS_PASSWORD)",
-            "-Dredis.clear_on_startup=false",
+            "-Dpersistence.cache_type=no-cache",
+            #"-Dredis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
+            #"-Dredis.follower_address=redis://cbioportal-public-persistence-redis-slave:6379",
+            #"-Dredis.database=11",
+            #"-Dredis.password=$(REDIS_PASSWORD)",
+            #"-Dredis.clear_on_startup=false",
             # disable ehcache
             "-Dehcache.cache_type=none",
             # misc frontend settings (this is NOT for backend persistence layer caching)
