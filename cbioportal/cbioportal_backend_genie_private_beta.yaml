@@ -30,7 +30,7 @@ spec:
         - configMapRef:
             name: cbioportal-genie-private-beta
         image: cbioportal/cbioportal:release-genie-performance-redis-web-shenandoah
-        command: [ "/usr/bin/java" ]
+        command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",

@@ -36,7 +36,7 @@ spec:
         volumeMounts:
         - name: ehcache-volume
           mountPath: /ehcache
-        command: [ "/usr/bin/java" ]
+        command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms100m",
