@@ -33,7 +33,7 @@ spec:
         - name: PORTAL_HOME
           value: /cbioportal/
         image: averyniceday/cbioportal:sv-public-push-v3.0
-        command: [ "/usr/bin/java" ]
+        command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms100m",
