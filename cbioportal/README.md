@@ -5,7 +5,8 @@
 Set up mongo database:
 
 ```bash
-helm install --name cbioportal-session-service-mongo --set persistence.size=10Gi stable/mongodb
+# only 4.2 mongo is compatible with session-service
+helm install --version 13.15.0 cbioportal-session-service-mongo-4dot2-20230524  --set image.tag=4.2,persistence.size=100Gi bitnami/mongodb
 ```
 
 Deploy session service app:
@@ -131,3 +132,4 @@ default `portal.properties.EXAMPLE` file of the repo.
 kubectl apply -f cbioportal_spring_boot.yaml
 kubectl apply -f service.yaml
 ```
+
