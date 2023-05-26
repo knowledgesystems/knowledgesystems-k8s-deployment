@@ -18,7 +18,7 @@ What didn't work:
 - Tried various approach of expanding existing k8s volume, but was tricky b/c volume expansion wasn't enabled for existing PersistenceVolumeClaims
 
 What did work:
-- Instead, started a new AWS EC2 instance with that volume attached. For whatever reason i couldn’t see the attached volume within ubuntu at first (had to use [lsblk and mount](https://stackoverflow.com/questions/22816878/my-mounted-ebs-volume-is-not-showing-up)). I guess this might be something you always have to do
+- Instead, started a new AWS EC2 instance with that volume attached. For whatever reason i couldn’t see the attached volume within ubuntu at first (had to use [lsblk and mount](https://stackoverflow.com/questions/22816878/my-mounted-ebs-volume-is-not-showing-up)). Might be something you always have to do...
 - Once the volume was accessible, we ran `docker run bitnami/mongodb` with the correct mount location specified to load the data
 - From a separate shell used mongodump as described (cmds are described in cbioportal/README)
 - Now that we got the dump, we set up a new mongo database in the k8s cluster to load the data:
