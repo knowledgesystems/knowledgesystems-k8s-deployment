@@ -1,7 +1,8 @@
 # Incidents Log
 ## 2023/05/24 Mongodb session service crash
-- Issue with the MSK-IMPACT study reported at 3.30PM
-- We identified that the mongo session service was down and had used up all disk space (20Gi) shortly
+- Issue with session-service reported at 3.30PM
+- We identified that the mongo session service was down and had used up all disk space (20Gi) shortly. That same day we created a new session service with 100Gi storage but weren't able to recover all old sessions
+- On 2023/05/26 we were able to restore old sessions. We did lose two days of saved sessions (5/24-5/25)
 
 ### Remediation
 
