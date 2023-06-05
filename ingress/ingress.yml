@@ -28,9 +28,6 @@ spec:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
   - hosts:
-    - master.cbioportal.org
-    secretName: cbioportal-master-cert
-  - hosts:
     - master-noredis.cbioportal.org
     secretName: cbioportal-master-noredis-cert
   - hosts:
@@ -73,13 +70,6 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal
-          servicePort: http
-  - host: master.cbioportal.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: cbioportal-backend-master
           servicePort: http
   - host: master-noredis.cbioportal.org
     http:
