@@ -155,6 +155,7 @@ spec:
             "-Dsitemaps=false",
             # internal oncokb instance gives 5x error on FGFR1
             # "-Doncokb.public_api.url=$(ONCOKB_PUBLIC_API_URL)",
+            "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Doncokb.merge_icons_by_default=false",
             "-Dgenomenexus.url=https://v1.genomenexus.org",
