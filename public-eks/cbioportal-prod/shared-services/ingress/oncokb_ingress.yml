@@ -36,7 +36,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: oncokb-public-beta
+              name: oncokb-public
               port:
                 number: 9095
   - host: sop.oncokb.org
