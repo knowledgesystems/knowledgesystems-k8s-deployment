@@ -32,13 +32,15 @@ spec:
   - hosts:
 #    - oncokb.org
 #    - www.oncokb.org
-#    - beta.oncokb.org
+    - beta.oncokb.org
     - legacy.oncokb.org
-#    - demo.oncokb.org
+    - demo.oncokb.org
     - cbioprod.oncokb.org
     - sop.oncokb.org
 #    - public.api.oncokb.org
 #    - transcript.oncokb.org
+
+# The following can only be swapped by Calvin. They need DB migration, but not urgent.
 #    - curation.oncokb.org
 #    - keycloak.oncokb.org
 #    - grafana.oncokb.org
@@ -66,26 +68,26 @@ spec:
 #            name: oncokb-public
 #            port:
 #              name: http
-#  - host: beta.oncokb.org
-#    http:
-#      paths:
-#      - path: "/"
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: oncokb-public-beta
-#            port:
-#              name: http
-#  - host: demo.oncokb.org
-#    http:
-#      paths:
-#      - path: "/"
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: oncokb-core-demo
-#            port:
-#              name: http
+  - host: beta.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public-beta
+            port:
+              name: http
+  - host: demo.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-demo
+            port:
+              name: http
   - host: legacy.oncokb.org
     http:
       paths:
