@@ -34,7 +34,7 @@ spec:
 #    - www.oncokb.org
 #    - beta.oncokb.org
 #    - beta.core.oncokb.org
-#    - legacy.oncokb.org
+    - legacy.oncokb.org
 #    - test.oncokb.org
 #    - demo.oncokb.org
     - cbioprod.oncokb.org
@@ -92,13 +92,16 @@ spec:
 #        backend:
 #          serviceName: oncokb-transcript-test
 #          servicePort: http
-#  - host: legacy.oncokb.org
-#    http:
-#      paths:
-#      - path: /
-#        backend:
-#          serviceName: oncokb-core-legacy
-#          servicePort: http
+  - host: legacy.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-legacy
+            port:
+              name: http
   - host: cbioprod.oncokb.org
     http:
       paths:
