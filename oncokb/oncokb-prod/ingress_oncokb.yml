@@ -1,11 +1,11 @@
-apiVersion: apps/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: oncokb-ingress
   namespace: oncokb
   annotations:
     kubernetes.io/ingress.class: nginx
-    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/limit-rps: "100"
     nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
     # the following has to be added due to an issue of from-to-www-redirect. https://github.com/kubernetes/ingress-nginx/issues/2043
@@ -30,134 +30,148 @@ spec:
   tls:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
   - hosts:
-    - oncokb.org
-    - www.oncokb.org
-    - beta.oncokb.org
-    - beta.core.oncokb.org
-    - legacy.oncokb.org
-    - test.oncokb.org
-    - demo.oncokb.org
+#    - oncokb.org
+#    - www.oncokb.org
+#    - beta.oncokb.org
+#    - beta.core.oncokb.org
+#    - legacy.oncokb.org
+#    - test.oncokb.org
+#    - demo.oncokb.org
+    - cbioprod.oncokb.org
     - sop.oncokb.org
-    - msk.oncokb.org
-    - public.api.oncokb.org
-    - transcript.oncokb.org
-    - beta.transcript.oncokb.org
-    - curation.oncokb.org
-    - keycloak.oncokb.org
-    - grafana.oncokb.org
-    - airflow.oncokb.org
+#    - msk.oncokb.org
+#    - public.api.oncokb.org
+#    - transcript.oncokb.org
+#    - beta.transcript.oncokb.org
+#    - curation.oncokb.org
+#    - keycloak.oncokb.org
+#    - grafana.oncokb.org
+#    - airflow.oncokb.org
     secretName: oncokb-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
-  - host: oncokb.org
+#  - host: oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-public
+#          servicePort: http
+#  - host: www.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-public
+#          servicePort: http
+#  - host: beta.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-public-beta
+#          servicePort: http
+#  - host: beta.core.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-core-beta
+#          servicePort: 8888
+#  - host: demo.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-core-demo
+#          servicePort: http
+#  - host: test.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-transcript-test
+#          servicePort: http
+#  - host: legacy.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-core-legacy
+#          servicePort: http
+  - host: cbioprod.oncokb.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: oncokb-public
-          servicePort: http
-  - host: www.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-public
-          servicePort: http
-  - host: beta.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-public-beta
-          servicePort: http
-  - host: beta.core.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-core-beta
-          servicePort: 8888
-  - host: demo.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-core-demo
-          servicePort: http
-  - host: test.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-transcript-test
-          servicePort: http
-  - host: legacy.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-core-legacy
-          servicePort: http
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-public
+              port:
+                number: 9095
   - host: sop.oncokb.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: oncokb-sop
-          servicePort: http
-  - host: msk.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-public
-          servicePort: http
-  - host: transcript.oncokb.org
-    http:
-      paths:
-        - path: /
+        - path: "/"
+          pathType: Prefix
           backend:
-            serviceName: oncokb-transcript
-            servicePort: http
-  - host: beta.transcript.oncokb.org
-    http:
-      paths:
-        - path: /
-          backend:
-            serviceName: oncokb-transcript-beta
-            servicePort: http
-  - host: curation.oncokb.org
-    http:
-      paths:
-        - path: /
-          backend:
-            serviceName: oncokb-curation
-            servicePort: http
-  - host: keycloak.oncokb.org
-    http:
-      paths:
-        - path: /
-          backend:
-            serviceName: oncokb-keycloak-http
-            servicePort: http
-  - host: public.api.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-core-public
-          servicePort: http
-  - host: grafana.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-grafana
-          servicePort: 80
-  - host: airflow.oncokb.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: oncokb-airflow-ng
-          servicePort: 8080
+            service:
+              name: oncokb-sop
+              port:
+                number: 80
+#  - host: msk.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-public
+#          servicePort: http
+#  - host: transcript.oncokb.org
+#    http:
+#      paths:
+#        - path: /
+#          backend:
+#            serviceName: oncokb-transcript
+#            servicePort: http
+#  - host: beta.transcript.oncokb.org
+#    http:
+#      paths:
+#        - path: /
+#          backend:
+#            serviceName: oncokb-transcript-beta
+#            servicePort: http
+#  - host: curation.oncokb.org
+#    http:
+#      paths:
+#        - path: /
+#          backend:
+#            serviceName: oncokb-curation
+#            servicePort: http
+#  - host: keycloak.oncokb.org
+#    http:
+#      paths:
+#        - path: /
+#          backend:
+#            serviceName: oncokb-keycloak-http
+#            servicePort: http
+#  - host: public.api.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-core-public
+#          servicePort: http
+#  - host: grafana.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-grafana
+#          servicePort: 80
+#  - host: airflow.oncokb.org
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: oncokb-airflow-ng
+#          servicePort: 8080
