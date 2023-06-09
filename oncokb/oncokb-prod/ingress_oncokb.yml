@@ -33,16 +33,12 @@ spec:
 #    - oncokb.org
 #    - www.oncokb.org
 #    - beta.oncokb.org
-#    - beta.core.oncokb.org
     - legacy.oncokb.org
-#    - test.oncokb.org
 #    - demo.oncokb.org
     - cbioprod.oncokb.org
     - sop.oncokb.org
-#    - msk.oncokb.org
 #    - public.api.oncokb.org
 #    - transcript.oncokb.org
-#    - beta.transcript.oncokb.org
 #    - curation.oncokb.org
 #    - keycloak.oncokb.org
 #    - grafana.oncokb.org
@@ -53,45 +49,43 @@ spec:
 #  - host: oncokb.org
 #    http:
 #      paths:
-#      - path: /
+#      - path: "/"
+#        pathType: Prefix
 #        backend:
-#          serviceName: oncokb-public
-#          servicePort: http
+#          service:
+#            name: oncokb-public
+#            port:
+#              name: http
 #  - host: www.oncokb.org
 #    http:
 #      paths:
-#      - path: /
+#      - path: "/"
+#        pathType: Prefix
 #        backend:
-#          serviceName: oncokb-public
-#          servicePort: http
+#          service:
+#            name: oncokb-public
+#            port:
+#              name: http
 #  - host: beta.oncokb.org
 #    http:
 #      paths:
-#      - path: /
+#      - path: "/"
+#        pathType: Prefix
 #        backend:
-#          serviceName: oncokb-public-beta
-#          servicePort: http
-#  - host: beta.core.oncokb.org
-#    http:
-#      paths:
-#      - path: /
-#        backend:
-#          serviceName: oncokb-core-beta
-#          servicePort: 8888
+#          service:
+#            name: oncokb-public-beta
+#            port:
+#              name: http
 #  - host: demo.oncokb.org
 #    http:
 #      paths:
-#      - path: /
+#      - path: "/"
+#        pathType: Prefix
 #        backend:
-#          serviceName: oncokb-core-demo
-#          servicePort: http
-#  - host: test.oncokb.org
-#    http:
-#      paths:
-#      - path: /
-#        backend:
-#          serviceName: oncokb-transcript-test
-#          servicePort: http
+#          service:
+#            name: oncokb-core-demo
+#            port:
+#              name: http
   - host: legacy.oncokb.org
     http:
       paths:
@@ -122,59 +116,63 @@ spec:
               name: oncokb-sop
               port:
                 number: 80
-#  - host: msk.oncokb.org
-#    http:
-#      paths:
-#      - path: /
-#        backend:
-#          serviceName: oncokb-public
-#          servicePort: http
 #  - host: transcript.oncokb.org
 #    http:
 #      paths:
-#        - path: /
+#        - path: "/"
+#          pathType: Prefix
 #          backend:
-#            serviceName: oncokb-transcript
-#            servicePort: http
-#  - host: beta.transcript.oncokb.org
-#    http:
-#      paths:
-#        - path: /
-#          backend:
-#            serviceName: oncokb-transcript-beta
-#            servicePort: http
+#            service:
+#              name: oncokb-transcript
+#              port:
+#                name: http
 #  - host: curation.oncokb.org
 #    http:
 #      paths:
-#        - path: /
+#        - path: "/"
+#          pathType: Prefix
 #          backend:
-#            serviceName: oncokb-curation
-#            servicePort: http
+#            service:
+#              name: oncokb-curation
+#              port:
+#                name: http
 #  - host: keycloak.oncokb.org
 #    http:
 #      paths:
-#        - path: /
+#        - path: "/"
+#          pathType: Prefix
 #          backend:
-#            serviceName: oncokb-keycloak-http
-#            servicePort: http
+#            service:
+#              name: oncokb-keycloak-http
+#              port:
+#                name: http
 #  - host: public.api.oncokb.org
 #    http:
 #      paths:
-#      - path: /
+#      - path: "/"
+#        pathType: Prefix
 #        backend:
-#          serviceName: oncokb-core-public
-#          servicePort: http
+#          service:
+#            name: oncokb-core-public
+#            port:
+#              name: http
 #  - host: grafana.oncokb.org
 #    http:
 #      paths:
-#      - path: /
+#      - path: "/"
+#        pathType: Prefix
 #        backend:
-#          serviceName: oncokb-grafana
-#          servicePort: 80
+#          service:
+#            name: oncokb-grafana
+#            port:
+#              number: 80
 #  - host: airflow.oncokb.org
 #    http:
 #      paths:
-#      - path: /
+#      - path: "/"
+#        pathType: Prefix
 #        backend:
-#          serviceName: oncokb-airflow-ng
-#          servicePort: 8080
+#          service:
+#            name: oncokb-airflow-ng
+#            port:
+#              number: 8080
