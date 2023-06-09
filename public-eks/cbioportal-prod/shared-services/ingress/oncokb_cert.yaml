@@ -7,9 +7,20 @@ spec:
   # Secret names are always required.
   secretName: oncokb-cert
   dnsNames:
+#    - oncokb.org
+#    - www.oncokb.org
+#    - public.api.oncokb.org
+#    - transcript.oncokb.org
     - legacy.oncokb.org
     - cbioprod.oncokb.org
     - sop.oncokb.org
+    - beta.oncokb.org
+    - demo.oncokb.org
+# The following can only be swapped by Calvin. They need DB migration, but not urgent.
+#    - curation.oncokb.org
+#    - keycloak.oncokb.org
+#    - grafana.oncokb.org
+#    - airflow.oncokb.org
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
