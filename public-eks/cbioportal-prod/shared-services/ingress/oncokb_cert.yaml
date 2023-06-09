@@ -7,6 +7,7 @@ spec:
   # Secret names are always required.
   secretName: oncokb-cert
   dnsNames:
+    - legacy.oncokb.org
     - cbioprod.oncokb.org
     - sop.oncokb.org
   issuerRef:
