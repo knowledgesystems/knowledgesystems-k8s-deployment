@@ -30,15 +30,14 @@ spec:
   tls:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
   - hosts:
-#    - oncokb.org
-#    - www.oncokb.org
+    - oncokb.org
+    - www.oncokb.org
     - beta.oncokb.org
     - legacy.oncokb.org
     - demo.oncokb.org
-    - cbioprod.oncokb.org
     - sop.oncokb.org
-#    - public.api.oncokb.org
-#    - transcript.oncokb.org
+    - public.api.oncokb.org
+    - transcript.oncokb.org
 
 # The following can only be swapped by Calvin. They need DB migration, but not urgent.
 #    - curation.oncokb.org
@@ -48,26 +47,26 @@ spec:
     secretName: oncokb-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
-#  - host: oncokb.org
-#    http:
-#      paths:
-#      - path: "/"
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: oncokb-public
-#            port:
-#              name: http
-#  - host: www.oncokb.org
-#    http:
-#      paths:
-#      - path: "/"
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: oncokb-public
-#            port:
-#              name: http
+  - host: oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
+  - host: www.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
   - host: beta.oncokb.org
     http:
       paths:
@@ -88,6 +87,16 @@ spec:
             name: oncokb-core-demo
             port:
               name: http
+  - host: public.api.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-public
+            port:
+              name: http
   - host: legacy.oncokb.org
     http:
       paths:
@@ -98,16 +107,6 @@ spec:
             name: oncokb-core-legacy
             port:
               name: http
-  - host: cbioprod.oncokb.org
-    http:
-      paths:
-        - path: "/"
-          pathType: Prefix
-          backend:
-            service:
-              name: oncokb-public
-              port:
-                number: 9095
   - host: sop.oncokb.org
     http:
       paths:
@@ -118,16 +117,16 @@ spec:
               name: oncokb-sop
               port:
                 number: 80
-#  - host: transcript.oncokb.org
-#    http:
-#      paths:
-#        - path: "/"
-#          pathType: Prefix
-#          backend:
-#            service:
-#              name: oncokb-transcript
-#              port:
-#                name: http
+  - host: transcript.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-transcript
+              port:
+                name: http
 #  - host: curation.oncokb.org
 #    http:
 #      paths:
@@ -148,16 +147,6 @@ spec:
 #              name: oncokb-keycloak-http
 #              port:
 #                name: http
-#  - host: public.api.oncokb.org
-#    http:
-#      paths:
-#      - path: "/"
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: oncokb-core-public
-#            port:
-#              name: http
 #  - host: grafana.oncokb.org
 #    http:
 #      paths:
