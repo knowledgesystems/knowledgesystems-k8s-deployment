@@ -38,12 +38,9 @@ spec:
     - sop.oncokb.org
     - public.api.oncokb.org
     - transcript.oncokb.org
-
-# The following can only be swapped by Calvin. They need DB migration, but not urgent.
-#    - curation.oncokb.org
-#    - keycloak.oncokb.org
-#    - grafana.oncokb.org
-#    - airflow.oncokb.org
+    - curation.oncokb.org
+    - keycloak.oncokb.org
+    - airflow.oncokb.org
     secretName: oncokb-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
@@ -127,43 +124,33 @@ spec:
               name: oncokb-transcript
               port:
                 name: http
-#  - host: curation.oncokb.org
-#    http:
-#      paths:
-#        - path: "/"
-#          pathType: Prefix
-#          backend:
-#            service:
-#              name: oncokb-curation
-#              port:
-#                name: http
-#  - host: keycloak.oncokb.org
-#    http:
-#      paths:
-#        - path: "/"
-#          pathType: Prefix
-#          backend:
-#            service:
-#              name: oncokb-keycloak-http
-#              port:
-#                name: http
-#  - host: grafana.oncokb.org
-#    http:
-#      paths:
-#      - path: "/"
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: oncokb-grafana
-#            port:
-#              number: 80
-#  - host: airflow.oncokb.org
-#    http:
-#      paths:
-#      - path: "/"
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: oncokb-airflow-ng
-#            port:
-#              number: 8080
+  - host: curation.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-curation
+              port:
+                name: http
+  - host: keycloak.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-keycloak-http
+              port:
+                name: http
+  - host: airflow.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-airflow-ng
+            port:
+              number: 8080
