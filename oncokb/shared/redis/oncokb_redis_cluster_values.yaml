@@ -10,7 +10,7 @@ redis:
     failureThreshold: 10
     timeoutSeconds: 5
   nodeSelector:
-    kops.k8s.io/instancegroup: oncokb
+    eks.amazonaws.com/nodegroup: oncokb
   tolerations:
   - key: "dedicated"
     operator: "Equal"

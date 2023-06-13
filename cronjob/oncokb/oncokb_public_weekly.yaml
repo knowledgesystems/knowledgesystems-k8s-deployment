@@ -1,4 +1,6 @@
-apiVersion: batch/v1beta1
+# THIS CRONJOB IS NOT IN PRODUCTION
+
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: oncokb-cronjob-public-weekly-cronjob
