@@ -35,8 +35,6 @@ spec:
               value: "$(REDIS_ADDRESS)"
             - name: APPLICATION_REDIS_PASSWORD
               value: "$(REDIS_PASSWROD)"
-            - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
-              value: "$(REDIS_MASTERNAME)"
             - name: SPRING_DATASOURCE_URL
               value: "$(DB_URL)/oncokb_transcript"
             - name: SPRING_DATASOURCE_USERNAME
@@ -49,8 +47,8 @@ spec:
             - configMapRef:
                 name: oncokb-db-oncokb-transcript
             - configMapRef:
-                name: oncokb-sentinel-redis
-          image: oncokb/oncokb-transcript:0.9.0
+                name: oncokb-redis-cluster
+          image: oncokb/oncokb-transcript:0.9.4
           imagePullPolicy: Always
           # use actionable variant endpoint to cache everything
           readinessProbe:
