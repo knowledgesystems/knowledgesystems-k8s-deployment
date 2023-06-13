@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.9.1
+          image: oncokb/oncokb-public:3.9.3
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -37,12 +37,12 @@ spec:
               value: "$(SECRET_ACCESS_KEY)"
             - name: APPLICATION_GITHUB_TOKEN
               value: "$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)"
+            - name: APPLICATION_REDIS_TYPE
+              value: '$(REDIS_TYPE)'
             - name: APPLICATION_REDIS_ADDRESS
               value: "$(REDIS_ADDRESS)"
             - name: APPLICATION_REDIS_PASSWORD
               value: "$(REDIS_PASSWROD)"
-            - name: APPLICATION_REDIS_SENTINEL_MASTER_NAME
-              value: "$(REDIS_MASTERNAME)"
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
               value: "-2147483647"
             - name: SENTRY_TRACES_SAMPLE_RATE
@@ -61,7 +61,7 @@ spec:
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
-                name: oncokb-sentinel-redis
+                name: oncokb-redis-cluster
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
