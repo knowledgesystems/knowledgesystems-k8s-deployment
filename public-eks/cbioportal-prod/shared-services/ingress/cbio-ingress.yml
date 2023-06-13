@@ -26,6 +26,12 @@ spec:
   - hosts:
     - master.cbioportal.org
     secretName: master-cbio-cert
+  - hosts:
+    - genie.cbioportal.org
+    secretName: geniepublic-cbio-cert
+  - hosts:
+    - genie-private.cbioportal.org
+    secretName: genieprivate-cbio-cert
   rules:
   - host: master.cbioportal.org
     http:
@@ -34,6 +40,26 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: ngnix-service
+            name: cbioportal-backend-master
+            port:
+              number: 80
+  - host: genie.cbioportal.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cbioportal-backend-genie-public 
+            port:
+              number: 80
+  - host: genie-private.cbioportal.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cbioportal-backend-genie-private 
             port:
               number: 80
