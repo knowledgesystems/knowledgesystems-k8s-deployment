@@ -32,6 +32,8 @@ cat ./core/src/main/resources/spring/database/oncokb.sql | \
 - The caching on boot takes quite a while which is why we need the long livenessProbe/readinessProbe.
 
 ## OncoKB Public Redis
+We currently only use Redis Cluster in production.
+
 ## Sentinel
 ### Install
 ####  With AOF persistence
