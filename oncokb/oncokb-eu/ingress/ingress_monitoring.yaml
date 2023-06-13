@@ -2,22 +2,23 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: oncokb-ingress
+  namespace: monitoring
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   tls:
     - hosts:
-        - eucentral.oncokb.org
+        - grafana.eucentral.oncokb.org
       secretName: letsencrypt-nginx-private-key
   rules:
-    - host: "eucentral.oncokb.org"
+    - host: "grafana.eucentral.oncokb.org"
       http:
         paths:
           - path: "/"
             pathType: Prefix
             backend:
               service:
-                name: oncokb-public
+                name: prometheus-grafana
                 port:
-                  number: 9095
+                  number: 80
   ingressClassName: nginx
