@@ -32,6 +32,12 @@ spec:
   - hosts:
     - genie-private.cbioportal.org
     secretName: genieprivate-cbio-cert
+  - hosts:
+      - www.cbioportal.org
+    secretName: cbioportal-www-cert
+  - hosts:
+      - beta.cbioportal.org
+    secretName: cbioportal-beta-cert
   rules:
   - host: master.cbioportal.org
     http:
@@ -63,3 +69,23 @@ spec:
             name: cbioportal-backend-genie-private 
             port:
               number: 80
+  - host: www.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal
+              port:
+                number: 80
+  - host: beta.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal-backend-beta
+              port:
+                number: 80
