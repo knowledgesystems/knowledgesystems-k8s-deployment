@@ -23,8 +23,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          # do not change to 3.9.3, it includes a service disruption banner which no longer applicable
-          image: oncokb/oncokb-public:3.9.2
+          image: oncokb/oncokb-public:3.9.4
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
