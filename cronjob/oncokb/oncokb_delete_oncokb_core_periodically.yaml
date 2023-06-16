@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: oncokb-cronjob-delete-oncokb-core-periodically
+  namespace: oncokb
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 30
+      template:
+        spec:
+          serviceAccountName: pod-deletion
+          containers:
+          - name: oncokb-pod-deletion
+            image: "bitnami/kubectl"
+            command: [ "/bin/bash", "-c" ]
+            # This cronjob is to delete oncokb-core so it can clear the cache before airflow is online
+            args:
+              - kubectl get pods -n oncokb -l run=oncokb-core | grep oncokb-core | awk 'NR==1{print $1}'  | while read pod; do print "Deleting $pod"; kubectl delete pod ${pod} -n oncokb; done;
+                echo "Done deleting";
+          restartPolicy: Never
+      backoffLimit: 5

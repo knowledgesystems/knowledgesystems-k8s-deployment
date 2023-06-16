@@ -92,7 +92,7 @@ spec:
         value: "oncokb"
         effect: "NoSchedule"
       nodeSelector:
-        kops.k8s.io/instancegroup: oncokb
+        eks.amazonaws.com/nodegroup: oncokb
       volumes:
       - name: recaptcha-credentials
         secret:
