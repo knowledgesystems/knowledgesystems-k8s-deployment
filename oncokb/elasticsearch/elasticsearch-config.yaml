@@ -3,7 +3,7 @@ clusterName: "oncokb-elasticsearch"
 
 antiAffinity: "soft"
 
-esJavaOpts: "-Xms512m -Xmx1g"
+esJavaOpts: "-Xms1g -Xmx1g"
 
 resources:
   requests:

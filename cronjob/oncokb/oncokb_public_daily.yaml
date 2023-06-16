@@ -1,11 +1,11 @@
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: oncokb-cronjob-public-daily-cronjob
   namespace: oncokb
 spec:
   # Some of the daily tasks require sending emails,
-  # set the time to avoid sending emails during inappropriate time for majority of the users
+  # set the time to avoid sending emails during inappropriate time for the majority of the users
   # The time is in UTC
   schedule: "0 11 * * *"
   successfulJobsHistoryLimit: 3
@@ -29,11 +29,6 @@ spec:
               echo 'API call to send emails to all users whose account will be expired soon';
               curl 'http://oncokb-public:9095/api/cronjob/renew-tokens'  -H 'Authorization: Bearer $(TOKEN)';
               echo 'Done calling cronjob/renew-tokens\n\n';
-
-              echo 'API call to update the token usage';
-              echo 'This call needs to be placed at the last since it takes a long time to generate new stats';
-              curl 'http://oncokb-public:9095/api/cronjob/update-token-stats'  -H 'Authorization: Bearer $(TOKEN)';
-              echo 'Done calling cronjob/update-token-stats\n\n';
               
               echo 'API call to check the trial accounts';
               curl 'http://oncokb-public:9095/api/cronjob/check-trial-accounts'  -H 'Authorization: Bearer $(TOKEN)';

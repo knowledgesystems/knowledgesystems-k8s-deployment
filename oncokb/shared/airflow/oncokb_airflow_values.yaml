@@ -49,7 +49,7 @@ web:
       configMap:
         name: oncokb-airflow-requirements
   nodeSelector:
-    kops.k8s.io/instancegroup: oncokb
+    eks.amazonaws.com/nodegroup: oncokb
   tolerations:
   - key: "dedicated"
     operator: "Equal"
@@ -65,7 +65,7 @@ scheduler:
       configMap:
         name: oncokb-airflow-requirements
   nodeSelector:
-    kops.k8s.io/instancegroup: oncokb
+    eks.amazonaws.com/nodegroup: oncokb
   tolerations:
   - key: "dedicated"
     operator: "Equal"
@@ -81,7 +81,7 @@ worker:
       configMap:
         name: oncokb-airflow-requirements
   nodeSelector:
-    kops.k8s.io/instancegroup: oncokb
+    eks.amazonaws.com/nodegroup: oncokb
   tolerations:
   - key: "dedicated"
     operator: "Equal"
@@ -90,7 +90,7 @@ worker:
 
 redis:
   nodeSelector:
-    kops.k8s.io/instancegroup: oncokb
+    eks.amazonaws.com/nodegroup: oncokb
   tolerations:
   - key: "dedicated"
     operator: "Equal"
@@ -99,7 +99,7 @@ redis:
 
 postgresql:
   nodeSelector:
-    kops.k8s.io/instancegroup: oncokb
+    eks.amazonaws.com/nodegroup: oncokb
   tolerations:
   - key: "dedicated"
     operator: "Equal"
