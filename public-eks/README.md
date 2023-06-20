@@ -18,7 +18,7 @@
     - If you already have a profile that has an eks-admin group (PROFILE is your existing profile)
 
         ```bash
-        aws --region us-east-1  eks update-kubeconfig  --name cbioportal-prod --role-arn arn:aws:sts::070278699608:role/eks-admin --profile [PROFILE]
+        aws --region us-east-1  eks update-kubeconfig  --name cbioportal-prod --role-arn arn:aws:sts::ACCOUNT_ID:role/eks-admin --profile [PROFILE]
         ```
 
     - else
