@@ -1,0 +1,39 @@
+## Bitnami Redis&reg; image
+## ref: https://hub.docker.com/r/bitnami/redis/tags/
+## @param image.registry Redis&reg; image registry
+## @param image.repository Redis&reg; image repository
+## @param image.tag Redis&reg; image tag (immutable tags are recommended)
+## @param image.digest Redis&reg; image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+## @param image.pullPolicy Redis&reg; image pull policy
+## @param image.pullSecrets Redis&reg; image pull secrets
+## @param image.debug Enable image debug mode
+##
+image:
+  registry: docker.io
+  repository: bitnami/redis
+  tag: 7.0.11-debian-11-r12
+  digest: ""
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+  ## Enable debug mode
+  ##
+  debug: false
+
+## @section Redis&reg; common configuration parameters
+## https://github.com/bitnami/containers/tree/main/bitnami/redis#configuration
+##
+
+## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
+##
+architecture: standalone
