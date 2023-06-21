@@ -1,6 +1,12 @@
 # Cluster setup
 
-- Make sure the latest aws-cli is installed, the current version of aws used at the time is 2.9.15
+| Dependency          | Version |
+|---------------------|---------|
+| aws-cli             | 2.9.15  |
+| k8s server          | 1.27+   |
+| k8s client          | 1.27+   |
+
+- Make sure the aws-cli and k8s is using desired version
 
     ```bash
     aws --region us-east-1  eks update-kubeconfig  --name cbioportal-prod
