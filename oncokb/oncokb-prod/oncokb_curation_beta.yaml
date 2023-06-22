@@ -6,14 +6,14 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: oncokb-curation
-  name: oncokb-curation
+    run: oncokb-curation-beta
+  name: oncokb-curation-beta
   namespace: oncokb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: oncokb-curation
+      run: oncokb-curation-beta
   strategy:
     rollingUpdate:
       maxUnavailable: 0
@@ -22,7 +22,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncokb-curation
+        run: oncokb-curation-beta
     spec:
       containers:
         - env:
@@ -51,7 +51,7 @@ spec:
               value: "$(REDIS_PASSWORD)"
           envFrom:
             - configMapRef:
-                name: oncokb-curation
+                name: oncokb-curation-beta
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-transcript
             - configMapRef:
@@ -73,7 +73,7 @@ spec:
             initialDelaySeconds: 10
             timeoutSeconds: 10
             periodSeconds: 3000
-          name: oncokb-curation
+          name: oncokb-curation-beta
           ports:
             - name: http
               containerPort: 9090
@@ -91,10 +91,10 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       tolerations:
-      - key: "dedicated"
-        operator: "Equal"
-        value: "oncokb"
-        effect: "NoSchedule"
+        - key: "dedicated"
+          operator: "Equal"
+          value: "oncokb"
+          effect: "NoSchedule"
       nodeSelector:
         eks.amazonaws.com/nodegroup: oncokb
       volumes:
@@ -107,7 +107,7 @@ status: {}
 apiVersion: v1
 kind: Service
 metadata:
-  name: oncokb-curation
+  name: oncokb-curation-beta
   namespace: oncokb
 spec:
   ports:
@@ -115,5 +115,5 @@ spec:
       name: http
       targetPort: 9090
   selector:
-    run: oncokb-curation
+    run: oncokb-curation-beta
   type: ClusterIP
