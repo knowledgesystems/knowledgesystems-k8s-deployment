@@ -1,0 +1,32 @@
+## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
+##
+architecture: replication
+
+master:
+  extraFlags:
+    - --maxmemory 8gb
+    - --maxmemory-policy volatile-ttl
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: "redis-persistence-nodes"
+  persistence:
+    enabled: false
+
+replica:
+  replicaCount: 2
+  extraFlags:
+    - --maxmemory 8gb
+    - --maxmemory-policy volatile-ttl
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: "redis-persistence-nodes"
+  persistence:
+    enabled: false
+  autoscaling:
+    ## @param replica.autoscaling.enabled Enable replica autoscaling settings
+    ##
+    enabled: true
+    ## @param replica.autoscaling.minReplicas Minimum replicas for the pod autoscaling
+    ##
+    minReplicas: 2
+    ## @param replica.autoscaling.maxReplicas Maximum replicas for the pod autoscaling
+    ##
+    maxReplicas: 4
