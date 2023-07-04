@@ -1,0 +1,3 @@
+## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
+##
+architecture: standalone
