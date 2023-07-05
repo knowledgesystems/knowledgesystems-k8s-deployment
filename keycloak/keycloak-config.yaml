@@ -1,10 +1,5 @@
 nodeSelector:
-  kops.k8s.io/instancegroup: mission-critical
-tolerations:
-  - effect: NoSchedule
-    key: dedicated
-    operator: Equal
-    value: mission-critical
+  eks.amazonaws.com/nodegroup: critical
 postgresql:
   # Disable PostgreSQL dependency
   enabled: false
