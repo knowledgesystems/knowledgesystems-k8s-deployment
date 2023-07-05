@@ -38,7 +38,20 @@ spec:
   - hosts:
       - beta.cbioportal.org
     secretName: cbioportal-beta-cert
+  - hosts:
+      - keycloak.cbioportal.org
+    secretName: keycloak-cert
   rules:
+  - host: keycloak.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak-http
+              port:
+                number: 80
   - host: master.cbioportal.org
     http:
       paths:
