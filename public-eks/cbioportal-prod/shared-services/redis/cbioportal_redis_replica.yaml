@@ -7,7 +7,7 @@ master:
     - --maxmemory 8gb
     - --maxmemory-policy volatile-ttl
   nodeSelector:
-    eks.amazonaws.com/nodegroup: "redis-persistence-nodes"
+    eks.amazonaws.com/nodegroup: redis-persistence-nodes
   persistence:
     enabled: false
 
@@ -17,7 +17,7 @@ replica:
     - --maxmemory 8gb
     - --maxmemory-policy volatile-ttl
   nodeSelector:
-    eks.amazonaws.com/nodegroup: "redis-persistence-nodes"
+    eks.amazonaws.com/nodegroup: redis-persistence-nodes
   persistence:
     enabled: false
   autoscaling:

@@ -1,3 +1,12 @@
 ## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
 ##
 architecture: standalone
+
+master:
+  extraFlags:
+    - --maxmemory 8gb
+    - --maxmemory-policy volatile-ttl
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: redis-persistence-nodes
+  persistence:
+    enabled: false
