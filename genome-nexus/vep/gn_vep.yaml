@@ -59,8 +59,13 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "genome-nexus"
+          effect: "NoSchedule"
       nodeSelector:
-         kops.k8s.io/instancegroup: genome-nexus
+        eks.amazonaws.com/nodegroup: genome-nexus
       # download data from s3 bucket (takes ~15m).
       # TODO: It might be better to create a volume from an existing snapshot.
       initContainers:
