@@ -31,7 +31,7 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot28-grch38-ensembl95-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-v0dot29-grch38-ensembl95-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
@@ -44,7 +44,7 @@ spec:
             # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
             # include shenandoah)
             "-Xms100m",
-            "-Xmx6g",
+            "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseZGC",
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
@@ -87,8 +87,13 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "genome-nexus"
+          effect: "NoSchedule"
       nodeSelector:
-         kops.k8s.io/instancegroup: genome-nexus
+        eks.amazonaws.com/nodegroup: genome-nexus
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler

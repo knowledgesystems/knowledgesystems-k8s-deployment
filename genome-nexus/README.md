@@ -8,7 +8,7 @@ Set up mongo database initialized with data from [gn-mongo image](https://hub.do
 
 If you are using helm v2:
 ```
-helm install --name gn-mongo-v0dot25 --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.25,persistence.size=100Gi bitnami/mongodb --namespace genome-nexus
+helm install --name gn-mongo-v0dot29 --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.29_mutationassessor,persistence.size=100Gi bitnami/mongodb --namespace genome-nexus
 ```
 
 If you are using helm v3:
@@ -78,7 +78,7 @@ helm search -l bitnami/mongodb
 
 To spin up the mongo database, run the following command:
 ```
-helm install --name genie-gn-mongo --version 7.3.1  --set image.repository=genomenexus/gn-mongo,image.tag=v0.12,persistence.size=50Gi bitnami/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"='genie-genome-nexus'
+helm install --name genie-gn-mongo --version 7.3.1  --set image.repository=genomenexus/gn-mongo,image.tag=0.29_mutationassessor,persistence.size=50Gi bitnami/mongodb --namespace genome-nexus --set nodeSelector."kops\\.k8s\\.io/instancegroup"='genie-genome-nexus'
 ```
 
 ### Setting Up GENIE VEP
