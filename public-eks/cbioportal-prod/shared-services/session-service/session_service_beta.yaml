@@ -6,24 +6,24 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: cbioportal-session-service
-  name: cbioportal-session-service
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-session-service
+    run: cbioportal-session-service-beta
+  name: cbioportal-session-service-beta
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-session-service-beta
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      run: cbioportal-session-service
+      run: cbioportal-session-service-beta
   strategy:
     rollingUpdate:
-      maxSurge: 3
+      maxSurge: 2
       maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
       creationTimestamp: null
       labels:
-        run: cbioportal-session-service
+        run: cbioportal-session-service-beta
     spec:
       containers:
       - env:
@@ -32,15 +32,15 @@ spec:
         - name: MONGODB_ROOT_PASSWORD
           valueFrom: 
             secretKeyRef:
-              name: cbioportal-session-service-mongo-4dot2-20230525-mongodb
+              name: cbioportal-session-service-mongo-mongodb
               key: mongodb-root-password
         envFrom:
           - configMapRef:
               name: cbioportal-session-service-user-credentials
-        image: cbioportal/session-service:0.6.1
+        image: cbioportal/session-service:0.5.0
         command: ["java"]
         args: [
-                  "-Dspring.data.mongodb.uri=mongodb://root:$(MONGODB_ROOT_PASSWORD)@cbioportal-session-service-mongo-4dot2-20230525-mongodb:27017/session_service?authSource=admin",
+                  "-Dspring.data.mongodb.uri=mongodb://root:$(MONGODB_ROOT_PASSWORD)@cbioportal-session-service-mongo-4dot2-20230711-mongodb:27017/session_service?authSource=admin",
                   "-Dsecurity.basic.enabled=true",
                   "-Dspring.security.user.name=$(USER_NAME)",
                   "-Dspring.security.user.password=$(USER_PASSWORD)",
@@ -54,13 +54,16 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 2
           periodSeconds: 5
-        name: cbioportal-session-service
+        name: cbioportal-session-service-beta
         ports:
         - containerPort: 8888
           protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+      # run on critical node group
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: critical
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -72,14 +75,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: cbioportal-session-service
-  name: cbioportal-session-service
-  selfLink: /api/v1/namespaces/default/services/cbioportal-session-service
+    run: cbioportal-session-service-beta
+  name: cbioportal-session-service-beta
+  selfLink: /api/v1/namespaces/default/services/cbioportal-session-service-beta
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8888
   selector:
-    run: cbioportal-session-service
+    run: cbioportal-session-service-beta
   type: ClusterIP
