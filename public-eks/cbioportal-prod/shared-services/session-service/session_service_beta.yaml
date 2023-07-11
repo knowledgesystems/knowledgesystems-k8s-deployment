@@ -32,12 +32,12 @@ spec:
         - name: MONGODB_ROOT_PASSWORD
           valueFrom: 
             secretKeyRef:
-              name: cbioportal-session-service-mongo-mongodb
+              name: cbioportal-session-service-mongo-4dot2-20230711-mongodb
               key: mongodb-root-password
         envFrom:
           - configMapRef:
               name: cbioportal-session-service-user-credentials
-        image: cbioportal/session-service:0.5.0
+        image: cbioportal/session-service:0.6.1
         command: ["java"]
         args: [
                   "-Dspring.data.mongodb.uri=mongodb://root:$(MONGODB_ROOT_PASSWORD)@cbioportal-session-service-mongo-4dot2-20230711-mongodb:27017/session_service?authSource=admin",
