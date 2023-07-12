@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: oncokb-public-beta
-      version: 'v1'
+      version: "v1"
   strategy:
     rollingUpdate:
       maxUnavailable: 0
@@ -17,36 +17,36 @@ spec:
     metadata:
       labels:
         app: oncokb-public-beta
-        version: 'v1'
+        version: "v1"
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.9.1
+          image: oncokb/oncokb-public:3.9.7
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
             - name: APPLICATION_REDIS_TYPE
-              value: '$(REDIS_TYPE)'
+              value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
-              value: '$(REDIS_ADDRESS)'
+              value: "$(REDIS_ADDRESS)"
             - name: APPLICATION_REDIS_PASSWORD
-              value: '$(REDIS_PASSWROD)'
+              value: "$(REDIS_PASSWROD)"
             - name: APPLICATION_REDIS_EXPIRATION
-              value: '$(REDIS_EXPIRATION)'
+              value: "$(REDIS_EXPIRATION)"
             - name: APPLICATION_DB_READ_ONLY
-              value: 'false'
+              value: "false"
             - name: JAVA_OPTS
-              value: '-Xmx1024m -Xms512m'
+              value: "-Xmx1024m -Xms512m"
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
-              value: '-2147483647'
+              value: "-2147483647"
             - name: SENTRY_TRACES_SAMPLE_RATE
-              value: '.2'
+              value: ".2"
             - name: SPRING_DATASOURCE_URL
-              value: '${DB_URL}/oncokb_public_beta'
+              value: "${DB_URL}/oncokb_public_beta"
             - name: SPRING_DATASOURCE_USERNAME
-              value: '${DB_USERNAME}'
+              value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
-              value: '${DB_PASSWORD}'
+              value: "${DB_PASSWORD}"
           envFrom:
             - configMapRef:
                 name: oncokb-public-beta
@@ -87,16 +87,16 @@ spec:
               subPath: oncokb-recaptcha-credentials.json
               name: recaptcha-credentials
       tolerations:
-      - key: "dedicated"
-        operator: "Equal"
-        value: "oncokb"
-        effect: "NoSchedule"
+        - key: "dedicated"
+          operator: "Equal"
+          value: "oncokb"
+          effect: "NoSchedule"
       nodeSelector:
         eks.amazonaws.com/nodegroup: oncokb
       volumes:
-      - name: recaptcha-credentials
-        secret:
-          secretName: oncokb-recaptcha-credentials
+        - name: recaptcha-credentials
+          secret:
+            secretName: oncokb-recaptcha-credentials
 
 ---
 apiVersion: v1
