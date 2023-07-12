@@ -35,7 +35,7 @@ spec:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.13.0-actionable-gene-2
+          image: oncokb/oncokb:3.12.13
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
