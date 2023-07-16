@@ -8,13 +8,13 @@ metadata:
     run: oncokb-curation
   name: oncokb-curation
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: oncokb-curation
   strategy:
     rollingUpdate:
-      maxUnavailable: 0
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
@@ -30,7 +30,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:3.12.3-curate
+          image: oncokb/oncokb:3.12.13-curate
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",

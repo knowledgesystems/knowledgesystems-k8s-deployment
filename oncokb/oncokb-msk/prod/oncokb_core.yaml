@@ -9,13 +9,13 @@ metadata:
     run: oncokb-core
   name: oncokb-core
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
       run: oncokb-core
   strategy:
     rollingUpdate:
-      maxSurge: 3
+      maxUnavailable: 2
     type: RollingUpdate
   template:
     metadata:
@@ -32,7 +32,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:3.12.11
+          image: oncokb/oncokb:3.12.13
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",

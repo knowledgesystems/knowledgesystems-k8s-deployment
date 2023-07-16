@@ -6,13 +6,13 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: oncokb-cbx
-  name: oncokb-cbx
+    run: oncokb-core-cbx
+  name: oncokb-core-cbx
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
-      run: oncokb-cbx
+      run: oncokb-core-cbx
   strategy:
     rollingUpdate:
       maxUnavailable: 1
@@ -21,13 +21,13 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: oncokb-cbx
+        run: oncokb-core-cbx
     spec:
       containers:
         - env:
           envFrom:
             - configMapRef:
-                name: oncokb-cbx
+                name: oncokb-core-cbx
             - configMapRef:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
@@ -76,7 +76,7 @@ spec:
             timeoutSeconds: 10
             periodSeconds: 10
             failureThreshold: 20
-          name: oncokb-cbx
+          name: oncokb-core-cbx
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -100,11 +100,11 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncokb-cbx
-  name: oncokb-cbx
+    run: oncokb-core-cbx
+  name: oncokb-core-cbx
 spec:
   ports:
     - port: 8888
   selector:
-    run: oncokb-cbx
+    run: oncokb-core-cbx
   type: ClusterIP

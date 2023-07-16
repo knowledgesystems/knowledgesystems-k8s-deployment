@@ -9,14 +9,10 @@ spec:
   tls:
     - hosts:
       - www.oncokb.aws.mskcc.org
-      - beta-core.oncokb.aws.mskcc.org
-      - core.oncokb.aws.mskcc.org
       - curation.oncokb.aws.mskcc.org
-      - mm.oncokb.aws.mskcc.org
       - cbx.oncokb.aws.mskcc.org
       - pub-data-17.oncokb.aws.mskcc.org
       - grafana.oncokb.aws.mskcc.org
-      secretName: wildcard-cert
   rules:
     - host: "www.oncokb.aws.mskcc.org"
       http:
@@ -28,26 +24,6 @@ spec:
                 name: oncokb-public
                 port:
                   number: 9095
-    - host: "beta-core.oncokb.aws.mskcc.org"
-      http:
-        paths:
-          - path: "/"
-            pathType: Prefix
-            backend:
-              service:
-                name: oncokb-core-pub-data-2017
-                port:
-                  number: 8888
-    - host: "core.oncokb.aws.mskcc.org"
-      http:
-        paths:
-          - path: "/"
-            pathType: Prefix
-            backend:
-              service:
-                name: oncokb-core
-                port:
-                  number: 8888
     - host: "cbx.oncokb.aws.mskcc.org"
       http:
         paths:
@@ -55,7 +31,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: oncokb-cbx
+                name: oncokb-core-cbx
                 port:
                   number: 8888
     - host: "pub-data-17.oncokb.aws.mskcc.org"
@@ -76,16 +52,6 @@ spec:
             backend:
               service:
                 name: oncokb-curation
-                port:
-                  number: 8888
-    - host: "mm.oncokb.aws.mskcc.org"
-      http:
-        paths:
-          - path: "/"
-            pathType: Prefix
-            backend:
-              service:
-                name: oncokb-mm
                 port:
                   number: 8888
     - host: "grafana.oncokb.aws.mskcc.org"
