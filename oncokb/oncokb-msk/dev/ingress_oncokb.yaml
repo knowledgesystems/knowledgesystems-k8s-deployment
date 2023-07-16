@@ -11,7 +11,7 @@ spec:
       - www.oncokb.dev.aws.mskcc.org
       - grafana.oncokb.dev.aws.mskcc.org
       - airflow.oncokb.dev.aws.mskcc.org
-      secretName: wildcard-cert
+      - core.oncokb.dev.aws.mskcc.org
   rules:
     - host: "www.oncokb.dev.aws.mskcc.org"
       http:

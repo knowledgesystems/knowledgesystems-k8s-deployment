@@ -9,7 +9,7 @@ metadata:
     run: oncokb-core
   name: oncokb-core
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       run: oncokb-core
@@ -30,7 +30,7 @@ spec:
                 name: oncokb-core
             - configMapRef:
                 name: oncokb-db-msk-dev-rds
-          image: oncokb/oncokb:3.12.6
+          image: oncokb/oncokb:3.12.13
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
