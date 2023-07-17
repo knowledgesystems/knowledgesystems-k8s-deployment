@@ -8,13 +8,13 @@ metadata:
     run: oncokb-curation
   name: oncokb-curation
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: oncokb-curation
   strategy:
     rollingUpdate:
-      maxUnavailable: 1
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
@@ -30,15 +30,17 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:3.12.13-curate
+          image: oncokb/oncokb:3.12.14-alpha.2
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
             "-Djdbc.password=$(DB_PASSWORD)",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+            "-Dncbi.api.key=$(NCBI_API_KEY)",
+            "-Dpublic_oncokb.token=$(PUBLIC_ONCOKB_TOKEN)",
             "-Dredis.enable=false",
             "-Dredis.type=$(REDIS_TYPE)",
             "-Dredis.address=$(REDIS_ADDRESS)",
@@ -56,7 +58,7 @@ spec:
             "-Dcuration_platform.internal_private_link=api/private/",
             "-Dcuration_platform.public_api_link=api/v1/",
             "-Dcuration_platform.internal_public_api_link=api/v1/",
-            "-Dcuration_platform.websocket_api_link=api/websocket/",
+            "-Dcuration_platform.websocket_api_link=wss://curation.oncokb.aws.mskcc.org/api/websocket/",
             "-Dshow_sitemaps=false",
             "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
             "-Dsentry.sample.rate=1",
