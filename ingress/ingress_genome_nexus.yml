@@ -1,11 +1,12 @@
-apiVersion: apps/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: gn-ingress
   namespace: genome-nexus
   annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: nginx
-    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
@@ -26,58 +27,79 @@ spec:
     - www.genomenexus.org
     - v2.genomenexus.org
     - v1.genomenexus.org
+    - beta.genomenexus.org
     - grch38.genomenexus.org
     - genie.genomenexus.org
     - annotation.genomenexus.org
-    - beta.genomenexus.org
-    secretName: genome-nexus-v2-cert
+    secretName: genome-nexus-cert
   rules:
   - host: www.genomenexus.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus
-          servicePort: http
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: genome-nexus
+              port:
+                number: 80
   - host: v2.genomenexus.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus
-          servicePort: http
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: genome-nexus
+              port:
+                number: 80
   - host: v1.genomenexus.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus
-          servicePort: http
-  - host: grch38.genomenexus.org
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus-grch38
-          servicePort: http
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: genome-nexus
+              port:
+                number: 80
   - host: beta.genomenexus.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus-beta
-          servicePort: http
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: genome-nexus-beta
+              port:
+                number: 80
+  - host: grch38.genomenexus.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: genome-nexus-grch38
+              port:
+                number: 80
   - host: genie.genomenexus.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus-genie
-          servicePort: http
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: genome-nexus-genie
+              port:
+                number: 80
   - host: annotation.genomenexus.org
     http:
       paths:
-      - path: /
-        backend:
-          serviceName: genome-nexus-gnap
-          servicePort: http
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: genome-nexus-gnap
+              port:
+                number: 80
