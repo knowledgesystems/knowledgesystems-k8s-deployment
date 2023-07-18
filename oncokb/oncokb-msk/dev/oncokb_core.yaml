@@ -9,7 +9,7 @@ metadata:
     run: oncokb-core
   name: oncokb-core
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       run: oncokb-core
@@ -30,12 +30,14 @@ spec:
                 name: oncokb-core
             - configMapRef:
                 name: oncokb-db-msk-dev-rds
+            - configMapRef:
+                name: oncokb-redis-cluster
           image: oncokb/oncokb:3.12.13
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.url=$(DB_URL)/oncokb_core_demo?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
             "-Djdbc.password=$(DB_PASSWORD)",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
