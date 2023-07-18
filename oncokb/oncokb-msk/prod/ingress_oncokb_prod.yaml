@@ -12,6 +12,7 @@ spec:
       - curation.oncokb.aws.mskcc.org
       - cbx.oncokb.aws.mskcc.org
       - pub-data-17.oncokb.aws.mskcc.org
+      - airflow.oncokb.aws.mskcc.org
   rules:
     - host: "www.oncokb.aws.mskcc.org"
       http:
@@ -53,4 +54,14 @@ spec:
                 name: oncokb-curation
                 port:
                   number: 8888
+    - host: "airflow.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-airflow
+                port:
+                  number: 8080
   ingressClassName: nginx
