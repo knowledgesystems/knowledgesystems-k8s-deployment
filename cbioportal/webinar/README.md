@@ -16,7 +16,7 @@ These are the steps to increase overall compute power and set up the temp webina
 **NOTE: it takes a long time for the database to boot (~30m), so you can continue with next non-database related steps**
 
 2. After creation of database instances modify them to enable "performance insights" (not sure if one can do this during creation of the instances)
-3. Increase number of nodes in large-mem group from 4 -> 6. This is the group of nodes that cbioportal runs on (see [../cbioportal_spring_boot.yaml](../cbioportal_spring_boot.yaml)). Note that you need to be able to use kops for this:
+3. Increase number of nodes in large-mem group from 4 -> 6. This is the group of nodes that cbioportal runs on (see [../cbioportal_spring_boot.yaml](../archived/cbioportal_spring_boot.yaml)). Note that you need to be able to use kops for this:
     ```
     kops edit instancegroups large-mem
     kops update cluster
@@ -27,8 +27,8 @@ These are the steps to increase overall compute power and set up the temp webina
     (Optional) increase those for genome-nexus group as well from 2 -> 4 in the same way
 4. Point db host parameters in [./cbioportal_webinar.yaml](./cbioportal_webinar.yaml) to the newly setup AWS RDS node
 5. `kubectl apply -f cbioportal_webinar.yaml` to bring up the webinar instance. URL has already been configured
-6. Point [../cbioportal_spring_boot.yaml](../cbioportal_spring_boot.yaml) to use the newly setup AWS RDS node (should be different from 3.)
-7. (optional) increase number of replicas for [../cbioportal_spring_boot.yaml](../cbioportal_spring_boot.yaml)
+6. Point [../cbioportal_spring_boot.yaml](../archived/cbioportal_spring_boot.yaml) to use the newly setup AWS RDS node (should be different from 3.)
+7. (optional) increase number of replicas for [../cbioportal_spring_boot.yaml](../archived/cbioportal_spring_boot.yaml)
 8. (optional) increase number of replicas for [../../genome-nexus/gn_spring_boot.yaml](../../genome-nexus/gn_spring_boot.yaml)
 
 
