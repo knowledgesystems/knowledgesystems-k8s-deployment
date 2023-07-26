@@ -16,8 +16,7 @@ spec:
       run: eks-msk-beta
   strategy:
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
