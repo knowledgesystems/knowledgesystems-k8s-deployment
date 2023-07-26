@@ -1,41 +1,35 @@
 ---
-# Service account the client will use to delete a pod,
+# Service account the client will use to reset the deployment,
 # by default the pods running inside the cluster can do no such things.
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: pod-deletion
-  namespace: oncokb
+  name: development-reset
+  namespace: default
 ---
 # allow getting status and patching only the one deployment you want
 # to restart
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: pod-deletion
-  namespace: oncokb
+  name: development-reset
+  namespace: default
 rules:
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["get", "list", "delete", "watch"]
-  - apiGroups: [""]
-    resources: ["secrets", "configmaps"]
-    verbs: ["get", "list"]
   - apiGroups: ["extensions", "apps"]
     resources: ["deployments"]
-    verbs: ["get"]
+    verbs: ["get", "list", "patch", "watch"]
 ---
 # bind the role to the service account
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: pod-deletion
-  namespace: oncokb
+  name: development-reset
+  namespace: default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: pod-deletion
+  name: development-reset
 subjects:
   - kind: ServiceAccount
-    name: pod-deletion
-    namespace: oncokb
+    name: development-reset
+    namespace: default
