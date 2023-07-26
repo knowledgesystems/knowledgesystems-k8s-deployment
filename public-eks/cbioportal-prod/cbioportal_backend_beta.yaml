@@ -34,7 +34,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:demo-clickhouse-k8s-web-shenandoah
+        image: cbioportal/cbioportal:demo-db-url-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -97,12 +97,10 @@ spec:
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            "-Ddb.host=$(DB_HOST)",
-            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
-            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
-            "-Ddb.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-            "-Ddb.clickhouse.user=$(DB_CLICKHOUSE_USER)",
-            "-Ddb.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
+            "-Ddb.connection_string=jdbc:mysql://publicdb.cbioportal.org:3306/cgds_public?zeroDateTimeBehavior=convertToNull&useSSL=false",
+            #"-Ddb.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            #"-Ddb.clickhouse.user=$(DB_CLICKHOUSE_USER)",
+            #"-Ddb.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
