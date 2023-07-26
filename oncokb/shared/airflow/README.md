@@ -39,6 +39,8 @@
         }
     }
     ```
+   See [connections.json](connections.json) for an example
+
 
 3. Add Airflow variables 
     
@@ -56,6 +58,8 @@
         "key2": "value2"
     }
     ```
+   See [variables.json](variables.json) for an example
+
 
 ## Upgrade with new values
 ```
