@@ -138,8 +138,9 @@ spec:
             "-Dsentry.factory=org.cbioportal.logging.SentryClientFactory",
             #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "-Dsitemaps=false",
-            "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
-            "-Doncokb.token=$(ONCOKB_TOKEN)",
+            "-Doncokb.public_api.url=https://core.oncokb.aws.mskcc.org/api/v1",
+            # token is not needed to access MSK OncoKB instance
+            "-Doncokb.token=fake_token",
             "-Doncokb.merge_icons_by_default=false",
             "-Dgenomenexus.url=https://v1.genomenexus.org",
             "-Dshow.genomenexus.annotation_sources=mutation_assessor",
