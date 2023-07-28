@@ -149,13 +149,10 @@ spec:
             "-Dsentry.factory=org.cbioportal.logging.SentryClientFactory",
             #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "-Dsitemaps=false",
-            # we need to stick to http protocol. OncoKB uses a cert that issued by MSK which is not trusted agent by java
-            #"-Doncokb.public_api.url=http://core.oncokb.aws.mskcc.org/api/v1",
-            # you do not need a token to access MSK OncoKB instance
-            #"-Doncokb.token=fake_token",
+            "-Doncokb.public_api.url=https://core.oncokb.aws.mskcc.org/api/v1",
+            # token is not needed to access MSK OncoKB instance
+            "-Doncokb.token=fake_token",
             #"-Doncokb.merge_icons_by_default=false",
-            "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
-            "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://v1.genomenexus.org",
             "-Dshow.genomenexus.annotation_sources=mutation_assessor",
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",

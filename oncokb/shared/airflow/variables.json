@@ -1,0 +1,6 @@
+{
+    "oncokb_k8_namespace": "default",
+    "oncokb_redis_cluster_num_replicas_per_master": 1,
+    "oncokb_redis_cluster_total_num_masters": 10,
+    "oncokb_redis_cluster_usage_threshold": 0.3
+}
