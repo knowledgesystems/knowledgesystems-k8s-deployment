@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.9.9
+          image: oncokb/oncokb-public:3.9.10
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -56,7 +56,7 @@ spec:
                 name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
             httpGet:
-              path: /v2/api-docs
+              path: /
               port: 9095
             initialDelaySeconds: 30
             timeoutSeconds: 5
