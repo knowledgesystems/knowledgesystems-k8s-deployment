@@ -34,7 +34,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:demo-db-url-web-shenandoah
+        image: cbioportal/cbioportal:demo-rfc72-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -154,28 +154,30 @@ spec:
             "-Denable_request_body_gzip_compression=true",
             # for single cell plugin
             "-Dfrontend.config=/cbioportal/frontendConfig.json",
-            "-jar",
-            "/webapp-runner.jar",
+            "-cp",
+            "/cbioportal-webapp:/cbioportal-webapp/lib/*",
+            "org.cbioportal.PortalApplication",
             # this addresses same issue as
             # https://github.com/cBioPortal/cbioportal/issues/2328 one needs to
             # set this if one doesn't want to forward https -> http -> https
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
-            "--proxy-base-url",
-            "https://beta.cbioportal.org",
-            "--max-threads",
-            "0",
-            "--session-store",
-            "redis",
-            "--session-store-operation-timeout",
-            "10000",
-            # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
-            "-AmaxHttpHeaderSize=16384",
-            "-AconnectionTimeout=20000",
-            "--enable-compression",
-            "--port",
-            "8888",
-            "/app.war"
+            # "--proxy-base-url",
+            # "https://beta.cbioportal.org",
+            # "--max-threads",
+            # "0",
+            # "--session-store",
+            # "redis",
+            # "--session-store-operation-timeout",
+            # "10000",
+            # # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
+            # "-AmaxHttpHeaderSize=16384",
+            # "-AconnectionTimeout=20000",
+            # "--enable-compression",
+            # "--port",
+            # "8888",
+            # "/app.war"
+            "/cbioportal-webapp/"
         ]
         imagePullPolicy: Always
         readinessProbe:
