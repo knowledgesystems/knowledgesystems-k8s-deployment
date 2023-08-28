@@ -1,0 +1,46 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  # https://github.com/kubernetes/ingress-nginx/blob/main/docs/examples/rewrite/README.md
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/app-root: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: cellxgene-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /pbmc3k(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: cellxgene-service-1
+                port:
+                  number: 8080
+          - path: /scRNA_rds_Ovarian_Malignant_cluster_object(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: cellxgene-service-2
+                port:
+                  number: 8080
+          - path: /scRNA_rds_Ovarian_nonMalignant_cluster_object(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: cellxgene-service-3
+                port:
+                  number: 8080
+          - path: /test(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: cellxgene-service-2
+                port:
+                  number: 8080
+---
+
+
