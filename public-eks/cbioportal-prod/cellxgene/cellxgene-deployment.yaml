@@ -1,0 +1,250 @@
+# 1. AWS EKS role for S3 access instead of AWS_ACCESS_KEY or a SECRETS/Configmap setup
+# Secrets for AWS Creds
+# 2. Subdomain/Host for cellxgene resources cellxgene.cbioportal.org
+# 3. Configmap for setting source bucket 
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cellxgene-deploy-1
+  labels:
+    app: cellxgene
+    dataset: pbmc3k.h5ad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dataset: pbmc3k.h5ad
+  template:
+    metadata:
+      labels:
+        dataset: pbmc3k.h5ad
+    spec:
+      containers:
+        - name: cellxgene-app
+          image: 'edit01/cellxgene:1.1.2'
+          command: ["cellxgene"]
+          args: [
+            "launch", 
+            "-p", 
+            "8080", 
+            "--host", 
+            "0.0.0.0", 
+            "--backed", 
+            "--disable-annotations", 
+            "--disable-gene-sets-save", 
+            "s3://jason-test-workspace/pbmc3k.h5ad"
+          ]
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 500Mi 
+              cpu: 1
+          readinessProbe: # Block traffic to container if not ready
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 60 
+            failureThreshold: 10
+          livenessProbe: # Restart container if not healthy
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 600  # 10min
+            periodSeconds: 3600 # 1hr
+            failureThreshold: 2
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom: 
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom: 
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: large-mem
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cellxgene-deploy-2
+  labels:
+    app: cellxgene
+    dataset: scRNA_rds_Ovarian_Malignant_cluster_object.h5ad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dataset: scRNA_rds_Ovarian_Malignant_cluster_object.h5ad
+  template:
+    metadata:
+      labels:
+        dataset: scRNA_rds_Ovarian_Malignant_cluster_object.h5ad
+    spec:
+      containers:
+        - name: cellxgene-app2
+          image: 'edit01/cellxgene:1.1.2'
+          command: ["cellxgene"]
+          args: [
+            "launch",
+            "-p",
+            "8080",
+            "--host",
+            "0.0.0.0",
+            "--backed",
+            "--disable-annotations",
+            "--disable-gene-sets-save",
+            "s3://jason-test-workspace/scRNA_rds_Ovarian_Malignant_cluster_object.h5ad"
+          ]
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 2Gi
+              cpu: 1
+          readinessProbe: # Block traffic to container if not ready
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 10
+          livenessProbe: # Restart container if not healthy
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 600  # 10min
+            periodSeconds: 3600 # 1hr
+            failureThreshold: 2
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: large-mem
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cellxgene-deploy-3
+  labels:
+    app: cellxgene
+    dataset: scRNA_rds_Ovarian_nonMalignant_cluster_object.h5ad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dataset: scRNA_rds_Ovarian_nonMalignant_cluster_object.h5ad
+  template:
+    metadata:
+      labels:
+        dataset: scRNA_rds_Ovarian_nonMalignant_cluster_object.h5ad
+    spec:
+      containers:
+        - name: cellxgene-app3
+          image: 'edit01/cellxgene:1.1.2'
+          command: ["cellxgene"]
+          args: [
+            "launch",
+            "-p",
+            "8080",
+            "--host",
+            "0.0.0.0",
+            "--backed",
+            "--disable-annotations",
+            "--disable-gene-sets-save",
+            "s3://jason-test-workspace/scRNA_rds_Ovarian_nonMalignant_cluster_object.h5ad"
+          ]
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 2Gi
+              cpu: 1
+          readinessProbe: # Block traffic to container if not ready
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 10
+          livenessProbe: # Restart container if not healthy
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 600  # 10min
+            periodSeconds: 3600 # 1hr
+            failureThreshold: 2
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: large-mem
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cellxgene-service-1
+  labels:  # For convenience
+    app: cellxgene
+    dataset: pbmc3k.h5ad
+spec:
+  selector:
+    dataset: pbmc3k.h5ad
+  ports:
+    - port: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cellxgene-service-2
+  labels:  # For convenience
+    app: cellxgene
+    dataset: scRNA_rds_Ovarian_Malignant_cluster_object.h5ad
+spec:
+  selector:
+    dataset: scRNA_rds_Ovarian_Malignant_cluster_object.h5ad
+  ports:
+    - port: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cellxgene-service-3
+  labels:  # For convenience
+    app: cellxgene
+    dataset: scRNA_rds_Ovarian_nonMalignant_cluster_object.h5ad
+spec:
+  selector:
+    dataset: scRNA_rds_Ovarian_nonMalignant_cluster_object.h5ad
+  ports:
+    - port: 8080
