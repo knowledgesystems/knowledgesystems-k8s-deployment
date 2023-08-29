@@ -61,13 +61,16 @@ spec:
           - name: AWS_ACCESS_KEY_ID
             valueFrom: 
               secretKeyRef:
-                name: awscreds
+                name: cellxgene-creds
                 key: aws_access_key_id
           - name: AWS_SECRET_ACCESS_KEY
             valueFrom: 
               secretKeyRef:
-                name: awscreds
+                name: cellxgene-creds
                 key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: large-mem
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -91,14 +94,14 @@ spec:
           image: 'edit01/cellxgene:1.1.2'
           command: ["cellxgene"]
           args: [
-            "launch", 
-            "-p", 
-            "8080", 
-            "--host", 
-            "0.0.0.0", 
-            "--backed", 
-            "--disable-annotations", 
-            "--disable-gene-sets-save", 
+            "launch",
+            "-p",
+            "8080",
+            "--host",
+            "0.0.0.0",
+            "--backed",
+            "--disable-annotations",
+            "--disable-gene-sets-save",
             "s3://jason-test-workspace/scRNA_rds_Ovarian_Malignant_cluster_object.h5ad"
           ]
           ports:
@@ -107,7 +110,7 @@ spec:
           imagePullPolicy: Always
           resources:
             limits:
-              memory: 2Gi 
+              memory: 2Gi
               cpu: 1
           readinessProbe: # Block traffic to container if not ready
             httpGet:
@@ -125,15 +128,18 @@ spec:
             failureThreshold: 2
           env:
           - name: AWS_ACCESS_KEY_ID
-            valueFrom: 
+            valueFrom:
               secretKeyRef:
-                name: awscreds
+                name: cellxgene-creds
                 key: aws_access_key_id
           - name: AWS_SECRET_ACCESS_KEY
-            valueFrom: 
+            valueFrom:
               secretKeyRef:
-                name: awscreds
+                name: cellxgene-creds
                 key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: large-mem
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -157,14 +163,14 @@ spec:
           image: 'edit01/cellxgene:1.1.2'
           command: ["cellxgene"]
           args: [
-            "launch", 
-            "-p", 
-            "8080", 
-            "--host", 
-            "0.0.0.0", 
-            "--backed", 
-            "--disable-annotations", 
-            "--disable-gene-sets-save", 
+            "launch",
+            "-p",
+            "8080",
+            "--host",
+            "0.0.0.0",
+            "--backed",
+            "--disable-annotations",
+            "--disable-gene-sets-save",
             "s3://jason-test-workspace/scRNA_rds_Ovarian_nonMalignant_cluster_object.h5ad"
           ]
           ports:
@@ -173,7 +179,7 @@ spec:
           imagePullPolicy: Always
           resources:
             limits:
-              memory: 2Gi 
+              memory: 2Gi
               cpu: 1
           readinessProbe: # Block traffic to container if not ready
             httpGet:
@@ -191,15 +197,18 @@ spec:
             failureThreshold: 2
           env:
           - name: AWS_ACCESS_KEY_ID
-            valueFrom: 
+            valueFrom:
               secretKeyRef:
-                name: awscreds
+                name: cellxgene-creds
                 key: aws_access_key_id
           - name: AWS_SECRET_ACCESS_KEY
-            valueFrom: 
+            valueFrom:
               secretKeyRef:
-                name: awscreds
+                name: cellxgene-creds
                 key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: large-mem
 ---
 kind: Service
 apiVersion: v1
