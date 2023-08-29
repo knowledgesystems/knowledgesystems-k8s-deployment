@@ -38,12 +38,20 @@ spec:
           ports:
           - containerPort: 8080
             protocol: TCP
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: 300Mi
+              cpu: 0.5
+            limits:
+              memory: 500Mi 
+              cpu: 1
           readinessProbe: # Block traffic to container if not ready
             httpGet:
               path: /
               port: 8080
             initialDelaySeconds: 30
-            periodSeconds: 60
+            periodSeconds: 60 
             failureThreshold: 10
           livenessProbe: # Restart container if not healthy
             httpGet:
@@ -99,11 +107,19 @@ spec:
           ports:
           - containerPort: 8080
             protocol: TCP
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: 1.2Gi 
+              cpu: 0.5
+            limits:
+              memory: 2Gi 
+              cpu: 1
           readinessProbe: # Block traffic to container if not ready
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 60
             failureThreshold: 10
           livenessProbe: # Restart container if not healthy
@@ -160,11 +176,19 @@ spec:
           ports:
           - containerPort: 8080
             protocol: TCP
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: 1.5Gi 
+              cpu: 0.5
+            limits:
+              memory: 2Gi 
+              cpu: 1
           readinessProbe: # Block traffic to container if not ready
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 60
             failureThreshold: 10
           livenessProbe: # Restart container if not healthy
