@@ -18,23 +18,23 @@ metadata:
   name: cellxgene
 ```
 
-### Deployment, Pods, Services, & Ingress
-```sh 
-kubectl apply -f cellxgene-deployment.yaml -n cellxgene
-kubectl apply -f cellxgene-ingress.yaml -n cellxgene
-```
-
 ### Secrets
 Will be switching to rolebased access soon
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: awscreds
+  name: cellxgene-creds
 type: Opaque
 data:
   aws_access_key_id: <base64_encoded>
   aws_secret_access_key: <base64_encoded>
+```
+
+### Deployment, Pods, Services, & Ingress
+```sh 
+kubectl apply -f cellxgene-deployment.yaml -n cellxgene
+kubectl apply -f cellxgene-ingress.yaml -n cellxgene
 ```
 
 [1]: https://github.com/chanzuckerberg/cellxgene
