@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public
-        image: cbioportal/cbioportal:5.3.19-web-shenandoah
+        image: cbioportal/cbioportal:5.4.1-web-shenandoah
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -92,8 +92,8 @@ spec:
             "-Dauthorization=true",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            "-Ddb.host=$(DB_HOST)",
-            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            #"-Ddb.host=$(DB_HOST)",
+            #"-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
