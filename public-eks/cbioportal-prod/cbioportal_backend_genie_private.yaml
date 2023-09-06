@@ -43,7 +43,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:5.3.19-web-shenandoah
+        image: cbioportal/cbioportal:5.4.1-web-shenandoah
         volumeMounts:
         - name: cbioportal-genie-private-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -115,8 +115,8 @@ spec:
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            "-Ddb.host=$(DB_HOST)",
-            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            #"-Ddb.host=$(DB_HOST)",
+            #"-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",

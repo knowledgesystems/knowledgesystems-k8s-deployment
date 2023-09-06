@@ -33,7 +33,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:5.3.19-web-shenandoah
+        image: cbioportal/cbioportal:5.4.1-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -95,9 +95,9 @@ spec:
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            "-Ddb.host=$(DB_HOST)",
+            #"-Ddb.host=$(DB_HOST)",
+            #"-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
-            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
