@@ -25,7 +25,6 @@ spec:
       labels:
         run: cbioportal-backend-beta
     spec:
-    spec:
       volumes:
       - name: cbioportal-frontend-config-volume
         configMap:
@@ -34,7 +33,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:demo-rfc72-web-shenandoah
+        image: cbioportal/cbioportal:demo-rfc72-fix-docker-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -81,7 +80,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://frontend.cbioportal.org",
+            #"-Dfrontend.url=https://frontend.cbioportal.org",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
@@ -93,11 +92,16 @@ spec:
             "-Dapp.name=public-portal",
             # connecting over dbcp
             "-Ddbconnector=dbcp",
-            "-Dauthenticate=social_auth_microsoft,social_auth_google",
+            # TODO: need to enable social_auth_microsoft as well
+            "-Dauthenticate=social_auth_google",
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            "-Ddb.connection_string=jdbc:mysql://publicdb.cbioportal.org:3306/cgds_public?zeroDateTimeBehavior=convertToNull&useSSL=false",
+            "-Dspring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver",
+            "-Dspring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect",
+            "-Dspring.datasource.url=jdbc:mysql://$(DB_USER):$(DB_PASSWORD)@publicdb.cbioportal.org:3306/cgds_public?zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true",
+            "-Dspring.datasource.username=$(DB_USER)",
+            "-Dspring.datasource.username=$(DB_PASSWORD)",
             #"-Ddb.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
             #"-Ddb.clickhouse.user=$(DB_CLICKHOUSE_USER)",
             #"-Ddb.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
@@ -154,9 +158,8 @@ spec:
             "-Denable_request_body_gzip_compression=true",
             # for single cell plugin
             "-Dfrontend.config=/cbioportal/frontendConfig.json",
-            "-cp",
-            "/cbioportal-webapp:/cbioportal-webapp/lib/*",
-            "org.cbioportal.PortalApplication",
+            "-jar",
+            "/cbioportal-webapp/app.jar"
             # this addresses same issue as
             # https://github.com/cBioPortal/cbioportal/issues/2328 one needs to
             # set this if one doesn't want to forward https -> http -> https
@@ -175,15 +178,14 @@ spec:
             # "-AconnectionTimeout=20000",
             # "--enable-compression",
             # "--port",
-            # "8888",
+            # "8080",
             # "/app.war"
-            "/cbioportal-webapp/"
         ]
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
             path: /api/health
-            port: 8888
+            port: 8080
           initialDelaySeconds: 45
           timeoutSeconds: 1
           periodSeconds: 5
@@ -191,14 +193,14 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: 8888
+            port: 8080
           initialDelaySeconds: 180
           timeoutSeconds: 1
           periodSeconds: 12
           failureThreshold: 5
         name: cbioportal-backend-beta
         ports:
-        - containerPort: 8888
+        - containerPort: 8080
           protocol: TCP
         - containerPort: 8849
           protocol: TCP
@@ -230,7 +232,7 @@ spec:
   ports:
   - port: 80
     name: http
-    targetPort: 8888
+    targetPort: 8080
   selector:
     run: cbioportal-backend-beta
   type: ClusterIP
