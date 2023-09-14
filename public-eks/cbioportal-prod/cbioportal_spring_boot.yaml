@@ -117,7 +117,7 @@ spec:
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
-            "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
+            "-Dgoogle_analytics_profile_id=G-5260NDGD6Z",
             "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
