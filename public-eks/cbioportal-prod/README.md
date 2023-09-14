@@ -77,7 +77,7 @@ docker run -v $PWD:/local --rm -it mongo:3.6 mongodump --out /local/session-serv
 
 ### Database
 
-We are running a mysql database inside the cluster:
+We are running a mysql database on AWS RDS, to run it inside the cluster:
 
 ```bash
 helm install -f cbioportal_mysql_db_values.yml --set mysqlRootPassword=picksomerootpasswordhere cbioportal-production-db stable/mysql
@@ -91,7 +91,7 @@ https://scalegrid.io/blog/calculating-innodb-buffer-pool-size-for-your-mysql-ser
 
 #### session management
 Notes:
-* the current version of helm which is used at msk for this deployment in our public kubernetes cluster is v2.12.2 - if you are creating or upgrading the public cluster deployment, use this version of the helm client.
+* the current version of helm which is used at msk for this deployment in our public kubernetes cluster is v3.12.0 - if you are creating or upgrading the public cluster deployment, use this version of the helm client.
 * the current version of helm which is used at msk for this deployment in our internal kubernetes cluster is v3.6.0 - if you are creating or upgrading the internal cluster deployment, use this version of the helm client.
 
 To manage user sessions we use one redis instance: 
