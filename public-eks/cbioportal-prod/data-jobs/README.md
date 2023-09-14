@@ -14,4 +14,4 @@ Make sure to delete the job again after
 ```
 kubectl delete -f sync_rc_db.yaml
 ```
-See [sync_rc_db.yaml](./sync_rc_db.yaml) for the script.
+See [sync_rc_db.yaml](sync_rc_db.yaml) for the script.
