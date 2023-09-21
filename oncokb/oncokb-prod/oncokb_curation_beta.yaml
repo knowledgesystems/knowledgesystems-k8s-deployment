@@ -37,7 +37,7 @@ spec:
             - name: APPLICATION_REDIS_PASSWORD
               value: "$(REDIS_PASSWORD)"
             - name: SPRING_DATASOURCE_URL
-              value: "$(DB_URL)/oncokb_curation"
+              value: "$(DB_URL)/oncokb_curation_beta"
             - name: SPRING_DATASOURCE_USERNAME
               value: "$(DB_USERNAME)"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -56,7 +56,7 @@ spec:
                 name: oncokb-db-public-rds-oncokb-transcript
             - configMapRef:
                 name: oncokb-curation-redis
-          image: oncokb/oncokb-curation:0.7.0
+          image: oncokb/oncokb-curation:0.9.0-alpha.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
