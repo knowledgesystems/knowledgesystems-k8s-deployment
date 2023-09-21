@@ -28,6 +28,8 @@ spec:
         - env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs,no-liquibase
+            - name: APPLICATION_FIREBASE_ENABLED
+              value: "true"
             - name: APPLICATION_REDIS_ENABLED
               value: "true"
             - name: APPLICATION_REDIS_TYPE
