@@ -16,6 +16,7 @@ spec:
     - beta.oncokb.org
     - demo.oncokb.org
     - curation.oncokb.org
+    - beta.curation.oncokb.org
     - keycloak.oncokb.org
     - airflow.oncokb.org
     - data-4-5.oncokb.org
