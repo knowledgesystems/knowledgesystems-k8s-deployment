@@ -1,3 +1,34 @@
----
-ingressShim.defaultIssuerName: letsencrypt-prod
-ingressShim.defaultIssuerKind: ClusterIssuer
+ingressShim:
+  defaultIssuerName: letsencrypt-prod
+  defaultIssuerKind: ClusterIssuer
+nodeSelector:
+  eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "eks-cbioportal-mission-critical"
+    effect: "NoSchedule"
+webhook:
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-cbioportal-mission-critical"
+      effect: "NoSchedule"
+cainjector:
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-cbioportal-mission-critical"
+      effect: "NoSchedule"
+startupapicheck:
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-cbioportal-mission-critical"
+      effect: "NoSchedule"
