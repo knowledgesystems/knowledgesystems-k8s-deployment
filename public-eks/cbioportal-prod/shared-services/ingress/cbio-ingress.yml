@@ -24,114 +24,114 @@ metadata:
 spec:
   tls:
   - hosts:
-    - master.cbioportal.org
-    secretName: master-cbio-cert
-  - hosts:
-    - genie.cbioportal.org
-    secretName: geniepublic-cbio-cert
-  - hosts:
-    - genie-private.cbioportal.org
-    secretName: genieprivate-cbio-cert
-  - hosts:
-      - www.cbioportal.org
-    secretName: cbioportal-www-cert
-  - hosts:
-      - beta.cbioportal.org
-    secretName: cbioportal-beta-cert
-  - hosts:
-      - keycloak.cbioportal.org
-    secretName: keycloak-cert
-  - hosts:
-      - genie-public-beta.cbioportal.org
-    secretName: cbioportal-genie-public-beta-cert
-  - hosts:
-      - session-service.cbioportal.org
-    secretName: cbioportal-session-service-cert
+    - webinar.cbioportal.org
+    secretName: webinar-cbio-cert
+#  - hosts:
+#    - genie.cbioportal.org
+#    secretName: geniepublic-cbio-cert
+#  - hosts:
+#    - genie-private.cbioportal.org
+#    secretName: genieprivate-cbio-cert
+#  - hosts:
+#      - www.cbioportal.org
+#    secretName: cbioportal-www-cert
+#  - hosts:
+#      - beta.cbioportal.org
+#    secretName: cbioportal-beta-cert
+#  - hosts:
+#      - keycloak.cbioportal.org
+#    secretName: keycloak-cert
+#  - hosts:
+#      - genie-public-beta.cbioportal.org
+#    secretName: cbioportal-genie-public-beta-cert
+#  - hosts:
+#      - session-service.cbioportal.org
+#    secretName: cbioportal-session-service-cert
 #  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
 #  - hosts:
 #      - session-service-beta.cbioportal.org
 #    secretName: cbioportal-session-service-beta-cert
   rules:
-  - host: keycloak.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: keycloak-http
-              port:
-                number: 80
-  - host: master.cbioportal.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cbioportal-backend-master
-            port:
-              number: 80
-  - host: genie-public-beta.cbioportal.org
+#  - host: keycloak.cbioportal.org
+#    http:
+#      paths:
+#        - path: /
+#          pathType: Prefix
+#          backend:
+#            service:
+#              name: keycloak-http
+#              port:
+#                number: 80
+  - host: webinar.cbioportal.org
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: cbioportal-backend-genie-public-beta
+            name: cbioportal-webinar
             port:
               number: 80
-  - host: genie.cbioportal.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cbioportal-backend-genie-public 
-            port:
-              number: 80
-  - host: genie-private.cbioportal.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cbioportal-backend-genie-private 
-            port:
-              number: 80
-  - host: www.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal
-              port:
-                number: 80
-  - host: beta.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-backend-beta
-              port:
-                number: 80
-  - host: session-service.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-session-service
-              port:
-                number: 80
+#  - host: genie-public-beta.cbioportal.org
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: cbioportal-backend-genie-public-beta
+#            port:
+#              number: 80
+#  - host: genie.cbioportal.org
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: cbioportal-backend-genie-public
+#            port:
+#              number: 80
+#  - host: genie-private.cbioportal.org
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: cbioportal-backend-genie-private
+#            port:
+#              number: 80
+#  - host: www.cbioportal.org
+#    http:
+#      paths:
+#        - path: /
+#          pathType: Prefix
+#          backend:
+#            service:
+#              name: cbioportal
+#              port:
+#                number: 80
+#  - host: beta.cbioportal.org
+#    http:
+#      paths:
+#        - path: /
+#          pathType: Prefix
+#          backend:
+#            service:
+#              name: cbioportal-backend-beta
+#              port:
+#                number: 80
+#  - host: session-service.cbioportal.org
+#    http:
+#      paths:
+#        - path: /
+#          pathType: Prefix
+#          backend:
+#            service:
+#              name: cbioportal-session-service
+#              port:
+#                number: 80
 
 #  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
 #  - host: session-service-beta.cbioportal.org
