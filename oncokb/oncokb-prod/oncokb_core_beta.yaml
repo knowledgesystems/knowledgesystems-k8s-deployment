@@ -30,7 +30,7 @@ spec:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.12.17-alpha.0
+          image: oncokb/oncokb:3.14.0-alpha.0
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
@@ -40,6 +40,7 @@ spec:
             "-Djdbc.password=$(DB_PASSWORD)",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
             "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
+            "-Doncokb_transcript.url=https://beta.transcript.oncokb.org",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
             "-Dredis.enable=true",
             "-Dredis.type=$(REDIS_TYPE)",
