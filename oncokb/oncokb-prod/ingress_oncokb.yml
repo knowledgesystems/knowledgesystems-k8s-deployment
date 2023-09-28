@@ -38,6 +38,7 @@ spec:
     - sop.oncokb.org
     - public.api.oncokb.org
     - transcript.oncokb.org
+    - beta.transcript.oncokb.org
     - curation.oncokb.org
     - beta.curation.oncokb.org
     - keycloak.oncokb.org
@@ -126,6 +127,16 @@ spec:
           backend:
             service:
               name: oncokb-transcript
+              port:
+                name: http
+  - host: beta.transcript.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-transcript-beta
               port:
                 name: http
   - host: curation.oncokb.org

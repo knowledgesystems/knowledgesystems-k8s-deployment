@@ -11,6 +11,7 @@ spec:
     - www.oncokb.org
     - public.api.oncokb.org
     - transcript.oncokb.org
+    - beta.transcript.oncokb.org
     - legacy.oncokb.org
     - sop.oncokb.org
     - beta.oncokb.org
