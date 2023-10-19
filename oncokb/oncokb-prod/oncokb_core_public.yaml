@@ -33,7 +33,7 @@ spec:
                 name: oncokb-core-public
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.14.0-no-frontend
+          image: oncokb/oncokb:3.14.1-no-frontend
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
