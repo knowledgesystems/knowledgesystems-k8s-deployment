@@ -5,7 +5,7 @@ metadata:
 spec:
   acme:
     # Email address used for ACME registration
-    email: ino@ino.pm
+    email: cbioportal@cbioporal.org
     # The ACME server URL
     server: https://acme-v02.api.letsencrypt.org/directory
     # Name of a secret used to store the ACME account private key
