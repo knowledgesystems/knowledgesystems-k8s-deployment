@@ -43,6 +43,7 @@ spec:
     - beta.curation.oncokb.org
     - keycloak.oncokb.org
     - airflow.oncokb.org
+    - data-4-9.oncokb.org
     - data-4-5.oncokb.org
     - data-4-0.oncokb.org
     - data-3-11.oncokb.org
@@ -179,6 +180,16 @@ spec:
             name: oncokb-airflow-ng
             port:
               number: 8080
+  - host: data-4-9.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-public-data-4-9
+              port:
+                name: http
   - host: data-4-5.oncokb.org
     http:
       paths:
