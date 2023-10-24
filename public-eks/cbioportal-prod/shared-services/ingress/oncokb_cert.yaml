@@ -20,6 +20,7 @@ spec:
     - beta.curation.oncokb.org
     - keycloak.oncokb.org
     - airflow.oncokb.org
+    - data-4-9.oncokb.org
     - data-4-5.oncokb.org
     - data-4-0.oncokb.org
     - data-3-11.oncokb.org
