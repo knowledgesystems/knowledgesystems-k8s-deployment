@@ -56,7 +56,7 @@ spec:
                 name: oncokb-db-public-rds-oncokb-transcript
             - configMapRef:
                 name: oncokb-curation-redis
-          image: oncokb/oncokb-curation:0.8.0-alpha.1
+          image: oncokb/oncokb-curation:0.9.0-alpha.1
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
@@ -91,10 +91,10 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       tolerations:
-      - key: "dedicated"
-        operator: "Equal"
-        value: "oncokb"
-        effect: "NoSchedule"
+        - key: "dedicated"
+          operator: "Equal"
+          value: "oncokb"
+          effect: "NoSchedule"
       nodeSelector:
         eks.amazonaws.com/nodegroup: oncokb
       volumes:
