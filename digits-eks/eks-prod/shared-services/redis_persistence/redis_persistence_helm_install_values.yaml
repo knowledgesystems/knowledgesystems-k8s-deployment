@@ -3,7 +3,12 @@ master:
   - --maxmemory 8gb
   - --maxmemory-policy volatile-ttl
   nodeSelector:
-    eks.amazonaws.com/nodegroup: essential-services
+    eks.amazonaws.com/nodegroup: cbioportal-hackathon
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "cbioportal-hackathon"
+      effect: "NoSchedule"
   persistence:
     enabled: false
 replica:
@@ -11,6 +16,11 @@ replica:
   - --maxmemory 8gb
   - --maxmemory-policy volatile-ttl
   nodeSelector:
-    eks.amazonaws.com/nodegroup: essential-services
+    eks.amazonaws.com/nodegroup: cbioportal-hackathon
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "cbioportal-hackathon"
+      effect: "NoSchedule"
   persistence:
     enabled: false
