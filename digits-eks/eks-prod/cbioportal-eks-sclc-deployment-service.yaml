@@ -125,7 +125,7 @@ spec:
             "-Dskin.authorization_message=Welcome to cBioPortal. Logging in will allow you to access your studies and groups from any computer, and cBioPortal will also remember your study view charts preferences for each study (i.e. order of the charts, type of charts and visibility). Login is optional and not required to access any of the other features of cBioPortal.",
             "-Dskin.blurb=",
             "-Dshow.mdacc.heatmap=true",
-            "-Dsession.service.url=https://session-service.cbioportal.aws.mskcc.org/api/sessions/sclc_portal/",
+            "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/sclc_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
