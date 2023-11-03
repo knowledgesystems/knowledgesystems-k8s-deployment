@@ -7,7 +7,12 @@ master:
     - --maxmemory 8gb
     - --maxmemory-policy volatile-ttl
   nodeSelector:
-    eks.amazonaws.com/nodegroup: redis-persistence-nodes
+    eks.amazonaws.com/nodegroup: eks-redis
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-redis"
+      effect: "NoSchedule"
   persistence:
     enabled: false
 
@@ -17,7 +22,12 @@ replica:
     - --maxmemory 8gb
     - --maxmemory-policy volatile-ttl
   nodeSelector:
-    eks.amazonaws.com/nodegroup: redis-persistence-nodes
+    eks.amazonaws.com/nodegroup: eks-redis
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-redis"
+      effect: "NoSchedule"
   persistence:
     enabled: false
   autoscaling:
@@ -29,4 +39,4 @@ replica:
     minReplicas: 2
     ## @param replica.autoscaling.maxReplicas Maximum replicas for the pod autoscaling
     ##
-    maxReplicas: 4
+    maxReplicas: 3
