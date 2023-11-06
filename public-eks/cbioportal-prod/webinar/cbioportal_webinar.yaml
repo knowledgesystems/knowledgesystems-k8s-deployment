@@ -27,16 +27,17 @@ spec:
         run: cbioportal-webinar
     spec:
       volumes:
-      - name: ehcache-volume
-        emptyDir: {}
+      - name: cbioportal-frontend-config-volume
+        configMap:
+          name: single-cell-frontend-config
       containers:
       - envFrom:
         - configMapRef:
             name: cbioportal-public
-        image: cbioportal/cbioportal:3.4.21-web-shenandoah
+        image: cbioportal/cbioportal:5.4.2-web-shenandoah
         volumeMounts:
-        - name: ehcache-volume
-          mountPath: /ehcache
+        - name: cbioportal-frontend-config-volume
+          mountPath: /cbioportal/
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -79,6 +80,7 @@ spec:
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
             "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
@@ -94,26 +96,29 @@ spec:
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            # change these two to the temp db instance host name
-            "-Ddb.host=cbioportal-webinardb.cq26ederqvxp.us-east-1.rds.amazonaws.com",
-            "-Ddb.connection_string=jdbc:mysql://cbioportal-webinardb.cq26ederqvxp.us-east-1.rds.amazonaws.com:3306/",
-            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            #"-Ddb.host=$(DB_HOST)",
+            #"-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
             "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
             "-Dskin.email_contact=cbioportal@googlegroups.com",
             "-Dskin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of legacy TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a>, last updated 1/28/2016.",
-            "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
+            "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type. It also provides links to download the data for each study. For alternative ways of downloading, see the <a href=\"https://docs.cbioportal.org/5.2-datasets/downloads#introduction\">Download Documentation</a>.",
             "-Dskin.authorization_message=Welcome to cBioPortal - sign in with your Google or Microsoft account to store your <a href=\"https://www.cbioportal.org/tutorials#virtual-studies\" target=\"_blank\">virtual studies</a> and <a href=\"https://www.cbioportal.org/tutorials#group-comparison\" target=\"_blank\">groups</a>. This will allow you to access your studies and groups from any computer, and cBioPortal will also remember your study view charts preferences for each study (i.e. order of the charts, type of charts and visibility). Login is optional and not required to access any of the other features of cBioPortal.",
             "-Dskin.blurb=",
             "-Dshow.mdacc.heatmap=true",
-            "-Dpriority_studies=PanCancer Studies#msk_impact_2017,metastatic_solid_tumors_mich_2017,mixed_allen_2018,summit_2018,tmb_mskcc_2018,ntrk_msk_2019,msk_ch_2020;Pediatric Cancer Studies#pptc_2019,all_phase2_target_2018_pub,rt_target_2018_pub,wt_target_2018_pub,aml_target_2018_pub,nbl_target_2018_pub,pediatric_dkfz_2017,mixed_pipseq_2017,all_stjude_2016,all_stjude_2015,es_dfarber_broad_2014,es_iocurie_2014,mbl_pcgp;Immunogenomic Studies#gbm_columbia_2019,skcm_dfci_2015,skcm_mskcc_2014,mel_ucla_2016,nsclc_mskcc_2018,nsclc_mskcc_2015,tmb_mskcc_2018,ccrcc_dfci_2019;Cell lines#ccle_broad_2019,cellline_ccle_broad,cellline_nci60",
+            "-Dskin.documentation.faq=user-guide/faq.md",
+            "-Dskin.show_r_matlab_tab=false",
+            "-Dpriority_studies=PanCancer Studies#msk_impact_2017,metastatic_solid_tumors_mich_2017,mixed_allen_2018,summit_2018,tmb_mskcc_2018,ntrk_msk_2019,msk_ch_2020,pan_origimed_2020,pancan_pcawg_2020,msk_met_2021;Pediatric Cancer Studies#pptc_2019,all_phase2_target_2018_pub,rt_target_2018_pub,wt_target_2018_pub,aml_target_2018_pub,nbl_target_2018_pub,pediatric_dkfz_2017,mixed_pipseq_2017,all_stjude_2016,all_stjude_2015,es_dfarber_broad_2014,es_iocurie_2014,mbl_pcgp;Immunogenomic Studies#gbm_columbia_2019,skcm_dfci_2015,skcm_mskcc_2014,mel_ucla_2016,nsclc_mskcc_2018,nsclc_mskcc_2015,tmb_mskcc_2018,ccrcc_dfci_2019;Cell lines#ccle_broad_2019,cellline_ccle_broad,cellline_nci60",
+            "-Dstudyview.max_samples_selected=100000",
+            "-Dstudy_download_url=https://cbioportal-datahub.s3.amazonaws.com/",
             "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/",
             "-Dsession.service.origin=*",
             "-Dsession.service.user=$(SESSION_SERVICE_USER_NAME)",
             "-Dsession.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
-            "-Dgoogle_analytics_profile_id=$(GOOGLE_ANALYTICS_PROFILE_ID)",
+            "-Dgoogle_analytics_profile_id=G-5260NDGD6Z",
             "-Dgoogleplus.consumer.key=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "-Dgoogleplus.consumer.secret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "-Dmicrosoftlive.consumer.key=$(MICROSOFT_LIVE_CONSUMER_KEY)",
@@ -128,20 +133,19 @@ spec:
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://v1.genomenexus.org",
+            "-Dshow.genomenexus.annotation_sources=mutation_assessor",
             "-Dmatchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "-Dmatchminer.token=$(MATCHMINER_TOKEN)",
-            # misc frontend settings
-            "-Denable_persistent_cache=true",
-            # ehcache settings
+            # cache settings (currently redis)
+            #"-Dcache.statistics_endpoint_enabled=false",
+            # disable ehcache
             "-Dehcache.cache_type=none",
-            # "-Dehcache.xml_configuration=/ehcache.xml",
-            # "-Dcache.statistics_endpoint_enabled=true",
-            # "-Dehcache.general_repository_cache.max_mega_bytes_heap=1024",
-            # "-Dehcache.static_repository_cache_one.max_mega_bytes_heap=64",
-            # "-Dehcache.persistence_path=/ehcache",
-            # "-Dehcache.general_repository_cache.max_mega_bytes_local_disk=1025",
-            # "-Dehcache.static_repository_cache_one.max_mega_bytes_local_disk=65",
-            # /ehcache settings
+            # misc frontend settings (this is NOT for backend persistence layer caching)
+            "-Denable_persistent_cache=false",
+            # compress on client side
+            "-Denable_request_body_gzip_compression=true",
+            # for single cell plugin
+            "-Dfrontend.config=/cbioportal/frontendConfig.json",
             "-jar",
             "/webapp-runner.jar",
             # this addresses same issue as
@@ -191,14 +195,19 @@ spec:
         resources:
           requests:
               cpu: 1500m
-              memory: 15Gi
+              memory: 5Gi
           limits:
-              memory: 26Gi
+              memory: 6Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-         kops.k8s.io/instancegroup: large-mem
+        eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-cbioportal-mission-critical"
+          effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler

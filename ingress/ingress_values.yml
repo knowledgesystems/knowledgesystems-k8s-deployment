@@ -21,7 +21,7 @@ controller:
     proxy-send-timeout: "300"
     use-proxy-protocol: "true"
   image:
-    tag: 0.15.0
+    tag: "v1.8.1"
   metrics:
     enabled: true
   replicaCount: 2
@@ -29,7 +29,36 @@ controller:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+#    internal:
+#      enabled: true
+#      annotations:
+#        # Create internal NLB
+#        service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
   stats:
     enabled: true
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-cbioportal-mission-critical"
+      effect: "NoSchedule"
+  admissionWebhooks:
+    patch:
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-cbioportal-mission-critical"
+          effect: "NoSchedule"
+defaultBackend:
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-cbioportal-mission-critical"
+      effect: "NoSchedule"
 rbac:
   create: true
