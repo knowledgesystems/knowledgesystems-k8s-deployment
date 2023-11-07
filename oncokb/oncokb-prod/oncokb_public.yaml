@@ -103,14 +103,14 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "oncokb"
+          value: "eks-oncokb"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb
       volumes:
-      - name: recaptcha-credentials
-        secret:
-          secretName: oncokb-recaptcha-credentials
+        - name: recaptcha-credentials
+          secret:
+            secretName: oncokb-recaptcha-credentials
 
 ---
 apiVersion: v1

@@ -45,3 +45,14 @@ extraEnvFrom: |
       name: oncokb-keycloak
   - configMapRef:
       name: oncokb-db-public-rds-oncokb-transcript
+
+# Node labels for Pod assignment
+nodeSelector:
+  eks.amazonaws.com/nodegroup: eks-oncokb
+
+# Node taints to tolerate
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "eks-oncokb"
+    effect: "NoSchedule"
