@@ -57,7 +57,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
           readinessProbe:
             httpGet:
-              path: /v2/api-docs
+              path: /
               port: 9095
             initialDelaySeconds: 30
             timeoutSeconds: 10
