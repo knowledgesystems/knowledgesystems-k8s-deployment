@@ -42,7 +42,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:5.3.12-web-shenandoah
+        image: cbioportal/cbioportal:5.4.7-web-shenandoah
         volumeMounts:
         - name: msk-beta-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
@@ -119,8 +119,10 @@ spec:
             "-Dauthorization=false",
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
-            "-Ddb.host=$(DB_HOST)",
-            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+#            "-Ddb.host=$(DB_HOST)",
+#            "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
+            "-Ddb.driver=com.mysql.jdbc.Driver",
+            "-Ddb.connection_string=jdbc:mysql://$(DB_HOST):3306/$(DB_PORTAL_DB_NAME)?zeroDateTimeBehavior=convertToNull&useSSL=false",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
