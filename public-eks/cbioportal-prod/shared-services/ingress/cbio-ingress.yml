@@ -35,6 +35,9 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
+  - hosts:
+    - master.cbioportal.org
+    secretName: master-cbio-cert
 #  - hosts:
 #      - beta.cbioportal.org
 #    secretName: cbioportal-beta-cert
@@ -110,6 +113,16 @@ spec:
           backend:
             service:
               name: cbioportal
+              port:
+                number: 80
+  - host: master.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal-backend-master
               port:
                 number: 80
 #  - host: beta.cbioportal.org
