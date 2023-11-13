@@ -38,9 +38,9 @@ spec:
   - hosts:
     - master.cbioportal.org
     secretName: master-cbio-cert
-#  - hosts:
-#      - beta.cbioportal.org
-#    secretName: cbioportal-beta-cert
+  - hosts:
+    - beta.cbioportal.org
+    secretName: cbioportal-beta-cert
 #  - hosts:
 #      - keycloak.cbioportal.org
 #    secretName: keycloak-cert
@@ -125,16 +125,16 @@ spec:
               name: cbioportal-backend-master
               port:
                 number: 80
-#  - host: beta.cbioportal.org
-#    http:
-#      paths:
-#        - path: /
-#          pathType: Prefix
-#          backend:
-#            service:
-#              name: cbioportal-backend-beta
-#              port:
-#                number: 80
+  - host: beta.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal-backend-beta
+              port:
+                number: 80
 #  - host: session-service.cbioportal.org
 #    http:
 #      paths:
