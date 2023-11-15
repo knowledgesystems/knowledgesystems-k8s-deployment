@@ -181,6 +181,7 @@ spec:
             "--server.tomcat.connection-timeout=20000",
             "--server.tomcat.max-http-response-header-size=16384",
             "--server.max-http-request-header-size=16384",
+            "--show.civic=false",
              "--port",
              "8080",
             # "/app.war"
