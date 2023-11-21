@@ -162,13 +162,33 @@ spec:
   - host: "oncotree.cbioportal.aws.mskcc.org"
     http:
       paths:
-      - path: "/"
-        pathType: Prefix
-        backend:
-          service:
-            name: eks-oncotree
-            port:
-              number: 80
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: eks-oncotree
+              port:
+                number: 80
+  - host: "www.oncotree.mskcc.org"
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: eks-oncotree
+              port:
+                number: 80
+  - host: "oncotree.mskcc.org"
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: eks-oncotree
+              port:
+                number: 80
   - host: "oncotree.info"
     http:
       paths:
@@ -229,3 +249,13 @@ spec:
             name: import
             port:
               number: 80
+  - host: "mskinternaltest.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: eks-msk-internal-test
+              port:
+                number: 80
