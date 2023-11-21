@@ -6,6 +6,7 @@ master:
     eks.amazonaws.com/nodegroup: essential-services
   persistence:
     enabled: false
+  count: 2
 replica:
   extraFlags:
   - --maxmemory 8gb
