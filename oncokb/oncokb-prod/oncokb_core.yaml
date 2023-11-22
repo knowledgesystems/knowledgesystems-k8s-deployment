@@ -8,7 +8,7 @@ metadata:
   name: oncokb-core
   namespace: oncokb
 spec:
-  replicas: 10
+  replicas: 8
   selector:
     matchLabels:
       run: oncokb-core

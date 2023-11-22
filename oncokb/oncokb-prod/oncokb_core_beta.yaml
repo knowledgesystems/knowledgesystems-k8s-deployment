@@ -30,7 +30,7 @@ spec:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.14.1
+          image: oncokb/oncokb:3.15-actionable-api.0
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
@@ -62,7 +62,7 @@ spec:
           # use actionable variants endpoint to cache everything
           readinessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /api/v1/utils/actionableGeneEvidences
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
@@ -70,7 +70,7 @@ spec:
             failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /api/v1/utils/actionableGeneEvidences
               port: 8888
             # wait for the pod is ready
             initialDelaySeconds: 300
