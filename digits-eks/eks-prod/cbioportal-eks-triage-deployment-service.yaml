@@ -200,17 +200,17 @@ spec:
             path: /api/health
             port: 8888
           initialDelaySeconds: 45
-          timeoutSeconds: 1
-          periodSeconds: 5
-          failureThreshold: 3
+          timeoutSeconds: 2
+          periodSeconds: 8
+          failureThreshold: 15
         livenessProbe:
           httpGet:
             path: /
             port: 8888
           initialDelaySeconds: 180
-          timeoutSeconds: 1
+          timeoutSeconds: 2
           periodSeconds: 12
-          failureThreshold: 5
+          failureThreshold: 20
         name: eks-triage
         ports:
         - containerPort: 8888
