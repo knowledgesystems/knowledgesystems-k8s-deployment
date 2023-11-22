@@ -194,7 +194,7 @@ spec:
           initialDelaySeconds: 45
           timeoutSeconds: 1
           periodSeconds: 5
-          failureThreshold: 3
+          failureThreshold: 15
         livenessProbe:
           httpGet:
             path: /
@@ -202,7 +202,7 @@ spec:
           initialDelaySeconds: 180
           timeoutSeconds: 1
           periodSeconds: 12
-          failureThreshold: 5
+          failureThreshold: 20
         name: eks-private
         ports:
         - containerPort: 8888
