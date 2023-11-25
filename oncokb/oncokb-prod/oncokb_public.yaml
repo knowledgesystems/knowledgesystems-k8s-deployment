@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.11.5
+          image: oncokb/oncokb-public:3.12.1-alpha.0
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -57,8 +57,6 @@ spec:
               value: '${DB_USERNAME}'
             - name: SPRING_DATASOURCE_PASSWORD
               value: '${DB_PASSWORD}'
-            - name: APPLICATION_DB_READ_ONLY
-              value: "true"
           envFrom:
             - configMapRef:
                 name: oncokb-public
