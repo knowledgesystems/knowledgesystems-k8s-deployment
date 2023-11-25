@@ -57,6 +57,8 @@ spec:
               value: '${DB_USERNAME}'
             - name: SPRING_DATASOURCE_PASSWORD
               value: '${DB_PASSWORD}'
+            - name: APPLICATION_DB_READ_ONLY
+              value: "true"
           envFrom:
             - configMapRef:
                 name: oncokb-public
