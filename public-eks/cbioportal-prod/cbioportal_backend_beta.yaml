@@ -99,6 +99,7 @@ spec:
             "--authenticate=optional_oauth2",
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            "--spring.security.oauth2.client.provider.google.user-name-attribute=email",
             "--authorization=false",
             "--db.user=$(DB_USER)",
             "--db.password=$(DB_PASSWORD)",
