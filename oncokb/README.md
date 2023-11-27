@@ -49,7 +49,7 @@ Editable board is located here https://miro.com/app/board/uXjVMTJ_gKI=/
 ### Prometheus/Grafana
 
 - We use the kube-prometheus-stack to install prometheus and grafana
-- We are sticking to helm chart `prometheus-community/kube-prometheus-stack --version 46.8.0`
+- We are sticking to helm chart `prometheus-community/kube-prometheus-stack --version 46.8.0 --set grafana.adminPassword=<pass>`
 
 ### Notes
 
