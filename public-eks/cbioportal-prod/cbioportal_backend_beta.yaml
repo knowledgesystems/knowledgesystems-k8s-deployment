@@ -145,6 +145,8 @@ spec:
             "--matchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "--matchminer.token=$(MATCHMINER_TOKEN)",
             # redis session store settings (different from redis persistence cache)
+            "--spring.session.store-type=redis",
+            # "--server.servlet.session.timeout=10s", (not sure what this should be)
             "--spring.data.redis.host=$(REDIS_SESSION_HOST)",
             "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
             "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
