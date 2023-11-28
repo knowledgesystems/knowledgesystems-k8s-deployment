@@ -150,6 +150,10 @@ spec:
             "--spring.data.redis.host=$(REDIS_SESSION_HOST)",
             "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
             "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
+            # To enable redis session store, we need to set
+            # spring.autoconfigure.exclude to a random value to override the
+            # property in applications.properties.EXAMPLE
+            "--spring.autoconfigure.exclude=dontexcludeanythingplz",
             # redis cache settings (currently redis)
             #"--cache.statistics_endpoint_enabled=false",
             "--persistence.cache_type=redis",
