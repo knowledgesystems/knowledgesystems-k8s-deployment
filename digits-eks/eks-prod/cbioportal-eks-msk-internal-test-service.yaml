@@ -57,7 +57,7 @@ spec:
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms100m",
-            "-Xmx15g",
+            "-Xmx20g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -167,7 +167,7 @@ spec:
             # cache settings (currently redis)",
             #"-Dcache.statistics_endpoint_enabled=false",
             "-Dredis.database=4",
-            "-Dpersistence.cache_type=redis",
+            "-Dpersistence.cache_type=no-cache",
             "-Dredis.leader_address=redis://cbioportal-internal-test-persistence-redis-master:6379",
             "-Dredis.follower_address=redis://cbioportal-internal-test-persistence-redis-replicas:6379",
             "-Dredis.password=$(REDIS_PASSWORD)",
