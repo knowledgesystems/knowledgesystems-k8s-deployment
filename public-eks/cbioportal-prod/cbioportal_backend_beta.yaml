@@ -97,6 +97,7 @@ spec:
             "--dbconnector=dbcp",
           # TODO: need to enable social_auth_microsoft as well
             "--authenticate=optional_oauth2",
+            "--always_show_study_group=PUBLIC",
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "--spring.security.oauth2.client.provider.google.user-name-attribute=email",
