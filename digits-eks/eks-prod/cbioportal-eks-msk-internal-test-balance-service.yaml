@@ -6,14 +6,14 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: eks-msk-internal-test-boost
-  name: eks-msk-internal-test-boost
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-internal-test-boost
+    run: eks-msk-internal-test-balance
+  name: eks-msk-internal-test-balance
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-internal-test-balance
 spec:
   replicas: 2
   selector:
     matchLabels:
-      run: eks-msk-internal-test-boost
+      run: eks-msk-internal-test-balance
   strategy:
     rollingUpdate:
       maxUnavailable: 1
@@ -22,7 +22,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: eks-msk-internal-test-boost
+        run: eks-msk-internal-test-balance
     spec:
       volumes:
         - name: msk-eks-internal-test-configmap-volume
@@ -57,7 +57,7 @@ spec:
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms100m",
-            "-Xmx40g",
+            "-Xmx30g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -168,8 +168,8 @@ spec:
             #"-Dcache.statistics_endpoint_enabled=false",
             "-Dredis.database=4",
             "-Dpersistence.cache_type=redis",
-            "-Dredis.leader_address=redis://cbioportal-internal-boost-persistence-redis-master:6379",
-            "-Dredis.follower_address=redis://cbioportal-internal-boost-persistence-redis-replicas:6379",
+            "-Dredis.leader_address=redis://cbioportal-internal-bal-persistence-redis-master:6379",
+            "-Dredis.follower_address=redis://cbioportal-internal-bal-persistence-redis-replicas:6379",
             "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dehcache.cache_type=none",
             "-Dcache.endpoint.api-key=$(CACHE_API_KEY)",
@@ -195,7 +195,7 @@ spec:
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
             "--proxy-base-url",
-            "https://mskinternaltestboost.cbioportal.aws.mskcc.org",
+            "https://mskinternaltestbalance.cbioportal.aws.mskcc.org",
             "--max-threads",
             "0",
             "--session-store",
@@ -227,7 +227,7 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 12
             failureThreshold: 5
-          name: eks-msk-internal-test-boost
+          name: eks-msk-internal-test-balance
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -235,18 +235,18 @@ spec:
               protocol: TCP
           resources:
             requests:
-              memory: 30Gi
+              memory: 25Gi
             limits:
-              memory: 40Gi
+              memory: 30Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: testing-to-be-deleted-dec7-boost-portals
+        eks.amazonaws.com/nodegroup: testing-to-be-deleted-dec7-balance-portals
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "testing-to-be-deleted-dec7-boost-portals"
+          value: "testing-to-be-deleted-dec7-balance-portals"
           effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
@@ -259,14 +259,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: eks-msk-internal-test-boost
-  name: eks-msk-internal-test-boost
-  selfLink: /api/v2/namespaces/default/services/eks-msk-internal-test-boost
+    run: eks-msk-internal-test-balance
+  name: eks-msk-internal-test-balance
+  selfLink: /api/v2/namespaces/default/services/eks-msk-internal-test-balance
 spec:
   ports:
     - port: 80
       name: http
       targetPort: 8888
   selector:
-    run: eks-msk-internal-test-boost
+    run: eks-msk-internal-test-balance
   type: ClusterIP
