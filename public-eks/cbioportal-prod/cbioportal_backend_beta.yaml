@@ -191,6 +191,7 @@ spec:
             # "-AmaxHttpHeaderSize=16384",
             # "-AconnectionTimeout=20000",
             # "--enable-compression",
+            "--server.compression.enabled=true",
             "--server.tomcat.connection-timeout=20000",
             "--server.tomcat.max-http-response-header-size=16384",
             "--server.max-http-request-header-size=16384",
