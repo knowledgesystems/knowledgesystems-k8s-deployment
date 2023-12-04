@@ -7,6 +7,9 @@ metadata:
   generation: 1
   labels:
     run: eks-msk-internal-test-balance
+    tags.datadoghq.com/env: cbioportal
+    tags.datadoghq.com/service: eks-msk-internal-test-balance
+    tags.datadoghq.com/version: 5.4.5
   name: eks-msk-internal-test-balance
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-internal-test-balance
 spec:
@@ -23,6 +26,12 @@ spec:
       creationTimestamp: null
       labels:
         run: eks-msk-internal-test-balance
+        tags.datadoghq.com/env: cbioportal
+        tags.datadoghq.com/service: eks-msk-internal-test-balance
+        tags.datadoghq.com/version: 5.4.5
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
         - name: msk-eks-internal-test-configmap-volume
@@ -42,6 +51,10 @@ spec:
           env:
             - name: PORTAL_HOME
               value: /cbioportal/
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_LOGS_INJECTION
+              value: "true"
           image: cbioportal/cbioportal:5.4.5-web-shenandoah
           volumeMounts:
             - name: msk-eks-internal-test-configmap-volume
@@ -167,7 +180,7 @@ spec:
             # cache settings (currently redis)",
             #"-Dcache.statistics_endpoint_enabled=false",
             "-Dredis.database=4",
-            "-Dpersistence.cache_type=redis",
+            "-Dpersistence.cache_type=no-cache",
             "-Dredis.leader_address=redis://cbioportal-internal-bal-persistence-redis-master:6379",
             "-Dredis.follower_address=redis://cbioportal-internal-bal-persistence-redis-replicas:6379",
             "-Dredis.password=$(REDIS_PASSWORD)",
