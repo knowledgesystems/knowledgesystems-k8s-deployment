@@ -7,8 +7,8 @@ metadata:
   generation: 1
   labels:
     run: eks-msk-internal-test
-    tags.datadoghq.com/env: cbioportal
-    tags.datadoghq.com/service: msk-eks-internal-test
+    tags.datadoghq.com/env: msk-eks-internal-test
+    tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 5.4.5
   name: eks-msk-internal-test
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-internal-test
@@ -26,8 +26,8 @@ spec:
       creationTimestamp: null
       labels:
         run: eks-msk-internal-test
-        tags.datadoghq.com/env: cbioportal
-        tags.datadoghq.com/service: msk-eks-internal-test
+        tags.datadoghq.com/env: msk-eks-internal-test
+        tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 5.4.5
         admission.datadoghq.com/enabled: "true"
       annotations:
