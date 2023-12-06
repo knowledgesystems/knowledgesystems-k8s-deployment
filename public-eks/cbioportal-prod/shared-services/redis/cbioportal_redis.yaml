@@ -9,7 +9,10 @@ master:
       operator: "Equal"
       value: "eks-cbioportal-mission-critical"
       effect: "NoSchedule"
+  persistence:
+    enabled: false
   count: 2
+  disableCommands: []
 replica:
   extraFlags:
   - --maxmemory 8gb
@@ -23,3 +26,4 @@ replica:
       effect: "NoSchedule"
   persistence:
     enabled: false
+  disableCommands: []
