@@ -27,14 +27,12 @@ spec:
       volumes:
       - name: msk-beta-eks-configmap-volume
         configMap:
-          name: cbioportal-msk-beta-kc
+          name: msk-beta-spring-boot-kc
           items:
-          - key: portal.properties
-            path: portal.properties
-          - key: msk-beta-cbioportal-saml-idp-metadata.xml
-            path: msk-beta-cbioportal-saml-idp-metadata.xml
-          - key: cbioportal-saml-keystore.jks
-            path: cbioportal-saml-keystore.jks
+          - key: local.key
+            path: local.key
+          - key: local.crt
+            path: local.crt
       containers:
       - envFrom:
         - configMapRef:
@@ -45,14 +43,11 @@ spec:
         image: cbioportal/cbioportal:demo-rfc72-web-shenandoah
         volumeMounts:
         - name: msk-beta-eks-configmap-volume
-          mountPath: /cbioportal/portal.properties
-          subPath: portal.properties
+          mountPath: /cbioportal/local.key
+          subPath: local.key
         - name: msk-beta-eks-configmap-volume
-          mountPath: /cbioportal/msk-beta-cbioportal-saml-idp-metadata.xml
-          subPath: msk-beta-cbioportal-saml-idp-metadata.xml
-        - name: msk-beta-eks-configmap-volume
-          mountPath: /cbioportal/cbioportal-saml-keystore.jks
-          subPath: cbioportal-saml-keystore.jks
+          mountPath: /cbioportal/local.crt
+          subPath: local.crt
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -93,7 +88,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org",
+            "--frontend.url=https://deploy-preview-4753--cbioportalfrontend.netlify.app/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
             "--about=about_us.html",
@@ -111,7 +106,7 @@ spec:
             "--skin.right_nav.show_testimonials=true",
             "--skin.title=MSK cBioPortal (Beta)",
             "--installation_map_url=https://installationmap.netlify.app/",
-            "--app.name=mskcc-portal",
+            "--app.name=cbioportal-msk-beta",
             # connecting over dbcp
             "--dbconnector=dbcp",
             "--authenticate=saml",
@@ -175,14 +170,22 @@ spec:
             "--redis.clear_on_startup=false",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             "--enable_persistent_cache=false",
+            # auth
+            # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=/cbioportal/msk-beta-cbioportal-saml-idp-metadata.xml",
+            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/external/protocol/saml/descriptor",
+            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=private-beta",
+            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt",
+            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key",
+            # "--logging.level.org.springframework.security=DEBUG",
+            # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.binding=POST",
+            # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo",
             # compress on client side
             "--enable_request_body_gzip_compression=true",
             "--server.compression.enabled=true",
             "--server.tomcat.connection-timeout=20000",
             "--server.tomcat.max-http-response-header-size=16384",
             "--server.max-http-request-header-size=16384",
-            "--port",
-            "8888",
+            "--server.port=8888",
         ]
         imagePullPolicy: Always
         readinessProbe:
