@@ -25,5 +25,6 @@ We use nginx ingress to handle the routing to the services. See
 [ingress/README.md](ingress/README.md).
 
 ## Monitoring
-We use Prometheus for monitoring our apps. See
-[monitoring/README.md](monitoring/README.md).
+We use Prometheus for monitoring our apps, and Grafana to visualize.
+- We use the kube-prometheus-stack to install prometheus and grafana
+- We are sticking to helm chart `prometheus-community/kube-prometheus-stack --version 46.8.0--set grafana.adminPassword=<pass>`

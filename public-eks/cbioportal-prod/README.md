@@ -133,3 +133,7 @@ kubectl apply -f cbioportal_spring_boot.yaml
 kubectl apply -f service.yaml
 ```
 
+## Monitoring
+The prometheus and grafana apps are installed under namespace `monitoring`.
+The ingress for the namespace can be found at [here](shared-services/ingress/monitoring_ingress.yaml)
+cBioPortal and OncoKB Grafana charts are located under shared-services/grafana
