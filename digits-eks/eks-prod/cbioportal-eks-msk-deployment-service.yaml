@@ -7,10 +7,13 @@ metadata:
   generation: 1
   labels:
     run: eks-msk
+    tags.datadoghq.com/env: eks-msk
+    tags.datadoghq.com/service: cbioportal
+    tags.datadoghq.com/version: 5.4.5
   name: eks-msk
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       run: eks-msk
@@ -23,6 +26,12 @@ spec:
       creationTimestamp: null
       labels:
         run: eks-msk
+        tags.datadoghq.com/env: eks-msk
+        tags.datadoghq.com/service: cbioportal
+        tags.datadoghq.com/version: 5.4.5
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
       - name: msk-eks-configmap-volume
@@ -42,6 +51,10 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
+        - name: DD_PROFILING_ENABLED
+          value: "true"
+        - name: DD_LOGS_INJECTION
+          value: "true"
         image: cbioportal/cbioportal:5.4.5-web-shenandoah
         volumeMounts:
         - name: msk-eks-configmap-volume
@@ -57,7 +70,7 @@ spec:
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             "-Xms100m",
-            "-Xmx15g",
+            "-Xmx60g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -94,7 +107,7 @@ spec:
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
             # /enable remote debug
-            "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Dfrontend.url=https://deploy-preview-4790--cbioportalfrontend.netlify.app",
             "-Ddefault_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "-Dquick_search.enabled=true",
             "-Ddefault_cross_cancer_study_list=mskimpact",
@@ -168,8 +181,8 @@ spec:
             #"-Dcache.statistics_endpoint_enabled=false",
             "-Dredis.database=1",
             "-Dpersistence.cache_type=redis",
-            "-Dredis.leader_address=redis://cbioportal-persistence-redis-master:6379",
-            "-Dredis.follower_address=redis://cbioportal-persistence-redis-replicas:6379",
+            "-Dredis.leader_address=redis://eks-msk-persistence-redis-master:6379",
+            "-Dredis.follower_address=redis://eks-msk-persistence-redis-replicas:6379",
             "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dehcache.cache_type=none",
             "-Dcache.endpoint.api-key=$(CACHE_API_KEY)",
@@ -235,14 +248,19 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 12Gi
+              memory: 30Gi
           limits:
-              memory: 20Gi
+              memory: 60Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: large-memory-portals
+        eks.amazonaws.com/nodegroup: msk-portals
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "msk-portals"
+          effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler

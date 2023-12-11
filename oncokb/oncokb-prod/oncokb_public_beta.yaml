@@ -34,7 +34,7 @@ spec:
             - name: APPLICATION_REDIS_EXPIRATION
               value: "$(REDIS_EXPIRATION)"
             - name: APPLICATION_DB_READ_ONLY
-              value: "TRUE"
+              value: "true"
             - name: JAVA_OPTS
               value: "-Xmx1024m -Xms512m"
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER

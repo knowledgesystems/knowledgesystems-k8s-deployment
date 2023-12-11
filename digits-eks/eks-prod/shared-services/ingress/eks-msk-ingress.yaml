@@ -259,3 +259,23 @@ spec:
               name: eks-msk-internal-test
               port:
                 number: 80
+  - host: "mskinternaltestboost.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: eks-msk-internal-test-boost
+              port:
+                number: 80
+  - host: "mskinternaltestbalance.cbioportal.aws.mskcc.org"
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: eks-msk-internal-test-balance
+              port:
+                number: 80

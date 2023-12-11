@@ -39,6 +39,8 @@ spec:
               value: '$(SECRET_ACCESS_KEY)'
             - name: APPLICATION_GITHUB_TOKEN
               value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
+            - name: APPLICATION_DB_READ_ONLY
+              value: "true"
             - name: APPLICATION_REDIS_TYPE
               value: '$(REDIS_TYPE)'
             - name: APPLICATION_REDIS_ADDRESS

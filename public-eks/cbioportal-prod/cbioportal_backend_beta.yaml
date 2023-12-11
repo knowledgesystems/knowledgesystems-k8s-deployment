@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-beta
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: cbioportal-backend-beta
@@ -97,8 +97,10 @@ spec:
             "--dbconnector=dbcp",
           # TODO: need to enable social_auth_microsoft as well
             "--authenticate=optional_oauth2",
+            "--always_show_study_group=PUBLIC",
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
+            "--spring.security.oauth2.client.provider.google.user-name-attribute=email",
             "--authorization=false",
             "--db.user=$(DB_USER)",
             "--db.password=$(DB_PASSWORD)",
@@ -143,13 +145,23 @@ spec:
             "--show.genomenexus.annotation_sources=mutation_assessor",
             "--matchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "--matchminer.token=$(MATCHMINER_TOKEN)",
-          # cache settings (currently redis)
-          #"--cache.statistics_endpoint_enabled=false",
+            # redis session store settings (different from redis persistence cache)
+            "--spring.session.store-type=redis",
+            # "--server.servlet.session.timeout=10s", (not sure what this should be)
+            "--spring.data.redis.host=$(REDIS_SESSION_HOST)",
+            "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
+            "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
+            # To enable redis session store, we need to set
+            # spring.autoconfigure.exclude to a random value to override the
+            # property in applications.properties.EXAMPLE
+            "--spring.autoconfigure.exclude=dontexcludeanythingplz",
+            # redis cache settings (currently redis)
+            #"--cache.statistics_endpoint_enabled=false",
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=8",
-            "--redis.password=$(REDIS_PASSWORD)",
+            "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
           #"--redis.clear_on_startup=false",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
@@ -179,6 +191,7 @@ spec:
             # "-AmaxHttpHeaderSize=16384",
             # "-AconnectionTimeout=20000",
             # "--enable-compression",
+            "--server.compression.enabled=true",
             "--server.tomcat.connection-timeout=20000",
             "--server.tomcat.max-http-response-header-size=16384",
             "--server.max-http-request-header-size=16384",
