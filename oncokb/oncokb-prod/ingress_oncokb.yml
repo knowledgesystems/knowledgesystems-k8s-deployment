@@ -4,15 +4,16 @@ metadata:
   name: oncokb-ingress
   namespace: oncokb
   annotations:
+    # kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/limit-rps: "100"
-    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
-    # the following has to be added due to an issue of from-to-www-redirect. https://github.com/kubernetes/ingress-nginx/issues/2043
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ($host = 'oncokb.org' ) {
-        rewrite ^ https://www.oncokb.org$request_uri permanent;
-      }
+    # nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    # # the following has to be added due to an issue of from-to-www-redirect. https://github.com/kubernetes/ingress-nginx/issues/2043
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   if ($host = 'oncokb.org' ) {
+    #     rewrite ^ https://www.oncokb.org$request_uri permanent;
+    #   }
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
@@ -30,7 +31,7 @@ spec:
   tls:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
   - hosts:
-    - oncokb.org
+    # - oncokb.org
     - www.oncokb.org
     - beta.oncokb.org
     - legacy.oncokb.org
@@ -51,6 +52,16 @@ spec:
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
   - host: oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
+  - host: www.oncokb.org
     http:
       paths:
       - path: "/"
@@ -177,7 +188,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: oncokb-airflow-ng
+            name: oncokb-airflow
             port:
               number: 8080
   - host: data-4-9.oncokb.org

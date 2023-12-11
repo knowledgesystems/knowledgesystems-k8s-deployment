@@ -95,12 +95,12 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       tolerations:
-      - key: "dedicated"
-        operator: "Equal"
-        value: "oncokb"
-        effect: "NoSchedule"
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-oncokb"
+          effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb
 ---
 apiVersion: v1
 kind: Service

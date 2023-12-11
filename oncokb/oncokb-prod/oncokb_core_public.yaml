@@ -33,7 +33,7 @@ spec:
                 name: oncokb-core-public
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.14.3-no-frontend
+          image: oncokb/oncokb:3.14.4-no-frontend
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -109,10 +109,10 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "oncokb"
+          value: "eks-oncokb"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb
 status: {}
 ---
 apiVersion: v1
