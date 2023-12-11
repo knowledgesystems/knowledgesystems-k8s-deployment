@@ -49,12 +49,12 @@ web:
       configMap:
         name: oncokb-airflow-requirements
   nodeSelector:
-    eks.amazonaws.com/nodegroup: oncokb
+    eks.amazonaws.com/nodegroup: eks-oncokb
   tolerations:
-  - key: "dedicated"
-    operator: "Equal"
-    value: "oncokb"
-    effect: "NoSchedule"
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-oncokb"
+      effect: "NoSchedule"
 
 scheduler:
   extraVolumeMounts:
@@ -65,13 +65,13 @@ scheduler:
       configMap:
         name: oncokb-airflow-requirements
   nodeSelector:
-    eks.amazonaws.com/nodegroup: oncokb
+    eks.amazonaws.com/nodegroup: eks-oncokb
   tolerations:
-  - key: "dedicated"
-    operator: "Equal"
-    value: "oncokb"
-    effect: "NoSchedule"
-        
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-oncokb"
+      effect: "NoSchedule"
+
 worker:
   extraVolumeMounts:
     - name: requirements
@@ -81,27 +81,27 @@ worker:
       configMap:
         name: oncokb-airflow-requirements
   nodeSelector:
-    eks.amazonaws.com/nodegroup: oncokb
+    eks.amazonaws.com/nodegroup: eks-oncokb
   tolerations:
-  - key: "dedicated"
-    operator: "Equal"
-    value: "oncokb"
-    effect: "NoSchedule"
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-oncokb"
+      effect: "NoSchedule"
 
 redis:
   nodeSelector:
-    eks.amazonaws.com/nodegroup: oncokb
+    eks.amazonaws.com/nodegroup: eks-oncokb
   tolerations:
-  - key: "dedicated"
-    operator: "Equal"
-    value: "oncokb"
-    effect: "NoSchedule"
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-oncokb"
+      effect: "NoSchedule"
 
 postgresql:
   nodeSelector:
-    eks.amazonaws.com/nodegroup: oncokb
+    eks.amazonaws.com/nodegroup: eks-oncokb
   tolerations:
-  - key: "dedicated"
-    operator: "Equal"
-    value: "oncokb"
-    effect: "NoSchedule"
+    - key: "dedicated"
+      operator: "Equal"
+      value: "eks-oncokb"
+      effect: "NoSchedule"

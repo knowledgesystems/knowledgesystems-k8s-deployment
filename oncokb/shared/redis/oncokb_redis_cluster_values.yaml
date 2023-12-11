@@ -10,11 +10,11 @@ redis:
     failureThreshold: 10
     timeoutSeconds: 5
   nodeSelector:
-    eks.amazonaws.com/nodegroup: oncokb
+    eks.amazonaws.com/nodegroup: eks-oncokb
   tolerations:
   - key: "dedicated"
     operator: "Equal"
-    value: "oncokb"
+    value: "eks-oncokb"
     effect: "NoSchedule"
 
 cluster:

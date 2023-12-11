@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.12.1-alpha.0
+          image: oncokb/oncokb-public:3.12.1
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -105,14 +105,14 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "oncokb"
+          value: "eks-oncokb"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb
       volumes:
-      - name: recaptcha-credentials
-        secret:
-          secretName: oncokb-recaptcha-credentials
+        - name: recaptcha-credentials
+          secret:
+            secretName: oncokb-recaptcha-credentials
 
 ---
 apiVersion: v1

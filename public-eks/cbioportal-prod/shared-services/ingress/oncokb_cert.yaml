@@ -7,7 +7,7 @@ spec:
   # Secret names are always required.
   secretName: oncokb-cert
   dnsNames:
-    - oncokb.org
+    # - oncokb.org
     - www.oncokb.org
     - public.api.oncokb.org
     - transcript.oncokb.org

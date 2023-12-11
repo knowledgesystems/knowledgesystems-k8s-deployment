@@ -15,7 +15,8 @@ spec:
   strategy:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
-      maxUnavailable: 5
+      maxSurge: 4
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
@@ -36,7 +37,7 @@ spec:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.14.3
+          image: oncokb/oncokb:3.14.4
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -123,10 +124,10 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "oncokb"
+          value: "eks-oncokb"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb
 ---
 apiVersion: v1
 kind: Service

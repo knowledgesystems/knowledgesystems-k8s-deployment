@@ -78,6 +78,13 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-oncokb"
+          effect: "NoSchedule"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-oncokb
 status: {}
 ---
 apiVersion: v1
