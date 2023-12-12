@@ -20,6 +20,7 @@ spec:
       labels:
         dataset: pbmc3k.h5ad
     spec:
+      # serviceAccountName: cellxgene-service-account
       containers:
         - name: cellxgene-app
           image: 'edit01/cellxgene:1.1.2'
