@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-beta
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-backend-beta
@@ -73,7 +73,7 @@ spec:
             #"-XX:MaxRAM=6500m",
             "-jar",
             "/cbioportal-webapp/app.jar",
-          # enable remote debug
+            # enable remote debug
             "--com.sun.management.jmxremote.rmi.port=8849",
             "--com.sun.management.jmxremote=false",
             "--com.sun.management.jmxremote.port=8849",
@@ -81,7 +81,7 @@ spec:
             "--com.sun.management.jmxremote.authenticate=false",
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
-          # /enable remote debug
+            # /enable remote debug
             "--frontend.url=https://deploy-preview-4753--cbioportalfrontend.netlify.app/",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
@@ -93,9 +93,8 @@ spec:
             "--skin.patientview.filter_genes_profiled_all_samples=false",
             "--installation_map_url=https://installationmap.netlify.app/",
             "--app.name=public-portal",
-          # connecting over dbcp
             "--dbconnector=dbcp",
-          # TODO: need to enable social_auth_microsoft as well
+            # TODO: need to enable social_auth_microsoft as well
             "--authenticate=optional_oauth2",
             "--always_show_study_group=PUBLIC",
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
@@ -157,21 +156,21 @@ spec:
             "--spring.autoconfigure.exclude=dontexcludeanythingplz",
             # redis cache settings (currently redis)
             #"--cache.statistics_endpoint_enabled=false",
+            # "--logging.level.org.cbioportal.persistence=DEBUG",
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
-            "--redis.database=8",
+            "--redis.database=2",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
-          #"--redis.clear_on_startup=false",
+            "--redis.clear_on_startup=false",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
-          # disable ehcache
             "--ehcache.cache_type=none",
-          # misc frontend settings (this is NOT for backend persistence layer caching)
-          #"--enable_persistent_cache=true",
-          # compress on client side
+            # misc frontend settings (this is NOT for backend persistence layer caching)
+            #"--enable_persistent_cache=true",
+            # compress on client side
             "--enable_request_body_gzip_compression=true",
-          # for single cell plugin
+            # for single cell plugin
             "--frontend.config=/cbioportal/frontendConfig.json",
             "--frontend_authenticate=optional_oauth2",
             # this addresses same issue as
