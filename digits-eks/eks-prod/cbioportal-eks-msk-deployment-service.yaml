@@ -255,11 +255,11 @@ spec:
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: msk-portals
+        eks.amazonaws.com/nodegroup: msk-portals-general-64g
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "msk-portals"
+          value: "msk-portals-general-64g"
           effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
