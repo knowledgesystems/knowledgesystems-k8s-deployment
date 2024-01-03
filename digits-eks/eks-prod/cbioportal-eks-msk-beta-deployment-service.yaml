@@ -40,7 +40,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:demo-rfc72-web-shenandoah
+        image: cbioportal/cbioportal:master-web-shenandoah
         volumeMounts:
         - name: msk-beta-eks-configmap-volume
           mountPath: /cbioportal/local.key
@@ -198,7 +198,7 @@ spec:
           failureThreshold: 3
         livenessProbe:
           httpGet:
-            path: /
+            path: /api/health
             port: 8888
           initialDelaySeconds: 180
           timeoutSeconds: 1
