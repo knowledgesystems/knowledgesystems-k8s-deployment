@@ -99,15 +99,17 @@ spec:
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "--spring.security.oauth2.client.provider.google.user-name-attribute=email",
-            "--spring.security.oauth2.client.registration.azure.clientId=$(MICROSOFT_LIVE_CONSUMER_KEY)",
+            "--logging.level.org.springframework.security=DEBUG",
+            "--spring.security.oauth2.client.registration.azure.client-id=$(MICROSOFT_LIVE_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.azure.clientSecret=$(MICROSOFT_LIVE_CONSUMER_SECRET)",
-            "--spring.security.oauth2.client.registration.azure.authorization_grant_type=authorization_code",
-            "--spring.security.oauth2.client.registration.azure.redirect_uri={baseUrl}",
-            "--spring.security.oauth2.client.registration.azure.scope=User.Read",
+            "--spring.security.oauth2.client.registration.azure.authorization-grant-type=authorization_code",
+            "--spring.security.oauth2.client.registration.azure.redirect-uri={baseUrl}/login/oauth2/code/azure",
+            "--spring.security.oauth2.client.registration.azure.scope=openid,profile,email",
             "--spring.security.oauth2.client.provider.azure.user-name-attribute=email",
-            #"--spring.security.oauth2.client.provider.azure.scope=User.Read",
-            #"--spring.security.oauth2.client.provider.azure.authorization_uri=https://login.microsoftonline.com/common/oauth2/authorize?resource=https://graph.microsoft.com/",
             "--spring.security.oauth2.client.provider.azure.issuer-uri=https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a/v2.0",
+            "--spring.security.oauth2.client.provider.azure.authorization-uri=https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+            "--spring.security.oauth2.client.provider.azure.token-uri=https://login.microsoftonline.com/common/oauth2/v2.0/token",
+            "--spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys",
             "--authorization=false",
             "--db.user=$(DB_USER)",
             "--db.password=$(DB_PASSWORD)",
@@ -208,22 +210,22 @@ spec:
             # "/app.war"
         ]
         imagePullPolicy: Always
-        readinessProbe:
-          httpGet:
-            path: /api/health
-            port: 8080
-          initialDelaySeconds: 5
-          timeoutSeconds: 1
-          periodSeconds: 5
-          failureThreshold: 3
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          timeoutSeconds: 1
-          periodSeconds: 12
-          failureThreshold: 5
+        #readinessProbe:
+        #  httpGet:
+        #    path: /api/health
+        #    port: 8080
+        #  initialDelaySeconds: 5
+        #  timeoutSeconds: 1
+        #  periodSeconds: 5
+        #  failureThreshold: 3
+        #livenessProbe:
+        #  httpGet:
+        #    path: /
+        #    port: 8080
+        #  initialDelaySeconds: 10
+        #  timeoutSeconds: 1
+        #  periodSeconds: 12
+        #  failureThreshold: 5
         name: cbioportal-backend-beta
         ports:
         - containerPort: 8080
