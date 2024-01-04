@@ -25,10 +25,6 @@ spec:
               "echo 'Install curl';
               apt update; apt -y install curl;
               echo 'Done installing curl\n\n';
-
-              echo 'API call to send emails to all users whose account will be expired soon';
-              curl 'http://oncokb-public:9095/api/cronjob/renew-tokens'  -H 'Authorization: Bearer $(TOKEN)';
-              echo 'Done calling cronjob/renew-tokens\n\n';
               
               echo 'API call to check the trial accounts';
               curl 'http://oncokb-public:9095/api/cronjob/check-trial-accounts'  -H 'Authorization: Bearer $(TOKEN)';
