@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.12.4-alpha.1
+          image: oncokb/oncokb-public:3.12.4
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -40,7 +40,7 @@ spec:
             - name: APPLICATION_GITHUB_TOKEN
               value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
             - name: APPLICATION_DB_READ_ONLY
-              value: "true"
+              value: "false"
             - name: APPLICATION_REDIS_TYPE
               value: '$(REDIS_TYPE)'
             - name: APPLICATION_REDIS_ADDRESS
