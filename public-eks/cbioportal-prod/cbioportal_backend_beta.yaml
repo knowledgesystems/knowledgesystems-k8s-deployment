@@ -175,7 +175,6 @@ spec:
             "--redis.clear_on_startup=false",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
-            "--ehcache.cache_type=none",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             #"--enable_persistent_cache=true",
             # compress on client side
@@ -188,18 +187,6 @@ spec:
             # set this if one doesn't want to forward https -> http -> https
             # when logging in through google auth. Somehow this goes over http
             # otherwise.
-            # "--proxy-base-url",
-            # "https://beta.cbioportal.org",
-            # "--max-threads",
-            # "0",
-            # "--session-store",
-            # "redis",
-            # "--session-store-operation-timeout",
-            # "10000",
-            # # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
-            # "-AmaxHttpHeaderSize=16384",
-            # "-AconnectionTimeout=20000",
-            # "--enable-compression",
             "--server.compression.enabled=true",
             "--server.tomcat.connection-timeout=20000",
             "--server.tomcat.max-http-response-header-size=16384",
@@ -207,7 +194,6 @@ spec:
             "--show.civic=false",
              "--port",
              "8080",
-            # "/app.war"
         ]
         imagePullPolicy: Always
         #readinessProbe:
