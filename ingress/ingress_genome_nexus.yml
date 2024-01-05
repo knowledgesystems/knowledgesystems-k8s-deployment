@@ -25,13 +25,25 @@ spec:
   tls:
   - hosts:
     - www.genomenexus.org
+    secretName: gn-public-cert
+  - hosts:
     - v2.genomenexus.org
+    secretName: gn-v2-cert
+  - hosts:
     - v1.genomenexus.org
+    secretName: gn-v1-cert
+  - hosts:
     - beta.genomenexus.org
+    secretName: gn-beta-cert
+  - hosts:  
     - grch38.genomenexus.org
+    secretName: gn-grch38-cert
+  - hosts:
     - genie.genomenexus.org
+    secretName: gn-genie-cert
+  - hosts:
     - annotation.genomenexus.org
-    secretName: genome-nexus-cert
+    secretName: gn-annotation-cert
   rules:
   - host: www.genomenexus.org
     http:

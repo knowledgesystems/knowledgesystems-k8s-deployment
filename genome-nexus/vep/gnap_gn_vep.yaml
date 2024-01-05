@@ -59,7 +59,12 @@ spec:
         terminationMessagePolicy: File
       # run on genome nexus machines
       nodeSelector:
-         kops.k8s.io/instancegroup: gnap-genome-nexus
+        eks.amazonaws.com/nodegroup: eks-genome-nexus
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-genome-nexus"
+          effect: "NoSchedule"
       # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
       initContainers:

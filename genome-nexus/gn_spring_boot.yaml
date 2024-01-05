@@ -88,10 +88,10 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "genome-nexus"
+          value: "eks-genome-nexus"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: genome-nexus
+        eks.amazonaws.com/nodegroup: eks-genome-nexus
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
