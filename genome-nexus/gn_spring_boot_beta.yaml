@@ -31,13 +31,13 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot13-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-v0dot30-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:test-fix-del-and-indel
+        image: genomenexus/gn-spring-boot:1.3.0
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -82,8 +82,13 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-genome-nexus"
+          effect: "NoSchedule"
       nodeSelector:
-         kops.k8s.io/instancegroup: genome-nexus
+        eks.amazonaws.com/nodegroup: eks-genome-nexus
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
