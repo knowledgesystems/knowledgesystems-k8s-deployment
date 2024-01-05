@@ -44,9 +44,9 @@ spec:
 #  - hosts:
 #      - keycloak.cbioportal.org
 #    secretName: keycloak-cert
-#  - hosts:
-#      - genie-public-beta.cbioportal.org
-#    secretName: cbioportal-genie-public-beta-cert
+  - hosts:
+      - genie-public-beta.cbioportal.org
+    secretName: cbioportal-genie-public-beta-cert
 #  - hosts:
 #      - session-service.cbioportal.org
 #    secretName: cbioportal-session-service-cert
@@ -75,16 +75,16 @@ spec:
 #            name: cbioportal
 #            port:
 #              number: 80
-#  - host: genie-public-beta.cbioportal.org
-#    http:
-#      paths:
-#      - path: /
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: cbioportal-backend-genie-public-beta
-#            port:
-#              number: 80
+  - host: genie-public-beta.cbioportal.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cbioportal-backend-genie-public-beta
+            port:
+              number: 80
   - host: genie.cbioportal.org
     http:
       paths:
