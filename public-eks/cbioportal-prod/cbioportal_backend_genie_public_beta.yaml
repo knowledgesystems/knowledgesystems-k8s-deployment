@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-genie-public-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-public-beta
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-backend-genie-public-beta
@@ -26,12 +26,12 @@ spec:
         run: cbioportal-backend-genie-public-beta
     spec:
       containers:
-        - envFrom:
-            - configMapRef:
-                name: cbioportal-genie-public-beta
+      - envFrom:
+        - configMapRef:
+            name: cbioportal-genie-public-beta
         image: cbioportal/cbioportal:master-web-shenandoah
-          command: [ "java" ]
-          args: [
+        command: [ "java" ]
+        args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             # "-Xms5g",
             # "-Xmx14g",
@@ -174,40 +174,40 @@ spec:
             "--port",
             "8888",
             "/app.war"
-          ]
-          imagePullPolicy: Always
-          readinessProbe:
-            httpGet:
-              path: /api/health
-              port: 8888
-            initialDelaySeconds: 45
-            timeoutSeconds: 1
-            periodSeconds: 5
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /login.jsp
-              port: 8888
-            initialDelaySeconds: 180
-            timeoutSeconds: 1
-            periodSeconds: 12
-            failureThreshold: 5
-          name: cbioportal-backend-genie-public-beta
-          ports:
-            - containerPort: 8888
-              protocol: TCP
-            - containerPort: 8849
-              protocol: TCP
-          resources:
-            requests:
+        ]
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8888
+          initialDelaySeconds: 45
+          timeoutSeconds: 1
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /login.jsp
+            port: 8888
+          initialDelaySeconds: 180
+          timeoutSeconds: 1
+          periodSeconds: 12
+          failureThreshold: 5
+        name: cbioportal-backend-genie-public-beta
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        - containerPort: 8849
+          protocol: TCP
+        resources:
+          requests:
               memory: 11Gi
-            limits:
+          limits:
               memory: 26Gi
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-      # run on big memory machine
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      # run on eks-genie-cbioportal node group
       nodeSelector:
-        eks.amazonaws.com/nodegroup: genie-portals
+        eks.amazonaws.com/nodegroup: eks-genie-cbioportal
       tolerations:
         - key: "dedicated"
           operator: "Equal"
@@ -229,9 +229,9 @@ metadata:
   selfLink: /api/v1/namespaces/default/services/cbioportal-backend-genie-public-beta
 spec:
   ports:
-    - port: 80
-      name: http
-      targetPort: 8888
+  - port: 80
+    name: http
+    targetPort: 8888
   selector:
     run: cbioportal-backend-genie-public-beta
   type: ClusterIP
