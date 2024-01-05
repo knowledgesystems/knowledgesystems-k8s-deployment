@@ -29,7 +29,7 @@ spec:
         - envFrom:
             - configMapRef:
                 name: cbioportal-genie-public-beta
-          image: cbioportal/cbioportal:demo-clickhouse-k8s-web-shenandoah
+        image: cbioportal/cbioportal:master-web-shenandoah
           command: [ "java" ]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -93,14 +93,14 @@ spec:
             "-Ddb.user=$(DB_USER)",
             "-Ddb.password=$(DB_PASSWORD)",
             "-Ddb.host=$(DB_HOST)",
-            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
-            "-Ddb.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-            "-Ddb.clickhouse.user=$(DB_CLICKHOUSE_USER)",
-            "-Ddb.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "-Dtomcat.catalina.scope=runtime",
+            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
+            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
+            #"-Ddb.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            #"-Ddb.clickhouse.user=$(DB_CLICKHOUSE_USER)",
+            #"-Ddb.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "-Dshow.transcript_dropdown=true",
-            "-Dshow.civic=$(SHOW_CIVIC)",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
             "-Dskin.email_contact=cbioportal@googlegroups.com",
             "-Dskin.right_nav.show_data_sets=false",
@@ -109,7 +109,7 @@ spec:
             "-Dskin.data_sets_footer=",
             "-Dskin.data_sets_header=The portal currently contains data from <NUM_CANCER_STUDIES> cancer genomics studies.  The table below lists the number of available samples per cancer study and data type.",
             "-Dskin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/genie-documentation/docs/",
-            "-Dskin.documentation.skin.news=genie-news.md",
+            "-Dskin.documentation.news=https://docs.cbioportal.org/news-genie/",
             "-Dskin.query.max_tree_depth=0",
             "-Dsession.service.url=https://session-service.cbioportal.org/api/sessions/genie_public_beta_portal/",
             "-Dsession.service.origin=*",
@@ -131,7 +131,6 @@ spec:
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dsitemaps=false",
             "-Doncokb.public_api.url=https://www.oncokb.org/api/v1",
-            "-Denable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "-Doncokb.token=$(ONCOKB_TOKEN)",
             "-Dgenomenexus.url=https://www.genomenexus.org",
             "-Dgenomenexus.isoform_override_source=uniprot",
@@ -143,11 +142,11 @@ spec:
             "-Ddat.uuid.revoke_other_tokens=true",
             # cache settings (currently redis)
             "-Dcache.statistics_endpoint_enabled=false",
-            "-Dpersistence.cache_type=no-cache",
-            # "-Dredis.leader_address=redis://cbioportal-persistence-redis-genie-master:6379",
-            # "-Dredis.follower_address=redis://cbioportal-persistence-redis-genie-slave:6379",
-            # "-Dredis.database=9",
-            # "-Dredis.password=$(REDIS_PASSWORD)",
+            "-Dpersistence.cache_type=redis",
+            "-Dredis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379",
+            "-Dredis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379",
+            "-Dredis.database=9",
+            "-Dredis.password=$(REDIS_PASSWORD)",
             # compress on client side
             "-Denable_request_body_gzip_compression=true",
             # comparison settings
@@ -209,6 +208,11 @@ spec:
       # run on big memory machine
       nodeSelector:
         eks.amazonaws.com/nodegroup: genie-portals
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-genie-cbioportal"
+          effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
