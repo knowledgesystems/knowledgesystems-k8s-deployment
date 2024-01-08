@@ -94,7 +94,7 @@ spec:
             "-Dcom.sun.management.jmxremote.authenticate=false",
             "-Dcom.sun.management.jmxremote.local.only=false",
             "-Djava.rmi.server.hostname=localhost",
-            "-Dfrontend.url=https://frontend.cbioportal.org",
+            "-Dfrontend.url=https://temp-master--cbioportalfrontend.netlify.app",
             "-Dquick_search.enabled=true",
             "-Dskin.footer=",
             "-Dskin.right_nav.whats_new_blurb=",
