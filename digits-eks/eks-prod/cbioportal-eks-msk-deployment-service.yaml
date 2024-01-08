@@ -55,7 +55,7 @@ spec:
           value: "true"
         - name: DD_LOGS_INJECTION
           value: "true"
-        image: cbioportal/cbioportal:5.4.5-web-shenandoah
+        image: cbioportal/cbioportal:5.4.10-web-shenandoah
         volumeMounts:
         - name: msk-eks-configmap-volume
           mountPath: /cbioportal/portal.properties
