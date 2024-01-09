@@ -209,22 +209,22 @@ spec:
             "--show.civic=false"
         ]
         imagePullPolicy: Always
-#        readinessProbe:
-#          httpGet:
-#            path: /api/health
-#            port: 8080
-#          initialDelaySeconds: 45
-#          timeoutSeconds: 1
-#          periodSeconds: 5
-#          failureThreshold: 3
-#        livenessProbe:
-#          httpGet:
-#            path: /
-#            port: 8080
-#          initialDelaySeconds: 180
-#          timeoutSeconds: 1
-#          periodSeconds: 12
-#          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8080
+          initialDelaySeconds: 45
+          timeoutSeconds: 1
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 180
+          timeoutSeconds: 1
+          periodSeconds: 12
+          failureThreshold: 5
         name: cbioportal-spring-boot
         ports:
         - containerPort: 8080
