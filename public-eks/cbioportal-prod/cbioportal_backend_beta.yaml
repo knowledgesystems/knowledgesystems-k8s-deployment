@@ -33,7 +33,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:master-web-shenandoah
+        image: cbioportal/cbioportal:demo-6.0.0-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -160,6 +160,12 @@ spec:
             "--spring.data.redis.host=$(REDIS_SESSION_HOST)",
             "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
             "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
+
+            # handles legacy swagger urls after upgrade
+            "--springdoc.swagger-ui.disable-swagger-default-url=true",
+            "--springdoc.swagger-ui.path=/api/swagger-ui",
+            "--springdoc.api-docs.path=/api/v2/api-docs",
+
             # To enable redis session store, we need to set
             # spring.autoconfigure.exclude to a random value to override the
             # property in applications.properties.EXAMPLE
