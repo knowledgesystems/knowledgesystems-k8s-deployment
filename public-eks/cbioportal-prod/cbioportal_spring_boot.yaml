@@ -96,6 +96,7 @@ spec:
             # Authentication settings
             "--authenticate=optional_oauth2",
             "--authorization=false",
+            "--security.method_authorization_enabled=false",
             "--always_show_study_group=PUBLIC",
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
