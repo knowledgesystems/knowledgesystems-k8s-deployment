@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.12.4
+          image: oncokb/oncokb-public:3.12.5
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -31,12 +31,14 @@ spec:
               value: prod,no-liquibase
             - name: JAVA_OPTS
               value: '-Xmx1024m -Xms512m'
-            - name: APPLICATION_AWS_S3_ACCESS_KEY
-              value: '$(ACCESS_KEY_ID)'
-            - name: APPLICATION_AWS_S3_REGION
-              value: '$(AWS_REGION)'
-            - name: APPLICATION_AWS_S3_SECRET_KEY
-              value: '$(SECRET_ACCESS_KEY)'
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
+              value: '$(SERVICE_ACCOUNT_USERNAME)'
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
+              value: '$(SERVICE_ACCOUNT_PASSWORD)'
+            - name: APPLICATION_SAMLAWS_PRINCIPALARN
+              value: '$(PRINCIPAL_ARN)'
+            - name: APPLICATION_SAMLAWS_ROLEARN
+              value: '$(ROLE_ARN)'
             - name: APPLICATION_GITHUB_TOKEN
               value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
             - name: APPLICATION_DB_READ_ONLY
@@ -63,7 +65,7 @@ spec:
             - configMapRef:
                 name: oncokb-public
             - configMapRef:
-                name: aws-cli-credentials
+                name: oncokb-schultz-lab-sa
             - configMapRef:
                 name: oncokb-github
             - configMapRef:
