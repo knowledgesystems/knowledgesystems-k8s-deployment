@@ -7,6 +7,9 @@ metadata:
   generation: 1
   labels:
     run: cbioportal-spring-boot
+    tags.datadoghq.com/env: eks-public
+    tags.datadoghq.com/service: cbioportal
+    tags.datadoghq.com/version: 6.0.0
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
@@ -24,6 +27,12 @@ spec:
       creationTimestamp: null
       labels:
         run: cbioportal-spring-boot
+        tags.datadoghq.com/env: eks-public
+        tags.datadoghq.com/service: cbioportal
+        tags.datadoghq.com/version: 6.0.0
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
       - name: cbioportal-frontend-config-volume
