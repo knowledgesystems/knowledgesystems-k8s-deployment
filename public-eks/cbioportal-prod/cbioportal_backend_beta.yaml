@@ -33,7 +33,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public-beta
-        image: cbioportal/cbioportal:demo-6.0.0-web-shenandoah
+        image: cbioportal/cbioportal:demo-fix-clinical-table-sorting-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
