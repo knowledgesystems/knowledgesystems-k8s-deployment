@@ -16,8 +16,6 @@ spec:
             - envFrom:
                 - configMapRef:
                     name: oncokb-public-bot
-                - configMapRef:
-                    name: oncokb-schultz-lab-sa
               name: main
               image: "oncokb/k8s-with-tools:1.0.0-beta.0"
               command: ["/bin/sh", "-c"]
@@ -28,5 +26,11 @@ spec:
                   echo 'Done calling cronjob/move-token-stats-to-s3\n\n';
                   ",
                 ]
-
+          tolerations:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "eks-oncokb"
+              effect: "NoSchedule"
+          nodeSelector:
+            eks.amazonaws.com/nodegroup: eks-oncokb
           restartPolicy: Never
