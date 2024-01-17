@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.12.4-alpha.1
+          image: oncokb/oncokb-public:3.12.6
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -35,6 +35,14 @@ spec:
               value: "$(REDIS_EXPIRATION)"
             - name: APPLICATION_DB_READ_ONLY
               value: "true"
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
+              value: '$(SERVICE_ACCOUNT_USERNAME)'
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
+              value: '$(SERVICE_ACCOUNT_PASSWORD)'
+            - name: APPLICATION_SAMLAWS_PRINCIPALARN
+              value: '$(PRINCIPAL_ARN)'
+            - name: APPLICATION_SAMLAWS_ROLEARN
+              value: '$(ROLE_ARN)'
             - name: JAVA_OPTS
               value: "-Xmx1024m -Xms512m"
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
@@ -50,6 +58,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: oncokb-public-beta
+            - configMapRef:
+                name: oncokb-schultz-lab-sa
             - configMapRef:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
