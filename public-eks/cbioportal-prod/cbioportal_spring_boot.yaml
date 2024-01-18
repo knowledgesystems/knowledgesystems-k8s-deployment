@@ -126,7 +126,7 @@ spec:
             "--db.password=$(DB_PASSWORD)",
             "--spring.datasource.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect",
-            "--spring.datasource.url=jdbc:mysql://publicdb.cbioportal.org:3306/cgds_public?zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true",
+            "--spring.datasource.url=jdbc:mysql://publicdb.cbioportal.org:3306/cgds_public_v5?zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true",
             "--spring.datasource.username=$(DB_USER)",
             "--spring.datasource.password=$(DB_PASSWORD)",
 #            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
@@ -178,7 +178,7 @@ spec:
             # handles legacy swagger urls after upgrade
             "--springdoc.swagger-ui.disable-swagger-default-url=true",
             "--springdoc.swagger-ui.path=/api/swagger-ui",
-            "--springdoc.api-docs.path=/api/v2/api-docs",
+            "--springdoc.api-docs.path=/api/v3/api-docs",
 
             # redis cache settings (currently redis)
             #"--cache.statistics_endpoint_enabled=false",
