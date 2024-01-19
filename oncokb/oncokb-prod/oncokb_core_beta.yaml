@@ -30,7 +30,8 @@ spec:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.15.1
+          # The beta current is used to showcase a new search endpoint
+          image: oncokb/oncokb:3.16-annotation-search.3
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
