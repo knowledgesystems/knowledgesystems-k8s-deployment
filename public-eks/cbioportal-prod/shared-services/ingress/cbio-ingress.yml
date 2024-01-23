@@ -47,9 +47,9 @@ spec:
   - hosts:
       - genie-public-beta.cbioportal.org
     secretName: cbioportal-genie-public-beta-cert
-#  - hosts:
-#      - session-service.cbioportal.org
-#    secretName: cbioportal-session-service-cert
+  - hosts:
+      - session-service.cbioportal.org
+    secretName: cbioportal-session-service-cert
 #  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
 #  - hosts:
 #      - session-service-beta.cbioportal.org
@@ -135,16 +135,16 @@ spec:
               name: cbioportal-backend-beta
               port:
                 number: 80
-#  - host: session-service.cbioportal.org
-#    http:
-#      paths:
-#        - path: /
-#          pathType: Prefix
-#          backend:
-#            service:
-#              name: cbioportal-session-service
-#              port:
-#                number: 80
+  - host: session-service.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal-session-service
+              port:
+                number: 80
 
 #  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
 #  - host: session-service-beta.cbioportal.org
