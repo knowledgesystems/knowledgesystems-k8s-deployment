@@ -177,8 +177,8 @@ spec:
             "--enable_persistent_cache=false",
             # auth
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=/cbioportal/msk-beta-cbioportal-saml-idp-metadata.xml",
-            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/external/protocol/saml/descriptor",
-            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=private-beta",
+            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/saml/descriptor",
+            "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=cbioportal-msk-beta-v6",
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt",
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key",
             # "--logging.level.org.springframework.security=DEBUG",
