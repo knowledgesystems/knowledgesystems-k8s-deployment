@@ -33,6 +33,9 @@ spec:
             path: local.key
           - key: local.crt
             path: local.crt
+      - name: cbioportal-frontend-config-volume
+        configMap:
+          name: msk-eks-frontend-config
       containers:
       - envFrom:
         - configMapRef:
@@ -48,6 +51,8 @@ spec:
         - name: msk-beta-eks-configmap-volume
           mountPath: /cbioportal/local.crt
           subPath: local.crt
+        - name: cbioportal-frontend-config-volume
+          mountPath: /cbioportal/aaron.json
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -150,6 +155,7 @@ spec:
             "--bitly.url=$(BITLY_URL)",
             "--bitly.access.token=$(BITLY_ACCESS_TOKEN)",
             "--sentry.dsn=$(SENTRY_DSN)",
+            "--frontend.config=/cbioportal/aaron.json",
             "--sentry.factory=org.cbioportal.logging.SentryClientFactory",
             #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "--sitemaps=false",
@@ -164,7 +170,7 @@ spec:
             "--filter_groups_by_appname=false",
             # cache settings (currently redis)
 #            "-Dcache.statistics_endpoint_enabled=false",
-            "--redis.database=5",
+            "--redis.database=3",
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-persistence-redis-replicas:6379",
@@ -172,7 +178,7 @@ spec:
             "--ehcache.cache_type=none",
             "--cache.endpoint.api-key=$(CACHE_API_KEY)",
             "--cache.endpoint.enabled=true",
-            "--redis.clear_on_startup=false",
+            "--redis.clear_on_startup=true",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             "--enable_persistent_cache=false",
             # auth
