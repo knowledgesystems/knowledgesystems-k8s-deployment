@@ -10,13 +10,13 @@ metadata:
   name: eks-msk-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-beta
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: eks-msk-beta
   strategy:
     rollingUpdate:
-      maxUnavailable: 0
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
@@ -169,10 +169,14 @@ spec:
             "--matchminer.token=$(MATCHMINER_TOKEN)",
             "--filter_groups_by_appname=false",
             # redis session store settings (different from redis persistence cache)
-#            "--spring.session.store-type=redis",
-#            "--spring.data.redis.host=$(REDIS_SESSION_HOST)",
-#            "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
-#            "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
+            "--spring.session.store-type=redis",
+            "--spring.data.redis.host=$(REDIS_SESSION_HOST)",
+            "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
+            "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
+            # To enable redis session store, we need to set
+            # spring.autoconfigure.exclude to a random value to override the
+            # property in applications.properties.EXAMPLE
+            "--spring.autoconfigure.exclude=dontexcludeanythingplz",
             # cache settings (currently redis)
 #            "-Dcache.statistics_endpoint_enabled=false",
             "--redis.database=3",
