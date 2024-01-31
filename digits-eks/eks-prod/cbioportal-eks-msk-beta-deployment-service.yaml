@@ -97,7 +97,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+            "--frontend.url=https://deploy-preview-4790--cbioportalfrontend.netlify.app/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
             "--about=about_us.html",
@@ -189,7 +189,7 @@ spec:
             "--ehcache.cache_type=none",
             "--cache.endpoint.api-key=$(CACHE_API_KEY)",
             "--cache.endpoint.enabled=true",
-            "--redis.clear_on_startup=true",
+            "--redis.clear_on_startup=false",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             "--enable_persistent_cache=false",
             # auth
@@ -210,22 +210,22 @@ spec:
             "--server.port=8888",
         ]
         imagePullPolicy: Always
-        readinessProbe:
-          httpGet:
-            path: /api/health
-            port: 8888
-          initialDelaySeconds: 45
-          timeoutSeconds: 1
-          periodSeconds: 5
-          failureThreshold: 3
-        livenessProbe:
-          httpGet:
-            path: /api/health
-            port: 8888
-          initialDelaySeconds: 180
-          timeoutSeconds: 1
-          periodSeconds: 12
-          failureThreshold: 5
+#        readinessProbe:
+#          httpGet:
+#            path: /api/health
+#            port: 8888
+#          initialDelaySeconds: 45
+#          timeoutSeconds: 1
+#          periodSeconds: 5
+#          failureThreshold: 3
+#        livenessProbe:
+#          httpGet:
+#            path: /api/health
+#            port: 8888
+#          initialDelaySeconds: 180
+#          timeoutSeconds: 1
+#          periodSeconds: 12
+#          failureThreshold: 5
         name: eks-msk-beta
         ports:
         - containerPort: 8888
