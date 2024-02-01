@@ -1,0 +1,44 @@
+# The redisinsight doesn't have built-in access control, so it's not a good idea to deploy it to a public-accessible website
+# But if we are interested in using this internally
+# After it's running on the cluster, one can use "kubectl port-forward svc/redisinsight-service 3001:80" to visit it localhost:3001
+kind: Deployment
+metadata:
+  name: redisinsight
+  labels:
+    app: redisinsight
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redisinsight
+  template:
+    metadata:
+      labels:
+        app: redisinsight
+    spec:
+      containers:
+
+        - name:  redisinsight
+          image: redislabs/redisinsight:1.14.0
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: db
+              mountPath: /db
+          ports:
+            - containerPort: 8001
+              protocol: TCP
+      volumes:
+        - name: db
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redisinsight-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8001
+  selector:
+    app: redisinsight
