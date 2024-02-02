@@ -118,7 +118,7 @@ spec:
             "--app.name=cbioportal-msk-beta",
             # connecting over dbcp
             "--dbconnector=dbcp",
-            "--authenticate=saml",
+            "--authenticate=saml_plus_basic",
             "--authorization=false",
             "--security.cors.allowed-origins=*",
             "--db.user=$(DB_USER)",
@@ -203,6 +203,19 @@ spec:
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo",
             # compress on client side
             "--enable_request_body_gzip_compression=true",
+            # basic auth
+            "--basic.username=$(BASIC_USERNAME)",
+            "--basic.password=$(BASIC_PASSWORD)",
+            "--basic.authorities=$(BASIC_AUTHORITIES)",
+            # msk whole slide viewer
+            "--msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)",
+            # darwin
+            "--darwin.auth_url=$(DARWIN_AUTH_URL)",
+            "--darwin.response_url=$(DARWIN_RESPONSE_URL)",
+            "--darwin.authority=$(DARWIN_AUTHORITY)",
+            "--ddp.response_url=$(DDP_RESPONSE_URL)",
+            "--cis.user=$(CIS_USER)",
+            "--darwin.regex=$(DARWIN_REGEX)",
             "--server.compression.enabled=true",
             "--server.tomcat.connection-timeout=20000",
             "--server.tomcat.max-http-response-header-size=16384",
