@@ -35,7 +35,10 @@ spec:
             path: local.crt
       - name: cbioportal-frontend-config-volume
         configMap:
-          name: msk-eks-frontend-config
+          name: test-frontend-config
+          items:
+          - key: frontendConfig.json
+            path: frontendConfig.json
       containers:
       - envFrom:
         - configMapRef:
@@ -43,7 +46,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:master-web-shenandoah
+        image: cbioportal/cbioportal:demo-darwin-fix-web-shenandoah
         volumeMounts:
         - name: msk-beta-eks-configmap-volume
           mountPath: /cbioportal/local.key
@@ -52,7 +55,8 @@ spec:
           mountPath: /cbioportal/local.crt
           subPath: local.crt
         - name: cbioportal-frontend-config-volume
-          mountPath: /cbioportal/aaron.json
+          mountPath: /cbioportal/frontendConfig.json
+          subPath: frontendConfig.json
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -97,7 +101,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://deploy-preview-4790--cbioportalfrontend.netlify.app/",
+            "--frontend.url=https://frontend.cbioportal.org/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
             "--about=about_us.html",
@@ -155,7 +159,7 @@ spec:
             "--bitly.url=$(BITLY_URL)",
             "--bitly.access.token=$(BITLY_ACCESS_TOKEN)",
             "--sentry.dsn=$(SENTRY_DSN)",
-            "--frontend.config=/cbioportal/aaron.json",
+            "--frontend.config=/cbioportal/frontendConfig.json",
             "--sentry.factory=org.cbioportal.logging.SentryClientFactory",
             #"-Dsentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "--sitemaps=false",
