@@ -35,7 +35,7 @@ spec:
             path: local.crt
       - name: cbioportal-frontend-config-volume
         configMap:
-          name: test-frontend-config
+          name: msk-eks-frontend-config
           items:
           - key: frontendConfig.json
             path: frontendConfig.json
@@ -46,7 +46,7 @@ spec:
         env:
         - name: PORTAL_HOME
           value: /cbioportal/
-        image: cbioportal/cbioportal:demo-darwin-fix-web-shenandoah
+        image: cbioportal/cbioportal:master-web-shenandoah
         volumeMounts:
         - name: msk-beta-eks-configmap-volume
           mountPath: /cbioportal/local.key
@@ -183,7 +183,7 @@ spec:
             "--spring.autoconfigure.exclude=dontexcludeanythingplz",
             # cache settings (currently redis)
 #            "-Dcache.statistics_endpoint_enabled=false",
-            "--redis.database=3",
+            "--redis.database=4",
             "--persistence.cache_type=redis",
 #            "--redis.leader_address=redis://cbioportal-persistence-redis-master:6379",
 #            "--redis.follower_address=redis://cbioportal-persistence-redis-replicas:6379",
