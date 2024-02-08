@@ -137,7 +137,7 @@ spec:
             "-Ddb.password=$(DB_PASSWORD)",
             #"-Ddb.host=$(DB_HOST)",
             #"-Ddb.portal_db_name=$(DB_PORTAL_DB_NAME)",
-            "-Ddb.connection_string=jdbc:mysql://$(DB_HOST):3306/$(DB_PORTAL_DB_NAME)?zeroDateTimeBehavior=convertToNull&useSSL=false",
+            "-Ddb.connection_string=jdbc:mysql://mskdb-cbioportal-performance.cd0mm8ga6b1h.us-east-1.rds.amazonaws.com:3306/$(DB_PORTAL_DB_NAME)?zeroDateTimeBehavior=convertToNull&useSSL=false",
             "-Ddb.driver=com.mysql.jdbc.Driver",
             "-Ddb.suppress_schema_version_mismatch_errors=true",
             "-Dtomcat.catalina.scope=runtime",
@@ -255,11 +255,11 @@ spec:
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: msk-portals-general-64g
+        eks.amazonaws.com/nodegroup: msk-portals-performance-64g
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "msk-portals-general-64g"
+          value: "msk-portals-performance-64g"
           effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
