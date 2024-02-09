@@ -9,17 +9,17 @@ metadata:
     run: eks-msk
     tags.datadoghq.com/env: eks-msk
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 5.4.5
+    tags.datadoghq.com/version: 5.4.10
   name: eks-msk
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       run: eks-msk
   strategy:
     rollingUpdate:
-      maxUnavailable: 1
+      maxUnavailable: 2
     type: RollingUpdate
   template:
     metadata:
@@ -28,7 +28,7 @@ spec:
         run: eks-msk
         tags.datadoghq.com/env: eks-msk
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 5.4.5
+        tags.datadoghq.com/version: 5.4.10
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
