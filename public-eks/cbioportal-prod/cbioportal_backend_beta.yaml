@@ -164,7 +164,7 @@ spec:
             # handles legacy swagger urls after upgrade
             "--springdoc.swagger-ui.disable-swagger-default-url=true",
             "--springdoc.swagger-ui.path=/api/swagger-ui",
-            "--springdoc.api-docs.path=/api/v2/api-docs",
+            "--springdoc.api-docs.path=/api/v3/api-docs",
 
             # To enable redis session store, we need to set
             # spring.autoconfigure.exclude to a random value to override the
@@ -197,7 +197,7 @@ spec:
             "--server.tomcat.connection-timeout=20000",
             "--server.tomcat.max-http-response-header-size=16384",
             "--server.max-http-request-header-size=16384",
-            "--show.civic=false"
+            "--show.civic=true"
         ]
         imagePullPolicy: Always
         #readinessProbe:

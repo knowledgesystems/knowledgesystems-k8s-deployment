@@ -224,7 +224,7 @@ spec:
 #            ??? can we still set port
 #            "--server.tomcat.port=8888",
             "--server.max-http-request-header-size=16384",
-            "--show.civic=false"
+            "--show.civic=true"
         ]
         imagePullPolicy: Always
         readinessProbe:
