@@ -219,6 +219,10 @@ spec:
             "--darwin.authority=$(DARWIN_AUTHORITY)",
             "--ddp.response_url=$(DDP_RESPONSE_URL)",
             "--cis.user=$(CIS_USER)",
+            # api-legacy/cis/ sample to patient view mapper
+            "--msk_entity_translation_enabled=true",
+            "--patient_view.url=https://beta.cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID",
+            "--sample_view.url=https://beta.cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID",
             "--darwin.regex=$(DARWIN_REGEX)",
             "--server.compression.enabled=true",
             "--server.tomcat.connection-timeout=20000",
