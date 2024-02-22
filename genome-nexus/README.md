@@ -3,17 +3,17 @@
 ```
 kubectl create namespace genome-nexus
 ```
-**Create mongodb**
+**Create MongoDB**
 Set up mongo database initialized with data from [gn-mongo image](https://hub.docker.com/r/genomenexus/gn-mongo/tags/) and run specifically on genome nexus nodes.
 
 If you are using helm v2:
 ```
-helm install --name gn-mongo-v0dot29 --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.29_mutationassessor,persistence.size=100Gi bitnami/mongodb --namespace genome-nexus
+helm install --name gn-mongo-v0dot31 --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.31_mutationassessor,persistence.size=100Gi,nodeSelector."eks\.amazonaws\.com/nodegroup"=eks-genome-nexus-database,tolerations[0].key="dedicated",tolerations[0].operator="Equal",tolerations[0].value="eks-genome-nexus-database",tolerations[0].effect="NoSchedule" bitnami/mongodb --namespace genome-nexus
 ```
 
 If you are using helm v3:
 ```
-helm install gn-mongo-v0dot25 bitnami/mongodb --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.25,persistence.size=100Gi --namespace genome-nexus
+helm install gn-mongo-v0dot31 bitnami/mongodb --version 7.3.1 --set image.repository=genomenexus/gn-mongo,image.tag=0.31_mutationassessor,persistence.size=100Gi,nodeSelector."eks\.amazonaws\.com/nodegroup"=eks-genome-nexus-database,tolerations[0].key="dedicated",tolerations[0].operator="Equal",tolerations[0].value="eks-genome-nexus-database",tolerations[0].effect="NoSchedule" --namespace genome-nexus
 ```
 
 **Troubleshooting**
