@@ -12,6 +12,7 @@ spec:
       - grafana.oncokb.dev.aws.mskcc.org
       - airflow.oncokb.dev.aws.mskcc.org
       - core.oncokb.dev.aws.mskcc.org
+      - germline.oncokb.dev.aws.mskcc.org
   rules:
     - host: "www.oncokb.dev.aws.mskcc.org"
       http:
@@ -53,4 +54,14 @@ spec:
                 name: airflow
                 port:
                   number: 8080
+    - host: "germline.oncokb.dev.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core-germline
+                port:
+                  number: 8888
   ingressClassName: nginx
