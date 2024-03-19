@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public
-        image: zhaogaofei/cbioportal-dev:debug-v6.0.2-web-shenandoah
+        image: cbioportal/cbioportal:6.0.4-web-shenandoah
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -74,6 +74,7 @@ spec:
             "--com.sun.management.jmxremote.authenticate=false",
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
+            # "--logging.level.org.springframework.security=TRACE",
             # /enable remote debug
             "--frontend.url=https://frontend.cbioportal.org/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
