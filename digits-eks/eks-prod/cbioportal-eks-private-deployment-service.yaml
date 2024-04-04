@@ -199,6 +199,16 @@ spec:
             # "--logging.level.org.springframework.security=DEBUG",
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.binding=POST",
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo",
+            # data token setting
+            "--dat.method=oauth2",
+            "--dat.oauth2.clientId=cbioportal-genie-private-api-v6",
+            "--dat.oauth2.clientSecret=$(DAT_OAUTH2_CLIENT_SECRET)",
+            "--dat.oauth2.accessTokenUri=https://keycloak.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/token",
+            "--dat.oauth2.jwkUrl=https://keycloak.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/certs",
+            "--dat.oauth2.issuer=https://keycloak.cbioportal.org/auth/realms/genie-private",
+            "--dat.oauth2.userAuthorizationUri=https://keycloak.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/auth",
+            "--dat.oauth2.redirectUri=https://genie-private.cbioportal.org/api/data-access-token/oauth2",
+            "--dat.oauth2.jwtRolesPath=realm_access::roles",
             # compress on client side
             "--enable_request_body_gzip_compression=true",
             # this addresses same issue as
