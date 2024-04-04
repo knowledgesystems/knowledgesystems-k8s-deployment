@@ -7,6 +7,9 @@ metadata:
   generation: 1
   labels:
     run: eks-msk-beta
+    tags.datadoghq.com/env: eks-msk-beta
+    tags.datadoghq.com/service: cbioportal
+    tags.datadoghq.com/version: 6.0.5
   name: eks-msk-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-beta
 spec:
@@ -23,6 +26,9 @@ spec:
       creationTimestamp: null
       labels:
         run: eks-msk-beta
+        tags.datadoghq.com/env: eks-msk-beta
+        tags.datadoghq.com/service: cbioportal
+        tags.datadoghq.com/version: 6.0.5
     spec:
       volumes:
       - name: msk-beta-eks-configmap-volume
@@ -44,9 +50,13 @@ spec:
         - configMapRef:
             name: msk-beta-eks
         env:
-        - name: PORTAL_HOME
-          value: /cbioportal/
-        image: cbioportal/cbioportal:6.0.2-web-shenandoah
+          - name: PORTAL_HOME
+            value: /cbioportal/
+          - name: DD_PROFILING_ENABLED
+            value: "true"
+          - name: DD_LOGS_INJECTION
+            value: "true"
+        image: cbioportal/cbioportal:6.0.5-web-shenandoah
         volumeMounts:
         - name: msk-beta-eks-configmap-volume
           mountPath: /cbioportal/local.key
@@ -207,6 +217,8 @@ spec:
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo",
             # compress on client side
             "--enable_request_body_gzip_compression=true",
+#            "--logging.level.org.cbioportal.security=TRACE",
+#            "--logging.level.org.springframework.security=TRACE",
             # basic auth
             "--basic.username=$(BASIC_USERNAME)",
             "--basic.password=$(BASIC_PASSWORD)",
@@ -229,24 +241,25 @@ spec:
             "--server.tomcat.max-http-response-header-size=16384",
             "--server.max-http-request-header-size=16384",
             "--server.port=8888",
+            "--filter_groups_by_appname=false",
         ]
         imagePullPolicy: Always
-#        readinessProbe:
-#          httpGet:
-#            path: /api/health
-#            port: 8888
-#          initialDelaySeconds: 45
-#          timeoutSeconds: 1
-#          periodSeconds: 5
-#          failureThreshold: 3
-#        livenessProbe:
-#          httpGet:
-#            path: /api/health
-#            port: 8888
-#          initialDelaySeconds: 180
-#          timeoutSeconds: 1
-#          periodSeconds: 12
-#          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8888
+          initialDelaySeconds: 45
+          timeoutSeconds: 1
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8888
+          initialDelaySeconds: 180
+          timeoutSeconds: 1
+          periodSeconds: 12
+          failureThreshold: 5
         name: eks-msk-beta
         ports:
         - containerPort: 8888
