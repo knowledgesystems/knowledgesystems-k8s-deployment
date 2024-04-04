@@ -42,6 +42,11 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-public6
+        env:
+          - name: DD_PROFILING_ENABLED
+            value: "true"
+          - name: DD_LOGS_INJECTION
+            value: "true"
         image: cbioportal/cbioportal:6.0.5-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
