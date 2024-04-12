@@ -13,7 +13,7 @@ metadata:
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
-  replicas: 5
+  replicas: 3
   selector:
     matchLabels:
       run: cbioportal-spring-boot
@@ -264,11 +264,11 @@ spec:
         terminationMessagePolicy: File
       # run on eks-public-cbioportal node group
       nodeSelector:
-        eks.amazonaws.com/nodegroup: cbioportal-workshop-traffic
+        eks.amazonaws.com/nodegroup: eks-public-cbioportal
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "eks-workshop-traffic"
+          value: "eks-public-cbioportal"
           effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
