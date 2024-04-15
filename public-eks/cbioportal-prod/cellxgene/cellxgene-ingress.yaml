@@ -5,7 +5,6 @@ metadata:
     # add an annotation indicating the issuer to use.
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/app-root: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
@@ -17,7 +16,7 @@ metadata:
     ingress.kubernetes.io/proxy-read-timeout: "300"
     ingress.kubernetes.io/proxy-send-timeout: "300"
     # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
-    # increae max response size to avoid 413 errors see
+    # increase max response size to avoid 413 errors see
     # https://github.com/kubernetes/ingress-nginx/issues/1824
     nginx.ingress.kubernetes.io/proxy-body-size: 512m
     ingress.kubernetes.io/proxy-body-size: 512m
@@ -25,6 +24,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
   name: cellxgene-ingress
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - cellxgene.cbioportal.org
@@ -34,24 +34,10 @@ spec:
       http:
         paths:
           - path: /pbmc3k(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: cellxgene-service-1
-                port:
-                  number: 8080
-          - path: /scRNA_rds_Ovarian_Malignant_cluster_object(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: cellxgene-service-2
-                port:
-                  number: 8080
-          - path: /scRNA_rds_Ovarian_nonMalignant_cluster_object(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: cellxgene-service-3
                 port:
                   number: 8080
 ---
@@ -62,7 +48,98 @@ metadata:
     # add an annotation indicating the issuer to use.
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/app-root: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # increase max response size to avoid 413 errors see
+    # https://github.com/kubernetes/ingress-nginx/issues/1824
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+
+    # type of authentication
+    nginx.ingress.kubernetes.io/auth-type: basic
+    # name of the secret that contains the user/password definitions
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    # message to display with an appropriate context why the authentication is required
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
+  name: cellxgene-ingress-with-auth
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - cellxgene.cbioportal.org
+      secretName: cellxgene-cert
+  rules:
+    - host: cellxgene.cbioportal.org
+      http:
+        paths:
+          - path: /scRNA_rds_Ovarian_Malignant_cluster_object(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-2
+                port:
+                  number: 8080
+          - path: /scRNA_rds_Ovarian_nonMalignant_cluster_object(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-3
+                port:
+                  number: 8080
+          - path: /Q3_norm_all_batch_reduced_meta_1(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-4
+                port:
+                  number: 8080
+          - path: /BTC_GBM_001(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-5
+                port:
+                  number: 8080
+          - path: /BTC_GBM_002(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-6
+                port:
+                  number: 8080
+          - path: /BTC_GBM_003(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-7
+                port:
+                  number: 8080
+          - path: /gbm_filtered_processing2(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-8
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    # add an annotation indicating the issuer to use.
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/app-root: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
@@ -82,6 +159,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
   name: cellxgene-ingress-static-route
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - cellxgene.cbioportal.org
@@ -91,7 +169,7 @@ spec:
       http:
         paths:
           - path: /static(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: cellxgene-service-1
