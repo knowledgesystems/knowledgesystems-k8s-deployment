@@ -83,8 +83,13 @@ pods
 kubectl apply -f cellxgene-deployment.yaml -n cellxgene
 kubectl apply -f cellxgene-ingress.yaml -n cellxgene
 ```
+### Adding basic auth
+[basic-auth][4]
+
 
 [1]: https://github.com/chanzuckerberg/cellxgene
 [2]: https://github.com/hweej/single-cell-tools/tree/main/cellxgene
 [3]: https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
+[4]: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
+
 
