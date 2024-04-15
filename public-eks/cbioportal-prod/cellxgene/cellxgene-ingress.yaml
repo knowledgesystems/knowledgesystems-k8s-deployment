@@ -125,6 +125,13 @@ spec:
                 name: cellxgene-service-7
                 port:
                   number: 8080
+          - path: /gbm_filtered_processing2(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-8
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
