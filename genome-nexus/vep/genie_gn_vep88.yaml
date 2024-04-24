@@ -79,7 +79,7 @@ spec:
       volumes:
       - name: vep-data
         persistentVolumeClaim:
-          claimName: genie-vep-pvclaim
+          claimName: gn-vep88-pvclaim
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
