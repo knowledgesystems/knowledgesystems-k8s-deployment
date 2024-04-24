@@ -6,15 +6,15 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: genie-gn-vep
-  name: genie-gn-vep
+    run: gn-vep88-vep
+  name: gn-vep88-vep
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/genie-gn-vep
+  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-vep88-vep
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: genie-gn-vep
+      run: gn-vep88-vep
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -24,7 +24,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: genie-gn-vep
+        run: gn-vep88-vep
     spec:
       containers:
       - env:
@@ -50,7 +50,7 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 60
           periodSeconds: 30
-        name: genie-gn-vep
+        name: gn-vep88-vep
         ports:
         - containerPort: 8888
           protocol: TCP
@@ -59,11 +59,11 @@ spec:
         terminationMessagePolicy: File
       # run on genome nexus machines
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genome-nexus
+        eks.amazonaws.com/nodegroup: eks-genome-nexus-vep
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "eks-genome-nexus"
+          value: "eks-genome-nexus-vep"
           effect: "NoSchedule"
       # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
@@ -91,11 +91,11 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: genie-gn-vep
-    app: genie-gn-vep
-  name: genie-gn-vep
+    run: gn-vep88-vep
+    app: gn-vep88-vep
+  name: gn-vep88-vep
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/genie-gn-vep
+  selfLink: /api/v1/namespaces/genome-nexus/services/gn-vep88-vep
 spec:
   ports:
   - port: 80
@@ -105,5 +105,5 @@ spec:
     name: https
     targetPort: 8888
   selector:
-    run: genie-gn-vep
+    run: gn-vep88-vep
   type: ClusterIP
