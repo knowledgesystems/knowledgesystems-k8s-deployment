@@ -6,15 +6,15 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: genome-nexus-genie
-  name: genome-nexus-genie
+    run: gn-vep88
+  name: gn-vep88
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/genome-nexus-genie
+  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-vep88
 spec:
   replicas: 2
   selector:
     matchLabels:
-      run: genome-nexus-genie
+      run: gn-vep88
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -24,7 +24,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: genome-nexus-genie
+        run: gn-vep88
     spec:
       containers:
       - env:
@@ -67,7 +67,7 @@ spec:
           initialDelaySeconds: 240
           timeoutSeconds: 120
           periodSeconds: 240
-        name: genome-nexus-genie
+        name: gn-vep88
         ports:
         - containerPort: 8888
           protocol: TCP
@@ -82,10 +82,10 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "eks-genome-nexus"
+          value: "eks-genome-nexus-vep"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genome-nexus
+        eks.amazonaws.com/nodegroup: eks-genome-nexus-vep
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -97,11 +97,11 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: genome-nexus-genie
-    app: genome-nexus-genie
-  name: genome-nexus-genie
+    run: gn-vep88
+    app: gn-vep88
+  name: gn-vep88
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/genome-nexus-genie
+  selfLink: /api/v1/namespaces/genome-nexus/services/gn-vep88
 spec:
   ports:
   - port: 80
@@ -111,5 +111,5 @@ spec:
     name: https
     targetPort: 8888
   selector:
-    run: genome-nexus-genie
+    run: gn-vep88
   type: ClusterIP
