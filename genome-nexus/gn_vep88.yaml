@@ -31,7 +31,7 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-vep88-mongo:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-vep88-mongo-mongodb:27017/annotator?connectTimeoutMS=120000
         image: genomenexus/gn-spring-boot:1.3.1
         imagePullPolicy: Always
         command: [ "java" ]
