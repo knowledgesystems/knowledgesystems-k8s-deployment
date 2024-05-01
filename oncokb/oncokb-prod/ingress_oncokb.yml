@@ -178,7 +178,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: oncokb-keycloak-http
+              name: oncokb-keycloak-code-http
               port:
                 name: http
   - host: airflow.oncokb.org
