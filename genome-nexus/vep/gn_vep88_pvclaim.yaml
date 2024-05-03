@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: genie-vep-pvclaim
+  name: gn-vep88-pvclaim
   namespace: genome-nexus
 spec:
   accessModes:

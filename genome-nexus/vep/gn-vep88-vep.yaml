@@ -6,15 +6,15 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    run: genie-gn-vep
-  name: genie-gn-vep
+    run: gn-vep88-vep
+  name: gn-vep88-vep
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/genie-gn-vep
+  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-vep88-vep
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: genie-gn-vep
+      run: gn-vep88-vep
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -24,13 +24,13 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: genie-gn-vep
+        run: gn-vep88-vep
     spec:
       containers:
       - env:
         - name: SERVER_PORT
           value: "8888"
-        image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
+        image: genomenexus/gn-vep:vep88
         imagePullPolicy: Always
         volumeMounts:
         - name: vep-data
@@ -50,7 +50,7 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 60
           periodSeconds: 30
-        name: genie-gn-vep
+        name: gn-vep88-vep
         ports:
         - containerPort: 8888
           protocol: TCP
@@ -59,11 +59,11 @@ spec:
         terminationMessagePolicy: File
       # run on genome nexus machines
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genome-nexus
+        eks.amazonaws.com/nodegroup: eks-genome-nexus-vep
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "eks-genome-nexus"
+          value: "eks-genome-nexus-vep"
           effect: "NoSchedule"
       # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
@@ -71,7 +71,7 @@ spec:
       - name: download-vep-cache
         image: busybox:1.30.0
         command: ['sh', '-c',
-            'cd /vep_data; if [ -d "cache" ]; then cd cache; if [ -f homo_sapiens/98_GRCh37/LRG_7/all_vars.gz.csi ]; then exit 0; fi; fi; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://genome-nexus-vep-data-01.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://genome-nexus-vep-data-01.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_98_GRCh37.tar'
+            'cd /vep_data; if [ -d "cache" ]; then cd cache; if [ -f homo_sapiens/88_GRCh37/LRG_7/all_vars.gz.csi ]; then exit 0; fi; fi; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://genome-nexus-vep-data-01.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://genome-nexus-vep-data-01.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_88_GRCh37.tar'
         ]
         volumeMounts:
         - name: vep-data
@@ -79,7 +79,7 @@ spec:
       volumes:
       - name: vep-data
         persistentVolumeClaim:
-          claimName: genie-vep-pvclaim
+          claimName: gn-vep88-pvclaim
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -91,11 +91,11 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: genie-gn-vep
-    app: genie-gn-vep
-  name: genie-gn-vep
+    run: gn-vep88-vep
+    app: gn-vep88-vep
+  name: gn-vep88-vep
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/genie-gn-vep
+  selfLink: /api/v1/namespaces/genome-nexus/services/gn-vep88-vep
 spec:
   ports:
   - port: 80
@@ -105,5 +105,5 @@ spec:
     name: https
     targetPort: 8888
   selector:
-    run: genie-gn-vep
+    run: gn-vep88-vep
   type: ClusterIP
