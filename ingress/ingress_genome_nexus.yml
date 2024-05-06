@@ -25,25 +25,14 @@ spec:
   tls:
   - hosts:
     - www.genomenexus.org
-    secretName: gn-public-cert
-  - hosts:
     - v2.genomenexus.org
-    secretName: gn-v2-cert
-  - hosts:
     - v1.genomenexus.org
-    secretName: gn-v1-cert
-  - hosts:
     - beta.genomenexus.org
-    secretName: gn-beta-cert
-  - hosts:  
     - grch38.genomenexus.org
-    secretName: gn-grch38-cert
-  - hosts:
     - genie.genomenexus.org
-    secretName: gn-genie-cert
-  - hosts:
     - annotation.genomenexus.org
-    secretName: gn-annotation-cert
+    - vep88.genomenexus.org
+    secretName: genome-nexus-cert
   rules:
   - host: www.genomenexus.org
     http:
@@ -113,5 +102,15 @@ spec:
           backend:
             service:
               name: genome-nexus-gnap
+              port:
+                number: 80
+  - host: vep88.genomenexus.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: gn-vep88
               port:
                 number: 80
