@@ -9,7 +9,7 @@ metadata:
     run: cbioportal-backend-genie-public
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.5
+    tags.datadoghq.com/version: 6.0.6
   name: cbioportal-backend-genie-public
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-public
 spec:
@@ -29,7 +29,7 @@ spec:
         run: cbioportal-backend-genie-public
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.5
+        tags.datadoghq.com/version: 6.0.6
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -43,7 +43,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.5-web-shenandoah
+        image: cbioportal/cbioportal:6.0.6-web-shenandoah
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -90,7 +90,7 @@ spec:
             "--java.rmi.server.hostname=localhost",
             # "--logging.level.org.springframework.security=TRACE",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+#            "--frontend.url=https://frontend.cbioportal.org/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=false",
             "--skin.footer= | <a href=\"https://www.aacr.org/professionals/research/aacr-project-genie\">AACR Project GENIE</a>",

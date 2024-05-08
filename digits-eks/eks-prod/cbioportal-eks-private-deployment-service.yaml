@@ -9,7 +9,7 @@ metadata:
     run: eks-private
     tags.datadoghq.com/env: eks-private
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.5
+    tags.datadoghq.com/version: 6.0.6
   name: eks-private
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-private
 spec:
@@ -28,7 +28,7 @@ spec:
         run: eks-private
         tags.datadoghq.com/env: eks-private
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.5
+        tags.datadoghq.com/version: 6.0.6
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -53,7 +53,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.5-web-shenandoah
+        image: cbioportal/cbioportal:6.0.6-web-shenandoah
         volumeMounts:
           - name: private-eks-configmap-volume
             mountPath: /cbioportal/local.key
@@ -108,7 +108,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+#           # "--frontend.url=https://frontend.cbioportal.org/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
             "--skin.footer=",
@@ -118,7 +118,7 @@ spec:
             "--skin.patientview.filter_genes_profiled_all_samples=false",
             "--installation_map_url=https://installationmap.netlify.app/",
             "--app.name=eks-private",
-            "--filter_groups_by_appname=false"
+            "--filter_groups_by_appname=false",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             # connecting over dbcp
             "--dbconnector=dbcp",

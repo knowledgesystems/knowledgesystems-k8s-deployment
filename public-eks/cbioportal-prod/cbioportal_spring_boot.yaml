@@ -9,7 +9,7 @@ metadata:
     run: cbioportal-spring-boot
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.5
+    tags.datadoghq.com/version: 6.0.6
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
@@ -29,7 +29,7 @@ spec:
         run: cbioportal-spring-boot
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.5
+        tags.datadoghq.com/version: 6.0.6
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -47,7 +47,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.5-web-shenandoah
+        image: cbioportal/cbioportal:6.0.6-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -94,7 +94,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+#            "--frontend.url=https://frontend.cbioportal.org/",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
