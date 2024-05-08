@@ -9,7 +9,7 @@ metadata:
     run: eks-triage
     tags.datadoghq.com/env: eks-triage
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.5
+    tags.datadoghq.com/version: 6.0.6
   name: eks-triage
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-triage
 spec:
@@ -28,7 +28,7 @@ spec:
         run: eks-triage
         tags.datadoghq.com/env: eks-triage
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.5
+        tags.datadoghq.com/version: 6.0.6
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -53,7 +53,7 @@ spec:
           value: "true"
         - name: DD_LOGS_INJECTION
           value: "true"
-        image: cbioportal/cbioportal:6.0.5-web-shenandoah
+        image: cbioportal/cbioportal:6.0.6-web-shenandoah
         volumeMounts:
         - name: triage-eks-configmap-volume
           mountPath: /cbioportal/local.key
@@ -108,7 +108,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+#            "--frontend.url=https://frontend.cbioportal.org/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
             "--default_cross_cancer_study_list=mskimpact",
@@ -201,10 +201,20 @@ spec:
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=triage-v6",
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt",
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key",
-            "--logging.level.root=DEBUG",
+            # "--logging.level.root=DEBUG",
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.binding=POST",
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo",
-            # compress on client side
+            # Data token settings
+            "--dat.method=oauth2",
+            "--dat.oauth2.clientId=triage-api-v6",
+            "--dat.oauth2.clientSecret=$(DAT_OAUTH2_CLIENT_SECRET)",
+            "--dat.oauth2.accessTokenUri=https://keycloak.cbioportal.mskcc.org/auth/realms/triage/protocol/openid-connect/token",
+            "--dat.oauth2.jwkUrl=https://keycloak.cbioportal.mskcc.org/auth/realms/triage/protocol/openid-connect/certs",
+            "--dat.oauth2.issuer=https://keycloak.cbioportal.mskcc.org/auth/realms/triage",
+            "--dat.oauth2.userAuthorizationUri=https://keycloak.cbioportal.mskcc.org/auth/realms/triage/protocol/openid-connect/auth",
+            "--dat.oauth2.redirectUri=https://triage.cbioportal.mskcc.org/api/data-access-token/oauth2",
+            "--dat.oauth2.jwtRolesPath=realm_access::roles",
+                # compress on client side
             "--enable_request_body_gzip_compression=true",
             # msk whole slide viewer
             "--msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)",
