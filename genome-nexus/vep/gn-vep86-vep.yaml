@@ -71,7 +71,7 @@ spec:
       - name: download-vep-cache
         image: busybox:1.30.0
         command: ['sh', '-c',
-            'cd /vep_data; if [ -d "cache" ]; then cd cache; if [ -f homo_sapiens/88_GRCh37/LRG_7/all_vars.gz.csi ]; then exit 0; fi; fi; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://genome-nexus-vep-data-01.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://genome-nexus-vep-data-01.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_88_GRCh37.tar'
+            'cd /vep_data; if [ -d "cache" ]; then cd cache; if [ -f homo_sapiens/86_GRCh37/LRG_7/all_vars.gz.csi ]; then exit 0; fi; fi; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://genome-nexus-vep86-data.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://genome-nexus-vep86-data.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_86_GRCh37.tar'
         ]
         volumeMounts:
         - name: vep-data
