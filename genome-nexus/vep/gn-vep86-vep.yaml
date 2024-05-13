@@ -30,7 +30,7 @@ spec:
       - env:
         - name: SERVER_PORT
           value: "8888"
-        image: genomenexus/gn-vep:vep88
+        image: genomenexus/gn-vep:vep86
         imagePullPolicy: Always
         volumeMounts:
         - name: vep-data
