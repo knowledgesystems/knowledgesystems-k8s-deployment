@@ -82,7 +82,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-#            "--frontend.url=https://deploy-preview-4786--cbioportalfrontend.netlify.app/",
+            "--frontend.url=https://frontend.cbioportal.org/",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
