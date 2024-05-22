@@ -132,6 +132,41 @@ spec:
                 name: cellxgene-service-8
                 port:
                   number: 8080
+          - path: /pilot_sharmalab_processed_scrna_MDA_with_inhibitor_filtered_feature_bc_matrix_prepared(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-9
+                port:
+                  number: 8080
+          - path: /pilot_sharmalab_processed_scrna_MDA_without_inhibitor_filtered_feature_bc_matrix_prepared(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-10
+                port:
+                  number: 8080
+          - path: /pilot_sharmalab_processed_scrna_MSK_no_inhibitor_filtered_feature_bc_matrix_prepared(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-11
+                port:
+                  number: 8080
+          - path: /pilot_sharmalab_processed_scrna_MSK_with_inhibitor_filtered_feature_bc_matrix_prepared(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-12
+                port:
+                  number: 8080
+          - path: /trial1a_sharma_lab_scrna_DFCI1_BTC-GBM-001-003-GEX_filtered_feature_bc_matrix_prepared(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-13
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
