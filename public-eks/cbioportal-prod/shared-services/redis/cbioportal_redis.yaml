@@ -1,29 +1,14 @@
+architecture: standalone
 master:
   extraFlags:
-  - --maxmemory 8gb
-  - --maxmemory-policy volatile-ttl
+    - --maxmemory 8gb
+    - --maxmemory-policy volatile-ttl
   nodeSelector:
     eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
-  tolerations:
-    - key: "dedicated"
-      operator: "Equal"
-      value: "eks-cbioportal-mission-critical"
-      effect: "NoSchedule"
   persistence:
     enabled: false
-  count: 2
-  disableCommands: []
-replica:
-  extraFlags:
-  - --maxmemory 8gb
-  - --maxmemory-policy volatile-ttl
-  nodeSelector:
-    eks.amazonaws.com/nodegroup: eks-cbioportal-mission-critical
   tolerations:
-    - key: "dedicated"
-      operator: "Equal"
-      value: "eks-cbioportal-mission-critical"
-      effect: "NoSchedule"
-  persistence:
-    enabled: false
-  disableCommands: []
+    - effect: NoSchedule
+      key: dedicated
+      operator: Equal
+      value: eks-cbioportal-mission-critical
