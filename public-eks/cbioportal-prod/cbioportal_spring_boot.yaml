@@ -47,7 +47,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.6-web-shenandoah
+        image: cbioportal/cbioportal:6.0.8-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -179,11 +179,6 @@ spec:
             # spring.autoconfigure.exclude to a random value to override the
             # property in applications.properties.EXAMPLE
             "--spring.autoconfigure.exclude=dontexcludeanythingplz",
-
-            # handles legacy swagger urls after upgrade
-            "--springdoc.swagger-ui.disable-swagger-default-url=true",
-            "--springdoc.swagger-ui.path=/api/swagger-ui",
-            "--springdoc.api-docs.path=/api/v3/api-docs",
 
             # redis cache settings (currently redis)
             #"--cache.statistics_endpoint_enabled=false",
