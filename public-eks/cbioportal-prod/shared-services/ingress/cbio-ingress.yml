@@ -41,12 +41,18 @@ spec:
   - hosts:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
-#  - hosts:
-#      - keycloak.cbioportal.org
-#    secretName: keycloak-cert
+  - hosts:
+      - keycloak.cbioportal.org
+    secretName: keycloak-cert
   - hosts:
       - genie-public-beta.cbioportal.org
     secretName: cbioportal-genie-public-beta-cert
+  - hosts:
+      - crdc.cbioportal.org
+    secretName: cbioportal-crdc-cert
+  - hosts:
+      - genie-public-beta1.cbioportal.org
+    secretName: cbioportal-genie-public-beta1-cert
   - hosts:
       - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
@@ -55,16 +61,16 @@ spec:
 #      - session-service-beta.cbioportal.org
 #    secretName: cbioportal-session-service-cert
   rules:
-#  - host: keycloak.cbioportal.org
-#    http:
-#      paths:
-#        - path: /
-#          pathType: Prefix
-#          backend:
-#            service:
-#              name: keycloak-http
-#              port:
-#                number: 80
+  - host: keycloak.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal-keycloak-http
+              port:
+                number: 80
 #  - host: webinar.cbioportal.org
 #    http:
 #      paths:
@@ -85,6 +91,16 @@ spec:
             name: cbioportal-backend-genie-public-beta
             port:
               number: 80
+  - host: genie-public-beta1.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal-backend-genie-public-beta
+              port:
+                number: 80
   - host: genie.cbioportal.org
     http:
       paths:
@@ -143,6 +159,16 @@ spec:
           backend:
             service:
               name: cbioportal-session-service
+              port:
+                number: 80
+  - host: crdc.cbioportal.org
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: cbioportal-backend-nci
               port:
                 number: 80
 
