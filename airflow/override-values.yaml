@@ -24,7 +24,7 @@ config:
 images:
   airflow:
     repository: jamesko/airflow
-    tag: "0.2"
+    tag: "0.5"
     pullPolicy: Always
   #pod_template:
   #  repository: jamesko/airflow-init
