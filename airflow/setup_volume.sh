@@ -93,6 +93,9 @@ build_gnap() {
     git config --global --add safe.directory "$repo_path"
 
     echo "Building GNAP"
+    echo "JAVA_HOME: $JAVA_HOME"
+    echo "Java version:" # should be 21
+    java -version
     (   # Executed in a subshell to avoid changing the actual working directory
         # If any statement fails, the return value of the entire expression is the failure status
         cd $repo_path &&

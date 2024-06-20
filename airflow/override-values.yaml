@@ -24,7 +24,7 @@ config:
 images:
   airflow:
     repository: jamesko/airflow
-    tag: "0.5"
+    tag: "0.6"
     pullPolicy: Always
   #pod_template:
   #  repository: jamesko/airflow-init
@@ -135,7 +135,7 @@ workers:
       #command: ["chmod", "-R", "g+w", "/opt/airflow/git_repos"]
       command: ["sh", "-c", "chmod g+w /opt/airflow/git_repos"]
     - name: setup-volume-data
-      image: jamesko/airflow-init:0.2
+      image: jamesko/airflow:0.6
       securityContext:
         runAsUser: 0
       volumeMounts:
