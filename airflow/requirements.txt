@@ -1,3 +1,4 @@
+# TODO this should be managed by the pipeline rather than the deployment
 requests==2.31.0
 google-auth==2.21.0
 google-cloud-bigquery==3.11.3

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# After making changes to this file, please run
+# airflow create cm airflow-volume-setup --from-file=scripts/setup_volume.sh
+# to deploy the changes.
+
 repo_dir="/opt/airflow/git_repos"
 
 clone_repo() {
