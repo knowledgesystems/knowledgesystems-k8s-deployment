@@ -29,7 +29,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-genie-public-beta
-        image: cbioportal/cbioportal:6.0.2-web-shenandoah
+        image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -75,7 +75,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://master--cbioportalfrontend.netlify.app/",
+            "--frontend.url=https://deploy-preview-4931--cbioportalfrontend.netlify.app/",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
@@ -90,7 +90,7 @@ spec:
             "--skin.authorization_message=Welcome to the AACR Project GENIE cBioPortal.<br/><br/>If you are a new user, you will need to register and agree to the terms of use before you can use this portal. [<a href=\"https://docs.google.com/forms/d/e/1FAIpQLScwlJ9WRmAGZ08CCg8wYo8l8bcUmsAzJ09i1MKjBNtb_dLqIw/viewform\">First time user registration</a>].",
             "--app.name=genie-public-portal",
             "--dbconnector=dbcp",
-            "--authenticate=oauth2",
+            "--authenticate=false",
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "--spring.security.oauth2.client.provider.google.user-name-attribute=email",
@@ -105,9 +105,6 @@ spec:
             "--spring.datasource.password=$(DB_PASSWORD)",
             "--tomcat.catalina.scope=runtime",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
-            #"--db.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-            #"--db.clickhouse.user=$(DB_CLICKHOUSE_USER)",
-            #"--db.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--show.transcript_dropdown=true",
             "--skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
             "--skin.email_contact=cbioportal@googlegroups.com",
@@ -142,7 +139,6 @@ spec:
             "--genomenexus.isoform_override_source=uniprot",
             "--show.genomenexus.annotation_sources=mutation_assessor",
             "--dat.unauth_users=anonymousUser",
-            "--dat.method=uuid",
             "--dat.uuid.max_number_per_user=1",
             "--dat.ttl_seconds=2592000",
             "--dat.uuid.revoke_other_tokens=true",
@@ -153,6 +149,16 @@ spec:
             "--spring.data.redis.host=$(REDIS_SESSION_HOST)",
             "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
             "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
+            "--dat.method=none",
+            "--spring.datasource.mysql.url=jdbc:mysql://rfc80db.cbioportal.org:3306/db_2024_05_23_original?zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true",
+            "--spring.datasource.mysql.username=cgds_user",
+            "--spring.datasource.mysql.password=rfc80dbuserpw5",
+            "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
+            "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            "--spring.datasource.clickhouse.url=jdbc:ch://mecgt250i0.us-east-1.aws.clickhouse.cloud:8443/sling_db_2024_05_23_original?ssl=true&sslmode=STRICT",
+            "--spring.datasource.clickhouse.username=app_user",
+            "--spring.datasource.clickhouse.password=P@ssword1976",
+
             # To enable redis session store, we need to set
             # spring.autoconfigure.exclude to a random value to override the
             # property in applications.properties.EXAMPLE
@@ -163,7 +169,7 @@ spec:
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379",
-            "--redis.database=9",
+            "--redis.database=5",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             "--redis.clear_on_startup=false",
             # misc frontend settings (this is NOT for backend persistence layer caching)
