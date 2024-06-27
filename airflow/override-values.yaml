@@ -6,6 +6,12 @@ nodeSelector:
 executor: KubernetesExecutor
 
 config:
+  smtp:
+    smtp_host: smtp.gmail.com
+    smtp_starttls: True
+    smtp_ssl: False
+    smtp_port: 587
+    smtp_mail_from: cbioportalpipelines@gmail.com
   core:
     # This changed in newer versions of Airflow
     # Compare: https://airflow.apache.org/docs/apache-airflow/2.7.1/configurations-ref.html#core
