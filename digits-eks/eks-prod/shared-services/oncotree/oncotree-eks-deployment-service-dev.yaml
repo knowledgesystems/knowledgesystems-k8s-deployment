@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "4"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    run: eks-dev-oncotree
+  name: eks-dev-oncotree
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-dev-oncotree
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: eks-dev-oncotree
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: eks-dev-oncotree
+    spec:
+      volumes:
+      - name: oncotree-dev-ssl-volume
+        configMap:
+          name: oncotree-dev-ssl-graphite
+          defaultMode: 0600
+          items:
+          - key: oncotree_graphite_private_key_ecdsa1
+            path: graphite-ssl-key
+      - name: oncotree-cache
+        persistentVolumeClaim:
+          claimName: oncotree-dev-pvc
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: oncotree-eks-graphite
+        image: mandaewilson/oncotree:move-to-graphite
+        command: ["/bin/sh", "-c"]
+        args: ["autossh -i /oncotree-ssl/graphite-ssl-key -M 0 -N -L 127.0.0.1:8443:msk-preprod3-priv.synaptica.net:443 -L 127.0.0.1:7200:msk-preprod3-priv.synaptica.net:7200 res_msk_cbioportal@msk-jump.synaptica.net & java -Dspringfox.documentation.swagger.v2.path=/api-docs -Dserver.port=8080 -Dgraphite.url=http://localhost:7200/repositories/graphite -Dgraphite.username=$(GRAPHITE_USERNAME) -Dgraphite.password=$(GRAPHITE_PASSWORD) -Dgraphite.oncotree_namespace_prefix=http://data.mskcc.org/ontologies/oncotree# -Dgraphite.oncotree_version_namespace_prefix=http://data.mskcc.org/ontologies/oncotree-version# -Dgraphite.oncotree_version_list_graph_id=https://preprod3.msk.synaptica.net/concept_scheme/3bb2d189-54c5-7cf7-e44b-e44a727611e6 -Dslack.url=$(SLACK_URL) -Dslack.channel=msk-pipeline-logs -Drequired.oncotree.version=oncotree_latest_stable -jar oncotree.jar"]
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 1
+          failureThreshold: 5
+        name: oncotree
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - mountPath: "/data/ehcache/"
+          name: oncotree-cache
+        - name: oncotree-dev-ssl-volume
+          mountPath: "/oncotree-ssl/graphite-ssl-key"
+          subPath: graphite-ssl-key
+        resources:
+          requests:
+              cpu: 100m
+              memory: 1Gi
+          limits:
+              memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: essential-services
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: eks-dev-oncotree
+  name: eks-dev-oncotree
+  selfLink: /api/v1/namespaces/default/services/eks-dev-oncotree
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
+  selector:
+    run: eks-dev-oncotree
+  type: ClusterIP
