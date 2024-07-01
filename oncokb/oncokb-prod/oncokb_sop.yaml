@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - env:
-          image: oncokb/oncokb-sop:4.0.0
+          image: oncokb/oncokb-sop:4.1.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
