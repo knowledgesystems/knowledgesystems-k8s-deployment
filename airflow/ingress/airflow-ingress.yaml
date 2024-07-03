@@ -1,45 +1,45 @@
-apiVersion: v1
-items:
-- apiVersion: networking.k8s.io/v1
-  kind: Ingress
-  metadata:
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-      ingress.kubernetes.io/proxy-body-size: 512m
-      ingress.kubernetes.io/proxy-connect-timeout: "300"
-      ingress.kubernetes.io/proxy-read-timeout: "300"
-      ingress.kubernetes.io/proxy-send-timeout: "300"
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","ingress.kubernetes.io/proxy-body-size":"512m","ingress.kubernetes.io/proxy-connect-timeout":"300","ingress.kubernetes.io/proxy-read-timeout":"300","ingress.kubernetes.io/proxy-send-timeout":"300","kubernetes.io/ingress.class":"nginx","kubernetes.io/tls-acme":"true","nginx.ingress.kubernetes.io/proxy-body-size":"512m","nginx.ingress.kubernetes.io/proxy-connect-timeout":"300","nginx.ingress.kubernetes.io/proxy-read-timeout":"300","nginx.ingress.kubernetes.io/proxy-send-timeout":"300","nginx.ingress.kubernetes.io/ssl-redirect":"false","service.beta.kubernetes.io/aws-load-balancer-proxy-protocol":"*"},"creationTimestamp":"2023-12-14T20:44:52Z","name":"cbioportal-ingress","namespace":"airflow"},"spec":{"rules":[{"host":"airflow.cbioportal.dev.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"airflow-webserver","port":{"number":8080}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["airflow.cbioportal.dev.aws.mskcc.org"],"secretName":"geniepublic-cbio-cert"}]},"status":{"loadBalancer":{"ingress":[{"hostname":"internal-ac9ca14a6e0544d08bc9ae4a590a0439-359163936.us-east-1.elb.amazonaws.com"}]}}}
-      kubernetes.io/ingress.class: nginx
-      kubernetes.io/tls-acme: "true"
-      nginx.ingress.kubernetes.io/proxy-body-size: 512m
-      nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-    generation: 2
-    name: cbioportal-ingress-airflow
-    namespace: airflow 
-  spec:
-    rules:
-    - host: airflow.cbioportal.dev.aws.mskcc.org
-      http:
-        paths:
-        - backend:
-            service:
-              name: airflow-webserver
-              port:
-                number: 8080
-          path: /
-          pathType: Prefix
-    tls:
-    - hosts:
-      - airflow.cbioportal.dev.aws.mskcc.org
-      secretName: airflow-cbio-cert
-  status:
-    loadBalancer:
-      ingress:
-      - hostname: internal-ac9ca14a6e0544d08bc9ae4a590a0439-359163936.us-east-1.elb.amazonaws.com
-kind: List
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","ingress.kubernetes.io/proxy-body-size":"512m","ingress.kubernetes.io/proxy-connect-timeout":"300","ingress.kubernetes.io/proxy-read-timeout":"300","ingress.kubernetes.io/proxy-send-timeout":"300","kubernetes.io/ingress.class":"nginx","kubernetes.io/tls-acme":"true","nginx.ingress.kubernetes.io/proxy-body-size":"512m","nginx.ingress.kubernetes.io/proxy-connect-timeout":"300","nginx.ingress.kubernetes.io/proxy-read-timeout":"300","nginx.ingress.kubernetes.io/proxy-send-timeout":"300","nginx.ingress.kubernetes.io/ssl-redirect":"false","service.beta.kubernetes.io/aws-load-balancer-proxy-protocol":"*"},"generation":1,"name":"cbioportal-ingress-airflow","namespace":"airflow"},"spec":{"rules":[{"host":"airflow.cbioportal.dev.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"airflow-webserver","port":{"number":8080}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["airflow.cbioportal.dev.aws.mskcc.org"],"secretName":"airflow-cbio-cert"}]},"status":{"loadBalancer":{"ingress":[{"hostname":"internal-ac9ca14a6e0544d08bc9ae4a590a0439-359163936.us-east-1.elb.amazonaws.com"}]}}}
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+  creationTimestamp: "2024-03-15T18:27:01Z"
+  generation: 1
+  name: cbioportal-ingress-airflow
+  namespace: airflow
+  resourceVersion: "30777611"
+  uid: bfc852d7-1777-4954-9c21-33553a33aee4
+spec:
+  rules:
+  - host: airflow.cbioportal.dev.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: airflow-webserver
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - airflow.cbioportal.dev.aws.mskcc.org
+    secretName: airflow-cbio-cert
+status:
+  loadBalancer:
+    ingress:
+    - hostname: internal-ac9ca14a6e0544d08bc9ae4a590a0439-359163936.us-east-1.elb.amazonaws.com
