@@ -73,6 +73,9 @@ scheduler:
     #- name: pod-template
     #  mountPath: /opt/airflow/pod-template.yaml
     #  subPath: pod_template_file.yaml
+    - name: cdm-setup
+      mountPath: /opt/airflow/scripts
+      readOnly: true
 
   extraVolumes:
     - name: pv
@@ -81,6 +84,10 @@ scheduler:
     #- name: pod-template
     #  configMap:
     #    name: airflow-config
+    - name: cdm-setup
+      configMap:
+        name: airflow-cdm-setup
+        subPath: cdm-setup
   
     # Workaround to get DAG persistence working
     # See: https://github.com/apache/airflow/pull/40531
@@ -100,6 +107,18 @@ scheduler:
       # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
       #command: ["chmod", "-R", "g+w", "/opt/airflow/git_repos"]
       command: ["sh", "-c", "chmod -R g+w /opt/airflow/git_repos"]
+    - name: cdm-setup
+      image: jamesko/airflow:1.1
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: pv
+          mountPath: /opt/airflow/git_repos
+        - name: cdm-setup
+          mountPath: /opt/airflow/scripts
+      # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
+      #command: ["chmod", "-R", "g+w", "/opt/airflow/git_repos"]
+      command: ["bash", "/opt/airflow/scripts/cdm-setup"]
   
   # TODO need root access so packages like java, vim can be apt-get installed
   #securityContexts:

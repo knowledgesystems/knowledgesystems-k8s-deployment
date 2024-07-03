@@ -35,9 +35,9 @@ function delete-airflow-namespace() {
     kubectl apply -f $AIRFLOW_DEPLOYMENT/storage/pvc.yaml
     kubectl apply -f $AIRFLOW_DEPLOYMENT/storage/pv.yaml
 
-    #kubectl -n airflow-nci create cm airflow-volume-setup --from-file=scripts/setup_volume.sh
-    kubectl create secret generic airflow-gcp-keyfile --from-file=gcp_key.json=$AIRFLOW_DEPLOYMENT/secrets/gcp_key.json --namespace $AIRFLOW_NS
-    kubectl create secret generic airflow-git-secret --from-file=id_ed25519=$AIRFLOW_DEPLOYMENT/secrets/id_ed25519 --from-file=known_hosts=$AIRFLOW_DEPLOYMENT/secrets/known_hosts --namespace $AIRFLOW_NS
+    afctl create cm airflow-cdm-setup --from-file=cdm-setup=$AIRFLOW_DEPLOYMENT/scripts/cdm-setup
+    afctl create secret generic airflow-gcp-keyfile --from-file=gcp_key.json=$AIRFLOW_DEPLOYMENT/secrets/gcp_key.json
+    afctl create secret generic airflow-git-secret --from-file=id_ed25519=$AIRFLOW_DEPLOYMENT/secrets/id_ed25519 --from-file=known_hosts=$AIRFLOW_DEPLOYMENT/secrets/known_hosts
 
     kubectl apply -f $AIRFLOW_DEPLOYMENT/ingress/airflow-ingress.yaml
 }

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+## Run this as an init container for the scheduler.
+## This is fed to k8s with a configmap-- after making changes to this file, please run:
+##
+## afctl delete cm airflow-cdm-setup
+## airflow create cm airflow-cdm-setup --from-file=scripts/cdm-setup
+
+REPOS_DIR=/opt/airflow/git_repos
+cd "$REPOS_DIR"
+
+clone_repo() {
+    repo_name="$1"
+    repo_url="$2"
+
+    # Check if repo already exists
+    if [ -d "${REPOS_DIR}/${repo_name}" ] ; then
+        echo "${repo_name} already exists"
+        return
+    fi
+
+    # Git clone
+    echo "Cloning repo ${repo_url} to ${REPOS_DIR}/${repo_name}"
+    (   # Executed in a subshell to avoid changing the actual working directory
+        # If any statement fails, the return value of the entire expression is the failure status
+        cd $REPOS_DIR &&
+        git clone $repo_url
+    )
+    if [ $? -gt 0 ] ; then
+	    echo "Error: Failed to clone $repo_url"
+    fi	
+}
+
+clone_repo cmo-pipelines git@github.com:knowledgesystems/cmo-pipelines.git
+clone_repo cdm-cbioportal-etl git@github.com:clinical-data-mining/cdm-cbioportal-etl.git
