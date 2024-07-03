@@ -1,7 +1,9 @@
-webserverSecretKey: '6f70d16ad375aa1bebf37a5dc557f255'
+webserverSecretKey: '3005d31b2366ac6fd4da0406c222d090'
 
 nodeSelector: 
   eks.amazonaws.com/nodegroup: airflow-scaledup
+
+executor: KubernetesExecutor
 
 config:
   core:
@@ -20,11 +22,16 @@ config:
   # [kubernetes_executor] and not [kubernetes]
   #kubernetes_executor:
   #  pod_template_file: /opt/airflow/pod-template.yaml
+  #  worker_container_repository: jamesko/airflow-worker-nci
+  #  worker_container_tag: 0.1
+  kubernetes_executor:
+    delete_worker_pods: True
+    delete_worker_pods_on_failure: True
 
 images:
   airflow:
     repository: jamesko/airflow
-    tag: "0.6"
+    tag: "1.1"
     pullPolicy: Always
   #pod_template:
   #  repository: jamesko/airflow-init
@@ -74,6 +81,32 @@ scheduler:
     #- name: pod-template
     #  configMap:
     #    name: airflow-config
+  
+    # Workaround to get DAG persistence working
+    # See: https://github.com/apache/airflow/pull/40531
+    - name: git-sync-ssh-key
+      secret:
+        secretName: airflow-ssh-secret
+        defaultMode: 288
+
+  extraInitContainers:
+    - name: volume-mount-permission
+      image: busybox:1.36
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: pv
+          mountPath: /opt/airflow/git_repos
+      # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
+      #command: ["chmod", "-R", "g+w", "/opt/airflow/git_repos"]
+      command: ["sh", "-c", "chmod -R g+w /opt/airflow/git_repos"]
+  
+  # TODO need root access so packages like java, vim can be apt-get installed
+  #securityContexts:
+  #  container:
+  #    allowPrivilegeEscalation: true
+  #  pod:
+  #    runAsUser: 0
 
 workers:
   extraVolumeMounts:
@@ -86,8 +119,6 @@ workers:
     - name: git-secret
       mountPath: /home/airflow/.ssh
       readOnly: true
-    - name: volume-setup
-      mountPath: /opt/airflow/scripts
     # Without this line we get "WARNING: Model file not found: ..."
     # Not exactly sure why since I thought this file is only needed on the scheduler,
     # but this keeps Airflow happy.
@@ -111,10 +142,6 @@ workers:
       secret:
         ## assumes that `Secret/airflow-git-secret` contains an SSH key called `id_ed25519`
         secretName: airflow-git-secret
-    - name: volume-setup
-      configMap:
-        name: airflow-volume-setup
-        defaultMode: 0777
     # This airflow-config ConfigMap has already been defined by Airflow's charts, no need to define it here.
     #- name: config
     #  configMap:
@@ -122,29 +149,6 @@ workers:
     #- name: pod-template
     #  configMap:
     #    name: airflow-config
-
-  extraInitContainers:
-    - name: volume-mount-permission
-      image: busybox:1.36
-      securityContext:
-        runAsUser: 0
-      volumeMounts:
-        - name: pv
-          mountPath: /opt/airflow/git_repos
-      # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
-      #command: ["chmod", "-R", "g+w", "/opt/airflow/git_repos"]
-      command: ["sh", "-c", "chmod g+w /opt/airflow/git_repos"]
-    - name: setup-volume-data
-      image: jamesko/airflow:0.6
-      securityContext:
-        runAsUser: 0
-      volumeMounts:
-        - name: pv
-          mountPath: /opt/airflow/git_repos
-        - name: volume-setup
-          mountPath: /opt/airflow/scripts
-      # Clone git repos to PV if they don't already exist 
-      command: ["bash", "-c", "/opt/airflow/scripts/setup_volume.sh"]
 
 logs:
   persistence:
@@ -169,6 +173,12 @@ secret:
     secretKey: "AIRFLOW_VAR_CF_PASSWORD"
 
 dags:
+  # DAG persistence improves performance a lot. Without it, each worker pod
+  # runs Git sync on its own, which can slow things down when there are a lot of tasks.
+  # See: https://airflow.apache.org/docs/helm-chart/stable/manage-dags-files.html#mounting-dags-using-git-sync-sidecar-with-persistence-enabled
+  persistence:
+    enabled: true
+
   gitSync:
     enabled: true 
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git 
@@ -177,6 +187,7 @@ dags:
     knownHosts: |
       github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
     sshKeySecret: airflow-ssh-secret
+
 extraSecrets:
   airflow-ssh-secret:
     data: |
