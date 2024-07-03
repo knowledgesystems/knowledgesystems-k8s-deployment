@@ -1,30 +1,49 @@
 #!/bin/bash
+
+## Utility script for running Airflow commands
+## Put in your .bashrc:
+## export AIRFLOW_NS=airflow
+## export AIRLFOW_DEPLOYMENT=/home/chennac/airflow-deployment
+## source /path/to/airflow-utils
+
 set -a # causes all functions/vars defined in this file to be exported to subshells
 
-AIRFLOW_DEP=/home/koj2/knowledgesystems-k8s-deployment/airflow
-
 function afctl() {
-    kubectl -n airflow "$@"
+    kubectl -n $AIRFLOW_NS "$@"
 }
 
 function scheduler-pod() {
-    afctl get pod | cut -d' ' -f1 | grep airflow-scheduler | head -n1
+    afctl get pod | cut -d' ' -f1 | grep ${AIRFLOW_NS}-scheduler | head -n1
 }
 
 function webserver-pod() {
-    afctl get pod | cut -d' ' -f1 | grep airflow-webserver | head -n1
+    afctl get pod | cut -d' ' -f1 | grep ${AIRFLOW_NS}-webserver | head -n1
 }
 
 function worker-pods() {
-    afctl get pod | cut -d' ' -f1 | grep nci-crdc-dag
+    afctl get pod | cut -d' ' -f1 | grep -v scheduler | grep -v webserver
 }
 
 function scheduler-logs() {
     afctl logs $(scheduler-pod) -f -c scheduler
 }
 
+function delete-airflow-namespace() {
+    kubectl delete namespace $AIRFLOW_NS
+    kubectl create namespace $AIRFLOW_NS
+
+    kubectl apply -f $AIRFLOW_DEPLOYMENT/storage/pvc.yaml
+    kubectl apply -f $AIRFLOW_DEPLOYMENT/storage/pv.yaml
+
+    #kubectl -n airflow-nci create cm airflow-volume-setup --from-file=scripts/setup_volume.sh
+    kubectl create secret generic airflow-gcp-keyfile --from-file=gcp_key.json=$AIRFLOW_DEPLOYMENT/secrets/gcp_key.json --namespace $AIRFLOW_NS
+    kubectl create secret generic airflow-git-secret --from-file=id_ed25519=$AIRFLOW_DEPLOYMENT/secrets/id_ed25519 --from-file=known_hosts=$AIRFLOW_DEPLOYMENT/secrets/known_hosts --namespace $AIRFLOW_NS
+
+    kubectl apply -f $AIRFLOW_DEPLOYMENT/ingress/airflow-ingress.yaml
+}
+
 function delete-airflow-chart() {
-    helm delete airflow --namespace airflow
+    helm delete $AIRFLOW_NS --namespace $AIRFLOW_NS
 }
 
 function delete-airflow-pvcs() {
@@ -35,12 +54,11 @@ function delete-airflow-pvcs() {
         logs-airflow-triggerer-0
         logs-airflow-worker-0
         redis-db-airflow-redis-0
-        airflow-logs
     )
     for pvc in "${pvcs_to_delete[@]}"; do
         # Force immediate deletion
-        kubectl patch pvc $pvc -n airflow -p '{"metadata":{"finalizers":null}}'
-        timeout 5 kubectl -n airflow delete pvc $pvc --grace-period=0 --force
+        kubectl patch pvc $pvc -n $AIRFLOW_NS -p '{"metadata":{"finalizers":null}}'
+        timeout 5 kubectl -n $AIRFLOW_NS delete pvc $pvc --grace-period=0 --force
     done
 
     afctl get pvc
@@ -48,11 +66,11 @@ function delete-airflow-pvcs() {
 
 function delete-airflow-pvs() {
     # Delete all Airflow PVs except for efs-pv
-    pvs_to_delete=$(kubectl get pv | grep airflow | grep -v efs-pv | grep -v airflow-logs | cut -d' ' -f1)
+    pvs_to_delete=$(kubectl get pv | grep $AIRFLOW_NS | grep -v efs-pv | grep -v ${AIRFLOW_NS}-logs | cut -d' ' -f1)
     for pv in "${pvs_to_delete[@]}"; do
         # Force immediate deletion
-        kubectl patch pv $pv -n airflow -p '{"metadata":{"finalizers":null}}'
-        timeout 5 kubectl -n airflow delete pv $pv --grace-period=0 --force
+        kubectl patch pv $pv -n $AIRFLOW_NS -p '{"metadata":{"finalizers":null}}'
+        timeout 5 kubectl -n $AIRFLOW_NS delete pv $pv --grace-period=0 --force
     done
 
     afctl get pv
@@ -62,17 +80,18 @@ function delete-airflow-workers() {
     # Clean up worker pods
     worker_pods=$(worker-pods)
     for pod in "${worker_pods[@]}"; do
-        timeout 5 kubectl -n airflow delete pod $pod
+        timeout 5 kubectl -n $AIRFLOW_NS delete pod $pod
     done
 
     afctl get pod
 }
 
 function install-airflow-chart() {
-    helm install -f $AIRFLOW_DEP/values.yaml -f $AIRFLOW_DEP/override-values.yaml airflow apache-airflow/airflow --namespace airflow --debug --timeout 10m
+    helm install -f $AIRFLOW_DEPLOYMENT/values.yaml -f $AIRFLOW_DEPLOYMENT/override-values.yaml $AIRFLOW_NS apache-airflow/airflow --namespace $AIRFLOW_NS --debug --timeout 10m
 }
 
 function reboot-airflow-server() {
+    delete-airflow-namespace
     delete-airflow-chart
     delete-airflow-pvcs
     delete-airflow-pvs
@@ -81,7 +100,11 @@ function reboot-airflow-server() {
 }
 
 function ssh-into-pod() {
-    afctl exec -it $1 -- /bin/bash
+    pod=$1
+    afctl exec -it $pod -- /bin/bash
 }
 
-# TODO pushing new Docker images
+function enter-image() {
+    image=$1
+    docker run --rm -it --entrypoint bash $image
+}
