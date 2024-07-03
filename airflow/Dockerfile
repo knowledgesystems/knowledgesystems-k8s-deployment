@@ -6,7 +6,7 @@ USER root
 # so we don't have to do in the Docker image
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-         vim \
+         git git-lfs vim \
   && apt-get autoremove -yqq --purge \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
