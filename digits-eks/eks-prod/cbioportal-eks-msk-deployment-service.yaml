@@ -9,7 +9,7 @@ metadata:
     run: eks-msk
     tags.datadoghq.com/env: eks-msk
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.6
+    tags.datadoghq.com/version: 6.0.10
   name: eks-msk
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk
 spec:
@@ -28,7 +28,7 @@ spec:
         run: eks-msk
         tags.datadoghq.com/env: eks-msk
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.6
+        tags.datadoghq.com/version: 6.0.10
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -59,7 +59,7 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal:master-web-shenandoah
+          image: cbioportal/cbioportal:6.0.10-web-shenandoah
           volumeMounts:
             - name: msk-eks-configmap-volume
               mountPath: /cbioportal/local.key
