@@ -13,40 +13,21 @@ config:
     smtp_port: 587
     smtp_mail_from: cbioportalpipelines@gmail.com
   core:
-    # This changed in newer versions of Airflow
-    # Compare: https://airflow.apache.org/docs/apache-airflow/2.7.1/configurations-ref.html#core
-    # and https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#core
     allowed_deserialization_classes_regexp: airflow\..* .*\..*StudyBuilder
   webserver:
     base_url: https://airflow.cbioportal.dev.aws.mskcc.org
-      #  metrics:
-      #    statsd_on: true
-      # statsd_host: 
-      #statsd_port: 8125
-      #statsd_prefix: airflow
-  # Starting in Airflow >=2.5.0, KubernetesExecutor is configured with
-  # [kubernetes_executor] and not [kubernetes]
-  #kubernetes_executor:
-  #  pod_template_file: /opt/airflow/pod-template.yaml
-  #  worker_container_repository: jamesko/airflow-worker-nci
-  #  worker_container_tag: 0.1
   kubernetes_executor:
     delete_worker_pods: True
     delete_worker_pods_on_failure: True
 
 images:
   airflow:
+    # TODO: the Docker image should live under the cbioportal/ namespace
     repository: jamesko/airflow
     tag: "1.2"
     pullPolicy: Always
-  #pod_template:
-  #  repository: jamesko/airflow-init
-  #  tag: "0.2"
-  #  pullPolicy: Always
 
 env:
-  - name: "AIRFLOW_VAR_CDM_UTILS_PATH"
-    value: "/opt/airflow/git_repos/cdm-utilities"
   - name: "PYTHONPATH"
     value: "/opt/airflow/dags/repo/nci-crdc-pipeline"
   - name: AIRFLOW__METRICS__STATSD_ON
@@ -71,9 +52,6 @@ scheduler:
     - name: pv
       mountPath: /opt/airflow/git_repos
       readOnly: false
-    #- name: pod-template
-    #  mountPath: /opt/airflow/pod-template.yaml
-    #  subPath: pod_template_file.yaml
     - name: cdm-setup
       mountPath: /opt/airflow/scripts
       readOnly: true
@@ -82,14 +60,9 @@ scheduler:
     - name: pv
       persistentVolumeClaim:
         claimName: efs-pv-claim
-    #- name: pod-template
-    #  configMap:
-    #    name: airflow-config
     - name: cdm-setup
       configMap:
         name: airflow-cdm-setup
-        subPath: cdm-setup
-  
     # Workaround to get DAG persistence working
     # See: https://github.com/apache/airflow/pull/40531
     - name: git-sync-ssh-key
@@ -106,9 +79,11 @@ scheduler:
         - name: pv
           mountPath: /opt/airflow/git_repos
       # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
-      #command: ["chmod", "-R", "g+w", "/opt/airflow/git_repos"]
       command: ["sh", "-c", "chmod -R g+w /opt/airflow/git_repos"]
+
+    # TODO: since this script is CDM-specific, it should be moved to the CDM repo
     - name: cdm-setup
+      # TODO: Docker image should live under cbioportal/ namespace
       image: jamesko/airflow:1.2
       securityContext:
         runAsUser: 0
@@ -119,7 +94,11 @@ scheduler:
           mountPath: /opt/airflow/scripts
       command: ["bash", "/opt/airflow/scripts/cdm-setup"]
   
-  # TODO need root access so packages like java, vim can be apt-get installed
+  # TODO: it would be nice to be able to run commands as root,
+  # so we're able to apt-get install packages like java / vim without
+  # explicitly having to specify them in the Docker image.
+  # I tried the following lines to get `sudo` working, but it doesn't
+  # really help because I don't know the password for the `airflow` user...
   #securityContexts:
   #  container:
   #    allowPrivilegeEscalation: true
@@ -140,8 +119,6 @@ workers:
     - name: hpc3-ssh-keyfile
       mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
       readOnly: true
-    - name: volume-setup
-      mountPath: /opt/airflow/scripts
     # Without this line we get "WARNING: Model file not found: ..."
     # Not exactly sure why since I thought this file is only needed on the scheduler,
     # but this keeps Airflow happy.
@@ -149,9 +126,6 @@ workers:
       mountPath: /opt/airflow/pod_templates/pod_template_file.yaml
       subPath: pod_template_file.yaml
       readOnly: true
-    #- name: pod-template
-    #  mountPath: /opt/airflow/pod-template.yaml
-    #  subPath: pod_template_file.yaml
 
   extraVolumes:
     - name: pv
@@ -169,17 +143,6 @@ workers:
       secret:
         ## assumes that `Secret/airflow-hpc3-ssh-keyfile` contains an SSH key called `id_rsa`
         secretName: airflow-hpc3-ssh-keyfile
-    - name: volume-setup
-      configMap:
-        name: airflow-volume-setup
-        defaultMode: 0777
-    # This airflow-config ConfigMap has already been defined by Airflow's charts, no need to define it here.
-    #- name: config
-    #  configMap:
-    #    name: airflow-config
-    #- name: pod-template
-    #  configMap:
-    #    name: airflow-config
 
 logs:
   persistence:
@@ -210,7 +173,6 @@ dags:
   # See: https://airflow.apache.org/docs/helm-chart/stable/manage-dags-files.html#mounting-dags-using-git-sync-sidecar-with-persistence-enabled
   persistence:
     enabled: true
-
   gitSync:
     enabled: true 
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git 
