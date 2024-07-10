@@ -6,41 +6,28 @@ nodeSelector:
 executor: KubernetesExecutor
 
 config:
+  smtp:
+    smtp_host: smtp.gmail.com
+    smtp_starttls: True
+    smtp_ssl: False
+    smtp_port: 587
+    smtp_mail_from: cbioportalpipelines@gmail.com
   core:
-    # This changed in newer versions of Airflow
-    # Compare: https://airflow.apache.org/docs/apache-airflow/2.7.1/configurations-ref.html#core
-    # and https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#core
     allowed_deserialization_classes_regexp: airflow\..* .*\..*StudyBuilder
   webserver:
     base_url: https://airflow.cbioportal.dev.aws.mskcc.org
-      #  metrics:
-      #    statsd_on: true
-      # statsd_host: 
-      #statsd_port: 8125
-      #statsd_prefix: airflow
-  # Starting in Airflow >=2.5.0, KubernetesExecutor is configured with
-  # [kubernetes_executor] and not [kubernetes]
-  #kubernetes_executor:
-  #  pod_template_file: /opt/airflow/pod-template.yaml
-  #  worker_container_repository: jamesko/airflow-worker-nci
-  #  worker_container_tag: 0.1
   kubernetes_executor:
     delete_worker_pods: True
     delete_worker_pods_on_failure: True
 
 images:
   airflow:
+    # TODO: the Docker image should live under the cbioportal/ namespace
     repository: jamesko/airflow
     tag: "1.2"
     pullPolicy: Always
-  #pod_template:
-  #  repository: jamesko/airflow-init
-  #  tag: "0.2"
-  #  pullPolicy: Always
 
 env:
-  - name: "AIRFLOW_VAR_CDM_UTILS_PATH"
-    value: "/opt/airflow/git_repos/cdm-utilities"
   - name: "PYTHONPATH"
     value: "/opt/airflow/dags/repo/nci-crdc-pipeline"
   - name: AIRFLOW__METRICS__STATSD_ON
@@ -49,11 +36,6 @@ env:
     value: "8125"
   - name: AIRFLOW__METRICS__STATSD_PREFIX
     value: "airflow"
-      #  - name: AIRFLOW__METRICS__STATSD_HOST
-      #    valueFrom:
-      #      fieldRef:
-      #        fieldPath: status.hostIP
-
 
 extraEnv: |-
   - name: AIRFLOW__METRICS__STATSD_HOST
@@ -70,9 +52,6 @@ scheduler:
     - name: pv
       mountPath: /opt/airflow/git_repos
       readOnly: false
-    #- name: pod-template
-    #  mountPath: /opt/airflow/pod-template.yaml
-    #  subPath: pod_template_file.yaml
     - name: cdm-setup
       mountPath: /opt/airflow/scripts
       readOnly: true
@@ -81,14 +60,9 @@ scheduler:
     - name: pv
       persistentVolumeClaim:
         claimName: efs-pv-claim
-    #- name: pod-template
-    #  configMap:
-    #    name: airflow-config
     - name: cdm-setup
       configMap:
         name: airflow-cdm-setup
-        subPath: cdm-setup
-  
     # Workaround to get DAG persistence working
     # See: https://github.com/apache/airflow/pull/40531
     - name: git-sync-ssh-key
@@ -105,9 +79,11 @@ scheduler:
         - name: pv
           mountPath: /opt/airflow/git_repos
       # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
-      #command: ["chmod", "-R", "g+w", "/opt/airflow/git_repos"]
       command: ["sh", "-c", "chmod -R g+w /opt/airflow/git_repos"]
+
+    # TODO: since this script is CDM-specific, it should be moved to the CDM repo
     - name: cdm-setup
+      # TODO: Docker image should live under cbioportal/ namespace
       image: jamesko/airflow:1.2
       securityContext:
         runAsUser: 0
@@ -118,7 +94,11 @@ scheduler:
           mountPath: /opt/airflow/scripts
       command: ["bash", "/opt/airflow/scripts/cdm-setup"]
   
-  # TODO need root access so packages like java, vim can be apt-get installed
+  # TODO: it would be nice to be able to run commands as root,
+  # so we're able to apt-get install packages like java / vim without
+  # explicitly having to specify them in the Docker image.
+  # I tried the following lines to get `sudo` working, but it doesn't
+  # really help because I don't know the password for the `airflow` user...
   #securityContexts:
   #  container:
   #    allowPrivilegeEscalation: true
@@ -136,6 +116,9 @@ workers:
     - name: git-secret
       mountPath: /home/airflow/.ssh
       readOnly: true
+    - name: hpc3-ssh-keyfile
+      mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
+      readOnly: true
     # Without this line we get "WARNING: Model file not found: ..."
     # Not exactly sure why since I thought this file is only needed on the scheduler,
     # but this keeps Airflow happy.
@@ -143,9 +126,6 @@ workers:
       mountPath: /opt/airflow/pod_templates/pod_template_file.yaml
       subPath: pod_template_file.yaml
       readOnly: true
-    #- name: pod-template
-    #  mountPath: /opt/airflow/pod-template.yaml
-    #  subPath: pod_template_file.yaml
 
   extraVolumes:
     - name: pv
@@ -159,13 +139,10 @@ workers:
       secret:
         ## assumes that `Secret/airflow-git-secret` contains an SSH key called `id_ed25519`
         secretName: airflow-git-secret
-    # This airflow-config ConfigMap has already been defined by Airflow's charts, no need to define it here.
-    #- name: config
-    #  configMap:
-    #    name: airflow-config
-    #- name: pod-template
-    #  configMap:
-    #    name: airflow-config
+    - name: hpc3-ssh-keyfile
+      secret:
+        ## assumes that `Secret/airflow-hpc3-ssh-keyfile` contains an SSH key called `id_rsa`
+        secretName: airflow-hpc3-ssh-keyfile
 
 logs:
   persistence:
@@ -175,19 +152,20 @@ logs:
     size: 10Gi
     # If using a custom storageClass, pass name here
     storageClassName: efs-sc
-    # the name of an existing PVC to use
-    #existingClaim: efs-pv-claim
 
 secret:
   - envName: "AIRFLOW_CONN_SMTP_DEFAULT"
     secretName: "airflow-smtp-uri"
     secretKey: "AIRFLOW_CONN_SMTP_DEFAULT"
+  - envName: "AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH"
+    secretName: "airflow-hpc3-cf-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH"
   - envName: "AIRFLOW_VAR_CF_CBIO_KEY"
     secretName: "airflow-cf-cbio-key"
     secretKey: "AIRFLOW_VAR_CF_CBIO_KEY"
-  - envName: "AIRFLOW_VAR_CF_PASSWORD"
-    secretName: "airflow-cf-password"
-    secretKey: "AIRFLOW_VAR_CF_PASSWORD"
+  - envName: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
+    secretName: "airflow-impact-pipeline-password"
+    secretKey: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
 
 dags:
   # DAG persistence improves performance a lot. Without it, each worker pod
@@ -195,7 +173,6 @@ dags:
   # See: https://airflow.apache.org/docs/helm-chart/stable/manage-dags-files.html#mounting-dags-using-git-sync-sidecar-with-persistence-enabled
   persistence:
     enabled: true
-
   gitSync:
     enabled: true 
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git 
@@ -209,16 +186,16 @@ extraSecrets:
   airflow-ssh-secret:
     data: |
       gitSshKey: 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwpReU5UVXhPUUFBQUNEVEtsZHlHK2tLN28zL3dDTFpGOXpmalhpT2FBMVZ0d3ZvTFd1ZUhpU05rUUFBQUtqU3pzb2kwczdLCklnQUFBQXR6YzJndFpXUXlOVFV4T1FBQUFDRFRLbGR5RytrSzdvMy93Q0xaRjl6ZmpYaU9hQTFWdHd2b0xXdWVIaVNOa1EKQUFBRUFHRkVNQzFHb2JXemtDSnNzV2ErMVd2ZTdMQ3lsbGxMY1kveEM5KytEQ2FkTXFWM0liNlFydWpmL0FJdGtYM04rTgplSTVvRFZXM0MrZ3RhNTRlSkkyUkFBQUFIbU5pYVc5d2IzSjBZV3d1Y0dsd1pXeHBibVZ6UUdkdFlXbHNMbU52YlFFQ0F3ClFGQmdjPQotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K'
-        #gitSshKey: 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlKS3dJQkFBS0NBZ0VBeDloNCtFVDhtRHVoU0hNak5kakZFMHcxTFlTMGUwbG9rcXpRV2tqN0NaUkdzN2dXClNsR3lKYmpPbkg0UVlISGJRd2ZMQ05Vem0xbGgrUkl1eTRHY29OZk9KdjFHWStpTlJzY1o1aHN3b1V3Z0ZLVTIKTHVoSlB0ZWRqTTRVSUlZT3V3MW1SUlBoUGFDMXRyL1BvRUZnbm5ob1FEOGtkejR3UUV1ejNTczhLUVJDVy92bQpCR01HR08vV01MMkZBUjlUTXhpWS9oSFh2RER5Lys4MmpndmdrMFcyMDYyRVNWL2NaWXRPUEZaRUd3Njg3cVorCnFjWjFwRzRJSGpaT1F0aitvSS91dnZybXlra296cWZQNGl1T0lLM2VvamkvZ0hkdk5UVGhaNGowNnpYY21BYmEKVlZPWkhlMnBWdnZuRXdIK1dvQlYvQXI2OE1FODZxWWlnemlKaXZWU08xNnRCbGZZZjdjK2ZtNnNZZkhuRktVWgowa0c3SktMWW16Vnc5b1RncTdNMWU5clBaWkY4SWxIc3NCclcvL1M2R0pUWjE0YVkwN3BtOGVWdURmNmV5bWxzCis3cEtjdjVGV2lSQjUvbXlLM2YwTFFMTHBxMGtJNlUwc2FzSFluRUR1dU9rREhvazJremJRRXVvb0ZmTXhLOWwKeHRlYmNXeE5sZTdvL3pzTUhLb2doOEx3SU9GeklOVFpqOCttakpjWTBUT2lYUUpLSStOWm1lMytVT0dITGNTUwpTMW1LZWVrQXlXVDBBRll3K2c1aEhzYWhKRmwyWXFYSllqeTl2Z0N3cjM1YkNKcVdUNXZDd3RkS1BBanZWTHFDCmNteFV5dk9KK3RrUEZKUHpCWTZjMEFTWHh6alJvNVRJWk1PVCtjT1RrRUE5bVVXU3lSb1VacFJLN1NjQ0F3RUEKQVFLQ0FnRUFxRG9SbXV4M3RhNThsZ0JXSTMzV1orZysyNUphVzIzd0dZaGYyNkNUc2Z5Zmg2bnZHYUNyMWhVNwoxNEJIU09pUEtsM2xEQXBzNXRqWElGT3VFS0dLdDlyeUx1QUY0UlJoMkxMQm1uSkkvWDZYZ3NtUVV1dzJ2Qy9FCjhFS0pydGNxajBzNFMrM3dMWENiaHJyd2pIWjhYdW44MkJoUEdoRy9qR0F0aUlCY3BDcHhzZnphSTljM3lzWWEKQisyQmlQQlZtUzJibkVSbzFvSmVEQlBTV01DbXkxSmtGTXg4RDBnaXYxZ0ZBOFdhanl4WTNveEpFNkY4Wm00NQpaelZQcS9YK1lpckhUdnptU21KTGQ2ckwxQmZXREt4UVBUNkg5aHlVQUxZRENLVEJoejVQODZuUklRSytZZk11CkdZcnplWXkwRUhyMzVyTlhpbE1nZEdabHB4Qnd0b3NUbWhNaWVhUkhQcW1Jc1ljRWNkOU1BNFFoejMyczRzYVcKU0REWTBMT2I3UTh5Z2YvZkV5dVY3RURncC84MERrL0J4V2Q0Y2psNWFYM1o4Z0p4MXUwRGV1M3hNalVaREp2Zgp1NEI4aDV5cHg3bFBzL2NIajl4cVJQU0s1QUcydG9CdGNFRUdDOGsxakpKRmpEWWNaQ3ZZWENmQXVtK0w5NytHCnp6MzduRFhOeCtiSzV1R2kvOVB5ajJKSm5peklEZ0xyR3pOUC9Ha1V6VU95NFlTVkpOcHlpTW53VWdMZ254SHMKUHN0ZzBTK09zcmxjWTlPbDNKc2tkay9sNFdpZmxlWlNndTFoMFhkaU84NkRUcWZRMTJBcFdhZDVkV3dXalRqRQo4TXk4Mjd3Ty9xbjlONjVSNEpoMGxjTU9uY0pHd1RRV2pQVGxFaHFIcE45YklDdE5JQUVDZ2dFQkFQSnB4RTFzClVsdE9LS2lFa3lsLzZlcnlnemFCNThvKzdwN2tVSDNhMmZHaCtlTlZTbGlKSXN4ZFhoK0JXRG8xbkR2cnlTYXgKaUFndTlwUzNyRnVlNytFbVBpM0NXWHNwMUVmMFJDRGJpSlNvQTdpQ1NqQk1HK1VYUUNHVHVRVjZ0dFRXaXFnNApiMmN2TzhSYUVqMG0zdTROZEVqRWg5U0VCMzM0ZktZQk9pazVSbjcrQ0tNODVSU29ud09MdWh6RnU4aS9RL2h5CkFqWlVTc1htV29VQmcyaFM2L3VQb0hHRndiZXJCOTdvUnV3TmRyVHJmYXk5U0haa05RVEgyNzVxRWNnYm9jd2YKQjVXTnZ5MmlpT3RhZDVSSndNem1yVG0zM3IzaklTVFQ2bHNEajd2YTBHR3kxVEt2NEpPREY3ZWkyTzQ5VmtTcApZQ2tiZ2VUVm5RSGI2c2NDZ2dFQkFOTUw3a1p0eVFwK21IYnU5QnRZZEpnd3NicHlzNnoxaHRwb3BCTi9pSjZlCnhBWmYwUTFvQjFMalFrOHF0VWVOdWRSWnkyRE5uSHBacWh0R050cTRJZFV1YWRuQkRpdkZjQ01hb1NZdkdKaDgKVXozWjZzOUFqTEdCdnRlYUJ0ZnBxWktCbWxZeHBHMklobkQxZE1KS1pRTk4xRUxibCtJWXQyUHgxbkR5b3Z2eQo2K2E5d1hFSEgrenRyeWpNV1FLVzVBOGZ6QXowdklsYktoUHlMeDJZMHVVeW04bWk2TDBFajkySWRtenoxVUZOCjBwdFIyeFpJQS9takJuc29mNWgwOFJnR0EwMWk2Z2p6aWF1YkNzeFBabUdpN3dZcllGaVNReWViOTFJRHZQY2EKakNFdVBjMEZpMTQ4M3FuSjVvSkUzSTBQUGhaZlU5ZHlPM0hVZUNzcmlxRUNnZ0VCQU5aTVNnMW54U2FTWWI4WAo5RUNybzg3ZnRMOXE5ODRDOUUvaTVvVmNBMjlwRWMrMmhwTGVLTFVobFNPazVLb1EycHplUkdUQWJORlBNdzBsCmtta3NpRU14MjZYNE9jSjNxQUkwSGtZdHpRQWR4NnhGQWZEUVY1aWVoVU1wcEZjRHRMMVRMQ0NxUTFHa24rRmsKL3Rxd2trTkFBWnlTb01GdU5uRldTbHMybW9QMjdpczF4ODBHK0R6YkZEZStQamxSVkVDVFZUTTlGbGVSRE1rRwphdDlLQnpFaW5SczJUVkFPUHNKdm4vV2V3WlBNRXpTOU9jeUxTSlBnNGozbnNJc1VtY09kS2R1WlVzc1RFLzd6CndMYk9zd2VVYTZ5NEFFc1dFUU1zMXhBSGh4WU9mL0pCN2hWd1Vxa01jaXYxcC9IZk5JYm9FbXVBa0ZIR3ozM00KbVpBYktlRUNnZ0VCQU05OCsxWGl1YlRIb2IzTVQ5SlN0TTZya1JCdGxKaUhDMzNQUXdDb2Nma0F2bGhGKzVIaQpwTkNvL1pnM3RPSVVSSTZ4ZVhKQ3M0VFdncGN1QU9Bb0I1cy9kbkhQaTg4YzNaS2xxNm1PdysrbXkzQVR2dmJqCnoyNzAwRnZINHRLRHQyT0NaK28yQkNKc0IwRW5FUk96Y0h3L0dHQmk1SUExTEpmbU81M3Y3cTBsdHllemgydEkKUmVyNkF5dHBQRmwvWDlnK3VxNUNMdG9iOXRLRldDMFJBc2F6YXRaaWc4N1JuVjkvdW02RGl6WVkvT1lYSS81VAo3eFNQWXQvU2dSK3lXUlgxVTJuUnhhWG5TWUtkZTVCQ3Y3VmVLd0UxeEJOUU9SWElFTzloSFhjVGNwRnNsUFhzCmJZakk3MkNlVHpIajRiSU5PazFraTFsVnhYdTBHRERaTGdFQ2dnRUJBTXJDRVYySzBGSFhHcTV3amVEU1RGT2cKaktGMjIwSm9EVGpvWEs3Q0FZMXYxREJpYU04SU5lcU9xVk1ibmpPTW1QVmhQTERCS1NRTXY5eUhVeWhpT1BmNQpIbHhNZUlObjl6QzM2Z09aQWpaY0xaQkVsUWVEUUNVRzk0bjBhMkE2L0RCRlpVcGVSR1BnV1BJL0RIdXpmNUhxCmdpeVlUVnE1dmZJWEJ1bldINDNXMURQVlFnQ2JwQzFZaVNXbDJxQk9idmJzWHhreHVuVjJkaXgvNkRxNjRsNkUKc2x3d2Z2bnA0ekhtQVYrQWVpZWo1YXZhQ1hidTlUeHVEU0d4OVVMRFdaaVlwd1J3cVpPYjdUcWEyL2o5TGdjeAplY2p6YWhCbFlyazlTQTVUTlIxendHTWo5bmlEbGQ3Vk9QZlIrSWE0ZmZYSkJsTGtPR1RVaTNPQkFjVVpEdms9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg=='
-        #gitSshKey: 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlKS3dJQkFBS0NBZ0VBeDloNCtFVDhtRHVoU0hNak5kakZFMHcxTFlTMGUwbG9rcXpRV2tqN0NaUkdzN2dXClNsR3lKYmpPbkg0UVlISGJRd2ZMQ05Vem0xbGgrUkl1eTRHY29OZk9KdjFHWStpTlJzY1o1aHN3b1V3Z0ZLVTIKTHVoSlB0ZWRqTTRVSUlZT3V3MW1SUlBoUGFDMXRyL1BvRUZnbm5ob1FEOGtkejR3UUV1ejNTczhLUVJDVy92bQpCR01HR08vV01MMkZBUjlUTXhpWS9oSFh2RER5Lys4MmpndmdrMFcyMDYyRVNWL2NaWXRPUEZaRUd3Njg3cVorCnFjWjFwRzRJSGpaT1F0aitvSS91dnZybXlra296cWZQNGl1T0lLM2VvamkvZ0hkdk5UVGhaNGowNnpYY21BYmEKVlZPWkhlMnBWdnZuRXdIK1dvQlYvQXI2OE1FODZxWWlnemlKaXZWU08xNnRCbGZZZjdjK2ZtNnNZZkhuRktVWgowa0c3SktMWW16Vnc5b1RncTdNMWU5clBaWkY4SWxIc3NCclcvL1M2R0pUWjE0YVkwN3BtOGVWdURmNmV5bWxzCis3cEtjdjVGV2lSQjUvbXlLM2YwTFFMTHBxMGtJNlUwc2FzSFluRUR1dU9rREhvazJremJRRXVvb0ZmTXhLOWwKeHRlYmNXeE5sZTdvL3pzTUhLb2doOEx3SU9GeklOVFpqOCttakpjWTBUT2lYUUpLSStOWm1lMytVT0dITGNTUwpTMW1LZWVrQXlXVDBBRll3K2c1aEhzYWhKRmwyWXFYSllqeTl2Z0N3cjM1YkNKcVdUNXZDd3RkS1BBanZWTHFDCmNteFV5dk9KK3RrUEZKUHpCWTZjMEFTWHh6alJvNVRJWk1PVCtjT1RrRUE5bVVXU3lSb1VacFJLN1NjQ0F3RUEKQVFLQ0FnRUFxRG9SbXV4M3RhNThsZ0JXSTMzV1orZysyNUphVzIzd0dZaGYyNkNUc2Z5Zmg2bnZHYUNyMWhVNwoxNEJIU09pUEtsM2xEQXBzNXRqWElGT3VFS0dLdDlyeUx1QUY0UlJoMkxMQm1uSkkvWDZYZ3NtUVV1dzJ2Qy9FCjhFS0pydGNxajBzNFMrM3dMWENiaHJyd2pIWjhYdW44MkJoUEdoRy9qR0F0aUlCY3BDcHhzZnphSTljM3lzWWEKQisyQmlQQlZtUzJibkVSbzFvSmVEQlBTV01DbXkxSmtGTXg4RDBnaXYxZ0ZBOFdhanl4WTNveEpFNkY4Wm00NQpaelZQcS9YK1lpckhUdnptU21KTGQ2ckwxQmZXREt4UVBUNkg5aHlVQUxZRENLVEJoejVQODZuUklRSytZZk11CkdZcnplWXkwRUhyMzVyTlhpbE1nZEdabHB4Qnd0b3NUbWhNaWVhUkhQcW1Jc1ljRWNkOU1BNFFoejMyczRzYVcKU0REWTBMT2I3UTh5Z2YvZkV5dVY3RURncC84MERrL0J4V2Q0Y2psNWFYM1o4Z0p4MXUwRGV1M3hNalVaREp2Zgp1NEI4aDV5cHg3bFBzL2NIajl4cVJQU0s1QUcydG9CdGNFRUdDOGsxakpKRmpEWWNaQ3ZZWENmQXVtK0w5NytHCnp6MzduRFhOeCtiSzV1R2kvOVB5ajJKSm5peklEZ0xyR3pOUC9Ha1V6VU95NFlTVkpOcHlpTW53VWdMZ254SHMKUHN0ZzBTK09zcmxjWTlPbDNKc2tkay9sNFdpZmxlWlNndTFoMFhkaU84NkRUcWZRMTJBcFdhZDVkV3dXalRqRQo4TXk4Mjd3Ty9xbjlONjVSNEpoMGxjTU9uY0pHd1RRV2pQVGxFaHFIcE45YklDdE5JQUVDZ2dFQkFQSnB4RTFzClVsdE9LS2lFa3lsLzZlcnlnemFCNThvKzdwN2tVSDNhMmZHaCtlTlZTbGlKSXN4ZFhoK0JXRG8xbkR2cnlTYXgKaUFndTlwUzNyRnVlNytFbVBpM0NXWHNwMUVmMFJDRGJpSlNvQTdpQ1NqQk1HK1VYUUNHVHVRVjZ0dFRXaXFnNApiMmN2TzhSYUVqMG0zdTROZEVqRWg5U0VCMzM0ZktZQk9pazVSbjcrQ0tNODVSU29ud09MdWh6RnU4aS9RL2h5CkFqWlVTc1htV29VQmcyaFM2L3VQb0hHRndiZXJCOTdvUnV3TmRyVHJmYXk5U0haa05RVEgyNzVxRWNnYm9jd2YKQjVXTnZ5MmlpT3RhZDVSSndNem1yVG0zM3IzaklTVFQ2bHNEajd2YTBHR3kxVEt2NEpPREY3ZWkyTzQ5VmtTcApZQ2tiZ2VUVm5RSGI2c2NDZ2dFQkFOTUw3a1p0eVFwK21IYnU5QnRZZEpnd3NicHlzNnoxaHRwb3BCTi9pSjZlCnhBWmYwUTFvQjFMalFrOHF0VWVOdWRSWnkyRE5uSHBacWh0R050cTRJZFV1YWRuQkRpdkZjQ01hb1NZdkdKaDgKVXozWjZzOUFqTEdCdnRlYUJ0ZnBxWktCbWxZeHBHMklobkQxZE1KS1pRTk4xRUxibCtJWXQyUHgxbkR5b3Z2eQo2K2E5d1hFSEgrenRyeWpNV1FLVzVBOGZ6QXowdklsYktoUHlMeDJZMHVVeW04bWk2TDBFajkySWRtenoxVUZOCjBwdFIyeFpJQS9takJuc29mNWgwOFJnR0EwMWk2Z2p6aWF1YkNzeFBabUdpN3dZcllGaVNReWViOTFJRHZQY2EKakNFdVBjMEZpMTQ4M3FuSjVvSkUzSTBQUGhaZlU5ZHlPM0hVZUNzcmlxRUNnZ0VCQU5aTVNnMW54U2FTWWI4WAo5RUNybzg3ZnRMOXE5ODRDOUUvaTVvVmNBMjlwRWMrMmhwTGVLTFVobFNPazVLb1EycHplUkdUQWJORlBNdzBsCmtta3NpRU14MjZYNE9jSjNxQUkwSGtZdHpRQWR4NnhGQWZEUVY1aWVoVU1wcEZjRHRMMVRMQ0NxUTFHa24rRmsKL3Rxd2trTkFBWnlTb01GdU5uRldTbHMybW9QMjdpczF4ODBHK0R6YkZEZStQamxSVkVDVFZUTTlGbGVSRE1rRwphdDlLQnpFaW5SczJUVkFPUHNKdm4vV2V3WlBNRXpTOU9jeUxTSlBnNGozbnNJc1VtY09kS2R1WlVzc1RFLzd6CndMYk9zd2VVYTZ5NEFFc1dFUU1zMXhBSGh4WU9mL0pCN2hWd1Vxa01jaXYxcC9IZk5JYm9FbXVBa0ZIR3ozM00KbVpBYktlRUNnZ0VCQU05OCsxWGl1YlRIb2IzTVQ5SlN0TTZya1JCdGxKaUhDMzNQUXdDb2Nma0F2bGhGKzVIaQpwTkNvL1pnM3RPSVVSSTZ4ZVhKQ3M0VFdncGN1QU9Bb0I1cy9kbkhQaTg4YzNaS2xxNm1PdysrbXkzQVR2dmJqCnoyNzAwRnZINHRLRHQyT0NaK28yQkNKc0IwRW5FUk96Y0h3L0dHQmk1SUExTEpmbU81M3Y3cTBsdHllemgydEkKUmVyNkF5dHBQRmwvWDlnK3VxNUNMdG9iOXRLRldDMFJBc2F6YXRaaWc4N1JuVjkvdW02RGl6WVkvT1lYSS81VAo3eFNQWXQvU2dSK3lXUlgxVTJuUnhhWG5TWUtkZTVCQ3Y3VmVLd0UxeEJOUU9SWElFTzloSFhjVGNwRnNsUFhzCmJZakk3MkNlVHpIajRiSU5PazFraTFsVnhYdTBHRERaTGdFQ2dnRUJBTXJDRVYySzBGSFhHcTV3amVEU1RGT2cKaktGMjIwSm9EVGpvWEs3Q0FZMXYxREJpYU04SU5lcU9xVk1ibmpPTW1QVmhQTERCS1NRTXY5eUhVeWhpT1BmNQpIbHhNZUlObjl6QzM2Z09aQWpaY0xaQkVsUWVEUUNVRzk0bjBhMkE2L0RCRlpVcGVSR1BnV1BJL0RIdXpmNUhxCmdpeVlUVnE1dmZJWEJ1bldINDNXMURQVlFnQ2JwQzFZaVNXbDJxQk9idmJzWHhreHVuVjJkaXgvNkRxNjRsNkUKc2x3d2Z2bnA0ekhtQVYrQWVpZWo1YXZhQ1hidTlUeHVEU0d4OVVMRFdaaVlwd1J3cVpPYjdUcWEyL2o5TGdjeAplY2p6YWhCbFlyazlTQTVUTlIxendHTWo5bmlEbGQ3Vk9QZlIrSWE0ZmZYSkJsTGtPR1RVaTNPQkFjVVpEdms9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg=='
-  #gitSshKey: 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwpReU5UVXhPUUFBQUNEVEtsZHlHK2tLN28zL3dDTFpGOXpmalhpT2FBMVZ0d3ZvTFd1ZUhpU05rUUFBQUtqU3pzb2kwczdLCklnQUFBQXR6YzJndFpXUXlOVFV4T1FBQUFDRFRLbGR5RytrSzdvMy93Q0xaRjl6ZmpYaU9hQTFWdHd2b0xXdWVIaVNOa1EKQUFBRUFHRkVNQzFHb2JXemtDSnNzV2ErMVd2ZTdMQ3lsbGxMY1kveEM5KytEQ2FkTXFWM0liNlFydWpmL0FJdGtYM04rTgplSTVvRFZXM0MrZ3RhNTRlSkkyUkFBQUFIbU5pYVc5d2IzSjBZV3d1Y0dsd1pXeHBibVZ6UUdkdFlXbHNMbU52YlFFQ0F3ClFGQmdjPQotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K'
+  airflow-hpc3-cf-ssh-uri:
+    data: |
+      AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH: 'c3NoOi8vZm9uZ2MyQHBsbGltc2tocGMzLm1za2NjLm9yZy8/X19leHRyYV9fPSU3QiUyMmtleV9maWxlJTIyJTNBKyUyMiUyRm9wdCUyRmFpcmZsb3clMkZzZWNyZXRzJTJGaHBjMy1zc2gta2V5ZmlsZSUyRmlkX3JzYSUyMiUyQyslMjJjbWRfdGltZW91dCUyMiUzQStudWxsJTdECg=='
   airflow-smtp-uri:
     data: |
       AIRFLOW_CONN_SMTP_DEFAULT: 'ZW1haWw6Ly9jYmlvcG9ydGFscGlwZWxpbmVzJTQwZ21haWwuY29tOmllcWZ5cmxsaWh4a3ZvaWNACg=='
   airflow-cf-cbio-key:
     data: |
       AIRFLOW_VAR_CF_CBIO_KEY: 'ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJZ09pQWlTbGRVSWl3aWEybGtJaUE2SUNKak4yRXhaR0V5TXkxa01tWmxMVFEyT0RRdE9UZGxaQzA1TXpCaVpUaGpORFl3TVdVaWZRLmV5SnBZWFFpT2pFMk9UVXpNREl5T1RVc0ltcDBhU0k2SWpZeU9UUTRNVGN4TFdGaU0yWXRORE0wWVMwNU5tWmlMVE15T1dKaU1EQXhNekExWVNJc0ltbHpjeUk2SW1oMGRIQnpPaTh2YTJWNVkyeHZZV3N1WTJKcGIzQnZjblJoYkM1dGMydGpZeTV2Y21jdllYVjBhQzl5WldGc2JYTXZiWE5ySWl3aVlYVmtJam9pYUhSMGNITTZMeTlyWlhsamJHOWhheTVqWW1sdmNHOXlkR0ZzTG0xemEyTmpMbTl5Wnk5aGRYUm9MM0psWVd4dGN5OXRjMnNpTENKemRXSWlPaUprTldZMU9USmhPUzFpWVRsaExUUTBNV0V0T1dNMk1DMHdZbVE1WkRnMll6VmxaVGdpTENKMGVYQWlPaUpQWm1ac2FXNWxJaXdpWVhwd0lqb2lZMkpwYjNCdmNuUmhiQzF0YzJzdFlYQnBJaXdpYzJWemMybHZibDl6ZEdGMFpTSTZJbVEwTlRobU0yWXdMVEUwTnpFdE5EVmpaaTA0T0dWaExXTm1ZVFJrTkdWbU5HWmlZU0lzSW5OamIzQmxJam9pYjNCbGJtbGtJRzltWm14cGJtVmZZV05qWlhOekluMC5sQkFIVGtNb1l0M1AwM0pHTVAxOHNMSnJfYl9ocWd1R1lTTU52R2Rudk1JCg=='
-  airflow-cf-password:
+  airflow-impact-pipeline-password:
     data: |
-      AIRFLOW_VAR_CF_PASSWORD: 'S24wd2wzZGczaXNrM3k='
+      AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD: 'S24wd2wzZGczaXNrM3k='
 

@@ -2,7 +2,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: efs-pv
-  namespace: airflow
 spec:
   capacity:
     storage: 10Gi
