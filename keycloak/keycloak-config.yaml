@@ -1,5 +1,5 @@
 nodeSelector:
-  eks.amazonaws.com/nodegroup: critical
+  eks.amazonaws.com/nodegroup: essential-services 
 postgresql:
   # Disable PostgreSQL dependency
   enabled: false

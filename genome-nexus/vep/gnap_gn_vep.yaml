@@ -11,7 +11,7 @@ metadata:
   namespace: genome-nexus
   selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gnap-gn-vep
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: gnap-gn-vep
@@ -41,14 +41,14 @@ spec:
             path: /vep/human/region/7:140453136-140453136:1/T
             port: 8888
           initialDelaySeconds: 10
-          timeoutSeconds: 15
-          periodSeconds: 15
+          timeoutSeconds: 120
+          periodSeconds: 30
         livenessProbe:
           httpGet:
             path: /vep/human/region/7:140453136-140453136:1/T
             port: 8888
-          initialDelaySeconds: 30
-          timeoutSeconds: 60
+          initialDelaySeconds: 10
+          timeoutSeconds: 120
           periodSeconds: 30
         name: gnap-gn-vep
         ports:
@@ -59,12 +59,7 @@ spec:
         terminationMessagePolicy: File
       # run on genome nexus machines
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genome-nexus
-      tolerations:
-        - key: "dedicated"
-          operator: "Equal"
-          value: "eks-genome-nexus"
-          effect: "NoSchedule"
+        eks.amazonaws.com/nodegroup: gnap-genome-nexus
       # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
       initContainers:
