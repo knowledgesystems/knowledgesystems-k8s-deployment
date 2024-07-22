@@ -63,6 +63,9 @@ spec:
   - hosts:
     - rho.cbioportal.org
     secretName: cbioportal-rho-cert
+  - hosts:
+    - crdc.cbioportal.org
+    secretName: cbioportal-crdc-cert
   rules:
   - host: www.cbioportal.org
     http:
@@ -161,6 +164,13 @@ spec:
       - path: /
         backend:
           serviceName: cbioportal-redis-cache
+          servicePort: http
+  - host: crdc.cbioportal.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cbioportal-backend-nci
           servicePort: http
 ---
 apiVersion: networking.k8s.io/v1beta1
