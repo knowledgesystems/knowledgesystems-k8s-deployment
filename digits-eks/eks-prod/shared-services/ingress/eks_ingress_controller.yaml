@@ -2,48 +2,53 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    meta.helm.sh/release-name: ingress
+    meta.helm.sh/release-name: lazing-sloth
     meta.helm.sh/release-namespace: default
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
     service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:666628074417:certificate/04511050-706a-496a-86c6-98403f1d0b61
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:666628074417:certificate/22af3940-79c4-464d-b408-e8a4fd85664d
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
-  creationTimestamp: "2021-10-21T02:22:21Z"
+  creationTimestamp: "2024-06-28T19:03:53Z"
   finalizers:
   - service.kubernetes.io/load-balancer-cleanup
   labels:
     app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: ingress
+    app.kubernetes.io/instance: lazing-sloth
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/version: 1.0.4
-    helm.sh/chart: ingress-nginx-4.0.6
-  name: ingress-ingress-nginx-controller
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.9.4
+    helm.sh/chart: ingress-nginx-4.8.3
+  name: lazing-sloth-ingress-nginx-controller
   namespace: default
-  resourceVersion: "15420460"
-  selfLink: /api/v1/namespaces/default/services/ingress-ingress-nginx-controller
-  uid: d2c0ca84-2cdb-4d16-881f-66d1a59dbbac
 spec:
-  clusterIP: 172.20.110.175
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 172.20.117.218
+  clusterIPs:
+  - 172.20.117.218
   externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
   ports:
   - name: http
-    nodePort: 30515
+    nodePort: 31331
     port: 80
     protocol: TCP
     targetPort: http
   - name: https
-    nodePort: 30862
+    nodePort: 30238
     port: 443
     protocol: TCP
-    targetPort: 80
+    targetPort: http
   selector:
     app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: ingress
+    app.kubernetes.io/instance: lazing-sloth
     app.kubernetes.io/name: ingress-nginx
   sessionAffinity: None
   type: LoadBalancer
 status:
   loadBalancer:
     ingress:
-    - hostname: internal-ad2c0ca842cdb4d16881f66d1a59dbba-204230514.us-east-1.elb.amazonaws.com
+    - hostname: internal-ab65ed103ef98482c845ae69ae512cac-1693183256.us-east-1.elb.amazonaws.com
