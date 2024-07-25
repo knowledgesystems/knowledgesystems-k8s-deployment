@@ -15,8 +15,8 @@ spec:
   strategy:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
-      maxSurge: 4
-      maxUnavailable: 0
+      maxSurge: 3
+      maxUnavailable: 3
     type: RollingUpdate
   template:
     metadata:
@@ -37,7 +37,7 @@ spec:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.18.2
+          image: oncokb/oncokb:3.19.0
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
