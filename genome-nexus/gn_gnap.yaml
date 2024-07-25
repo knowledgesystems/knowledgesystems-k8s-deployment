@@ -70,7 +70,7 @@ spec:
           value: "eks-genome-nexus"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genome-nexus
+        eks.amazonaws.com/nodegroup: gnap-genome-nexus
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
