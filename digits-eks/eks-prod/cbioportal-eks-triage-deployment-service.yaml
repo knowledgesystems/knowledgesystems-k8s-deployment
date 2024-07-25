@@ -183,7 +183,7 @@ spec:
             "--spring.autoconfigure.exclude=dontexcludeanythingplz",
             # cache settings (currently redis)
 #            "--cache.statistics_endpoint_enabled=false",
-            "--redis.database=3",
+            "--redis.database=1",
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://triage-cbioportal-persistence-redis-master:6379",
             "--redis.follower_address=redis://triage-cbioportal-persistence-redis-replicas:6379",

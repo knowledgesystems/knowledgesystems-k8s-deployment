@@ -4,7 +4,6 @@ metadata:
   name: eks-prod-ingress
   namespace: genome-nexus
   annotations:
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/backend-protocol: "http"
@@ -20,6 +19,7 @@ metadata:
     ingress.kubernetes.io/proxy-send-timeout: "300"
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
+  ingressClassName: nginx
   rules:
   - host: "genomenexus.cbioportal.aws.mskcc.org"
     http:
