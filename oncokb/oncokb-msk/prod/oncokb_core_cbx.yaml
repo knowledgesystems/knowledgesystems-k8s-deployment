@@ -15,12 +15,11 @@ spec:
       run: oncokb-core-cbx
   strategy:
     rollingUpdate:
-      maxSurge: 3
+      maxSurge: 2
       maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         run: oncokb-core-cbx
     spec:
@@ -33,7 +32,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:3.18.2
+          image: oncokb/oncokb:3.19.0
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
