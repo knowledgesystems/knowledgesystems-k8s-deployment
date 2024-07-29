@@ -53,6 +53,20 @@ webserver:
     timeoutSeconds: 360
 
 scheduler:
+  # To deploy multiple scheduler replicas across nodes, uncomment the below configuration 
+  #replicas: 2
+
+  #labels:
+    #pod-type: scheduler
+
+  #topologySpreadConstraints:
+    #- maxSkew: 1
+      #topologyKey: kubernetes.io/hostname
+      #whenUnsatisfiable: DoNotSchedule
+      #labelSelector:
+        #matchLabels:
+          #pod-type: scheduler
+
   extraVolumeMounts:
     - name: pv
       mountPath: /opt/airflow/git_repos
@@ -178,6 +192,7 @@ dags:
   # See: https://airflow.apache.org/docs/helm-chart/stable/manage-dags-files.html#mounting-dags-using-git-sync-sidecar-with-persistence-enabled
   persistence:
     enabled: true
+    storageClassName: efs-sc
   gitSync:
     enabled: true 
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git 
