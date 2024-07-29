@@ -32,7 +32,7 @@ spec:
       containers:
       - envFrom:
         - configMapRef:
-            name: cbioportal-public6
+            name: cbioportal-beta-v6
         image: cbioportal/cbioportal:6.0.12-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
