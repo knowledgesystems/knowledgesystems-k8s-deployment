@@ -1,11 +1,16 @@
 webserverSecretKey: '3005d31b2366ac6fd4da0406c222d090'
 
 nodeSelector: 
-  eks.amazonaws.com/nodegroup: airflow-scaledup
+  eks.amazonaws.com/nodegroup: airflow-r5xlarge
 
 executor: KubernetesExecutor
 
 config:
+  api:
+    auth_backends: airflow.api.auth.backend.basic_auth
+    access_control_allow_headers: origin, content-type, accept
+    access_control_allow_methods: POST, GET, OPTIONS, DELETE
+    access_control_allow_origins: http://pipelines3.cbioportal.aws.mskcc.org
   smtp:
     smtp_host: smtp.gmail.com
     smtp_starttls: True
@@ -48,6 +53,20 @@ webserver:
     timeoutSeconds: 360
 
 scheduler:
+  # To deploy multiple scheduler replicas across nodes, uncomment the below configuration 
+  #replicas: 2
+
+  #labels:
+    #pod-type: scheduler
+
+  #topologySpreadConstraints:
+    #- maxSkew: 1
+      #topologyKey: kubernetes.io/hostname
+      #whenUnsatisfiable: DoNotSchedule
+      #labelSelector:
+        #matchLabels:
+          #pod-type: scheduler
+
   extraVolumeMounts:
     - name: pv
       mountPath: /opt/airflow/git_repos
@@ -173,6 +192,7 @@ dags:
   # See: https://airflow.apache.org/docs/helm-chart/stable/manage-dags-files.html#mounting-dags-using-git-sync-sidecar-with-persistence-enabled
   persistence:
     enabled: true
+    storageClassName: efs-sc
   gitSync:
     enabled: true 
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git 
