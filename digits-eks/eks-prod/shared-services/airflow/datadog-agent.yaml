@@ -42,4 +42,4 @@ spec:
               - airflow 
             init_config:
             instances:
-              - url: http://airflow.cbioportal.dev.aws.mskcc.org
+              - url: http://airflow.cbioportal.aws.mskcc.org

@@ -89,7 +89,8 @@ function delete-airflow-workers() {
 }
 
 function install-airflow-chart() {
-    helm install -f $AIRFLOW_DEPLOYMENT/values.yaml -f $AIRFLOW_DEPLOYMENT/override-values.yaml $AIRFLOW_NS apache-airflow/airflow --namespace $AIRFLOW_NS --debug --timeout 10m --set nodeSelector."eks\.amazonaws\.com/nodegroup"=$AIRFLOW_NODEGROUP
+    helm install -f $AIRFLOW_DEPLOYMENT/values.yaml -f $AIRFLOW_DEPLOYMENT/override-values.yaml $AIRFLOW_NS apache-airflow/airflow --namespace $AIRFLOW_NS --debug --timeout 10m
+    #helm install -f $AIRFLOW_DEPLOYMENT/values.yaml -f $AIRFLOW_DEPLOYMENT/override-values.yaml $AIRFLOW_NS apache-airflow/airflow --namespace $AIRFLOW_NS --debug --timeout 10m --set nodeSelector."eks\.amazonaws\.com/nodegroup"=$AIRFLOW_NODEGROUP
 }
 
 function reboot-airflow-server() {

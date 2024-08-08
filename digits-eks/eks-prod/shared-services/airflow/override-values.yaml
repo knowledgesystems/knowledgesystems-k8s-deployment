@@ -1,7 +1,7 @@
 webserverSecretKey: '3005d31b2366ac6fd4da0406c222d090'
 
 nodeSelector: 
-  eks.amazonaws.com/nodegroup: airflow-r5xlarge
+  eks.amazonaws.com/nodegroup: airflow
 
 executor: KubernetesExecutor
 
@@ -20,7 +20,7 @@ config:
   core:
     allowed_deserialization_classes_regexp: airflow\..* .*\..*StudyBuilder
   webserver:
-    base_url: https://airflow.cbioportal.dev.aws.mskcc.org
+    base_url: https://airflow.cbioportal.aws.mskcc.org
   kubernetes_executor:
     delete_worker_pods: True
     delete_worker_pods_on_failure: True
@@ -100,19 +100,6 @@ scheduler:
       # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
       command: ["sh", "-c", "chmod -R g+w /opt/airflow/git_repos"]
 
-    # TODO: since this script is CDM-specific, it should be moved to the CDM repo
-    - name: cdm-setup
-      # TODO: Docker image should live under cbioportal/ namespace
-      image: jamesko/airflow:1.2
-      securityContext:
-        runAsUser: 0
-      volumeMounts:
-        - name: pv
-          mountPath: /opt/airflow/git_repos
-        - name: cdm-setup
-          mountPath: /opt/airflow/scripts
-      command: ["bash", "/opt/airflow/scripts/cdm-setup"]
-  
   # TODO: it would be nice to be able to run commands as root,
   # so we're able to apt-get install packages like java / vim without
   # explicitly having to specify them in the Docker image.
