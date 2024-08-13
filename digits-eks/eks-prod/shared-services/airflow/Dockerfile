@@ -1,9 +1,6 @@
 FROM apache/airflow:latest
 USER root
 
-# Install vim on scheduler pod to make reading text files less painful
-# TODO: figure out how to run `sudo apt-get install ...` inside the container
-# so we don't have to do in the Docker image
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
          git git-lfs vim \
