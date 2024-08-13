@@ -27,7 +27,6 @@ config:
 
 images:
   airflow:
-    # TODO: the Docker image should live under the cbioportal/ namespace
     repository: jamesko/airflow
     tag: "1.2"
     pullPolicy: Always
@@ -54,18 +53,18 @@ webserver:
 
 scheduler:
   # To deploy multiple scheduler replicas across nodes, uncomment the below configuration 
-  #replicas: 2
+  #replicas: <num-scheduler-replicas>
 
   #labels:
-    #pod-type: scheduler
+  #  pod-type: scheduler
 
   #topologySpreadConstraints:
-    #- maxSkew: 1
-      #topologyKey: kubernetes.io/hostname
-      #whenUnsatisfiable: DoNotSchedule
-      #labelSelector:
-        #matchLabels:
-          #pod-type: scheduler
+  #  - maxSkew: 1
+  #    topologyKey: kubernetes.io/hostname
+  #    whenUnsatisfiable: DoNotSchedule
+  #    labelSelector:
+  #      matchLabels:
+  #        pod-type: scheduler
 
   extraVolumeMounts:
     - name: pv
@@ -100,17 +99,6 @@ scheduler:
       # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
       command: ["sh", "-c", "chmod -R g+w /opt/airflow/git_repos"]
 
-  # TODO: it would be nice to be able to run commands as root,
-  # so we're able to apt-get install packages like java / vim without
-  # explicitly having to specify them in the Docker image.
-  # I tried the following lines to get `sudo` working, but it doesn't
-  # really help because I don't know the password for the `airflow` user...
-  #securityContexts:
-  #  container:
-  #    allowPrivilegeEscalation: true
-  #  pod:
-  #    runAsUser: 0
-
 workers:
   extraVolumeMounts:
     - name: pv
@@ -139,15 +127,15 @@ workers:
         claimName: efs-pv-claim
     - name: gcp-keyfile
       secret:
-        ## assumes that `Secret/airflow-gcp-keyfile` contains a key called `gcp_key.json`
+        # Assumes that `Secret/airflow-gcp-keyfile` contains a key called `gcp_key.json`
         secretName: airflow-gcp-keyfile
     - name: git-secret
       secret:
-        ## assumes that `Secret/airflow-git-secret` contains an SSH key called `id_ed25519`
+        # Assumes that `Secret/airflow-git-secret` contains an SSH key called `id_ed25519`
         secretName: airflow-git-secret
     - name: hpc3-ssh-keyfile
       secret:
-        ## assumes that `Secret/airflow-hpc3-ssh-keyfile` contains an SSH key called `id_rsa`
+        # Assumes that `Secret/airflow-hpc3-ssh-keyfile` contains an SSH key called `id_rsa`
         secretName: airflow-hpc3-ssh-keyfile
 
 logs:
@@ -166,17 +154,11 @@ secret:
   - envName: "AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH"
     secretName: "airflow-hpc3-cf-ssh-uri"
     secretKey: "AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH"
-  - envName: "AIRFLOW_VAR_CF_CBIO_KEY"
-    secretName: "airflow-cf-cbio-key"
-    secretKey: "AIRFLOW_VAR_CF_CBIO_KEY"
   - envName: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
     secretName: "airflow-impact-pipeline-password"
     secretKey: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
 
 dags:
-  # DAG persistence improves performance a lot. Without it, each worker pod
-  # runs Git sync on its own, which can slow things down when there are a lot of tasks.
-  # See: https://airflow.apache.org/docs/helm-chart/stable/manage-dags-files.html#mounting-dags-using-git-sync-sidecar-with-persistence-enabled
   persistence:
     enabled: true
     storageClassName: efs-sc
@@ -188,21 +170,3 @@ dags:
     knownHosts: |
       github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
     sshKeySecret: airflow-ssh-secret
-
-extraSecrets:
-  airflow-ssh-secret:
-    data: |
-      gitSshKey: 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwpReU5UVXhPUUFBQUNEVEtsZHlHK2tLN28zL3dDTFpGOXpmalhpT2FBMVZ0d3ZvTFd1ZUhpU05rUUFBQUtqU3pzb2kwczdLCklnQUFBQXR6YzJndFpXUXlOVFV4T1FBQUFDRFRLbGR5RytrSzdvMy93Q0xaRjl6ZmpYaU9hQTFWdHd2b0xXdWVIaVNOa1EKQUFBRUFHRkVNQzFHb2JXemtDSnNzV2ErMVd2ZTdMQ3lsbGxMY1kveEM5KytEQ2FkTXFWM0liNlFydWpmL0FJdGtYM04rTgplSTVvRFZXM0MrZ3RhNTRlSkkyUkFBQUFIbU5pYVc5d2IzSjBZV3d1Y0dsd1pXeHBibVZ6UUdkdFlXbHNMbU52YlFFQ0F3ClFGQmdjPQotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K'
-  airflow-hpc3-cf-ssh-uri:
-    data: |
-      AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH: 'c3NoOi8vZm9uZ2MyQHBsbGltc2tocGMzLm1za2NjLm9yZy8/X19leHRyYV9fPSU3QiUyMmtleV9maWxlJTIyJTNBKyUyMiUyRm9wdCUyRmFpcmZsb3clMkZzZWNyZXRzJTJGaHBjMy1zc2gta2V5ZmlsZSUyRmlkX3JzYSUyMiUyQyslMjJjbWRfdGltZW91dCUyMiUzQStudWxsJTdECg=='
-  airflow-smtp-uri:
-    data: |
-      AIRFLOW_CONN_SMTP_DEFAULT: 'ZW1haWw6Ly9jYmlvcG9ydGFscGlwZWxpbmVzJTQwZ21haWwuY29tOmllcWZ5cmxsaWh4a3ZvaWNACg=='
-  airflow-cf-cbio-key:
-    data: |
-      AIRFLOW_VAR_CF_CBIO_KEY: 'ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJZ09pQWlTbGRVSWl3aWEybGtJaUE2SUNKak4yRXhaR0V5TXkxa01tWmxMVFEyT0RRdE9UZGxaQzA1TXpCaVpUaGpORFl3TVdVaWZRLmV5SnBZWFFpT2pFMk9UVXpNREl5T1RVc0ltcDBhU0k2SWpZeU9UUTRNVGN4TFdGaU0yWXRORE0wWVMwNU5tWmlMVE15T1dKaU1EQXhNekExWVNJc0ltbHpjeUk2SW1oMGRIQnpPaTh2YTJWNVkyeHZZV3N1WTJKcGIzQnZjblJoYkM1dGMydGpZeTV2Y21jdllYVjBhQzl5WldGc2JYTXZiWE5ySWl3aVlYVmtJam9pYUhSMGNITTZMeTlyWlhsamJHOWhheTVqWW1sdmNHOXlkR0ZzTG0xemEyTmpMbTl5Wnk5aGRYUm9MM0psWVd4dGN5OXRjMnNpTENKemRXSWlPaUprTldZMU9USmhPUzFpWVRsaExUUTBNV0V0T1dNMk1DMHdZbVE1WkRnMll6VmxaVGdpTENKMGVYQWlPaUpQWm1ac2FXNWxJaXdpWVhwd0lqb2lZMkpwYjNCdmNuUmhiQzF0YzJzdFlYQnBJaXdpYzJWemMybHZibDl6ZEdGMFpTSTZJbVEwTlRobU0yWXdMVEUwTnpFdE5EVmpaaTA0T0dWaExXTm1ZVFJrTkdWbU5HWmlZU0lzSW5OamIzQmxJam9pYjNCbGJtbGtJRzltWm14cGJtVmZZV05qWlhOekluMC5sQkFIVGtNb1l0M1AwM0pHTVAxOHNMSnJfYl9ocWd1R1lTTU52R2Rudk1JCg=='
-  airflow-impact-pipeline-password:
-    data: |
-      AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD: 'S24wd2wzZGczaXNrM3k='
-
