@@ -1,12 +1,1 @@
 .idea
-
-# Airflow deployment
-*.swp
-*.bak
-*.old
-old/
-airflow.crt
-airflow.key
-secrets/
-connections/
-variables/
