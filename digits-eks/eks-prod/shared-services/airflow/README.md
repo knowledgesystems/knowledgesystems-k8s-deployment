@@ -57,7 +57,7 @@ In the AWS Route 53 Dashboard, create an entry under the desired hosted zone (In
 7. Apply the ingress.  
 Before running the below command, modify `eks-airflow-ingress.yaml` to point to the correct URL for your Airflow server.
     ```
-	kubectl apply -f $AIRFLOW_DEPLOYMENT/../ingress/eks-airflow-ingress.yaml -n $NAMESPACE
+	kubectl apply -f ../ingress/eks-airflow-ingress.yaml -n $NAMESPACE
     ```
 
 8. Modify `webserver.base_url` in `override-values.yaml` to reflect the desired URL of the Airflow server. This is required for email notifications to work correctly.
@@ -70,7 +70,7 @@ Before running the below command, modify `eks-airflow-ingress.yaml` to point to 
 	```
     helm repo add apache-airflow https://airflow.apache.org
 	helm repo update
-    helm install -f $AIRFLOW_DEPLOYMENT/values.yaml -f $AIRFLOW_DEPLOYMENT/override-values.yaml airflow apache-airflow/airflow --namespace $NAMESPACE --debug --timeout 10m
+    helm install -f override-values.yaml airflow apache-airflow/airflow --namespace $NAMESPACE --debug --timeout 10m
     ```
 
 10. Setup the DataDog agent.  
