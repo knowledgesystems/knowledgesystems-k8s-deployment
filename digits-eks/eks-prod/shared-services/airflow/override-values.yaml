@@ -1,4 +1,4 @@
-webserverSecretKey: '3005d31b2366ac6fd4da0406c222d090'
+webserverSecretKeySecretName: airflow-webserver-secret-key
 
 nodeSelector: 
   eks.amazonaws.com/nodegroup: airflow
