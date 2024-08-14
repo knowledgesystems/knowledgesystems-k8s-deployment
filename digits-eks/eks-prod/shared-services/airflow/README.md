@@ -36,16 +36,9 @@ Before running the below commands, update the `spec.csi.volumeHandle` setting in
     ```
 	
 5. Create secrets.  
-The below secrets are required for running the NCI and CDM DAGs.
+The below secrets are required for running the NCI and CDM DAGs. The referenced secrets file is located in the portal-configuration repository.
 	```
-    # For NCI project
-    kubectl create secret generic airflow-gcp-keyfile --from-file=gcp_key.json=$AIRFLOW_DEPLOYMENT/secrets/gcp_key.json -n $NAMESPACE
-
-    # For DAGs that clone/commit/push to CDSI git repos (NCI)
-	kubectl create secret generic airflow-git-secret --from-file=id_ed25519=$AIRFLOW_DEPLOYMENT/secrets/id_ed25519 --from-file=known_hosts=$AIRFLOW_DEPLOYMENT/secrets/known_hosts -n $NAMESPACE
-
-    # For CDM project
-	kubectl create secret generic airflow-hpc3-ssh-keyfile --from-file=id_rsa=$AIRFLOW_DEPLOYMENT/secrets/id_rsa -n $NAMESPACE
+    kubectl apply -f portal-configuration/k8s-config-vars/digits-eks/eks-prod/airflow-secrets.yaml
     ```
 
 6. Set up networking.  
