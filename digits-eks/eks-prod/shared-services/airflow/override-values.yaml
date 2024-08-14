@@ -27,9 +27,9 @@ config:
 
 images:
   airflow:
-    repository: jamesko/airflow
-    tag: "1.2"
-    pullPolicy: Always
+    repository: apache/airflow
+    tag: "2.9.2"
+    pullPolicy: IfNotPresent
 
 env:
   - name: "PYTHONPATH"
