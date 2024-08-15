@@ -81,12 +81,6 @@ scheduler:
     - name: cdm-setup
       configMap:
         name: airflow-cdm-setup
-    # Workaround to get DAG persistence working
-    # See: https://github.com/apache/airflow/pull/40531
-    - name: git-sync-ssh-key
-      secret:
-        secretName: airflow-ssh-secret
-        defaultMode: 288
 
   extraInitContainers:
     - name: volume-mount-permission
@@ -112,13 +106,6 @@ workers:
       readOnly: true
     - name: hpc3-ssh-keyfile
       mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
-      readOnly: true
-    # Without this line we get "WARNING: Model file not found: ..."
-    # Not exactly sure why since I thought this file is only needed on the scheduler,
-    # but this keeps Airflow happy.
-    - name: config
-      mountPath: /opt/airflow/pod_templates/pod_template_file.yaml
-      subPath: pod_template_file.yaml
       readOnly: true
 
   extraVolumes:
@@ -159,9 +146,6 @@ secret:
     secretKey: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
 
 dags:
-  persistence:
-    enabled: true
-    storageClassName: efs-sc
   gitSync:
     enabled: true 
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git 
