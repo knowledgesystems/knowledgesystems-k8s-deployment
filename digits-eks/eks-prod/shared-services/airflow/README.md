@@ -42,7 +42,7 @@ The below secrets are required for running the NCI and CDM DAGs. The referenced 
     ```
 
 6. Set up networking.  
-In the AWS Route 53 Dashboard, create an entry under the desired hosted zone (In this case, `cbioportal.aws.mskcc.org`):
+In the AWS Route 53 Dashboard, create an entry under the desired hosted zone (For production, `cbioportal.aws.mskcc.org`):
     - For `Record Name`, enter the desired URL.
     - For `Record Type`, choose `CNAME`. 
     - For `Value`, enter the URL of the desired load balancer.  
@@ -67,8 +67,7 @@ Before running the below command, modify `eks-airflow-ingress.yaml` to point to 
     ```
 
 10. Setup the DataDog agent.  
-We monitor our Airflow deployment using MSK's [DataDog instance](https://app.datadoghq.com/account/login/id/861kel1ds8quzqlv
-). Refer to the DataDog documentation for more information on [installation](https://docs.datadoghq.com/containers/kubernetes/installation/?tab=datadogoperator) and [Airflow integration](https://docs.datadoghq.com/integrations/airflow/?tab=containerized).
+We monitor our Airflow deployment using MSK's [DataDog instance](https://app.datadoghq.com/apm/home). Refer to the DataDog documentation for more information on [installation](https://docs.datadoghq.com/containers/kubernetes/installation/?tab=datadogoperator) and [Airflow integration](https://docs.datadoghq.com/integrations/airflow/?tab=containerized).
 Before running the below steps, modify `datadog-agent.yaml` to point to the correct URL for your Airflow server.
 	
     ```
