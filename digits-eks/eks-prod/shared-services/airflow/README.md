@@ -1,8 +1,6 @@
 # CDSI Airflow
 
-This folder contains the deployment files for the CDSI Airflow server. For more information, please see this Confluence document: https://mskconfluence.mskcc.org/display/CDSI/Airflow
-
-Ingress files live separately at [`../ingress`](../ingress).
+This folder contains the deployment files for the CDSI Airflow server. For more detailed information, please see this Confluence document: https://mskconfluence.mskcc.org/display/CDSI/Airflow.
 
 ## Deployment
 Follow the steps below to set up your own Airflow deployment for production or development purposes. Note that this deployment depends on AWS, Kubernetes, and Helm. 
@@ -25,7 +23,7 @@ Follow the user guide [here](https://docs.aws.amazon.com/eks/latest/userguide/ef
     1.  [Create a role](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html#efs-create-iam-resources). Note that when creating an IAM role on a DigITs-provisioned AWS account, you must prefix the role name with `userServiceRole` and point to the permission boundary of `AutomationOrUserServiceRolePermissions`.  
     2. [Install the EFS plugin](https://docs.aws.amazon.com/eks/latest/userguide/creating-an-add-on.html). Add `–-profile <your-aws-profile>` to the AWS commands to locate the correct credentials.    
     3. [Create the EFS filesystem](https://github.com/kubernetes-sigs/aws-efs-csi-driver/blob/master/docs/efs-create-filesystem.md). Add `–-profile <your-aws-profile>` to the AWS commands to locate the correct credentials. Store the filesystem ID for use in the next step.  
-    4. [Create a storage class for EFS](https://github.com/kubernetes-sigs/aws-efs-csi-driver/blob/master/examples/kubernetes/dynamic_provisioning/README.md).  
+    4. [Create a storage class for EFS](https://github.com/kubernetes-sigs/aws-efs-csi-driver/blob/master/examples/kubernetes/dynamic_provisioning/README.md). You can use our `storage/storageclass.yaml` as a template, but you must update `parameters.fileSystemId` to the filesystem ID you created in the previous step.
 
 4. Allocate persistent volume storage.  
 This deployment requires persistent storage for GitHub repo access. If your deployment does not require persistent volume storage, skip this step and remove references to persistent volumes in `override-values.yaml`.  
@@ -48,7 +46,7 @@ In the AWS Route 53 Dashboard, create an entry under the desired hosted zone (Fo
     - For `Value`, enter the URL of the desired load balancer.  
 
 7. Apply the ingress.  
-Before running the below command, modify `eks-airflow-ingress.yaml` to point to the correct URL for your Airflow server.
+The production ingress file is located at `../ingress/eks-airflow-ingress.yaml`. If you are deploying an Airflow server on the development AWS cluster, use the `digits-eks/eks-dev/shared-services/ingress/airflow-ingress.yaml` file instead. Before running the below command, modify the relevant ingress file to point to the correct URL for your Airflow server.
     ```
 	kubectl apply -f ../ingress/eks-airflow-ingress.yaml -n $NAMESPACE
     ```
@@ -62,7 +60,7 @@ Before running the below command, modify `eks-airflow-ingress.yaml` to point to 
 9. Install the Airflow Helm chart.
 	```
     helm repo add apache-airflow https://airflow.apache.org
-	helm repo update
+    helm repo update
     helm install -f override-values.yaml airflow apache-airflow/airflow --namespace $NAMESPACE --debug --timeout 10m
     ```
 
