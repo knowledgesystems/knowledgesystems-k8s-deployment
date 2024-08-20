@@ -40,6 +40,16 @@ spec:
                 name: cellxgene-service-1
                 port:
                   number: 8080
+    - host: cellxgene.cbioportal.org
+      http:
+        paths:
+          - path: /Q3_norm_all_batch_reduced_meta_1(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-4
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -67,11 +77,21 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 
     # type of authentication
-    nginx.ingress.kubernetes.io/auth-type: basic
+    # nginx.ingress.kubernetes.io/auth-type: basic
     # name of the secret that contains the user/password definitions
-    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    # nginx.ingress.kubernetes.io/auth-secret: basic-auth
     # message to display with an appropriate context why the authentication is required
-    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
+    # nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.cbioportal.org/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy.cbioportal.org/oauth2/auth/oauth2/start?rd=https://cellxgene.cbioportal.org$escaped_request_uri"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $name_upstream_1 $upstream_cookie__oauth2_proxy_gbm_1;
+
+      access_by_lua_block {
+        if ngx.var.name_upstream_1 ~= "" then
+          ngx.header["Set-Cookie"] = "_oauth2_proxy_gbm_1=" .. ngx.var.name_upstream_1 .. ngx.var.auth_cookie:match("(; .*)")
+        end
+      }
   name: cellxgene-ingress-with-auth
 spec:
   ingressClassName: nginx
@@ -83,48 +103,6 @@ spec:
     - host: cellxgene.cbioportal.org
       http:
         paths:
-          - path: /scRNA_rds_Ovarian_Malignant_cluster_object(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: cellxgene-service-2
-                port:
-                  number: 8080
-          - path: /scRNA_rds_Ovarian_nonMalignant_cluster_object(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: cellxgene-service-3
-                port:
-                  number: 8080
-          - path: /Q3_norm_all_batch_reduced_meta_1(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: cellxgene-service-4
-                port:
-                  number: 8080
-          - path: /BTC_GBM_001(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: cellxgene-service-5
-                port:
-                  number: 8080
-          - path: /BTC_GBM_002(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: cellxgene-service-6
-                port:
-                  number: 8080
-          - path: /BTC_GBM_003(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: cellxgene-service-7
-                port:
-                  number: 8080
           - path: /gbm_filtered_processing2(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
@@ -210,3 +188,29 @@ spec:
                 name: cellxgene-service-1
                 port:
                   number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oauth2-proxy
+  annotations:
+    # add an annotation indicating the issuer to use.
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - oauth2-proxy.cbioportal.org
+    secretName: oauth2-proxy-cert
+  rules:
+  - host: oauth2-proxy.cbioportal.org
+    http:
+      paths:
+      - path: /oauth2
+        pathType: Prefix
+        backend:
+          service:
+            name: oauth2-proxy  # This points to the service we're running
+            port:
+              number: 4180
