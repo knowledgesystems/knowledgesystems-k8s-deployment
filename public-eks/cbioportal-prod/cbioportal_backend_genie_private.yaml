@@ -190,7 +190,8 @@ spec:
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379",
-            "--redis.database=8",
+            "--redis.database=2",
+            "--redis.clear_on_startup=true",
             "--redis.password=$(REDIS_PASSWORD)",
             # misc. frontend settings (this is NOT a persistence layer caching property!)
             "--enable_persistent_cache=true",
