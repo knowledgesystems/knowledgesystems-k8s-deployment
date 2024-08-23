@@ -178,7 +178,8 @@ spec:
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379",
-            "--redis.database=9",
+            "--redis.database=1",
+            "--redis.clear_on_startup=true",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             # compress on client side
             "--enable_request_body_gzip_compression=true",
