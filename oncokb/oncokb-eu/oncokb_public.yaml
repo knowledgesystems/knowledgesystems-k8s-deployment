@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: oncokb-public
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: oncokb-public
