@@ -423,6 +423,18 @@ a#social-pingId .kc-social-provider-name {
     color: transparent;
 }
 
+/* social- controls the BTC Microsoft IDP icon*/
+a#social-btc-microsoft-oidc .kc-social-provider-name {
+    background: url("../img/btc-ms-symbollockup_signin_dark.png") no-repeat;
+    height: 41px;
+    width: 215px;
+    display: inline-block;
+}
+
+a#social-btc-microsoft-oidc .kc-social-provider-name {
+    color: transparent;
+}
+
 .kc-social-provider-name {
     position: relative;
     top: 3px; 
