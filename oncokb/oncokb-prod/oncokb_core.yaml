@@ -15,8 +15,8 @@ spec:
   strategy:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
-      maxSurge: 3
-      maxUnavailable: 3
+      maxSurge: 0
+      maxUnavailable: 4
     type: RollingUpdate
   template:
     metadata:

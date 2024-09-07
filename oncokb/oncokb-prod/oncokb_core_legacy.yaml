@@ -30,6 +30,8 @@ spec:
         envFrom:
           - configMapRef:
               name: oncokb-core-legacy
+          - configMapRef:
+              name: oncokb-db-public-rds-oncokb-user
         image: oncokb/oncokb:1.4.10
         command: ["java"]
         args: [
@@ -52,9 +54,9 @@ spec:
                   "-XX:MaxRAM=1024m",
                   "-Dapp.name=oncokb-core-legacy",
                   "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-                  "-Djdbc.url=jdbc:mysql://$(DB_HOST):3306/$(DB_NAME)?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-                  "-Djdbc.username=$(USER_NAME)",
-                  "-Djdbc.password=$(USER_PASSWORD)",
+                  "-Djdbc.url=$(DB_URL)/oncokb_core_legacy?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+                  "-Djdbc.username=$(DB_USERNAME)",
+                  "-Djdbc.password=$(DB_PASSWORD)",
                   "-Ddata.version=v1.23",
                   "-Ddata.version_date=08/28/2019",
                   "-Dgenomenexus.api=https://www.genomenexus.org/",
