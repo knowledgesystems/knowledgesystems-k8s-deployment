@@ -53,6 +53,7 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             "-XX:MaxRAM=1024m",
+            "-Dapp.name=oncokb-core-public",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
             "-Djdbc.url=$(DB_URL)/oncokb_core_public?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
