@@ -14,6 +14,7 @@ spec:
       - curation.oncokb.aws.mskcc.org
       - cbx.oncokb.aws.mskcc.org
       - pub-data-17.oncokb.aws.mskcc.org
+      - data-legacy.oncokb.aws.mskcc.org
       - airflow.oncokb.aws.mskcc.org
   rules:
     - host: "www.oncokb.aws.mskcc.org"
@@ -54,6 +55,16 @@ spec:
             backend:
               service:
                 name: oncokb-core-pub-data-2017
+                port:
+                  number: 8888
+    - host: "data-legacy.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core-data-legacy
                 port:
                   number: 8888
     - host: "curation.oncokb.aws.mskcc.org"
