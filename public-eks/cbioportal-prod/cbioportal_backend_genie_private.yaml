@@ -9,7 +9,7 @@ metadata:
     run: cbioportal-backend-genie-private
     tags.datadoghq.com/env: eks-genie-private
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.16
+    tags.datadoghq.com/version: 6.0.17
   name: cbioportal-backend-genie-private
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-private
 spec:
@@ -29,7 +29,7 @@ spec:
         run: cbioportal-backend-genie-private
         tags.datadoghq.com/env: eks-genie-private
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.16
+        tags.datadoghq.com/version: 6.0.17
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -54,7 +54,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.16-web-shenandoah
+        image: cbioportal/cbioportal:6.0.17-web-shenandoah
         volumeMounts:
           - name: cbioportal-genie-private-configmap-volume
             mountPath: /cbioportal/local.key
