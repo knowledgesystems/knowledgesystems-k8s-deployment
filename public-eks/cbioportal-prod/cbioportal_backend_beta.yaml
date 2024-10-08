@@ -33,7 +33,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-beta-v6
-        image: cbioportal/cbioportal:6.0.17-web-shenandoah
+        image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -82,7 +82,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+            "--frontend.url=https://deploy-preview-4931.cancerrevue.org/",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
@@ -111,16 +111,15 @@ spec:
             "--spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys",
             "--security.cors.allowed-origins=*",
             "--authorization=false",
-            "--db.user=$(DB_USER)",
-            "--db.password=$(DB_PASSWORD)",
-            "--spring.datasource.driver-class-name=com.mysql.jdbc.Driver",
+            "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
+            "--spring.datasource.mysql.username=$(DB_USER)",
+            "--spring.datasource.mysql.password=$(DB_PASSWORD)",
+            "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect",
-            "--spring.datasource.url=$(DB_CONNECTION_STRING)",
-            "--spring.datasource.username=$(DB_USER)",
-            "--spring.datasource.password=$(DB_PASSWORD)",
-          #"--db.clickhouse.connection_string=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-          #"--db.clickhouse.user=$(DB_CLICKHOUSE_USER)",
-          #"--db.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
+            "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
+            "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--tomcat.catalina.scope=runtime",
             "--show.transcript_dropdown=true",
             "--skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
