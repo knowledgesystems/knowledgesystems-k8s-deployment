@@ -1,0 +1,51 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: oncokb-dev
+  region: us-east-1
+  version: "1.27"
+
+managedNodeGroups:
+  - name: large-general
+    instanceType: t3.large
+    minSize: 3
+    desiredCapacity: 3
+    maxSize: 3
+    privateNetworking: true
+    iam:
+      instanceRoleARN: "arn:aws:iam::762447640649:role/userServiceRoleEKSWorkerNode-oncokb-dev"
+    securityGroups:
+      attachIDs: ["sg-0475cebc4766a0dfb"] # sg for cbioportal prod Node
+  - name: eks-oncokb-load-testing
+    instanceType: r7i.2xlarge
+    minSize: 2
+    desiredCapacity: 2
+    maxSize: 2
+    privateNetworking: true
+    taints:
+      - key: dedicated
+        value: eks-oncokb-load-testing
+        effect: NoSchedule
+    iam:
+      instanceRoleARN: "arn:aws:iam::762447640649:role/userServiceRoleEKSWorkerNode-oncokb-dev"
+    securityGroups:
+      attachIDs: ["sg-0475cebc4766a0dfb"] # sg for cbioportal prod Node
+vpc:
+  id: vpc-08330c6eeb2de84b1
+  securityGroup: sg-0d6da57032ee7fff1 # this is the ControlPlaneSecurityGroup, sgfor-cbioportal-prod-ControlPlane
+  cidr: 10.1.202.0/23
+  subnets:
+    private:
+      us-east-1-0:
+        az: us-east-1a
+        cidr: 10.1.202.0/25
+        id: subnet-0f9926ece09dc2800
+      us-east-1-1:
+        az: us-east-1b
+        cidr: 10.1.202.128/25
+        id: subnet-01c3bd0d698f0c07a
+      us-east-1-2:
+        az: us-east-1c
+        cidr: 10.1.203.0/25
+        id: subnet-06d9a2a8ac316c03b
