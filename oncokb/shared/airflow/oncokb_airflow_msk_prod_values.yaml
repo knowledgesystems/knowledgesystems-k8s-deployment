@@ -9,6 +9,9 @@ dags:
     httpSecret: oncokb-github
     httpSecretUsernameKey: USERNAME
     httpSecretPasswordKey: PRIVATE_ACCESS_TOKEN
+    ## the number of consecutive failures allowed before aborting
+    ## NOTE: if your repo regularly has intermittent failures, you may wish to set a non-0 value
+    maxFailures: 1
 
 postgresql:
   # to use the external db, the embedded one must be disabled
