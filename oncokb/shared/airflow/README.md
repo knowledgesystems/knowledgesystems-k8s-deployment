@@ -33,7 +33,7 @@ List of values to change depending on cluster deployment:
 Apply service account (if KubernetesPodOperator is used):
 
 ```
-kubectl -n $AIRFLOW_NAMESPACE apply -f airflow/oncokb_airflow_service_account.yaml --version 8.9.0
+kubectl -n $AIRFLOW_NAMESPACE apply -f airflow/oncokb_airflow_service_account.yaml
 ```
 
 After making the neccesary changes, install Helm chart:
