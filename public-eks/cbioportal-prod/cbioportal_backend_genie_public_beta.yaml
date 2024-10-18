@@ -150,14 +150,14 @@ spec:
             "--spring.data.redis.port=$(REDIS_SESSION_PORT)",
             "--spring.data.redis.password=$(REDIS_SESSION_PASSWORD)",
             "--dat.method=none",
-            "--spring.datasource.mysql.url=jdbc:mysql://rfc80db.cbioportal.org:3306/db_2024_05_23_original?zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true",
-            "--spring.datasource.mysql.username=cgds_user",
-            "--spring.datasource.mysql.password=rfc80dbuserpw5",
+            "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
+            "--spring.datasource.mysql.username=$(DB_USER)",
+            "--spring.datasource.mysql.password=$(DB_PASSWORD)",
             "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
-            "--spring.datasource.clickhouse.url=jdbc:ch://mecgt250i0.us-east-1.aws.clickhouse.cloud:8443/sling_db_2024_05_23_original?ssl=true&sslmode=STRICT",
-            "--spring.datasource.clickhouse.username=app_user",
-            "--spring.datasource.clickhouse.password=P@ssword1976",
+            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
+            "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
 
             # To enable redis session store, we need to set
             # spring.autoconfigure.exclude to a random value to override the
