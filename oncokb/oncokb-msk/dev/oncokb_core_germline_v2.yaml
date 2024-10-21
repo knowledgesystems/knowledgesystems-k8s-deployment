@@ -29,7 +29,7 @@ spec:
                 name: oncokb-db-msk-dev-rds
             - configMapRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:4.0.0-germline.2
+          image: oncokb/oncokb:4.0.0-germline.3
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
