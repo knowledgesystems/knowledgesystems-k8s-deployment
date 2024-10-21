@@ -188,7 +188,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: oncokb-airflow
+            name: oncokb-airflow-stable-web
             port:
               number: 8080
   - host: data-4-9.oncokb.org
