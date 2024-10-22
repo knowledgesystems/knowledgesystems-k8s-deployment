@@ -58,7 +58,7 @@ spec:
                 name: oncokb-db-public-rds-oncokb-transcript
             - configMapRef:
                 name: oncokb-curation-redis
-          image: oncokb/oncokb-curation:2.0.25
+          image: oncokb/oncokb-curation:2.0.26
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
