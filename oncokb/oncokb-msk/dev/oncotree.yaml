@@ -24,10 +24,9 @@ spec:
           image: oncokb/oncotree:latest
           resources:
             requests:
-              memory: 1Gi
               cpu: 500m
             limits:
-              memory: 2Gi
+              memory: 200Mi
               cpu: 750m
           ports:
             - name: http
