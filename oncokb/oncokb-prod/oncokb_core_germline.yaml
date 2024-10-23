@@ -4,13 +4,14 @@ metadata:
   annotations:
     deployment.kubernetes.io/revision: "4"
   labels:
-    run: oncokb-core-germline-v2
-  name: oncokb-core-germline-v2
+    run: oncokb-core-germline
+  name: oncokb-core-germline
+  namespace: oncokb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: oncokb-core-germline-v2
+      run: oncokb-core-germline
   strategy:
     rollingUpdate:
       maxUnavailable: 0
@@ -18,34 +19,39 @@ spec:
   template:
     metadata:
       labels:
-        run: oncokb-core-germline-v2
+        run: oncokb-core-germline
     spec:
       containers:
         - env:
           envFrom:
             - configMapRef:
-                name: oncokb-core-germline-v2
+                name: oncokb-core-germline
             - configMapRef:
-                name: oncokb-db-msk-dev-rds
+                name: oncokb-redis-cluster-ng
             - configMapRef:
-                name: oncokb-redis-cluster
-          image: oncokb/oncokb:4.0.0-germline.4
+                name: oncokb-db-public-rds-oncokb-user
+          # The beta current is used to showcase a new search endpoint
+          image: oncokb/oncokb:4.0.0-germline.5
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=$(DB_URL)/oncokb_core_germline_v2?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.url=$(DB_URL)/oncokb_core_germline?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
             "-Djdbc.password=$(DB_PASSWORD)",
             "-Dgenomenexus.api=https://www.genomenexus.org/",
+            "-Doncokb_transcript.url=https://transcript.oncokb.org",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+            "-Dpublic_oncokb.token=$(PUBLIC_ONCOKB_TOKEN)",
             "-Dredis.enable=false",
             "-Dredis.type=$(REDIS_TYPE)",
             "-Dredis.address=$(REDIS_ADDRESS)",
-            "-Dredis.password=$(REDIS_PASSWROD)",
-            "-Dredis.masterName=$(REDIS_MASTERNAME)",
+            "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dredis.expiration=$(REDIS_EXPIRATION)",
+            "-Dswagger_url=https://beta.oncokb.org",
             "-Dshow_sitemaps=false",
+            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
+            "-Dsentry.sample.rate=1",
             "-jar",
             "/webapp-runner.jar",
             "--enable-compression",
@@ -61,18 +67,18 @@ spec:
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 30
+            periodSeconds: 20
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 900
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
-          name: oncokb-core-germline-v2
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 60
+          name: oncokb-core-germline
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -81,7 +87,6 @@ spec:
               cpu: 500m
               memory: 1Gi
             limits:
-              cpu: 2
               memory: 2Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -90,16 +95,24 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-oncokb"
+          effect: "NoSchedule"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-oncokb
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncokb-core-germline-v2
-  name: oncokb-core-germline-v2
+    run: oncokb-core-germline
+  name: oncokb-core-germline
+  namespace: oncokb
 spec:
   ports:
     - port: 8888
   selector:
-    run: oncokb-core-germline-v2
+    run: oncokb-core-germline
   type: ClusterIP

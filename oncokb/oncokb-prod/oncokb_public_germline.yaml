@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: oncokb-public-germline
+  namespace: oncokb
 spec:
   replicas: 1
   selector:
@@ -10,7 +11,6 @@ spec:
       version: 'v1'
   strategy:
     rollingUpdate:
-      maxSurge: 2
       maxUnavailable: 0
     type: RollingUpdate
   template:
@@ -20,23 +20,35 @@ spec:
         version: 'v1'
     spec:
       containers:
-        - name: oncokb-public
+        - name: oncokb-public-germline
           image: oncokb/oncokb-public:4.0.0-germline.2
           env:
+            # Database schema update takes a lot of especially when changing a table with a lot of table
+            # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
+            - name: JAVA_OPTS
+              value: '-Xmx1024m -Xms512m'
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
+              value: '$(SERVICE_ACCOUNT_USERNAME)'
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
+              value: '$(SERVICE_ACCOUNT_PASSWORD)'
+            - name: APPLICATION_SAMLAWS_PRINCIPALARN
+              value: '$(PRINCIPAL_ARN)'
+            - name: APPLICATION_SAMLAWS_ROLEARN
+              value: '$(ROLE_ARN)'
+            - name: APPLICATION_GITHUB_TOKEN
+              value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
+            - name: APPLICATION_DB_READ_ONLY
+              value: "false"
             - name: APPLICATION_REDIS_TYPE
               value: '$(REDIS_TYPE)'
             - name: APPLICATION_REDIS_ADDRESS
               value: '$(REDIS_ADDRESS)'
             - name: APPLICATION_REDIS_PASSWORD
-              value: '$(REDIS_PASSWORD)'
+              value: '$(REDIS_PASSWROD)'
             - name: APPLICATION_REDIS_EXPIRATION
               value: '$(REDIS_EXPIRATION)'
-            - name: APPLICATION_DB_READ_ONLY
-              value: 'false'
-            - name: JAVA_OPTS
-              value: '-Xmx1024m -Xms512m'
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
               value: '-2147483647'
             - name: SENTRY_TRACES_SAMPLE_RATE
@@ -51,15 +63,19 @@ spec:
             - configMapRef:
                 name: oncokb-public-germline
             - configMapRef:
-                name: oncokb-redis-cluster
+                name: oncokb-schultz-lab-sa
             - configMapRef:
-                name: oncokb-db-msk-dev-rds
+                name: oncokb-github
+            - configMapRef:
+                name: oncokb-redis-cluster-ng
+            - configMapRef:
+                name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
             httpGet:
               path: /
               port: 9095
             initialDelaySeconds: 30
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             periodSeconds: 5
             failureThreshold: 6
           livenessProbe:
@@ -67,16 +83,16 @@ spec:
               path: /
               port: 9095
             initialDelaySeconds: 90
-            timeoutSeconds: 5
-            periodSeconds: 5
-            failureThreshold: 5
+            timeoutSeconds: 15
+            periodSeconds: 15
+            failureThreshold: 10
           resources:
             requests:
               memory: 1Gi
               cpu: 500m
             limits:
               memory: 2Gi
-              cpu: 750m
+              cpu: 2000m
           ports:
             - name: http
               containerPort: 9095
@@ -86,16 +102,24 @@ spec:
             - mountPath: /app/resources/config/recaptcha/oncokb-recaptcha-credentials.json
               subPath: oncokb-recaptcha-credentials.json
               name: recaptcha-credentials
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-oncokb"
+          effect: "NoSchedule"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-oncokb
       volumes:
-      - name: recaptcha-credentials
-        secret:
-          secretName: oncokb-recaptcha-credentials
+        - name: recaptcha-credentials
+          secret:
+            secretName: oncokb-recaptcha-credentials
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: oncokb-public-germline
+  namespace: oncokb
   labels:
     app: oncokb-public-germline
 spec:
@@ -103,4 +127,5 @@ spec:
     app: oncokb-public-germline
   type: ClusterIP
   ports:
-    - port: 9095
+    - name: http
+      port: 9095
