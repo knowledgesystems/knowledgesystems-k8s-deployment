@@ -37,7 +37,7 @@ spec:
                 name: oncokb-redis-cluster
             - configMapRef:
                 name: oncokb-db-eucentral-rds
-          image: oncokb/oncokb:3.21.0
+          image: oncokb/oncokb:3.22.0
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
