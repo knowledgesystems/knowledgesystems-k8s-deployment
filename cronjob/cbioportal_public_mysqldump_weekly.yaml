@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioportal-public-mysqldump-weekly
+spec:
+  schedule: "59 23 * * 6"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - envFrom:
+                - configMapRef:
+                    name: aws-cli-credentials
+                - configMapRef:
+                    name: cbioportal-mysql-dump
+              name: cbioportal-public-mysqldump-weekly
+              image: mysql:8.0-debian
+              command: ["/bin/sh", "-c"]
+              args:
+                - echo "Install curl";
+                  apt-get update; apt-get install unzip curl -y;
+                  echo "Done installing curl\n\n";
+                  
+                  echo "Install aws cli";
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscli.zip";
+                  unzip awscli.zip;
+                  ./aws/install;
+                  
+                  echo "Configure AWS CLI";
+                  aws configure set aws_access_key_id ${ACCESS_KEY_ID};
+                  aws configure set aws_secret_access_key ${SECRET_ACCESS_KEY};
+                  aws configure set default.region ${AWS_REGION};
+                  echo "Done configuring AWS CLI\n\n";
+
+                  # Add date and current database version to file name
+                  SCHEMA_VERSION=$(mysql -h${DB_HOST} -u${DB_USER} -p"${DB_PASSWORD}" -s -N -e "select DB_SCHEMA_VERSION from info;")
+                  MYSQL_DUMP_FILE_NAME=dump_$(date "+%m_%d_%Y")_\(v${SCHEMA__VERSION}\).sql.gz
+
+                  # TODO: Mysql dump to s3 bucket
+                  mysqldump -h${DB_HOST} -u${DB_USER} -p"${DB_PASSWORD}" --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_NAME}/${MYSQL_DUMP_FILE_NAME}
+
+                  # TODO: Delete objects older than 4 weeks
+
+          restartPolicy: OnFailure
