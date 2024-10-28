@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "4"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    run: gn-spring-boot
+  name: gn-spring-boot
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/gn-spring-boot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: gn-spring-boot
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: gn-spring-boot
+    spec:
+      containers:
+        - env:
+            - name: SERVER_PORT
+              value: "8888"
+            - name: MONGODB_URI
+              value: mongodb://gn-mongo-v0dot31-mongodb:27017/annotator?connectTimeoutMS=120000
+          image: genomenexus/gn-spring-boot:1.3.1
+          imagePullPolicy: Always
+          command: ["java"]
+          args: [
+              # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
+              # include shenandoah)
+              "-Xms100m",
+              "-Xmx8g",
+              "-XX:+UnlockExperimentalVMOptions",
+              "-XX:+UseShenandoahGC",
+              "-XX:ShenandoahUncommitDelay=1000",
+              "-XX:ShenandoahGuaranteedGCInterval=10000",
+              "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
+              # this is to use VEP running inside K8s. Remove to use
+              # grch37.rest.ensembl.org instead
+              # "-Dgn_vep.region.url=http://gn-vep/vep/human/region/VARIANT",
+              "-jar",
+              "/app.war",
+            ]
+          # TODO: create a better readiness probe
+          readinessProbe:
+            httpGet:
+              path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+              port: 8888
+            initialDelaySeconds: 240
+            timeoutSeconds: 30
+            periodSeconds: 60
+          # TODO: create a better liveness probe (this is just readiness with
+          # more lenience)
+          livenessProbe:
+            httpGet:
+              path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+              port: 8888
+            initialDelaySeconds: 240
+            timeoutSeconds: 120
+            periodSeconds: 240
+          name: gn-spring-boot
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              memory: 3Gi
+            limits:
+              memory: 11Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      # run on genome nexus machines
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-oncokb-load-testing"
+          effect: "NoSchedule"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-oncokb-load-testing
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-spring-boot
+    app: gn-spring-boot
+  name: genome-nexus
+  selfLink: /api/v1/namespaces/default/services/genome-nexus
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8888
+    - port: 443
+      name: https
+      targetPort: 8888
+  selector:
+    run: gn-spring-boot
+  type: ClusterIP
