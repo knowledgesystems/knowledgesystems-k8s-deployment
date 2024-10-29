@@ -21,13 +21,14 @@ spec:
               command: ["/bin/sh", "-c"]
               args:
                 - echo "Install curl";
-                  apt-get update; apt-get install unzip curl -y;
+                  apt-get update; apt-get install unzip curl less -y;
                   echo "Done installing curl\n\n";
                   
                   echo "Install aws cli";
                   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscli.zip";
                   unzip awscli.zip;
                   ./aws/install;
+                  echo "Done installing aws cli\n\n";
                   
                   echo "Configure AWS CLI";
                   aws configure set aws_access_key_id ${ACCESS_KEY_ID};
@@ -36,12 +37,40 @@ spec:
                   echo "Done configuring AWS CLI\n\n";
 
                   # Add date and current database version to file name
-                  SCHEMA_VERSION=$(mysql -h${DB_HOST} -u${DB_USER} -p"${DB_PASSWORD}" -s -N -e "select DB_SCHEMA_VERSION from info;")
-                  MYSQL_DUMP_FILE_NAME=dump_$(date "+%m_%d_%Y")_\(v${SCHEMA__VERSION}\).sql.gz
+                  SCHEMA_VERSION=$(
+                    mysql \
+                    -h${DB_HOST} \
+                    -u${DB_USER} \
+                    -p"${DB_PASSWORD}" \
+                    ${DB_PORTAL_DB_NAME} \
+                    -s -N -e \
+                    "select DB_SCHEMA_VERSION from info;" | sed "s/\./_/g"
+                  );
+                  
+                  MYSQL_DUMP_FILE_NAME=dump_$(date "+%Y_%m_%d")_v${SCHEMA_VERSION}.sql.gz;
 
-                  # TODO: Mysql dump to s3 bucket
-                  mysqldump -h${DB_HOST} -u${DB_USER} -p"${DB_PASSWORD}" --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_NAME}/${MYSQL_DUMP_FILE_NAME}
+                  # Dump mysql database to s3 bucket
+                  echo "Dump database to aws s3 bucket";
+                  mysqldump \
+                    -h${DB_HOST} \
+                    -u${DB_USER} \
+                    -p"${DB_PASSWORD}" \
+                    --compress \
+                    ${DB_PORTAL_DB_NAME} | \
+                    gzip | \
+                    aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/${MYSQL_DUMP_FILE_NAME};
+                  echo "Done dumping to bucket\n\n";
 
-                  # TODO: Delete objects older than 4 weeks
+                  # Delete objects older than 30 days
+                  FILE_OLDER_THAN_30_DAYS=$(
+                  aws s3api list-objects-v2 \
+                  --bucket ${AWS_S3_DUMP_BUCKET} \
+                  --query "Contents[?LastModified<'$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)'].Key" \
+                  --output text
+                  );
+                  
+                  echo "Delete previous dumps that are older than a month";
+                  aws s3 rm s3://${AWS_S3_DUMP_BUCKET}/${FILE_OLDER_THAN_30_DAYS};
+                  echo "Done deleting older dumps\n\n";
 
           restartPolicy: OnFailure
