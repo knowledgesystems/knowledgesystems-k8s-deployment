@@ -61,16 +61,21 @@ spec:
                     aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/${MYSQL_DUMP_FILE_NAME};
                   echo "Done dumping to bucket\n\n";
 
-                  # Delete objects older than 30 days
-                  FILE_OLDER_THAN_30_DAYS=$(
-                  aws s3api list-objects-v2 \
-                  --bucket ${AWS_S3_DUMP_BUCKET} \
-                  --query "Contents[?LastModified<'$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)'].Key" \
-                  --output text
+                  # Get list of files older than 30 days
+                  FILES_OLDER_THAN_30_DAYS=$(
+                    aws s3api list-objects-v2 \
+                    --bucket ${AWS_S3_DUMP_BUCKET} \
+                    --query "Contents[?LastModified<'$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)'].Key" \
+                    --output text | \
+                    sed 's/\s/\n/g'
                   );
                   
+                  # Delete older dumps only if more than 4 dumps present
                   echo "Delete previous dumps that are older than a month";
-                  aws s3 rm s3://${AWS_S3_DUMP_BUCKET}/${FILE_OLDER_THAN_30_DAYS};
+                  [ $(aws s3 ls s3://${AWS_S3_DUMP_BUCKET} | wc -l) -gt 4 ] && \
+                    echo $FILES_OLDER_THAN_30_DAYS | \
+                    xargs -I {} \
+                    aws s3 rm s3://${AWS_S3_DUMP_BUCKET}/{};
                   echo "Done deleting older dumps\n\n";
 
           restartPolicy: OnFailure
