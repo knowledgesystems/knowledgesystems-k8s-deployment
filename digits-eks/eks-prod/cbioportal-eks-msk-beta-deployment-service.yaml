@@ -59,7 +59,7 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal:6.0.14-web-shenandoah
+          image: cbioportal/cbioportal:demo-fix-data-token-issue-web-shenandoah
           volumeMounts:
             - name: msk-beta-eks-configmap-volume
               mountPath: /cbioportal/local.key
@@ -214,6 +214,8 @@ spec:
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=cbioportal-msk-beta-v6",
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt",
             "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key",
+            "--logging.level.org.cbioportal.security=TRACE",
+            "--logging.level.org.springframework.security=TRACE",
             # "--logging.level.org.springframework.security=DEBUG",
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.binding=POST",
             # "--spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo",
