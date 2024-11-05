@@ -19,52 +19,28 @@ spec:
               image: mysql:8.0-debian
               command: ["/bin/sh", "-c"]
               args:
-                - printf "Install curl";
+                - printf "Install libraries\n";
                   apt-get update; apt-get install unzip curl less -y;
                   printf "Done installing curl\n\n";
                   
-                  printf "Install aws cli";
+                  printf "Install aws cli\n";
                   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscli.zip";
                   unzip awscli.zip;
                   ./aws/install;
                   printf "Done installing aws cli\n\n";
 
-                  SCHEMA_VERSION=$(
-                    mysql \
-                    -h${DB_HOST} \
-                    -u${DB_USER} \
-                    -p"${DB_PASSWORD}" \
-                    ${DB_PORTAL_DB_NAME} \
-                    -s -N -e \
-                    "select DB_SCHEMA_VERSION from info;" | sed "s/\./_/g"
-                  );
-                  
+                  SCHEMA_VERSION=$(mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_PORTAL_DB_NAME} -s -N -e "select DB_SCHEMA_VERSION from info;" | sed "s/\./_/g");
+
                   MYSQL_DUMP_FILE_NAME=dump_$(date "+%Y_%m_%d")_v${SCHEMA_VERSION}.sql.gz;
-
-                  printf "Dump database to aws s3 bucket";
-                  mysqldump \
-                    -h${DB_HOST} \
-                    -u${DB_USER} \
-                    -p"${DB_PASSWORD}" \
-                    --compress \
-                    ${DB_PORTAL_DB_NAME} | \
-                    gzip | \
-                    aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/${MYSQL_DUMP_FILE_NAME};
-                  printf "Done dumping to bucket\n\n";
-
-                  FILES_OLDER_THAN_30_DAYS=$(
-                    aws s3api list-objects-v2 \
-                    --bucket ${AWS_S3_DUMP_BUCKET} \
-                    --query "Contents[?LastModified<'$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)'].Key" \
-                    --output text | \
-                    sed 's/\s/\n/g'
-                  );
                   
-                  printf "Delete previous dumps that are older than a month";
-                  [ $(aws s3 ls s3://${AWS_S3_DUMP_BUCKET} | wc -l) -gt 4 ] && \
-                    printf $FILES_OLDER_THAN_30_DAYS | \
-                    xargs -I {} \
-                    aws s3 rm s3://${AWS_S3_DUMP_BUCKET}/{};
+                  printf "Dump database to aws s3 bucket\n";
+                  mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/${MYSQL_DUMP_FILE_NAME};
+                  printf "Done dumping to bucket\n\n";
+                  
+                  FILES_OLDER_THAN_30_DAYS=$(aws s3api list-objects-v2 --bucket ${AWS_S3_DUMP_BUCKET} --query "Contents[?LastModified<'$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)'].Key" --output text | sed "s/\s/\n/g");
+                  
+                  printf "Delete previous dumps that are older than a month\n";
+                  [ $(aws s3 ls s3://${AWS_S3_DUMP_BUCKET} | wc -l) -gt 4 ] && printf $FILES_OLDER_THAN_30_DAYS | xargs -I {} aws s3 rm s3://${AWS_S3_DUMP_BUCKET}/{};
                   printf "Done deleting older dumps\n\n";
 
           restartPolicy: OnFailure
