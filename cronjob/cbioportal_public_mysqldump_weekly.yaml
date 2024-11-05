@@ -10,33 +10,25 @@ spec:
     spec:
       template:
         spec:
+          serviceAccountName: cbioportal-mysql-dump-weekly
           containers:
             - envFrom:
-                - configMapRef:
-                    name: aws-cli-credentials
                 - configMapRef:
                     name: cbioportal-mysql-dump
               name: cbioportal-public-mysqldump-weekly
               image: mysql:8.0-debian
               command: ["/bin/sh", "-c"]
               args:
-                - echo "Install curl";
+                - printf "Install curl";
                   apt-get update; apt-get install unzip curl less -y;
-                  echo "Done installing curl\n\n";
+                  printf "Done installing curl\n\n";
                   
-                  echo "Install aws cli";
+                  printf "Install aws cli";
                   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscli.zip";
                   unzip awscli.zip;
                   ./aws/install;
-                  echo "Done installing aws cli\n\n";
-                  
-                  echo "Configure AWS CLI";
-                  aws configure set aws_access_key_id ${ACCESS_KEY_ID};
-                  aws configure set aws_secret_access_key ${SECRET_ACCESS_KEY};
-                  aws configure set default.region ${AWS_REGION};
-                  echo "Done configuring AWS CLI\n\n";
+                  printf "Done installing aws cli\n\n";
 
-                  # Add date and current database version to file name
                   SCHEMA_VERSION=$(
                     mysql \
                     -h${DB_HOST} \
@@ -49,8 +41,7 @@ spec:
                   
                   MYSQL_DUMP_FILE_NAME=dump_$(date "+%Y_%m_%d")_v${SCHEMA_VERSION}.sql.gz;
 
-                  # Dump mysql database to s3 bucket
-                  echo "Dump database to aws s3 bucket";
+                  printf "Dump database to aws s3 bucket";
                   mysqldump \
                     -h${DB_HOST} \
                     -u${DB_USER} \
@@ -59,9 +50,8 @@ spec:
                     ${DB_PORTAL_DB_NAME} | \
                     gzip | \
                     aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/${MYSQL_DUMP_FILE_NAME};
-                  echo "Done dumping to bucket\n\n";
+                  printf "Done dumping to bucket\n\n";
 
-                  # Get list of files older than 30 days
                   FILES_OLDER_THAN_30_DAYS=$(
                     aws s3api list-objects-v2 \
                     --bucket ${AWS_S3_DUMP_BUCKET} \
@@ -70,12 +60,11 @@ spec:
                     sed 's/\s/\n/g'
                   );
                   
-                  # Delete older dumps only if more than 4 dumps present
-                  echo "Delete previous dumps that are older than a month";
+                  printf "Delete previous dumps that are older than a month";
                   [ $(aws s3 ls s3://${AWS_S3_DUMP_BUCKET} | wc -l) -gt 4 ] && \
-                    echo $FILES_OLDER_THAN_30_DAYS | \
+                    printf $FILES_OLDER_THAN_30_DAYS | \
                     xargs -I {} \
                     aws s3 rm s3://${AWS_S3_DUMP_BUCKET}/{};
-                  echo "Done deleting older dumps\n\n";
+                  printf "Done deleting older dumps\n\n";
 
           restartPolicy: OnFailure
