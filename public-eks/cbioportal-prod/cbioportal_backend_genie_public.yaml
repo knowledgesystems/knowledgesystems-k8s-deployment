@@ -9,7 +9,7 @@ metadata:
     run: cbioportal-backend-genie-public
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.19
+    tags.datadoghq.com/version: 6.0.20
   name: cbioportal-backend-genie-public
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-genie-public
 spec:
@@ -29,7 +29,7 @@ spec:
         run: cbioportal-backend-genie-public
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.19
+        tags.datadoghq.com/version: 6.0.20
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -43,7 +43,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.19-web-shenandoah
+        image: cbioportal/cbioportal:6.0.20-web-shenandoah
         command: [ "java" ]
         args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/

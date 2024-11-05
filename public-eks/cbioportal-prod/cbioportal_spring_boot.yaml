@@ -9,7 +9,7 @@ metadata:
     run: cbioportal-spring-boot
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.19
+    tags.datadoghq.com/version: 6.0.20
   name: cbioportal-spring-boot
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
@@ -29,7 +29,7 @@ spec:
         run: cbioportal-spring-boot
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.19
+        tags.datadoghq.com/version: 6.0.20
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -47,7 +47,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.19-web-shenandoah
+        image: cbioportal/cbioportal:6.0.20-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
