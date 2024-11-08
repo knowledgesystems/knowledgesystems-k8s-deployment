@@ -167,7 +167,7 @@ spec:
       paths:
       - backend:
           service:
-            name: eks-cdd
+            name: eks-cdd-graphite
             port:
               number: 80
         path: /
@@ -177,7 +177,7 @@ spec:
       paths:
       - backend:
           service:
-            name: eks-cdd
+            name: eks-cdd-graphite
             port:
               number: 80
         path: /
