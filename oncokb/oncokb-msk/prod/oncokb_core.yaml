@@ -30,7 +30,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:3.22.0
+          image: oncokb/oncokb:3.23.0
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
