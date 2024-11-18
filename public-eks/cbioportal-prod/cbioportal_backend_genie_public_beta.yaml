@@ -90,7 +90,7 @@ spec:
             "--skin.authorization_message=Welcome to the AACR Project GENIE cBioPortal.<br/><br/>If you are a new user, you will need to register and agree to the terms of use before you can use this portal. [<a href=\"https://docs.google.com/forms/d/e/1FAIpQLScwlJ9WRmAGZ08CCg8wYo8l8bcUmsAzJ09i1MKjBNtb_dLqIw/viewform\">First time user registration</a>].",
             "--app.name=genie-public-portal",
             "--dbconnector=dbcp",
-            "--authenticate=oauth2",
+            "--authenticate=false",
             "--spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)",
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "--spring.security.oauth2.client.provider.google.user-name-attribute=email",
