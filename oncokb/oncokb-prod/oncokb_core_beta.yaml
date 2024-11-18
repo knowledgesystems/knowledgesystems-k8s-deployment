@@ -31,7 +31,7 @@ spec:
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:3.23.0
+          image: oncokb/oncokb:3.24.0-alpha.2
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
@@ -74,20 +74,21 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 300
+            initialDelaySeconds: 480
             timeoutSeconds: 5
-            periodSeconds: 20
-            failureThreshold: 60
+            periodSeconds: 5
+            failureThreshold: 100
           name: oncokb-core-beta
           ports:
             - containerPort: 8888
               protocol: TCP
           resources:
             requests:
-              cpu: 500m
-              memory: 1Gi
-            limits:
+              cpu: 1000m
               memory: 2Gi
+            limits:
+              cpu: 4000m
+              memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
