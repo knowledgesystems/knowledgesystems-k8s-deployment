@@ -95,7 +95,7 @@ spec:
             "--spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)",
             "--spring.security.oauth2.client.provider.google.user-name-attribute=email",
             "--security.cors.allowed-origins=*",
-            "--authorization=true",
+            "--authorization=false",
             "--db.user=$(DB_USER)",
             "--db.password=$(DB_PASSWORD)",
             "--spring.datasource.driver-class-name=com.mysql.jdbc.Driver",
@@ -158,6 +158,9 @@ spec:
             "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
             "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
             "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
+
+            # Clickhouse mode
+            "--clickhouse_mode=true",
 
             # To enable redis session store, we need to set
             # spring.autoconfigure.exclude to a random value to override the
