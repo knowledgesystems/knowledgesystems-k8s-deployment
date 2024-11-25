@@ -36,11 +36,5 @@ spec:
                   printf "Dump database to aws s3 bucket\n";
                   mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/${MYSQL_DUMP_FILE_NAME};
                   printf "Done dumping to bucket\n\n";
-                  
-                  FILES_OLDER_THAN_30_DAYS=$(aws s3api list-objects-v2 --bucket ${AWS_S3_DUMP_BUCKET} --query "Contents[?LastModified<'$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)'].Key" --output text | sed "s/\s/\n/g");
-                  
-                  printf "Delete previous dumps that are older than a month\n";
-                  [ $(aws s3 ls s3://${AWS_S3_DUMP_BUCKET} | wc -l) -gt 4 ] && printf $FILES_OLDER_THAN_30_DAYS | xargs -I {} aws s3 rm s3://${AWS_S3_DUMP_BUCKET}/{};
-                  printf "Done deleting older dumps\n\n";
 
           restartPolicy: OnFailure
