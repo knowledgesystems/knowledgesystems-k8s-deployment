@@ -36,5 +36,11 @@ spec:
                   printf "Dump database to aws s3 bucket\n";
                   mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/dumps/${MYSQL_DUMP_FILE_NAME};
                   printf "Done dumping to bucket\n\n";
+                
+                  printf "Create an index page for object listing\n";
+                  OBJECTS=$(aws s3 ls s3://${AWS_S3_DUMP_BUCKET}/dumps | awk '{printf "<tr><td><a href=\"dumps/%s\">%s</a></td><td>%s %s</td><td>%s</td><td><a href=\"dumps/%s\">Download</a></td></tr>\\n", $4, $4, $1, $2, $3, $4}');
+                  aws s3api get-object --bucket ${AWS_S3_DUMP_BUCKET} --key template.html template.html > /dev/null;
+                  sed "s|{{ S3_FILES }}|$OBJECTS|g" template.html | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/index.html;
+                  printf "Done creating index page\n";
 
           restartPolicy: OnFailure
