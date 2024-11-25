@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioportal-public-mysqldump-weekly
+spec:
+  schedule: "59 23 * * 6"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cbioportal-mysql-dump-weekly
+          containers:
+            - envFrom:
+                - configMapRef:
+                    name: cbioportal-mysql-dump
+              name: cbioportal-public-mysqldump-weekly
+              image: mysql:8.0-debian
+              command: ["/bin/sh", "-c"]
+              args:
+                - printf "Install libraries\n";
+                  apt-get update; apt-get install unzip curl less -y;
+                  printf "Done installing curl\n\n";
+                  
+                  printf "Install aws cli\n";
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscli.zip";
+                  unzip awscli.zip;
+                  ./aws/install;
+                  printf "Done installing aws cli\n\n";
+
+                  SCHEMA_VERSION=$(mysql -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} ${DB_PORTAL_DB_NAME} -s -N -e "select DB_SCHEMA_VERSION from info;" | sed "s/\./_/g");
+
+                  MYSQL_DUMP_FILE_NAME=dump_$(date "+%Y_%m_%d")_v${SCHEMA_VERSION}.sql.gz;
+                  
+                  printf "Dump database to aws s3 bucket\n";
+                  mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/dumps/${MYSQL_DUMP_FILE_NAME};
+                  printf "Done dumping to bucket\n\n";
+                
+                  printf "Create an index page for object listing\n";
+                  OBJECTS=$(aws s3 ls s3://${AWS_S3_DUMP_BUCKET}/dumps/ | sort -r -k4 | awk '{size_gb = $3 / (1024^3); printf "<tr><td><a href=\"dumps/%s\">%s</a></td><td>%.2f GB</td><td><a href=\"dumps/%s\">Download</a></td></tr>\\n", $4, $4, size_gb, $4}');
+                  aws s3api get-object --bucket ${AWS_S3_DUMP_BUCKET} --key site/template.html template.html > /dev/null;
+                  sed "s|{{ S3_FILES }}|$OBJECTS|g" template.html > index.html;
+                  aws s3 cp --content-type 'text/html' index.html s3://${AWS_S3_DUMP_BUCKET}/index.html;
+                  printf "Done creating index page\n";
+
+          restartPolicy: OnFailure
