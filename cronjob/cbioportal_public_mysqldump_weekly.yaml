@@ -34,7 +34,7 @@ spec:
                   MYSQL_DUMP_FILE_NAME=dump_$(date "+%Y_%m_%d")_v${SCHEMA_VERSION}.sql.gz;
                   
                   printf "Dump database to aws s3 bucket\n";
-                  mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/${MYSQL_DUMP_FILE_NAME};
+                  mysqldump -h${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --quick --compress ${DB_PORTAL_DB_NAME} | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/dumps/${MYSQL_DUMP_FILE_NAME};
                   printf "Done dumping to bucket\n\n";
 
           restartPolicy: OnFailure
