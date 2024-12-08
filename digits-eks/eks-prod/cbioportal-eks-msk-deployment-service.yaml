@@ -36,7 +36,7 @@ spec:
       volumes:
         - name: msk-eks-configmap-volume
           configMap:
-            name: msk-eks-v6-kc
+            name: msk-eks-v6-dec-2024-kc
             items:
               - key: local.key
                 path: local.key
