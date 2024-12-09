@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cbioportal-backend-genie-public-blue
+  name: cbioportal-backend-genie-public-green
   namespace: default
 spec:
   progressDeadlineSeconds: 600
@@ -9,7 +9,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      run: cbioportal-backend-genie-public-blue
+      run: cbioportal-backend-genie-public-green
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -22,7 +22,7 @@ spec:
       creationTimestamp: null
       labels:
         admission.datadoghq.com/enabled: "true"
-        run: cbioportal-backend-genie-public-blue
+        run: cbioportal-backend-genie-public-green
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.0.21
@@ -73,7 +73,7 @@ spec:
         - --java.rmi.server.hostname=localhost
         #- --logging.level.org.springframework.security=TRACE
         # /enable remote debug
-        - --frontend.url=https://frontend.cbioportal.org/
+        - --frontend.url=https://deploy-preview-4931.cancerrevue.org/
         - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
         - --quick_search.enabled=false
         - --skin.footer= | <a href="https://www.aacr.org/professionals/research/aacr-project-genie">AACR
@@ -183,9 +183,23 @@ spec:
         - --persistence.cache_type=redis
         - --redis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379
         - --redis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379
-        - --redis.database=1
+        - --redis.database=2
         - --redis.clear_on_startup=false
         - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
+        # NEW PROPERTIES START
+        - --enable_persistent_cache=true
+        - --persistence.cache_type_clickhouse=redis
+        #- --persistence.cache_type_clickhouse=no-cache
+        - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
+        - --spring.datasource.mysql.username=$(DB_USER)
+        - --spring.datasource.mysql.password=$(DB_PASSWORD)
+        - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+        - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
+        - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+        - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
+        - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
+        - --clickhouse_mode=true
+        # NEW PROPERTIES END
         # compress on client side
         - --enable_request_body_gzip_compression=true
         # comparison settings
@@ -211,8 +225,9 @@ spec:
           value: "true"
         envFrom:
         - configMapRef:
-            name: cbioportal-genie-public-blue
-        image: cbioportal/cbioportal:6.0.21-web-shenandoah
+            name: cbioportal-genie-public-green
+        #image: cbioportal/cbioportal:6.0.21-web-shenandoah
+        image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
@@ -224,7 +239,7 @@ spec:
           periodSeconds: 12
           successThreshold: 1
           timeoutSeconds: 1
-        name: cbioportal-backend-genie-public-blue
+        name: cbioportal-backend-genie-public-green
         ports:
         - containerPort: 8888
           protocol: TCP
@@ -265,8 +280,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: cbioportal-backend-genie-public-blue
-  name: cbioportal-backend-genie-public-blue
+    run: cbioportal-backend-genie-public-green
+  name: cbioportal-backend-genie-public-green
   namespace: default
 spec:
   internalTrafficPolicy: Cluster
@@ -279,6 +294,6 @@ spec:
     protocol: TCP
     targetPort: 8888
   selector:
-    run: cbioportal-backend-genie-public-blue
+    run: cbioportal-backend-genie-public-green
   sessionAffinity: None
   type: ClusterIP
