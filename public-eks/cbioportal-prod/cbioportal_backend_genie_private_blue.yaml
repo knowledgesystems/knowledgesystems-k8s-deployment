@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   progressDeadlineSeconds: 600
-  replicas: 3
+  replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -23,7 +23,7 @@ spec:
       labels:
         admission.datadoghq.com/enabled: "true"
         run: cbioportal-backend-genie-private-blue
-        tags.datadoghq.com/env: eks-genie-private-blue
+        tags.datadoghq.com/env: eks-genie-private
         tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.0.21
     spec:
@@ -178,8 +178,8 @@ spec:
         - --persistence.cache_type=redis
         - --redis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379
         - --redis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379
-        - --redis.database=2
-        - --redis.clear_on_startup=true
+        - --redis.database=3
+        - --redis.clear_on_startup=false
         - --redis.password=$(REDIS_PASSWORD)
         # misc. frontend settings (this is NOT a persistence layer caching property!)
         - --enable_persistent_cache=true
@@ -238,7 +238,7 @@ spec:
           value: "true"
         envFrom:
         - configMapRef:
-            name: cbioportal-genie-private-v6
+            name: cbioportal-genie-private-blue
         image: cbioportal/cbioportal:6.0.21-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
@@ -276,10 +276,10 @@ spec:
         terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /cbioportal/local.key
-          name: cbioportal-genie-private-blue-configmap-volume
+          name: cbioportal-genie-private-configmap-volume
           subPath: local.key
         - mountPath: /cbioportal/local.crt
-          name: cbioportal-genie-private-blue-configmap-volume
+          name: cbioportal-genie-private-configmap-volume
           subPath: local.crt
       dnsPolicy: ClusterFirst
       nodeSelector:
@@ -302,7 +302,7 @@ spec:
           - key: local.crt
             path: local.crt
           name: genie-private-v6-spring-boot-kc-dec-2024
-        name: cbioportal-genie-private-blue-configmap-volume
+        name: cbioportal-genie-private-configmap-volume
 ---
 apiVersion: v1
 kind: Service
