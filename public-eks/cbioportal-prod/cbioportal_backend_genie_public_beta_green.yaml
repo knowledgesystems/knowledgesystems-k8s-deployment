@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cbioportal-backend-genie-public-beta-blue
+  name: cbioportal-backend-genie-public-beta-green
   namespace: default
 spec:
   progressDeadlineSeconds: 600
@@ -9,7 +9,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      run: cbioportal-backend-genie-public-beta-blue
+      run: cbioportal-backend-genie-public-beta-green
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -19,7 +19,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: cbioportal-backend-genie-public-beta-blue
+        run: cbioportal-backend-genie-public-beta-green
     spec:
       containers:
       - args:
@@ -210,7 +210,7 @@ spec:
         - java
         envFrom:
         - configMapRef:
-            name: cbioportal-genie-public-beta-blue
+            name: cbioportal-genie-public-beta-green
         image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
         imagePullPolicy: Always
         #readinessProbe:
@@ -229,7 +229,7 @@ spec:
         #  timeoutSeconds: 1
         #  periodSeconds: 12
         #  failureThreshold: 5
-        name: cbioportal-backend-genie-public-beta-blue
+        name: cbioportal-backend-genie-public-beta-green
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -260,7 +260,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cbioportal-backend-genie-public-beta-blue
+  name: cbioportal-backend-genie-public-beta-green
   namespace: default
 spec:
   internalTrafficPolicy: Cluster
@@ -273,6 +273,6 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    run: cbioportal-backend-genie-public-beta-blue
+    run: cbioportal-backend-genie-public-beta-green
   sessionAffinity: None
   type: ClusterIP
