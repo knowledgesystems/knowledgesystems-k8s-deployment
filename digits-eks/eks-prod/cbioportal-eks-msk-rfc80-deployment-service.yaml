@@ -55,7 +55,7 @@ spec:
         - --com.sun.management.jmxremote.authenticate=false
         - --com.sun.management.jmxremote.local.only=false
         - --java.rmi.server.hostname=localhost
-        - --frontend.url=https://deploy-preview-4931--cbioportalfrontend.netlify.app/
+        - --frontend.url=https://deploy-preview-4931.cancerrevue.org/
         - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
         - --quick_search.enabled=true
         - --default_cross_cancer_study_list=mskimpact
@@ -119,7 +119,7 @@ spec:
           the number of available samples per cancer study and data type.
         - --skin.authorization_message=Access to this portal is only available to
           authorized users at MSKCC. [<a href="http://bit.ly/gdac-form">Request Access</a>].
-        - --skin.blurb=<p>Please adhere to the Memorial Hospital Research Data Governance guidelines regarding <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Abstract-&amp;-Manuscript-Submission-for-MH-RDG-Review.aspx?source=https%3A%2F%2Fmskcc.sharepoint.com%2Fsites%2Fpub-ResearchDG%2FSitePages%2FForms%2FByAuthor.aspx\">abstract and manuscript submission</a>, <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Policies.aspx?csf=1&amp;web=1&amp;share=EZhGGgAuvUdMkI7dTo25OyABYkazBEq5LtO--jhVL-UuTw&amp;e=hA3Lh2\">guiding principles</a>, and <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/ResearchDG-Policies.aspx\">authorship policies</a> when using unpublished MSK patient-derived clinical data.</p></p>When writing manuscripts, please do not include private links to this portal.</p>"
+        - --skin.blurb=<p>Please adhere to the <a href="https://cmo.mskcc.org/index.php/msk-impact/">MSK-IMPACT publication guidelines</a> when using MSK-IMPACT DATA in your publications.</p> <p>When writing manuscripts, please do not include private links to this portal.</p> <p><b>Please cite</b> <a href="http://www.ncbi.nlm.nih.gov/pubmed/23550210">Gao et al. <i>Sci. Signal.</i> 2013</a> &amp;  <a href="http://cancerdiscovery.aacrjournals.org/content/2/5/401.abstract"> Cerami et al. <i>Cancer Discov.</i> 2012</a> when publishing results based on cBioPortal.</p>
         - --show.mdacc.heatmap=true
         - --priority_studies=Shared institutional Data Sets#mskimpact,mskarcher,cellline_mskcc,mixed_cbe_solitd_MSK_cfDNA_IMPACT,mixed_impact_wes_2017,msk_impact_ch_2020
         - --session.service.url=https://session-service.cbioportal.org/api/sessions/msk_portal/
@@ -159,7 +159,7 @@ spec:
         - --ehcache.cache_type=none
         - --cache.endpoint.api-key=$(CACHE_API_KEY)
         - --cache.endpoint.enabled=true
-        - --redis.clear_on_startup=false
+        - --redis.clear_on_startup=true
         - --enable_persistent_cache=false
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/saml/descriptor
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=cbioportal-msk-rfc80-v6
