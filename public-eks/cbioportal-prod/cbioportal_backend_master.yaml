@@ -152,6 +152,7 @@ spec:
             "--sentry.factory=org.cbioportal.logging.SentryClientFactory",
             "--db.suppress_schema_version_mismatch_errors=true",
             "--sitemaps=false",
+            "--skin.show_r_matlab_tab=false",
             "--oncokb.public_api.url=https://www.oncokb.org/api/v1",
             "--oncokb.token=$(ONCOKB_TOKEN)",
             "--genomenexus.url=https://v1.genomenexus.org",
