@@ -4,24 +4,207 @@ metadata:
   annotations:
     # add an annotation indicating the issuer to use.
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    ingress.kubernetes.io/proxy-connect-timeout: "300"
-    ingress.kubernetes.io/proxy-read-timeout: "300"
-    ingress.kubernetes.io/proxy-send-timeout: "300"
     # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
     # increae max response size to avoid 413 errors see
     # https://github.com/kubernetes/ingress-nginx/issues/1824
-    nginx.ingress.kubernetes.io/proxy-body-size: 512m
     ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
   name: cbioportal-ingress
+  namespace: default
 spec:
+  rules:
+  - host: keycloak.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-keycloak-http
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+#  - host: webinar.cbioportal.org
+#    http:
+#      paths:
+#      - backend:
+#          service:
+#            name: cbioportal
+#            port:
+#              number: 80
+#        path: /
+#        pathType: Prefix
+  - host: genie-public-beta.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-beta-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-public-beta-blue.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-beta-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-public-beta-green.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-beta-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-public-beta1.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-beta
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-public-blue.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-public-green.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-private.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-private-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-private-blue.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-private-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-private-green.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-private-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: www.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: master.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-master
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: beta.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-beta
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: session-service.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-session-service
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: crdc.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-nci
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+#  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
+#  - host: session-service-beta.cbioportal.org
+#    http:
+#      paths:
+#      - backend:
+#          service:
+#            name: cbioportal-session-service-beta
+#            port:
+#              number: 80
+#        path: /
+#        pathType: Prefix
   tls:
 #  - hosts:
 #    - webinar.cbioportal.org
@@ -30,8 +213,20 @@ spec:
     - genie.cbioportal.org
     secretName: geniepublic-cbio-cert
   - hosts:
+    - genie-public-blue.cbioportal.org
+    secretName: geniepublicblue-cbio-cert
+  - hosts:
+    - genie-public-green.cbioportal.org
+    secretName: geniepublicgreen-cbio-cert
+  - hosts:
     - genie-private.cbioportal.org
     secretName: genieprivate-cbio-cert
+  - hosts:
+    - genie-private-blue.cbioportal.org
+    secretName: genieprivateblue-cbio-cert
+  - hosts:
+    - genie-private-green.cbioportal.org
+    secretName: genieprivategreen-cbio-cert
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
@@ -42,144 +237,27 @@ spec:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
   - hosts:
-      - keycloak.cbioportal.org
+    - keycloak.cbioportal.org
     secretName: keycloak-cert
   - hosts:
-      - genie-public-beta.cbioportal.org
+    - genie-public-beta.cbioportal.org
     secretName: cbioportal-genie-public-beta-cert
   - hosts:
-      - crdc.cbioportal.org
+    - genie-public-beta-blue.cbioportal.org
+    secretName: cbioportal-genie-public-beta-blue-cert
+  - hosts:
+    - genie-public-beta-green.cbioportal.org
+    secretName: cbioportal-genie-public-beta-green-cert
+  - hosts:
+    - crdc.cbioportal.org
     secretName: cbioportal-crdc-cert
   - hosts:
-      - genie-public-beta1.cbioportal.org
+    - genie-public-beta1.cbioportal.org
     secretName: cbioportal-genie-public-beta1-cert
   - hosts:
-      - session-service.cbioportal.org
+    - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
 #  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
 #  - hosts:
 #      - session-service-beta.cbioportal.org
 #    secretName: cbioportal-session-service-cert
-  rules:
-  - host: keycloak.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-keycloak-http
-              port:
-                number: 80
-#  - host: webinar.cbioportal.org
-#    http:
-#      paths:
-#      - path: /
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: cbioportal
-#            port:
-#              number: 80
-  - host: genie-public-beta.cbioportal.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cbioportal-backend-genie-public-beta
-            port:
-              number: 80
-  - host: genie-public-beta1.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-backend-genie-public-beta
-              port:
-                number: 80
-  - host: genie.cbioportal.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cbioportal-backend-genie-public
-            port:
-              number: 80
-  - host: genie-private.cbioportal.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cbioportal-backend-genie-private
-            port:
-              number: 80
-  - host: www.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal
-              port:
-                number: 80
-  - host: master.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-backend-master
-              port:
-                number: 80
-  - host: beta.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-backend-beta
-              port:
-                number: 80
-  - host: session-service.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-session-service
-              port:
-                number: 80
-  - host: crdc.cbioportal.org
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: cbioportal-backend-nci
-              port:
-                number: 80
-
-#  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
-#  - host: session-service-beta.cbioportal.org
-#    http:
-#      paths:
-#        - path: /
-#          pathType: Prefix
-#          backend:
-#            service:
-#              name: cbioportal-session-service-beta
-#              port:
-#                number: 80
