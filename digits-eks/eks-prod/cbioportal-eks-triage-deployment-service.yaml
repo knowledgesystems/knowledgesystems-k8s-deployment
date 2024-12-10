@@ -36,7 +36,7 @@ spec:
       volumes:
       - name: triage-eks-configmap-volume
         configMap:
-          name: triage-eks-v6-kc-dec-2024
+          name: eks-v6-shared-kc-dec-2029
           items:
           - key: local.key
             path: local.key
