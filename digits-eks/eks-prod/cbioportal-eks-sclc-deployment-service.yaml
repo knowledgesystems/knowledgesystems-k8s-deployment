@@ -36,7 +36,7 @@ spec:
       volumes:
       - name: sclc-eks-configmap-volume
         configMap:
-          name: sclc-eks-v6-kc
+          name: eks-v6-shared-kc-dec-2029
           items:
           - key: local.key
             path: local.key
