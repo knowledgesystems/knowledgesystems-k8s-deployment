@@ -1,6 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    run: cbioportal-backend-genie-public-blue
+    tags.datadoghq.com/env: eks-genie-public
+    tags.datadoghq.com/service: cbioportal
+    tags.datadoghq.com/version: 6.0.21
   name: cbioportal-backend-genie-public-blue
   namespace: default
 spec:
@@ -73,7 +78,7 @@ spec:
         - --java.rmi.server.hostname=localhost
         #- --logging.level.org.springframework.security=TRACE
         # /enable remote debug
-        - --frontend.url=https://frontend.cbioportal.org/
+        - --frontend.url=https://deploy-preview-4931.cancerrevue.org/
         - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
         - --quick_search.enabled=false
         - --skin.footer= | <a href="https://www.aacr.org/professionals/research/aacr-project-genie">AACR
@@ -186,6 +191,20 @@ spec:
         - --redis.database=1
         - --redis.clear_on_startup=false
         - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
+        # NEW PROPERTIES START
+        - --enable_persistent_cache=true
+        - --persistence.cache_type_clickhouse=redis
+        #- --persistence.cache_type_clickhouse=no-cache
+        - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
+        - --spring.datasource.mysql.username=$(DB_USER)
+        - --spring.datasource.mysql.password=$(DB_PASSWORD)
+        - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+        - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
+        - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+        - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
+        - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
+        - --clickhouse_mode=true
+        # NEW PROPERTIES END
         # compress on client side
         - --enable_request_body_gzip_compression=true
         # comparison settings
@@ -212,7 +231,8 @@ spec:
         envFrom:
         - configMapRef:
             name: cbioportal-genie-public-blue
-        image: cbioportal/cbioportal:6.0.21-web-shenandoah
+        #image: cbioportal/cbioportal:6.0.21-web-shenandoah
+        image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
