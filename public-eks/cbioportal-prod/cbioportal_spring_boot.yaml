@@ -138,6 +138,7 @@ spec:
             "--tomcat.catalina.scope=runtime",
             "--show.transcript_dropdown=true",
             "--skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
+            "--skin.show_donate_button=true",
             "--skin.email_contact=cbioportal@googlegroups.com",
             "--skin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of legacy TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a>, last updated 1/28/2016.",
             "--skin.data_sets_header=The table below lists the number of available samples per cancer study and data type. It also provides links to download the data for each study. For alternative ways of downloading, see the <a href=\"https://docs.cbioportal.org/5.2-datasets/downloads#introduction\">Download Documentation</a>.",
