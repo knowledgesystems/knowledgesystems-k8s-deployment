@@ -5,12 +5,12 @@ metadata:
     run: cbioportal-backend-genie-public-green
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.21
+    tags.datadoghq.com/version: 6.0.22
   name: cbioportal-backend-genie-public-green
   namespace: default
 spec:
   progressDeadlineSeconds: 600
-  replicas: 1
+  replicas: 0
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-genie-public-green
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.21
+        tags.datadoghq.com/version: 6.0.22
     spec:
       containers:
       - args:
@@ -231,7 +231,7 @@ spec:
         envFrom:
         - configMapRef:
             name: cbioportal-genie-public-green
-        #image: cbioportal/cbioportal:6.0.21-web-shenandoah
+        #image: cbioportal/cbioportal:6.0.22-web-shenandoah
         image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
