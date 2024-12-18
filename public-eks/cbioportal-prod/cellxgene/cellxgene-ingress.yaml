@@ -60,6 +60,16 @@ spec:
                 name: cellxgene-service-4
                 port:
                   number: 8080
+    - host: cellxgene.cbioportal.org
+      http:
+        paths:
+          - path: /spectrum_all_cells(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-14
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
