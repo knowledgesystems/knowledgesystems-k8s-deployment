@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cellxgene-index-page
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>
+                cBioportal: CellxGene Instances
+            </title>
+        </head>
+        <body>
+            <ul>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/pbmc3k/"
+                        target="_blank" >
+                        pbmc3k
+                    </a>
+                </li>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/Q3_norm_all_batch_reduced_meta_1/"
+                        target="_blank" >
+                        Q3_norm_all_batch_reduced_meta_1
+                    </a>
+                </li>
+            </ul>
+        </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cellxgene-btc-index-page
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>
+                cBioportal: CellxGene Instances
+            </title>
+        </head>
+        <body>
+            <ul>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/gbm_filtered_processing2/"
+                        target="_blank" >
+                        gbm_filtered_processing2
+                    </a>
+                </li>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/pilot_sharmalab_processed_scrna_MDA_with_inhibitor_filtered_feature_bc_matrix_prepared/"
+                        target="_blank" >
+                        pilot_sharmalab_processed_scrna_MDA_with_inhibitor_filtered_feature_bc_matrix_prepared
+                    </a>
+                </li>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/pilot_sharmalab_processed_scrna_MDA_without_inhibitor_filtered_feature_bc_matrix_prepared/"
+                        target="_blank" >
+                        pilot_sharmalab_processed_scrna_MDA_without_inhibitor_filtered_feature_bc_matrix_prepared
+                    </a>
+                </li>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/pilot_sharmalab_processed_scrna_MSK_no_inhibitor_filtered_feature_bc_matrix_prepared/"
+                        target="_blank" >
+                        pilot_sharmalab_processed_scrna_MSK_no_inhibitor_filtered_feature_bc_matrix_prepared
+                    </a>
+                </li>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/pilot_sharmalab_processed_scrna_MSK_with_inhibitor_filtered_feature_bc_matrix_prepared/"
+                        target="_blank" >
+                        pilot_sharmalab_processed_scrna_MSK_with_inhibitor_filtered_feature_bc_matrix_prepared
+                    </a>
+                </li>
+                <li>
+                    <a 
+                        href="https://cellxgene.cbioportal.org/trial1a_sharma_lab_scrna_DFCI1_BTC-GBM-001-003-GEX_filtered_feature_bc_matrix_prepared/"
+                        target="_blank" >
+                        trial1a_sharma_lab_scrna_DFCI1_BTC-GBM-001-003-GEX_filtered_feature_bc_matrix_prepared
+                    </a>
+                </li>
+            </ul>
+        </body>
+    </html>
