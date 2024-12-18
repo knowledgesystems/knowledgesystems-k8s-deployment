@@ -602,6 +602,80 @@ spec:
           value: "eks-cellxgene"
           effect: "NoSchedule"
 ---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cellxgene-deploy-14
+  labels:
+    app: cellxgene
+    dataset: msk_spectrum_all.h5ad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dataset: msk_spectrum_all.h5ad
+  template:
+    metadata:
+      labels:
+        dataset: msk_spectrum_all.h5ad
+    spec:
+      containers:
+        - name: cellxgene-app14
+          image: 'edit01/cellxgene:1.2.0'
+          command: ["cellxgene"]
+          args: [
+            "launch",
+            "-p",
+            "8080",
+            "--host",
+            "0.0.0.0",
+            "--backed",
+            "--disable-annotations",
+            "--disable-gene-sets-save",
+            "s3://jason-test-workspace/spectrum_all_cells.h5ad"
+          ]
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          imagePullPolicy: Always
+          # resources:
+          #   limits:
+          #     memory: 7Gi
+          #     cpu: 250m
+          readinessProbe: # Block traffic to container if not ready
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 10
+          livenessProbe: # Restart container if not healthy
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 600  # 10min
+            periodSeconds: 3600 # 1hr
+            failureThreshold: 2
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-cellxgene
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-cellxgene"
+          effect: "NoSchedule"
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -770,4 +844,18 @@ spec:
     dataset: scrna_DFCI1_BTC-GBM-001-003-GEX_filtered_feature_bc_matrix.h5ad
   ports:
     - port: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cellxgene-service-14
+  labels:  # For convenience
+    app: cellxgene
+    dataset: msk_spectrum_all.h5ad
+spec:
+  selector:
+    dataset: msk_spectrum_all.h5ad
+  ports:
+    - port: 8080
+
 
