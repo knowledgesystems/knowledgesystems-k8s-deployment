@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-cellxgene-index-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-index
+  template:
+    metadata:
+      labels:
+        app: nginx-index
+    spec:
+      containers:
+        - name: nginx-v1
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config-volume-v1
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: nginx-config-volume-v1
+          configMap:
+            name: nginx-cellxgene-index-page
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-cellxgene
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-cellxgene"
+          effect: "NoSchedule"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-cellxgene-btc-index-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-btc-index
+  template:
+    metadata:
+      labels:
+        app: nginx-btc-index
+    spec:
+      containers:
+        - name: nginx-v1
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: nginx-cellxgene-btc-index-page
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-cellxgene
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-cellxgene"
+          effect: "NoSchedule"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+  labels:  # For convenience
+    app: cellxgene-index-page
+spec:
+  selector:
+    app: nginx-index
+  ports:
+    - port: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-btc-service
+  labels:  # For convenience
+    app: cellxgene-btc-index-page
+spec:
+  selector:
+    app: nginx-btc-index
+  ports:
+    - port: 80
