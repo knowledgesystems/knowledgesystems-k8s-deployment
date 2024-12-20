@@ -232,7 +232,7 @@ spec:
         - configMapRef:
             name: cbioportal-genie-public-green
         #image: cbioportal/cbioportal:6.0.22-web-shenandoah
-        image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
+        image: cbioportal/cbioportal:demo-rfc80-working-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
