@@ -38,7 +38,7 @@ spec:
         #- -Xms5g
         #- -Xmx14g
         - -Xms1g
-        - -Xmx25g
+        - -Xmx12g
         - -XX:+UnlockExperimentalVMOptions
         - -XX:+UseShenandoahGC
         - -XX:ShenandoahUncommitDelay=1000
@@ -262,15 +262,15 @@ spec:
           timeoutSeconds: 1
         resources:
           limits:
-            memory: 26Gi
+            memory: 12Gi
           requests:
-            memory: 11Gi
+            memory: 6Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
-      # run on eks-genie-cbioportal node group
+      # run test on eks-genie-cbioportal-ec2-test node group
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genie-cbioportal
+        eks.amazonaws.com/nodegroup: eks-genie-cbioportal-ec2-test
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
@@ -279,7 +279,7 @@ spec:
       - effect: NoSchedule
         key: dedicated
         operator: Equal
-        value: eks-genie-cbioportal
+        value: eks-genie-cbioportal-ec2-test
 ---
 apiVersion: v1
 kind: Service
