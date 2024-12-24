@@ -33,6 +33,16 @@ spec:
                 name: cellxgene-service-1
                 port:
                   number: 8080
+    - host: cellxgene.cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /msk_spectrum_all(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-2
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
