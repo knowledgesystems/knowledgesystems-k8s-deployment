@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx.ingress.kubernetes.io/use-regex: "true"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # increase max response size to avoid 413 errors see
+    # https://github.com/kubernetes/ingress-nginx/issues/1824
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+  name: cellxgene-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cellxgene.cbioportal.mskcc.org
+      http:
+        paths:
+          # - path: /pbmc3k(/|$)(.*)
+          - path: /pbmc3k
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-1
+                port:
+                  number: 8080
+status:
+  loadBalancer:
+    ingress:
+    - hostname: internal-ab65ed103ef98482c845ae69ae512cac-1693183256.us-east-1.elb.amazonaws.com 
