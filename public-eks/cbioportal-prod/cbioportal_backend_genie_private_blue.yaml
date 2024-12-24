@@ -320,7 +320,7 @@ spec:
             path: local.key
           - key: local.crt
             path: local.crt
-          name: genie-private-v6-spring-boot-kc-dec-2024
+          name: eks-v6-shared-kc-dec-2029
         name: cbioportal-genie-private-configmap-volume
 ---
 apiVersion: v1
