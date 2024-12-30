@@ -15,6 +15,12 @@ spec:
             - envFrom:
                 - configMapRef:
                     name: cbioportal-mysql-dump
+              env:
+                - name: DB_PORTAL_DB_NAME
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cbioportal-public6
+                      key: DB_PORTAL_DB_NAME
               name: cbioportal-public-mysqldump-weekly
               image: mysql:8.0-debian
               command: ["/bin/sh", "-c"]
