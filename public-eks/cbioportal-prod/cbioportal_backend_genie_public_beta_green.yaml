@@ -3,6 +3,10 @@ kind: Deployment
 metadata:
   name: cbioportal-backend-genie-public-beta-green
   namespace: default
+  labels:
+    tags.datadoghq.com/env: eks-genie-public-beta
+    tags.datadoghq.com/service: cbioportal
+    tags.datadoghq.com/version: 6.0.23
 spec:
   progressDeadlineSeconds: 600
   replicas: 2
@@ -17,9 +21,15 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
       creationTimestamp: null
       labels:
+        admission.datadoghq.com/enabled: "true"
         run: cbioportal-backend-genie-public-beta-green
+        tags.datadoghq.com/env: eks-genie-public-beta
+        tags.datadoghq.com/service: cbioportal
+        tags.datadoghq.com/version: 6.0.23
     spec:
       containers:
       - args:
