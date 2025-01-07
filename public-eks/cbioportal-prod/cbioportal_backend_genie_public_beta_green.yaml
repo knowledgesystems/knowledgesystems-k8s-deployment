@@ -221,6 +221,11 @@ spec:
         envFrom:
         - configMapRef:
             name: cbioportal-genie-public-beta-green
+        env:
+          - name: DD_PROFILING_ENABLED
+            value: "true"
+          - name: DD_LOGS_INJECTION
+            value: "true"
         image: cbioportal/cbioportal:demo-comparison-speed-web-shenandoah
         imagePullPolicy: Always
         #readinessProbe:
@@ -256,7 +261,7 @@ spec:
       # run test on eks-genie-cbioportal-ec2-test node group
       dnsPolicy: ClusterFirst
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genie-cbioportal-ec2-test
+        eks.amazonaws.com/nodegroup: eks-public-cbioportal
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
@@ -265,7 +270,7 @@ spec:
       - effect: NoSchedule
         key: dedicated
         operator: Equal
-        value: eks-genie-cbioportal-ec2-test
+        value: eks-public-cbioportal
 ---
 apiVersion: v1
 kind: Service
