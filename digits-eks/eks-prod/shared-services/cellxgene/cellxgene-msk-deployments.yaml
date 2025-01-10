@@ -148,6 +148,81 @@ spec:
           effect: "NoSchedule"
 
 ---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cellxgene-deploy-3
+  labels:
+    app: cellxgene
+    dataset: gastric-wholecohort-regularUMAP-annotated-dec13.h5ad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dataset: gastric-wholecohort-regularUMAP-annotated-dec13.h5ad
+  template:
+    metadata:
+      labels:
+        dataset: gastric-wholecohort-regularUMAP-annotated-dec13.h5ad
+    spec:
+      containers:
+        - name: cellxgene-app3
+          image: 'edit01/cellxgene:1.2.0'
+          command: ["cellxgene"]
+          args: [
+            "launch",
+            "-p",
+            "8080",
+            "--host",
+            "0.0.0.0",
+            "--backed",
+            "--disable-annotations",
+            "--disable-gene-sets-save",
+            "s3://shah-data-upload/gastric-wholecohort-regularUMAP-annotated-dec13.h5ad"
+          ]
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          imagePullPolicy: Always
+          # resources:
+          #   limits:
+          #     memory: 7Gi
+          #     cpu: 250m
+          readinessProbe: # Block traffic to container if not ready
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 10
+          livenessProbe: # Restart container if not healthy
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 600  # 10min
+            periodSeconds: 3600 # 1hr
+            failureThreshold: 2
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cellxgene-creds
+                key: aws_secret_access_key
+      # run on big memory machine
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: cellxgene-large-memory-nodes
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-cellxgene"
+          effect: "NoSchedule"
+
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -171,5 +246,18 @@ metadata:
 spec:
   selector:
     dataset: msk_spectrum_all.h5ad
+  ports:
+    - port: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cellxgene-service-3
+  labels: 
+    app: cellxgene
+    dataset: gastric-wholecohort-regularUMAP-annotated-dec13.h5ad
+spec:
+  selector:
+    dataset: gastric-wholecohort-regularUMAP-annotated-dec13.h5ad
   ports:
     - port: 8080
