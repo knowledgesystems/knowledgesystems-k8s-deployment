@@ -48,6 +48,12 @@ spec:
             items:
               - key: frontendConfig.json
                 path: frontendConfig.json
+        - name: beta-truststore-volume
+          configMap:
+            name: beta-cert
+            items:
+              - key: beta.truststore
+              - path: beta.truststore
       containers:
         - envFrom:
             - configMapRef:
@@ -70,6 +76,9 @@ spec:
             - name: cbioportal-frontend-config-volume
               mountPath: /cbioportal/frontendConfig.json
               subPath: frontendConfig.json
+            - name: beta-truststore-volume
+              mountPath: /certs/beta.truststore
+              subPath: beta.truststore
           command: [ "java" ]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -102,6 +111,8 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #"-XX:MaxRAM=6500m",
+            "-Djavax.net.ssl.trustStore=/certs/beta.truststore",
+            "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)",
             "-jar",
             "/cbioportal-webapp/app.jar",
             # handles legacy swagger urls after upgrade
@@ -244,6 +255,8 @@ spec:
             "--darwin.authority=$(DARWIN_AUTHORITY)",
             "--ddp.response_url=$(DDP_RESPONSE_URL)",
             "--cis.user=$(CIS_USER)",
+            "--mpath.token=$(MPATH_TOKEN)",
+            "--mpath.decryption_url=$(MPATH_DECRYPTION_URL)",
             "--darwin.regex=$(DARWIN_REGEX)",
             # basic auth
             "--basic.username=$(BASIC_USERNAME)",
