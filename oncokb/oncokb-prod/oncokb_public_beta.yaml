@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.17.0
+          image: oncokb/oncokb-public:3.18.0-alpha.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -36,7 +36,7 @@ spec:
             - name: APPLICATION_REDIS_EXPIRATION
               value: "$(REDIS_EXPIRATION)"
             - name: APPLICATION_DB_READ_ONLY
-              value: "true"
+              value: "false"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
               value: '$(SERVICE_ACCOUNT_USERNAME)'
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
@@ -52,7 +52,7 @@ spec:
             - name: SENTRY_TRACES_SAMPLE_RATE
               value: ".2"
             - name: SPRING_DATASOURCE_URL
-              value: "${DB_URL}/oncokb_public"
+              value: "${DB_URL}/oncokb_public_beta"
             - name: SPRING_DATASOURCE_USERNAME
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
