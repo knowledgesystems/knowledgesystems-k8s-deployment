@@ -192,7 +192,7 @@ spec:
             # token is not needed to access MSK OncoKB instance
             "--oncokb.token=fake_token",
             "--oncokb.merge_icons_by_default=false",
-            "--genomenexus.url=htmsk//v1.genomenexus.org",
+            "--genomenexus.url=https://v1.genomenexus.org",
             "--show.genomenexus.annotation_sources=mutation_assessor",
             "--matchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "--matchminer.token=$(MATCHMINER_TOKEN)",
