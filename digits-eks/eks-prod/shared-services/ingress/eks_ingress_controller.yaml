@@ -6,7 +6,7 @@ metadata:
     meta.helm.sh/release-namespace: default
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
     service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:666628074417:certificate/22af3940-79c4-464d-b408-e8a4fd85664d
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:666628074417:certificate/d2d67856-f3db-4ce1-b931-9dcba0ddda27
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
   creationTimestamp: "2024-06-28T19:03:53Z"
   finalizers:
