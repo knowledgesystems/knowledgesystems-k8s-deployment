@@ -36,7 +36,7 @@ spec:
       volumes:
         - name: msk-beta-eks-configmap-volume
           configMap:
-            name: msk-beta-spring-boot-kc
+            name: eks-v6-shared-kc-dec-2029
             items:
               - key: local.key
                 path: local.key
@@ -48,12 +48,12 @@ spec:
             items:
               - key: frontendConfig.json
                 path: frontendConfig.json
-        - name: beta-truststore-volume
+        - name: betacerts-volume
           configMap:
-            name: beta-cert
+            name: betacerts
             items:
-              - key: beta.truststore
-              - path: beta.truststore
+              - key: betacerts
+                path: betacerts
       containers:
         - envFrom:
             - configMapRef:
@@ -65,7 +65,7 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal:demo-fix-data-token-issue-web-shenandoah
+          image: cbioportal/cbioportal:demo-cisintegration-web-shenandoah 
           volumeMounts:
             - name: msk-beta-eks-configmap-volume
               mountPath: /cbioportal/local.key
@@ -76,9 +76,9 @@ spec:
             - name: cbioportal-frontend-config-volume
               mountPath: /cbioportal/frontendConfig.json
               subPath: frontendConfig.json
-            - name: beta-truststore-volume
-              mountPath: /certs/beta.truststore
-              subPath: beta.truststore
+            - name: betacerts-volume
+              mountPath: /certs/betacerts
+              subPath: betacerts
           command: [ "java" ]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -111,7 +111,7 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #"-XX:MaxRAM=6500m",
-            "-Djavax.net.ssl.trustStore=/certs/beta.truststore",
+            "-Djavax.net.ssl.trustStore=/certs/betacerts",
             "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)",
             "-jar",
             "/cbioportal-webapp/app.jar",
@@ -192,7 +192,7 @@ spec:
             # token is not needed to access MSK OncoKB instance
             "--oncokb.token=fake_token",
             "--oncokb.merge_icons_by_default=false",
-            "--genomenexus.url=https://v1.genomenexus.org",
+            "--genomenexus.url=htmsk//v1.genomenexus.org",
             "--show.genomenexus.annotation_sources=mutation_assessor",
             "--matchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555",
             "--matchminer.token=$(MATCHMINER_TOKEN)",

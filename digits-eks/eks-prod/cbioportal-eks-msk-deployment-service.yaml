@@ -48,6 +48,12 @@ spec:
             items:
               - key: frontendConfig.json
                 path: frontendConfig.json
+        - name: mskcerts-volume
+          configMap:
+            name: mskcerts
+            items:
+              - key: mskcerts
+                path: mskcerts
       containers:
         - envFrom:
             - configMapRef:
@@ -59,7 +65,7 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal:6.0.23-web-shenandoah
+          image: cbioportal/cbioportal:demo-cisintegration-web-shenandoah
           volumeMounts:
             - name: msk-eks-configmap-volume
               mountPath: /cbioportal/local.key
@@ -70,6 +76,9 @@ spec:
             - name: cbioportal-frontend-config-volume
               mountPath: /cbioportal/frontendConfig.json
               subPath: frontendConfig.json
+            - name: mskcerts-volume
+              mountPath: /certs/mskcerts
+              subPath: mskcerts
           command: [ "java" ]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -102,6 +111,8 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #"-XX:MaxRAM=6500m",
+            "-Djavax.net.ssl.trustStore=/certs/mskcerts",
+            "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)",
             "-jar",
             "/cbioportal-webapp/app.jar",
             # handles legacy swagger urls after upgrade
@@ -159,7 +170,7 @@ spec:
             "--skin.blurb=<p>Please adhere to the Memorial Hospital Research Data Governance guidelines regarding <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Abstract-&amp;-Manuscript-Submission-for-MH-RDG-Review.aspx?source=https%3A%2F%2Fmskcc.sharepoint.com%2Fsites%2Fpub-ResearchDG%2FSitePages%2FForms%2FByAuthor.aspx\">abstract and manuscript submission</a>, <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Policies.aspx?csf=1&amp;web=1&amp;share=EZhGGgAuvUdMkI7dTo25OyABYkazBEq5LtO--jhVL-UuTw&amp;e=hA3Lh2\">guiding principles</a>, and <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/ResearchDG-Policies.aspx\">authorship policies</a> when using unpublished MSK patient-derived clinical data.</p></p>When writing manuscripts, please do not include private links to this portal.</p>",
             "--show.mdacc.heatmap=true",
             "--priority_studies=Shared institutional Data Sets#mskimpact,mskarcher,cellline_mskcc,mixed_cbe_solitd_MSK_cfDNA_IMPACT,mixed_impact_wes_2017,msk_impact_ch_2020",
-            "--session.service.url=https://session-service.cbioportal.org/api/sessions/msk_portal/",
+            "--session.service.url=http://session-service.cbioportal.org/api/sessions/msk_portal/",
             "--session.service.origin=*",
             "--session.service.user=$(SESSION_SERVICE_USER_NAME)",
             "--session.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
@@ -242,6 +253,8 @@ spec:
             "--darwin.authority=$(DARWIN_AUTHORITY)",
             "--ddp.response_url=$(DDP_RESPONSE_URL)",
             "--cis.user=$(CIS_USER)",
+            "--mpath.token=$(MPATH_TOKEN)",
+            "--mpath.decryption_url=$(MPATH_DECRYPTION_URL)",
             "--darwin.regex=$(DARWIN_REGEX)",
             # basic auth
             "--basic.username=$(BASIC_USERNAME)",
