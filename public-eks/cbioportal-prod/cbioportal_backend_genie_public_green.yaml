@@ -231,7 +231,7 @@ spec:
         envFrom:
         - configMapRef:
             name: cbioportal-genie-public-green
-        image: cbioportal/cbioportal:master-web-shenandoah
+        image: cbioportal/cbioportal:release-6.0.24-alpha-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
