@@ -65,7 +65,7 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal:demo-cisintegration-web-shenandoah 
+          image: cbioportal/cbioportal:6.0.24-web-shenandoah
           volumeMounts:
             - name: msk-beta-eks-configmap-volume
               mountPath: /cbioportal/local.key
