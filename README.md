@@ -34,7 +34,6 @@ The [iac](/iac) directory contains all Terraform configurations for managing the
 
 ### Prerequisites
 1. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
-2. **tflint**: We use [tflint](https://github.com/terraform-linters/tflint) in our CI/CD pipelines. Install it to lint your changes locally before pushing to Git.
 
 ### Usage
 The [iac](/iac) directory contains multiple submodules where each submodule resides under varying nesting levels. Essentially, any subdirectory that has `*.tf` files is a submodule. We don't manage a root module config to avoid accidental disastrous actions and changes that end up impacting multiple accounts at the same time. To make changes to each module, change your present working directory to that module where the `*.tf` files reside.
