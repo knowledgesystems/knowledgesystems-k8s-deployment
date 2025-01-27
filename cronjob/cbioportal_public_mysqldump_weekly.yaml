@@ -11,6 +11,8 @@ spec:
       template:
         spec:
           serviceAccountName: cbioportal-mysql-dump-weekly
+          nodeSelector:
+            eks.amazonaws.com/nodegroup: eks-cbioportal-all-purpose
           containers:
             - envFrom:
                 - configMapRef:
@@ -22,7 +24,7 @@ spec:
                       name: cbioportal-public6
                       key: DB_PORTAL_DB_NAME
               name: cbioportal-public-mysqldump-weekly
-              image: mysql:8.0-debian
+              image: mysql:8.0
               command: ["/bin/sh", "-c"]
               args:
                 - printf "Install libraries\n";
