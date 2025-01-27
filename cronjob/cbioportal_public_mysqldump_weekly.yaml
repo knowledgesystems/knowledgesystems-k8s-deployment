@@ -24,7 +24,7 @@ spec:
                       name: cbioportal-public6
                       key: DB_PORTAL_DB_NAME
               name: cbioportal-public-mysqldump-weekly
-              image: mysql:8.0
+              image: mysql:8.0-debian
               command: ["/bin/sh", "-c"]
               args:
                 - printf "Install libraries\n";
