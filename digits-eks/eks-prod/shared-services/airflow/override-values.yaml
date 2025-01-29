@@ -70,17 +70,11 @@ scheduler:
     - name: pv
       mountPath: /opt/airflow/git_repos
       readOnly: false
-    - name: cdm-setup
-      mountPath: /opt/airflow/scripts
-      readOnly: true
 
   extraVolumes:
     - name: pv
       persistentVolumeClaim:
         claimName: efs-pv-claim
-    - name: cdm-setup
-      configMap:
-        name: airflow-cdm-setup
 
   extraInitContainers:
     - name: volume-mount-permission
@@ -144,6 +138,9 @@ secret:
   - envName: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
     secretName: "airflow-impact-pipeline-password"
     secretKey: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
+  - envName: "AIRFLOW_CONN_GENIE_IMPORTER_SSH"
+    secretName: "airflow-genie-importer-ssh-uri"
+    secretKey: "AIRFLOW_CONN_GENIE_IMPORTER_SSH"
 
 dags:
   gitSync:
