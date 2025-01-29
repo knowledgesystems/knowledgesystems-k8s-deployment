@@ -19,13 +19,28 @@ managedNodeGroups:
       attachIDs: ["sg-0475cebc4766a0dfb"] # sg for cbioportal prod Node
   - name: eks-oncokb-load-testing
     instanceType: r7i.2xlarge
-    minSize: 2
-    desiredCapacity: 2
-    maxSize: 2
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    volumeSize: 3000
     privateNetworking: true
     taints:
       - key: dedicated
         value: eks-oncokb-load-testing
+        effect: NoSchedule
+    iam:
+      instanceRoleARN: "arn:aws:iam::762447640649:role/userServiceRoleEKSWorkerNode-oncokb-dev"
+    securityGroups:
+      attachIDs: ["sg-0475cebc4766a0dfb"] # sg for cbioportal prod Node
+  - name: oncokb-data-preview
+    instanceType: t3.xlarge
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    taints:
+      - key: dedicated
+        value: oncokb-data-preview
         effect: NoSchedule
     iam:
       instanceRoleARN: "arn:aws:iam::762447640649:role/userServiceRoleEKSWorkerNode-oncokb-dev"
