@@ -10,11 +10,12 @@ terraform {
     }
   }
 
-  # Use s3 bucket to store terraform state.
+  # Use s3 bucket to store terraform state. Use s3 state locking https://developer.hashicorp.com/terraform/language/backend/s3#use_lockfile-1
   backend "s3" {
-    bucket         = "k8s-terraform-state-storage"
-    key            = "terraform/666628074417/clusters/cbioportal-prod/eks.tfstate"
-    region         = "us-east-1"
+    bucket       = "k8s-terraform-state-storage"
+    key          = "terraform/666628074417/clusters/cbioportal-prod/eks.tfstate"
+    region       = "us-east-1"
+    use_lockfile = false
   }
 }
 

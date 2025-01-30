@@ -71,14 +71,15 @@ The [iac](/iac) directory contains multiple submodules where each submodule resi
 > ### ⚠️ **WARNING**
 > Making changes to state configuration, such as changing the bucket, key, or region, is a destructive action and can lead to out-of-sync terraform states. Always consult before making such changes as it would require state migration.
 
-Terraform uses `.tfstate` files to keep track of the infrastructure state. By default, terraform stores these files locally within the module subdirectory, which is insecure as state files can contain sensitive information. We use S3 Buckets and DynamoDB tables to store our infrastructure state remotely. Each AWS account has a single S3 bucket and a single DynamoDB table, both called `k8s-terraform-state-storage`, reserved for this purpose.
+Terraform uses `.tfstate` files to keep track of the infrastructure state. By default, terraform stores these files locally within the module subdirectory, which is insecure as state files can contain sensitive information. We use S3 Buckets to store our infrastructure state remotely. Each AWS account has a single S3 bucket called `k8s-terraform-state-storage` reserved for this purpose.
 
 When creating a new submodule, configure it to use its own state file in the S3 bucket by adding a `backend` block to the _terraform.tf_ file. Check [example](iac/aws/666628074417/clusters/cbioportal-prod/eks/terraform.tf).
 
 ```terraform
 backend "s3" {
-   bucket = "k8s-terraform-state-storage"
-   key = "terraform/<path>/<to>/<submodule>/eks.tfstate"
-   region = "us-east-1"
+   bucket       = "k8s-terraform-state-storage"
+   key          = "terraform/<path>/<to>/<submodule>/eks.tfstate"
+   region       = "us-east-1"
+   use_lockfile = false
 }
 ```
