@@ -300,7 +300,7 @@ spec:
           terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: large-memory-portals
+        eks.amazonaws.com/nodegroup: cbioportal-5d0a06c9-20250129191900201200000015
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
