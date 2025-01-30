@@ -9,24 +9,21 @@ module "eks_cluster" {
   }
 
   # Network Config
-  vpc_id = "vpc-0003c8f263d7ed5ab"
-  az-1   = "us-east-1a"
-  az-2   = "us-east-1b"
-  az-3   = "us-east-1d"
+  vpc_id = "vpc-016649a093bc6177a"
+  azs    = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
   # API Controls
-  cluster_endpoint_public  = false
+  cluster_endpoint_public  = true
   cluster_endpoint_private = true
-  use_public_for_private   = true
 
   # EKS Managed Node Groups
   eks_managed_node_groups = {
     cbioportal = {
-      instance_types = ["r5.xlarge"]
+      instance_types = ["r5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      max_size       = 1
-      min_size       = 1
+      desired_size   = 4
+      max_size       = 4
+      min_size       = 4
     }
   }
 }
