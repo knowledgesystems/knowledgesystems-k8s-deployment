@@ -29,6 +29,25 @@ We use Prometheus for monitoring our apps, and Grafana to visualize.
 - We use the kube-prometheus-stack to install prometheus and grafana
 - We are sticking to helm chart `prometheus-community/kube-prometheus-stack --version 46.8.0--set grafana.adminPassword=<pass>`
 
+## ArgoCD (Work in Progress)
+The [argocd](/argocd) directory contains all our manifests for managing the kubernetes deployments across multiple AWS accounts and clusters.
+
+### Prerequisites
+1. **kubectl**: Before you can use ArgoCD to manage deployments, make sure you have access to the cluster where ArgoCD is deployed on and your local kubectl config is set up to use the correct context.
+
+### Usage
+The [argocd](/argocd) directory contains manifests organized by aws-account/cluster-name/app-name. After making changes to manifests, following the steps below to launch the ArgoCD dashboard locally and sync your changes.
+1. Confirm kubectl is using the correct context. E.g. if you want to work on the `cbioportal-prod` cluster under account `666628074417`, your output should be:
+   ```shell
+   kubectl config current-context
+   # Output: arn:aws:eks:us-east-1:666628074417:cluster/cbioportal-prod-<random-number>
+   ```
+2. Port-forward ArgoCD dashboard from the cluster to your [localhost:8080](localhost:8080).
+   ```shell
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+   ```
+3. Open ArgoCD at [localhost:8080](localhost:8080) and login with admin credentials. For credentials, contact [email us](mailto:nasirz1@mskcc.org).
+
 ## IAC with Terraform (Work in Progress)
 The [iac](/iac) directory contains all Terraform configurations for managing the infrastructure across multiple AWS accounts and clusters.
 
