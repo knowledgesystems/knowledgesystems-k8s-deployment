@@ -70,17 +70,11 @@ scheduler:
     - name: pv
       mountPath: /opt/airflow/git_repos
       readOnly: false
-    - name: cdm-setup
-      mountPath: /opt/airflow/scripts
-      readOnly: true
 
   extraVolumes:
     - name: pv
       persistentVolumeClaim:
         claimName: efs-pv-claim
-    - name: cdm-setup
-      configMap:
-        name: airflow-cdm-setup
 
   extraInitContainers:
     - name: volume-mount-permission
@@ -107,6 +101,9 @@ workers:
     - name: hpc3-ssh-keyfile
       mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
       readOnly: true
+    - name: genie-importer-ssh-keyfile
+      mountPath: /opt/airflow/secrets/genie-importer-ssh-keyfile
+      readOnly: true
 
   extraVolumes:
     - name: pv
@@ -124,6 +121,10 @@ workers:
       secret:
         # Assumes that `Secret/airflow-hpc3-ssh-keyfile` contains an SSH key called `id_rsa`
         secretName: airflow-hpc3-ssh-keyfile
+    - name: genie-importer-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-genie-importer-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_operator`
+        secretName: airflow-genie-importer-ssh-keyfile
 
 logs:
   persistence:
@@ -144,6 +145,9 @@ secret:
   - envName: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
     secretName: "airflow-impact-pipeline-password"
     secretKey: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
+  - envName: "AIRFLOW_CONN_GENIE_IMPORTER_SSH"
+    secretName: "airflow-genie-importer-ssh-uri"
+    secretKey: "AIRFLOW_CONN_GENIE_IMPORTER_SSH"
 
 dags:
   gitSync:
