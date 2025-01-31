@@ -32,20 +32,6 @@ managedNodeGroups:
       instanceRoleARN: "arn:aws:iam::762447640649:role/userServiceRoleEKSWorkerNode-oncokb-dev"
     securityGroups:
       attachIDs: ["sg-0475cebc4766a0dfb"] # sg for cbioportal prod Node
-  - name: oncokb-data-preview
-    instanceType: t3.xlarge
-    minSize: 1
-    desiredCapacity: 1
-    maxSize: 1
-    privateNetworking: true
-    taints:
-      - key: dedicated
-        value: oncokb-data-preview
-        effect: NoSchedule
-    iam:
-      instanceRoleARN: "arn:aws:iam::762447640649:role/userServiceRoleEKSWorkerNode-oncokb-dev"
-    securityGroups:
-      attachIDs: ["sg-0475cebc4766a0dfb"] # sg for cbioportal prod Node
 vpc:
   id: vpc-08330c6eeb2de84b1
   securityGroup: sg-0d6da57032ee7fff1 # this is the ControlPlaneSecurityGroup, sgfor-cbioportal-prod-ControlPlane

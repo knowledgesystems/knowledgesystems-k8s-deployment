@@ -61,17 +61,17 @@ spec:
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 30
+            periodSeconds: 20
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 900
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 60
           name: oncokb-core-germline-v2
           ports:
             - containerPort: 8888
@@ -85,6 +85,13 @@ spec:
               memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-oncokb-load-testing"
+          effect: "NoSchedule"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-oncokb-load-testing
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
