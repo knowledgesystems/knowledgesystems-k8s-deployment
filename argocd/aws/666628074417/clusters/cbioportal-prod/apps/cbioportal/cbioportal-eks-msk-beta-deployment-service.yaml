@@ -33,9 +33,9 @@ spec:
         admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
-        - name: msk-beta-eks-configmap-volume
-          configMap:
-            name: eks-v6-shared-kc-dec-2029
+        - name: msk-beta-eks-secret-volume
+          secret:
+            secretName: eks-v6-shared-kc-dec-2029
             items:
               - key: local.key
                 path: local.key
@@ -48,14 +48,14 @@ spec:
               - key: frontendConfig.json
                 path: frontendConfig.json
         - name: betacerts-volume
-          configMap:
-            name: betacerts
+          secret:
+            secretName: betacerts
             items:
               - key: betacerts
                 path: betacerts
       containers:
         - envFrom:
-            - configMapRef:
+            - secretRef:
                 name: msk-beta-eks
           env:
             - name: PORTAL_HOME
@@ -66,10 +66,10 @@ spec:
               value: "true"
           image: cbioportal/cbioportal:6.0.25-web-shenandoah
           volumeMounts:
-            - name: msk-beta-eks-configmap-volume
+            - name: msk-beta-eks-secret-volume
               mountPath: /cbioportal/local.key
               subPath: local.key
-            - name: msk-beta-eks-configmap-volume
+            - name: msk-beta-eks-secret-volume
               mountPath: /cbioportal/local.crt
               subPath: local.crt
             - name: cbioportal-frontend-config-volume
