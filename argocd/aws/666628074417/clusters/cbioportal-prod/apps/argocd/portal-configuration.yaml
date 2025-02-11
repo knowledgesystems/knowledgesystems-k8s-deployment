@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: portal-configuration
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/portal-configuration.git
+      path: argocd/aws/666628074417/clusters/cbioportal-prod
+      targetRevision: HEAD
+      directory:
+        recurse: true
+    - repoURL: https://github.com/knowledgesystems/portal-configuration.git
+      path: argocd/aws/shared
+      targetRevision: HEAD
+      directory:
+        recurse: true
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc

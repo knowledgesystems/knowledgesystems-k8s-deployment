@@ -30,7 +30,7 @@ We use Prometheus for monitoring our apps, and Grafana to visualize.
 - We are sticking to helm chart `prometheus-community/kube-prometheus-stack --version 46.8.0--set grafana.adminPassword=<pass>`
 
 ## ArgoCD (Work in Progress)
-The [argocd](/argocd) directory contains all our manifests for managing the kubernetes deployments across multiple AWS accounts and clusters.
+The [argocd](/argocd) directory contains all our manifests for managing the kubernetes deployments across multiple AWS accounts and clusters. We follow the _app-of-apps_ workflow to manage everything. Each `argocd/aws/<account-number>/clusters/<cluster-name>/apps` directory has a `argocd` subdirectory that contains the parent app. This parent app is responsible for managing all other apps in ArgoCD.
 
 ### Prerequisites
 1. **kubectl**: Before you can use ArgoCD to manage deployments, make sure you have access to the cluster where ArgoCD is deployed on and your local kubectl config is set up to use the correct context.
@@ -48,19 +48,18 @@ The [argocd](/argocd) directory contains manifests organized by aws-account/clus
    ```
 3. Open ArgoCD at [localhost:8080](localhost:8080) and login with admin credentials. For credentials, contact [email us](mailto:nasirz1@mskcc.org).
 
-### ArgoCD Configuration
-ArgoCD uses a configmap that includes configuration settings. To modify these settings, follow the steps below:
+### Creating New Apps
+Follow the steps below to add a new app to ArgoCD.
+1. Create a new subdirectory under the appropriate nesting structure `argocd/aws/<account-number>/clusters/<cluster-name>/apps/<app-name>`. This subdirectory will host your deployment files.
+2. In the `argocd` subdirectory under the same nesting level, add a new `Application` manifest. Look at other apps in this repo for example.
+3. Commit your changes. ArgoCD will automatically sync the changes and the new app should show up in the Dashboard.
 
-1. Use the template [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-cm-yaml/) and create a new `ConfigMap` manifest file under the appropriate directory. See example [here](argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/argocd-cm.yaml).
-2. Make changes to the config map. The template provided overwrites a lot of default values so delete anything you don't need and only set the required properties.
-3. Use `kubectl` to apply your changes. Make sure your `kubectl context` is set correctly.
-   ```shell
-   kubectl apply -f argocd-cm.yaml -n argocd
-   ```
-4. Restart `argocd-repo-server`.
-   ```shell
-   kubectl -n argocd rollout restart deploy argocd-repo-server   
-   ```
+### Creating New Kubernetes Objects
+Follow the steps below to create new Kubernetes objects in a cluster (e.g. Deployment).
+1. Add a new manifest file under the appropriate nesting structure `argocd/aws/<account-number>/clusters/<cluster-name>/apps/<app-name>/object-name.yaml`.
+2. Push your changes to the repo.
+3. Launch ArgoCD dashboard and refresh the app to fetch new changes from the repo.
+4. Sync changes.
 
 ## IAC with Terraform (Work in Progress)
 The [iac](/iac) directory contains all Terraform configurations for managing the infrastructure across multiple AWS accounts and clusters.
