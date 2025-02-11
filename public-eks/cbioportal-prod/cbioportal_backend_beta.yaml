@@ -2,13 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    deployment.kubernetes.io/revision: "4"
+    deployment.kubernetes.io/revision: "49"
   creationTimestamp: null
-  generation: 1
+  generation: 50
   labels:
     run: cbioportal-backend-beta
   name: cbioportal-backend-beta
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-backend-beta
 spec:
   replicas: 1
   selector:
@@ -33,7 +32,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-beta-v6
-        image: cbioportal/cbioportal:demo-rfc80-poc-web-shenandoah
+        image: cbioportal/cbioportal:6.0.17-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -82,7 +81,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://deploy-preview-4931.cancerrevue.org/",
+            "--frontend.url=https://frontend.cbioportal.org/",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
@@ -111,15 +110,13 @@ spec:
             "--spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys",
             "--security.cors.allowed-origins=*",
             "--authorization=false",
-            "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
-            "--spring.datasource.mysql.username=$(DB_USER)",
-            "--spring.datasource.mysql.password=$(DB_PASSWORD)",
-            "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
+            "--db.user=$(DB_USER)",
+            "--db.password=$(DB_PASSWORD)",
+            "--spring.datasource.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect",
-            "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
-            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
-            "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
+            "--spring.datasource.url=$(DB_CONNECTION_STRING)",
+            "--spring.datasource.username=$(DB_USER)",
+            "--spring.datasource.password=$(DB_PASSWORD)",
             "--tomcat.catalina.scope=runtime",
             "--show.transcript_dropdown=true",
             "--skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
@@ -172,13 +169,13 @@ spec:
             # redis cache settings (currently redis)
             #"--cache.statistics_endpoint_enabled=false",
             # "--logging.level.org.cbioportal.persistence=DEBUG",
-            "--persistence.cache_type=redis",
+            "--persistence.cache_type=none",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=2",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             "--redis.clear_on_startup=false",
-            "--cache.endpoint.enabled=true",
+            "--cache.endpoint.enabled=false",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             #"--enable_persistent_cache=true",
@@ -249,7 +246,6 @@ metadata:
   labels:
     run: cbioportal-backend-beta
   name: cbioportal-backend-beta
-  selfLink: /api/v1/namespaces/default/services/cbioportal-backend-beta
 spec:
   ports:
   - port: 80
