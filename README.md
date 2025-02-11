@@ -30,7 +30,7 @@ We use Prometheus for monitoring our apps, and Grafana to visualize.
 - We are sticking to helm chart `prometheus-community/kube-prometheus-stack --version 46.8.0--set grafana.adminPassword=<pass>`
 
 ## ArgoCD (Work in Progress)
-The [argocd](/argocd) directory contains all our manifests for managing the kubernetes deployments across multiple AWS accounts and clusters. We follow the _app-of-apps_ workflow to manage everything. Each `argocd/aws/<account-number>/clusters/<cluster-name>/apps` directory has a `argocd` subdirectory that contains the parent app. This parent app is responsible for managing all other apps in ArgoCD.
+The [argocd](/argocd) directory contains all our manifests for managing the kubernetes deployments across multiple AWS accounts and clusters. We follow the _app-of-apps_ workflow to manage everything. Each `argocd/aws/<account-number>/clusters/<cluster-name>/apps` directory has a `argocd` subdirectory that contains the parent app. This parent app is responsible for managing all other apps in ArgoCD within that cluster.
 
 ### Prerequisites
 1. **kubectl**: Before you can use ArgoCD to manage deployments, make sure you have access to the cluster where ArgoCD is deployed on and your local kubectl config is set up to use the correct context.
@@ -46,7 +46,7 @@ The [argocd](/argocd) directory contains manifests organized by aws-account/clus
    ```shell
    kubectl port-forward svc/argocd-server -n argocd 8080:443
    ```
-3. Open ArgoCD at [localhost:8080](localhost:8080) and login with admin credentials. For credentials, contact [email us](mailto:nasirz1@mskcc.org).
+3. Open ArgoCD at [localhost:8080](localhost:8080) and login with admin credentials. For credentials, [email us](mailto:nasirz1@mskcc.org).
 
 ### Creating New Apps
 Follow the steps below to add a new app to ArgoCD.
