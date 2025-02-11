@@ -35,7 +35,7 @@ The [argocd](/argocd) directory contains all our manifests for managing the kube
 ### Prerequisites
 1. **kubectl**: Before you can use ArgoCD to manage deployments, make sure you have access to the cluster where ArgoCD is deployed on and your local kubectl config is set up to use the correct context.
 
-### Usage
+### Accessing the Dashboard
 The [argocd](/argocd) directory contains manifests organized by aws-account/cluster-name/app-name. After making changes to manifests, following the steps below to launch the ArgoCD dashboard locally and sync your changes.
 1. Confirm kubectl is using the correct context. E.g. if you want to work on the `cbioportal-prod` cluster under account `666628074417`, your output should be:
    ```shell
@@ -47,6 +47,20 @@ The [argocd](/argocd) directory contains manifests organized by aws-account/clus
    kubectl port-forward svc/argocd-server -n argocd 8080:443
    ```
 3. Open ArgoCD at [localhost:8080](localhost:8080) and login with admin credentials. For credentials, contact [email us](mailto:nasirz1@mskcc.org).
+
+### ArgoCD Configuration
+ArgoCD uses a configmap that includes configuration settings. To modify these settings, follow the steps below:
+
+1. Use the template [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-cm-yaml/) and create a new `ConfigMap` manifest file under the appropriate directory. See example [here](argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/argocd-cm.yaml).
+2. Make changes to the config map. The template provided overwrites a lot of default values so delete anything you don't need and only set the required properties.
+3. Use `kubectl` to apply your changes. Make sure your `kubectl context` is set correctly.
+   ```shell
+   kubectl apply -f argocd-cm.yaml -n argocd
+   ```
+4. Restart `argocd-repo-server`.
+   ```shell
+   kubectl -n argocd rollout restart deploy argocd-repo-server   
+   ```
 
 ## IAC with Terraform (Work in Progress)
 The [iac](/iac) directory contains all Terraform configurations for managing the infrastructure across multiple AWS accounts and clusters.
