@@ -313,22 +313,7 @@ kind: Service
 metadata:
   labels:
     run: eks-msk-beta
-  name: eks-msk-beta-blue
-spec:
-  ports:
-    - port: 80
-      name: http
-      targetPort: 8888
-  selector:
-    run: eks-msk-beta
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    run: eks-msk-beta
-  name: eks-msk-beta-green
+  name: eks-msk-beta
 spec:
   ports:
     - port: 80
