@@ -322,3 +322,18 @@ spec:
   selector:
     run: eks-msk-beta
   type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: eks-msk-beta
+  name: eks-msk-beta-preview
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8888
+  selector:
+    run: eks-msk-beta
+  type: ClusterIP
