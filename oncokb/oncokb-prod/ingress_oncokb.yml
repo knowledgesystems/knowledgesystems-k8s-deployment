@@ -34,6 +34,7 @@ spec:
     # - oncokb.org
     - www.oncokb.org
     - beta.oncokb.org
+    - staging.oncokb.org
     - legacy.oncokb.org
     - demo.oncokb.org
     - sop.oncokb.org
@@ -89,6 +90,16 @@ spec:
         backend:
           service:
             name: oncokb-public-beta
+            port:
+              name: http
+  - host: staging.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public-staging
             port:
               name: http
   - host: demo.oncokb.org

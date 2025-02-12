@@ -15,6 +15,7 @@ spec:
     - legacy.oncokb.org
     - sop.oncokb.org
     - beta.oncokb.org
+    - staging.oncokb.org
     - demo.oncokb.org
     - curation.oncokb.org
     - beta.curation.oncokb.org
