@@ -12,7 +12,7 @@ metadata:
     tags.datadoghq.com/version: 6.0.25
   name: eks-msk-beta
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       run: eks-msk-beta
