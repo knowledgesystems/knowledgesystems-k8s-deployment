@@ -13,6 +13,6 @@ spec:
     revisions: 3
   strategy:
     blueGreen:
-      activeService: eks-msk-beta
-      previewService: eks-msk-beta-preview
+      activeService: eks-msk-beta-blue
+      previewService: eks-msk-beta-green
       previewReplicaCount: 1
