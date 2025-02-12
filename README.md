@@ -67,17 +67,29 @@ The [iac](/iac) directory contains all Terraform configurations for managing the
 ### Prerequisites
 1. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
 
+### AWS Cli Setup
+By default, submodules in this repo use the `default` aws cli profile when running commands. To use a custom profile, follows the steps below.
+1. Move into the submodule you intend on working on:
+```shell
+cd iac/aws/<account-number>/clusters/<cluster-name>/eks
+```
+2. Create a terraform variables file:
+```shell
+touch terraform.tfvars
+```
+3. Add the following variable to the file with the correct AWS profile
+```shell
+AWS_PROFILE='aws-profile-name'
+```
+Now, all terraform commands from this submodule will use this profile.
+
 ### Usage
 The [iac](/iac) directory contains multiple submodules where each submodule resides under varying nesting levels. Essentially, any subdirectory that has `*.tf` files is a submodule. We don't manage a root module config to avoid accidental disastrous actions and changes that end up impacting multiple accounts at the same time. To make changes to each module, change your present working directory to that module where the `*.tf` files reside.
 1. Change directory into the appropriate module. E.g., Do the following if you want to work on the EKS setup under the `cbioportal-prod` cluster in account `666628074417`.
    ```shell
    cd iac/aws/666628074417/clusters/cbioportal-prod/eks
    ```
-2. Pull remote module sources. This requires Git authentication when running for the first time.
-   ```shell
-   terraform get
-   ```
-3. Now you can make changes to the Terraform files. After making changes format them to ensure consistent formatting.
+2. Now you can make changes to the Terraform files. After making changes format them to ensure consistent formatting.
    ```shell
    terraform fmt
    ```
@@ -85,15 +97,19 @@ The [iac](/iac) directory contains multiple submodules where each submodule resi
    ```shell
    terraform init
    ```
-4. Validate your terraform files.
+4. Pull remote module sources. This requires Git authentication when running for the first time.
+   ```shell
+   terraform get
+   ```
+5. Validate your terraform files.
    ```shell
    terraform validate
    ```
-4. Dry run to see what changes you are making.
+6. Dry run to see what changes you are making.
    ```shell
    terraform plan
    ```
-5. Apply changes.
+7. Apply changes.
    ```shell
    terraform apply
    ```
@@ -103,14 +119,14 @@ The [iac](/iac) directory contains multiple submodules where each submodule resi
 > ### ⚠️ **WARNING**
 > Making changes to state configuration, such as changing the bucket, key, or region, is a destructive action and can lead to out-of-sync terraform states. Always consult before making such changes as it would require state migration.
 
-Terraform uses `.tfstate` files to keep track of the infrastructure state. By default, terraform stores these files locally within the module subdirectory, which is insecure as state files can contain sensitive information. We use S3 Buckets to store our infrastructure state remotely. Each AWS account has a single S3 bucket called `k8s-terraform-state-storage` reserved for this purpose.
+Terraform uses `.tfstate` files to keep track of the infrastructure state. By default, terraform stores these files locally within the module subdirectory, which is insecure as state files can contain sensitive information. We use S3 Buckets to store our infrastructure state remotely. Each AWS account has a single S3 bucket called `k8s-terraform-state-storage-<account-number>` reserved for this purpose.
 
 When creating a new submodule, configure it to use its own state file in the S3 bucket by adding a `backend` block to the _terraform.tf_ file. Check [example](iac/aws/666628074417/clusters/cbioportal-prod/eks/terraform.tf).
 
 ```terraform
 backend "s3" {
-   bucket       = "k8s-terraform-state-storage"
-   key          = "terraform/<path>/<to>/<submodule>/eks.tfstate"
+   bucket       = "k8s-terraform-state-storage-<account-number>"
+   key          = "terraform/<account-number>/eks.tfstate"
    region       = "us-east-1"
    use_lockfile = false
 }
