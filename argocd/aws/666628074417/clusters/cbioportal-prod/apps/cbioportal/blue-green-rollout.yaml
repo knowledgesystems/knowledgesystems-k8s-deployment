@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: msk-beta-blue-green-rollout
+spec:
+  replicas: 1
+  workloadRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: eks-msk-beta
+  minReadySeconds: 60
+  rollbackWindow:
+    revisions: 3
+  strategy:
+    blueGreen:
+      activeService: eks-msk-beta
+      previewReplicaCount: 1
