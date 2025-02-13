@@ -68,20 +68,10 @@ The [iac](/iac) directory contains all Terraform configurations for managing the
 1. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
 
 ### AWS Cli Setup
-By default, submodules in this repo use the `default` aws cli profile when running commands. To use a custom profile, follows the steps below.
-1. Move into the submodule you intend on working on:
+By default, submodules in this repo use the `default` aws cli profile when running commands. To use a custom profile, set the `TF_VAR_AWS_PROFILE` environment variable.
 ```shell
-cd iac/aws/<account-number>/clusters/<cluster-name>/eks
+export TF_VAR_AWS_PROFILE=<profile-name>
 ```
-2. Create a terraform variables file:
-```shell
-touch terraform.tfvars
-```
-3. Add the following variable to the file with the correct AWS profile
-```shell
-AWS_PROFILE='aws-profile-name'
-```
-Now, all terraform commands from this submodule will use this profile.
 
 ### Usage
 The [iac](/iac) directory contains multiple submodules where each submodule resides under varying nesting levels. Essentially, any subdirectory that has `*.tf` files is a submodule. We don't manage a root module config to avoid accidental disastrous actions and changes that end up impacting multiple accounts at the same time. To make changes to each module, change your present working directory to that module where the `*.tf` files reside.
@@ -114,6 +104,41 @@ The [iac](/iac) directory contains multiple submodules where each submodule resi
    terraform apply
    ```
    
+### Creating New Submodule
+Follow the steps below to create a new submodule.
+1. Create a submodule directory under the appropriate nesting structure.
+   ```shell
+   mkdir -p iac/aws/<account-number>/clusters/<cluster-name>/<submodule-name>
+   
+   # E.g. For a s3 submodule, you would do this
+   # mkdir -p iac/aws/203403084713/clusters/cbioportal-prod/s3
+   ```
+2. Move into the new module.
+   ```shell
+   cd iac/aws/<account-number>/clusters/<cluster-name>/<submodule-name>
+   ```
+3. Create a `terraform.tf` file for the terraform configuration for that specific submodule. Check other submodules in this repo for examples.
+   ```shell
+   touch terraform.tf
+   ```
+4. Make sure you set the required resource tags and state backend for every new submodule you create. See [Resource Tagging](#resource-tagging) and [Infrastructure State](#infrastructure-state).
+
+### Resource Tagging
+Tagging all submodule is very important for tracking our AWS costs. All PRs are checked by a linting Github Action to make sure proper tags have been added to each submodule. PRs are blocked in case of failure. When creating a new submodule or managing existing ones, make sure that the `terraform.tf` file contains the following tags within the `provider "aws"` block. Check existing submodules for examples.
+```yaml
+provider "aws" {
+  ...
+  default_tags {
+    tags = {
+      CDSI-Owner = <team-owner-email>
+      CDSI-Team  = <team-name>
+      CDSI-App   = <app-name>
+    }
+  }
+  ...
+}
+```
+
 ### Infrastructure State
 
 > ### ⚠️ **WARNING**

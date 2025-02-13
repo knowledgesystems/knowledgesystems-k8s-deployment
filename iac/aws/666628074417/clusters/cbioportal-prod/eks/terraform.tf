@@ -21,5 +21,12 @@ terraform {
 
 provider "aws" {
   region  = "us-east-1"
-  profile = "cbioportal-msk-666628074417"
+  profile = var.AWS_PROFILE
+  default_tags {
+    tags = {
+      CDSI-Owner = "nasirz1@mskcc.org"
+      CDSI-App   = "cbioportal"
+      CDSI-Team  = "data-visualization"
+    }
+  }
 }
