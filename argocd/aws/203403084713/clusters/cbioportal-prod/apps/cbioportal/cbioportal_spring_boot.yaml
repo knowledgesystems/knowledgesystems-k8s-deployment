@@ -40,7 +40,7 @@ spec:
           name: single-cell-frontend-config
       containers:
       - envFrom:
-        - configMapRef:
+        - secretRef:
             name: cbioportal-public6
         env:
           - name: DD_PROFILING_ENABLED
