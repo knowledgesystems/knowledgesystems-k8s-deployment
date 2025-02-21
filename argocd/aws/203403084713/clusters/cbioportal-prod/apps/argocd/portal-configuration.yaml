@@ -6,12 +6,12 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://github.com/knowledgesystems/portal-configuration.git
+    - repoURL: git@github.com:knowledgesystems/portal-configuration.git
       path: argocd/aws/203403084713/clusters/cbioportal-prod
       targetRevision: HEAD
       directory:
         recurse: true
-    - repoURL: https://github.com/knowledgesystems/portal-configuration.git
+    - repoURL: git@github.com:knowledgesystems/portal-configuration.git
       path: argocd/aws/shared
       targetRevision: HEAD
       directory:
