@@ -24,6 +24,20 @@ module "eks_cluster" {
       desired_size   = 1
       max_size       = 1
       min_size       = 1
+      taints = {
+        dedicated = {
+          key    = "workload"
+          value  = "cbioportal"
+          effect = "NO_SCHEDULE"
+        }
+      }
+    }
+    argocd = {
+      instance_types = ["m5.large"]
+      ami_type      = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
     }
   }
 }
