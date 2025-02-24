@@ -1,16 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: redis
-  namespace: argocd
+  name: redis-persistence
 spec:
   project: default
-  sources:
-    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/redis
-      targetRevision: HEAD
-      directory:
-        recurse: true
+  source:
+    chart: bitnami/redis
+    repoURL: registry-1.docker.io/bitnamicharts/redis
+    targetRevision: 20.7.1
+    helm:
+      releaseName: cbioportal-redis-public-master
+      values: |
+        auth:
+          existingSecret: cbioportal-public6
   destination:
     namespace: default
     server: https://kubernetes.default.svc
