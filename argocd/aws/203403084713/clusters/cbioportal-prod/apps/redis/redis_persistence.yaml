@@ -4,7 +4,7 @@ metadata:
   name: redis-persistence
 spec:
   project: default
-  sources:
+  source:
     chart: bitnami/redis
     repoURL: registry-1.docker.io/bitnamicharts/redis
     targetRevision: 20.7.1
