@@ -14,6 +14,8 @@ spec:
       parameters:
         - name: master.persistence.enabled
           value: "false"
+        - name: replica.persistence.enabled
+          value: "false"
         - name: master.extraFlags[0]
           value: "--maxmemory 8gb"
         - name: master.extraFlags[1]
