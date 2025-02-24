@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: redis-persistence
+  name: redis-session
 spec:
   project: default
   source:
