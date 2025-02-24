@@ -10,21 +10,25 @@ spec:
     chart: redis
     helm:
       releaseName: cbioportal-redis-public-master
-      values: |
-        architecture: standalone
-        auth:
-          existingSecret: cbioportal-public6
-        master:
-          extraFlags:
-            - --maxmemory 8gb
-            - --maxmemory-policy volatile-ttl
-        persistence:
-          enabled: false
-        tolerations:
-          - effect: NoSchedule
-            key: workload
-            operator: Equal
-            value: cbioportal-redis
+      parameters:
+        - name: architecture
+          value: standalone
+        - name: auth.enabled
+          value: "false"
+        - name: master.extraFlags[0]
+          value: --maxmemory 8gb
+        - name: master.extraFlags[1]
+          value: --maxmemory-policy volatile-ttl
+        - name: persistence.enabled
+          value: "false"
+        - name: tolerations[0].effect
+          value: NoSchedule
+        - name: tolerations[0].key
+          value: workload
+        - name: tolerations[0].operator
+          value: Equal
+        - name: tolerations[0].value
+          value: cbioportal-redis
   destination:
     namespace: default
     server: https://kubernetes.default.svc
