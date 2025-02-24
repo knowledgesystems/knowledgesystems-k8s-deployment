@@ -79,13 +79,13 @@ spec:
         - name: master.tolerations[0].effect
           value: NoSchedule
         - name: replica.replicaCount
-          value: 2
+          value: "2"
         - name: replica.autoscaling.enabled
           value: "true"
         - name: replica.autoscaling.minReplicas
-          value: 2
+          value: "2"
         - name: replica.autoScaling.maxReplicas
-          value: 3
+          value: "3"
         - name: replica.extraFlags[0]
           value: --maxmemory 8gb
         - name: replica.extraFlags[1]
