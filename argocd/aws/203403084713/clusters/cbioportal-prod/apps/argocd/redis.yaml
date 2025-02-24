@@ -6,7 +6,7 @@ spec:
   project: default
   source:
     chart: bitnami/redis
-    repoURL: registry-1.docker.io/bitnamicharts/redis
+    repoURL: https://charts.bitnami.com/bitnami
     targetRevision: 20.7.1
     helm:
       releaseName: cbioportal-redis-public-master
