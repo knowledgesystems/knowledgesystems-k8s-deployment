@@ -16,10 +16,20 @@ spec:
           value: standalone
         - name: master.persistence.enabled
           value: "false"
-        - name: master.extraFlags
-          value: '["--maxmemory 8gb", "--maxmemory-policy volatile-ttl"]'
-        - name: master.tolerations
-          value: '[{"effect": "NoSchedule", "key": "workload", "operator": "Equal", "value": "cbioportal-redis"}]'
+        - name: replica.persistence.enabled
+          value: "false"
+        - name: master.extraFlags[0]
+          value: --maxmemory 8gb
+        - name: master.extraFlags[1]
+          value: --maxmemory-policy volatile-ttl
+        - name: master.tolerations[0].key
+          value: workload
+        - name: master.tolerations[0].value
+          value: cbioportal-redis
+        - name: master.tolerations[0].operator
+          value: Equal
+        - name: master.tolerations[0].effect
+          value: NoSchedule
   destination:
     namespace: default
     server: https://kubernetes.default.svc
