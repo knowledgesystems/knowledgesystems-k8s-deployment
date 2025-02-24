@@ -14,6 +14,11 @@ spec:
       parameters:
         - name: architecture
           value: standalone
+        - name: global.redis.password
+          valueFrom:
+            secretKeyRef:
+              name: cbioportal-public6
+              key: REDIS_SESSION_PASSWORD
         - name: master.persistence.enabled
           value: "false"
         - name: replica.persistence.enabled
