@@ -1,10 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "4"
-  creationTimestamp: null
-  generation: 1
   labels:
     run: cbioportal-spring-boot
     tags.datadoghq.com/env: eks-public
@@ -277,7 +273,6 @@ metadata:
     run: cbioportal-spring-boot
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
   name: cbioportal
-  selfLink: /api/v1/namespaces/default/services/cbioportal-spring-boot
 spec:
   ports:
   - port: 80
