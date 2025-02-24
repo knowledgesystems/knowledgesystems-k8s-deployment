@@ -10,25 +10,22 @@ spec:
     chart: redis
     helm:
       releaseName: cbioportal-redis-public-master
+      # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
-        - name: architecture
-          value: standalone
-        - name: auth.enabled
+        - name: master.persistence.enabled
           value: "false"
         - name: master.extraFlags[0]
-          value: --maxmemory 8gb
+          value: "--maxmemory 8gb"
         - name: master.extraFlags[1]
-          value: --maxmemory-policy volatile-ttl
-        - name: persistence.enabled
-          value: "false"
-        - name: tolerations[0].effect
-          value: NoSchedule
-        - name: tolerations[0].key
+          value: "--maxmemory-policy volatile-ttl"
+        - name: master.tolerations[0].key
           value: workload
-        - name: tolerations[0].operator
-          value: Equal
-        - name: tolerations[0].value
+        - name: master.tolerations[0].value
           value: cbioportal-redis
+        - name: master.tolerations[0].operator
+          value: Equal
+        - name: master.tolerations[0].effect
+          value: NoSchedule
   destination:
     namespace: default
     server: https://kubernetes.default.svc
