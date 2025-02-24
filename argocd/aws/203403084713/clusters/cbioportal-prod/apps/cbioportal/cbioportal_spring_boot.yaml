@@ -7,7 +7,6 @@ metadata:
     tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.0.25
   name: cbioportal-spring-boot
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/cbioportal-spring-boot
 spec:
   replicas: 1
   selector:
