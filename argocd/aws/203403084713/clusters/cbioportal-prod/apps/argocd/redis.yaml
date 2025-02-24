@@ -5,14 +5,26 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://charts.bitnami.com/bitnami
+    repoURL: registry-1.docker.io/bitnamicharts
     targetRevision: 20.8.0
     chart: redis
     helm:
       releaseName: cbioportal-redis-public-master
       values: |
+        architecture: standalone
         auth:
           existingSecret: cbioportal-public6
+        master:
+          extraFlags:
+            - --maxmemory 8gb
+            - --maxmemory-policy volatile-ttl
+        persistence:
+          enabled: false
+        tolerations:
+          - effect: NoSchedule
+            key: workload
+            operator: Equal
+            value: cbioportal-redis
   destination:
     namespace: default
     server: https://kubernetes.default.svc
