@@ -5,7 +5,7 @@ metadata:
     run: cbioportal-backend-genie-public-blue
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.25
+    tags.datadoghq.com/version: 6.0.27
   name: cbioportal-backend-genie-public-blue
   namespace: default
 spec:
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-genie-public-blue
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.25
+        tags.datadoghq.com/version: 6.0.27
     spec:
       containers:
       - args:
@@ -204,6 +204,7 @@ spec:
         - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
         - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
         - --clickhouse_mode=true
+        - --spring.profiles.active=clickhouse
         # NEW PROPERTIES END
         # compress on client side
         - --enable_request_body_gzip_compression=true
@@ -231,7 +232,7 @@ spec:
         envFrom:
         - configMapRef:
             name: cbioportal-genie-public-blue
-        image: cbioportal/cbioportal:6.0.25-web-shenandoah
+        image: cbioportal/cbioportal:6.0.27-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
