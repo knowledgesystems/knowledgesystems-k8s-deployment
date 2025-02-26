@@ -17,6 +17,10 @@ agents:
       operator: "Equal"
       value: "cbioportal"
       effect: "NoSchedule"
+    - key: "workload"
+      operator: "Equal"
+      value: "datadog"
+      effect: "NoSchedule"
 clusterAgent:
   image:
     name: cluster-agent
