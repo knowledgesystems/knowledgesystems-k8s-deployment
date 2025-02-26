@@ -1,0 +1,50 @@
+targetSystem: "linux"
+datadog:
+  logs:
+    enabled: true
+    containerCollectAll: true
+  clusterChecks:
+    enabled: true
+  apiKeyExistingSecret: datadog-api-key
+
+agents:
+  enabled: true
+  image:
+    name: agent
+    tag: 7.49.0
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "cbioportal"
+      effect: "NoSchedule"
+clusterAgent:
+  image:
+    name: cluster-agent
+    tag: 7.49.0
+  enabled: true
+  replicas: 2
+  createPodDisruptionBudget: true
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "datadog"
+      effect: "NoSchedule"
+  confd:
+# To enable nginx, http-snippet is needed, we should enable that during the cluster migration
+# see reference at https://docs.datadoghq.com/integrations/nginx_ingress_controller/?tab=containerized
+#    nginx.yaml: |-
+#      cluster_check: true
+#      ad_identifiers:
+#        - nginx
+#        - controller
+#      init_config:
+#      instances:
+#        - nginx_status_url: http://%%host%%:18080/nginx_status
+#    nginx_ingress_controller.yaml: |-
+#      cluster_check: true
+#      init_config:
+#      instances:
+#        - prometheus_url: http://10.0.4.24:10254/metrics
+#      logs:
+#        service: nginx-ingress-controller
+#        source: nginx-ingress-controller

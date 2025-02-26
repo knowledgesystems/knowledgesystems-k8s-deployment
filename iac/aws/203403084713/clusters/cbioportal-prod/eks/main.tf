@@ -53,5 +53,19 @@ module "eks_cluster" {
         }
       }
     }
+    datadog = {
+      instance_types = ["t3.small"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 1
+      max_size       = 3
+      taints = {
+        dedicated = {
+          key    = "workload"
+          value  = "datadog"
+          effect = "NO_SCHEDULE"
+        }
+      }
+    }
   }
 }
