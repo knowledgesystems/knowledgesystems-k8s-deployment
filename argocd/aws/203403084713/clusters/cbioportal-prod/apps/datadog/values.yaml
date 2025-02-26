@@ -55,5 +55,3 @@ clusterAgent:
 #      logs:
 #        service: nginx-ingress-controller
 #        source: nginx-ingress-controller
-clusterChecksRunner:
-  revisionHistoryLimit: 2
