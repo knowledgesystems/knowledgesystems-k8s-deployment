@@ -17,7 +17,7 @@ spec:
       helm:
         releaseName: datadog
         valueFiles:
-          - $datadog/values.yaml
+          - $datadog/argocd/aws/203403084713/clusters/cbioportal-prod/apps/datadog/values.yaml
   destination:
     namespace: monitoring
     server: https://kubernetes.default.svc
