@@ -24,7 +24,6 @@ agents:
       value: "datadog"
       effect: "NoSchedule"
 clusterAgent:
-  tokenExistingSecret: datadog
   image:
     name: cluster-agent
     tag: 7.49.0
