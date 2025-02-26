@@ -1,10 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "55"
-  creationTimestamp: null
-  generation: 50
   labels:
     run: cbioportal-backend-beta
   name: cbioportal-backend-beta
