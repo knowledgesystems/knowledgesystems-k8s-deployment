@@ -5,10 +5,10 @@ metadata:
     run: cbioportal-spring-boot
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.25
+    tags.datadoghq.com/version: 6.0.27
   name: cbioportal-spring-boot
 spec:
-  replicas: 0 # This should be set to 0 because it is controlled by the Rollout manifest spec
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-spring-boot
@@ -24,7 +24,7 @@ spec:
         run: cbioportal-spring-boot
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.25
+        tags.datadoghq.com/version: 6.0.27
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -42,7 +42,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.0.26-web-shenandoah
+        image: cbioportal/cbioportal:6.0.27-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -280,35 +280,3 @@ spec:
   selector:
     run: cbioportal-spring-boot
   type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    run: cbioportal-spring-boot
-  name: cbioportal-preview
-spec:
-  ports:
-    - port: 80
-      name: http
-      targetPort: 8080
-  selector:
-    run: cbioportal-spring-boot
-  type: ClusterIP
----
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
-metadata:
-  name: cbioportal-blue-green-rollout
-spec:
-  replicas: 1
-  workloadRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: cbioportal-spring-boot
-  strategy:
-    blueGreen:
-      activeService: cbioportal
-      previewService: cbioportal-preview
-      autoPromotionEnabled: false
-      previewReplicaCount: 1
