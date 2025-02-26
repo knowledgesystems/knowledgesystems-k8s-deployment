@@ -34,7 +34,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: cbioportal-beta-v6
-        image: cbioportal/cbioportal:6.0.25-web-shenandoah
+        image: cbioportal/cbioportal:6.0.27-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -204,6 +204,7 @@ spec:
             "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
             "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--clickhouse_mode=true",
+            "--spring.profiles.active=clickhouse",
             # for single cell plugin
             "--frontend.config=/cbioportal/frontendConfig.json",
             "--frontend_authenticate=optional_oauth2",
