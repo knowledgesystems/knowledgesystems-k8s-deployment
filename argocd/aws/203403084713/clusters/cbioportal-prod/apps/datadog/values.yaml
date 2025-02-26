@@ -5,7 +5,7 @@ datadog:
     containerCollectAll: true
   clusterChecks:
     enabled: true
-  apiKeyExistingSecret: datadog-api-key
+  apiKeyExistingSecret: datadog
   apm:
     instrumentation:
       skipKPITelemetry: true
@@ -24,6 +24,7 @@ agents:
       value: "datadog"
       effect: "NoSchedule"
 clusterAgent:
+  tokenExistingSecret: datadog
   image:
     name: cluster-agent
     tag: 7.49.0
