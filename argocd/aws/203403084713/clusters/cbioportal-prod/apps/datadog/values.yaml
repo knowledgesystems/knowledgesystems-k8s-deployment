@@ -6,7 +6,9 @@ datadog:
   clusterChecks:
     enabled: true
   apiKeyExistingSecret: datadog-api-key
-
+  apm:
+    instrumentation:
+      skipKPITelemetry: true
 agents:
   enabled: true
   image:
