@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cert-manager
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: cert-manager
+    - repoURL: https://charts.jetstack.io
+      targetRevision: 1.17.0
+      chart: cert-manager
+      helm:
+        releaseName: cert-manager
+        valueFiles:
+          - $cert-manager/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cert-manager/values.yaml
+  destination:
+    namespace: cert-manager
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
