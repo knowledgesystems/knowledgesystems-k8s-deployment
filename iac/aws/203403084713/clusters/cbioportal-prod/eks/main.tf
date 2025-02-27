@@ -26,9 +26,9 @@ module "eks_cluster" {
       min_size       = 1
       taints = {
         dedicated = {
-          key    = "workload"
+          key    = var.TAINT_KEY
           value  = "cbioportal"
-          effect = "NO_SCHEDULE"
+          effect = var.TAINT_EFFECT
         }
       }
     }
@@ -47,9 +47,9 @@ module "eks_cluster" {
       min_size       = 1
       taints = {
         dedicated = {
-          key    = "workload"
+          key    = var.TAINT_KEY
           value  = "cbioportal-redis"
-          effect = "NO_SCHEDULE"
+          effect = var.TAINT_EFFECT
         }
       }
     }
@@ -61,9 +61,23 @@ module "eks_cluster" {
       max_size       = 3
       taints = {
         dedicated = {
-          key    = "workload"
+          key    = var.TAINT_KEY
           value  = "datadog"
-          effect = "NO_SCHEDULE"
+          effect = var.TAINT_EFFECT
+        }
+      }
+    }
+    ingress = {
+      instance_types = ["t3.small"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 1
+      max_size       = 3
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "ingress"
+          effect = var.TAINT_EFFECT
         }
       }
     }
