@@ -1,0 +1,27 @@
+cainjector:
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
+ingressShim:
+  defaultIssuerKind: ClusterIssuer
+  defaultIssuerName: letsencrypt-prod
+installCRDs: true
+startupapicheck:
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
+tolerations:
+  - effect: NoSchedule
+    key: workload
+    operator: Equal
+    value: ingress
+webhook:
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
