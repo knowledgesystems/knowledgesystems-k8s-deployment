@@ -25,6 +25,11 @@ controller:
   metrics:
     enabled: true
   replicaCount: 2
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "ingress"
+      effect: "NoSchedule"
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
