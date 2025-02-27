@@ -70,9 +70,9 @@ module "eks_cluster" {
     ingress = {
       instance_types = ["t3.small"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
-      min_size       = 1
-      max_size       = 3
+      desired_size   = 3
+      min_size       = 2
+      max_size       = 4
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
