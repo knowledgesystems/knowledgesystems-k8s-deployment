@@ -25,5 +25,5 @@ spec:
                   name: https
   tls:
     - hosts:
-        - argocd.cbioporotal.org
+        - argocd.cbioportal.org
       secretName: argocd-server-tls # as expected by argocd-server
