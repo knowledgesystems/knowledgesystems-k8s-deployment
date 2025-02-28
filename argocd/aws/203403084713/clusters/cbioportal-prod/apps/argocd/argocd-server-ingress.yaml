@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: argocd.cbioportal.com
+    - host: argocd.cbioportal.org
       http:
         paths:
           - path: /
@@ -25,5 +25,5 @@ spec:
                   name: https
   tls:
     - hosts:
-        - argocd.cbioporotal.com
+        - argocd.cbioporotal.org
       secretName: argocd-server-tls # as expected by argocd-server
