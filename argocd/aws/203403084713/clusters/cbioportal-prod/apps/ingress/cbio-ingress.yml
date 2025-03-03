@@ -37,4 +37,4 @@ spec:
   tls:
   - hosts:
     - beta-argocd.cbioportal.org
-    secretName: cbioportal-beta-cert
+    secretName: cert-cbioportal-beta
