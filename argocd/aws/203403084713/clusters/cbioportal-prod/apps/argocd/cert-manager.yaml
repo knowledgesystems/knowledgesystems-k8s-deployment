@@ -13,7 +13,7 @@ spec:
         recurse: true
       ref: cert-manager
     - repoURL: https://charts.jetstack.io
-      targetRevision: 1.17.0
+      targetRevision: 1.12.0
       chart: cert-manager
       helm:
         releaseName: cert-manager
