@@ -25,6 +25,8 @@ controller:
   metrics:
     enabled: true
   replicaCount: 2
+  nodeSelector:
+    workload: ingress
   tolerations:
     - key: "workload"
       operator: "Equal"
