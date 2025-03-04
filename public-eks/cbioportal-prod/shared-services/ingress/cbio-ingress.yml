@@ -44,46 +44,6 @@ spec:
 #              number: 80
 #        path: /
 #        pathType: Prefix
-  - host: genie-public-beta.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-public-beta-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: genie-public-beta-blue.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-public-beta-blue
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: genie-public-beta-green.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-public-beta-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: genie-public-beta1.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-public-beta
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
   - host: genie.cbioportal.org
     http:
       paths:
@@ -240,20 +200,8 @@ spec:
     - keycloak.cbioportal.org
     secretName: keycloak-cert
   - hosts:
-    - genie-public-beta.cbioportal.org
-    secretName: cbioportal-genie-public-beta-cert
-  - hosts:
-    - genie-public-beta-blue.cbioportal.org
-    secretName: cbioportal-genie-public-beta-blue-cert
-  - hosts:
-    - genie-public-beta-green.cbioportal.org
-    secretName: cbioportal-genie-public-beta-green-cert
-  - hosts:
     - crdc.cbioportal.org
     secretName: cbioportal-crdc-cert
-  - hosts:
-    - genie-public-beta1.cbioportal.org
-    secretName: cbioportal-genie-public-beta1-cert
   - hosts:
     - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
