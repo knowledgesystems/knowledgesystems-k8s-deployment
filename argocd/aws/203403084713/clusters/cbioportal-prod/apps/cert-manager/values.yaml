@@ -1,25 +1,33 @@
-cainjector:
-  tolerations:
-    - effect: NoSchedule
-      key: workload
-      operator: Equal
-      value: ingress
 ingressShim:
   defaultIssuerKind: ClusterIssuer
   defaultIssuerName: letsencrypt-prod
 installCRDs: true
-startupapicheck:
-  tolerations:
-    - effect: NoSchedule
-      key: workload
-      operator: Equal
-      value: ingress
+nodeSelector:
+  workload: ingress
 tolerations:
   - effect: NoSchedule
     key: workload
     operator: Equal
     value: ingress
+cainjector:
+  nodeSelector:
+    workload: ingress
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
+startupapicheck:
+  nodeSelector:
+    workload: ingress
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
 webhook:
+  nodeSelector:
+    workload: ingress
   tolerations:
     - effect: NoSchedule
       key: workload
