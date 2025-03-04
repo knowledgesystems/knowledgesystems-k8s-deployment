@@ -16,3 +16,9 @@ variable "TAINT_EFFECT" {
   type        = string
   default     = "NO_SCHEDULE"
 }
+
+variable "LABEL_KEY" {
+  description = "Default key for node labels"
+  type        = string
+  default     = "workload"
+}

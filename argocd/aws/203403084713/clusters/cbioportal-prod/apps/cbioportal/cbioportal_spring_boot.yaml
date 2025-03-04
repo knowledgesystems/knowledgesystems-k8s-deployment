@@ -253,6 +253,8 @@ spec:
               memory: 20Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+      nodeSelector:
+        workload: cbioportal
       tolerations:
         - key: "workload"
           operator: "Equal"
