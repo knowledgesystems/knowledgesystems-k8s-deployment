@@ -14,6 +14,8 @@ agents:
   image:
     name: agent
     tag: 7.49.0
+  nodeSelector:
+    workload: datadog
   tolerations:
     - key: "workload"
       operator: "Equal"
@@ -31,6 +33,8 @@ clusterAgent:
   enabled: true
   replicas: 2
   createPodDisruptionBudget: true
+  nodeSelector:
+    workload: datadog
   tolerations:
     - key: "workload"
       operator: "Equal"
