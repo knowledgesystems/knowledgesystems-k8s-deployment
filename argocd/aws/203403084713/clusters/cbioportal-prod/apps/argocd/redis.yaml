@@ -70,6 +70,8 @@ spec:
           value: --maxmemory 8gb
         - name: master.extraFlags[1]
           value: --maxmemory-policy volatile-ttl
+        - name: master.nodeSelector.workload
+          value: redis
         - name: master.tolerations[0].key
           value: workload
         - name: master.tolerations[0].value
@@ -90,6 +92,8 @@ spec:
           value: --maxmemory 8gb
         - name: replica.extraFlags[1]
           value: --maxmemory-policy volatile-ttl
+        - name: replica.nodeSelector.workload
+          value: redis
         - name: replica.tolerations[0].key
           value: workload
         - name: replica.tolerations[0].value
