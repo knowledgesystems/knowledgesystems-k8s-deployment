@@ -77,8 +77,8 @@ module "eks_cluster" {
       }
     }
     ingress = {
-      instance_types = ["r7g.medium"]
-      ami_type       = "BOTTLEROCKET_ARM_64"
+      instance_types = ["m5.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 1
       min_size       = 1
       max_size       = 2
