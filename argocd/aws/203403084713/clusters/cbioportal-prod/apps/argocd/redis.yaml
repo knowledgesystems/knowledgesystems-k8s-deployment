@@ -12,7 +12,7 @@ spec:
       releaseName: cbioportal-redis-public
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
-        - name: global.imagePullSecrets
+        - name: global.imagePullSecrets[0]
           value: dockerhub-creds
         - name: architecture
           value: standalone
@@ -56,7 +56,7 @@ spec:
       releaseName: cbioportal-public-persistence-redis
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
-        - name: global.imagePullSecrets
+        - name: global.imagePullSecrets[0]
           value: dockerhub-creds
         - name: architecture
           value: replication
