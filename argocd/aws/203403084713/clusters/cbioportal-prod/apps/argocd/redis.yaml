@@ -5,13 +5,17 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://charts.bitnami.com/bitnami
+    repoURL: registry-1.docker.io/bitnamicharts/redis
     targetRevision: 20.8.0
     chart: redis
     helm:
       releaseName: cbioportal-redis-public
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
+        - name: global.imageRegistry
+          value: gcr.io
+        - name: image.repository
+          value: bitnami-containers/redis
         - name: architecture
           value: standalone
         - name: auth.enabled
@@ -47,13 +51,17 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://charts.bitnami.com/bitnami
+    repoURL: registry-1.docker.io/bitnamicharts/redis
     targetRevision: 20.8.0
     chart: redis
     helm:
       releaseName: cbioportal-public-persistence-redis
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
+        - name: global.imageRegistry
+          value: gcr.io
+        - name: image.repository
+          value: bitnami-containers/redis
         - name: architecture
           value: replication
         - name: auth.enabled
