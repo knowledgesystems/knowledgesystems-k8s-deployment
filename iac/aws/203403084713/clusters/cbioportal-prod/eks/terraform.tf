@@ -20,13 +20,9 @@ terraform {
 }
 
 provider "aws" {
-  region  = "us-east-1"
+  region  = var.AWS_REGION
   profile = var.AWS_PROFILE
   default_tags {
-    tags = {
-      CDSI-Owner = "nasirz1@mskcc.org"
-      CDSI-App   = "cbioportal"
-      CDSI-Team  = "data-visualization"
-    }
+    tags = var.AWS_DEFAULT_TAGS
   }
 }
