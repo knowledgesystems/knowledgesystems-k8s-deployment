@@ -31,7 +31,7 @@ spec:
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:3.27.0
+          image: oncokb/oncokb:3.28.0-alpha.0
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
@@ -63,7 +63,7 @@ spec:
           # use actionable variants endpoint to cache everything
           readinessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
@@ -71,7 +71,7 @@ spec:
             failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             # wait for the pod is ready
             initialDelaySeconds: 480
