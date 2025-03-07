@@ -3,5 +3,5 @@ This repo contains all the kubernetes configuration files needed to run the Know
 
 https://docs.google.com/presentation/d/1mnSnSZRDJmX0vv8ZF_lNQvX2sz73deKia8w5S9YciR8/
 
-## [Documentation](knowledgesystems.github.io/knowledgesystems-k8s-deployment)
-The documentation for this repo can be found [here](knowledgesystems.github.io/knowledgesystems-k8s-deployment).
+## [Documentation](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment)
+The documentation for this repo can be found [here](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment).
