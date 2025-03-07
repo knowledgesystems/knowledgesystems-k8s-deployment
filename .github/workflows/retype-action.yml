@@ -1,0 +1,22 @@
+name: Publish Docs to GitHub Pages
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    name: Publish to gh-pages branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 7.0.x
+      - uses: retypeapp/action-build@latest
+      - uses: retypeapp/action-github-pages@latest
+        with:
+          update-branch: true

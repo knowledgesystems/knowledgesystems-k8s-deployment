@@ -1,0 +1,25 @@
+input: ./docs
+output: .retype
+url: knowledgesystems.github.io/knowledgesystems-k8s-deployment/docs
+branding:
+  title: CDSI K8s
+  label: Docs
+links:
+- text: GitHub
+  icon: mark-github
+  link: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+  target: blank
+cache:
+  strategy: query
+  token: v1
+edit:
+  repo: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/
+  base: /docs/
+  branch: master
+  label: Edit on GitHub
+editor:
+  enabled: false
+meta:
+  title: " | CDSI K8s Documentation"
+footer:
+  copyright: "&copy; Copyright {{ year }}. All rights reserved."
