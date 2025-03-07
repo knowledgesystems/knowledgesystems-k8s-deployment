@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/docs/sitemap.xml.gz
+Sitemap: https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/sitemap.xml.gz
