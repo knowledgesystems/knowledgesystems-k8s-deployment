@@ -1,6 +1,6 @@
 input: ./docs
 output: .retype
-url: knowledgesystems.github.io/knowledgesystems-k8s-deployment/docs
+url: knowledgesystems.github.io/knowledgesystems-k8s-deployment
 branding:
   title: CDSI K8s
   label: Docs
