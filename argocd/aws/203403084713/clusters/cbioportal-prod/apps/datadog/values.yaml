@@ -14,8 +14,6 @@ agents:
   image:
     name: agent
     tag: 7.49.0
-  nodeSelector:
-    workload: datadog
   tolerations:
     - key: "workload"
       operator: "Equal"
