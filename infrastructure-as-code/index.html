@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.6.0.794698288100">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.6.0.794925330608">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.6.0">
@@ -31,12 +31,11 @@
 
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
-    <link href="../resources/css/retype.css?v=3.6.0.794698288100" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=3.6.0.794925330608" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.6.0.794698288100" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=3.6.0.794925330608" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=3.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.6.0.794698288100" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.6.0.794698288100" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.6.0.794925330608" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -200,156 +199,6 @@
     </h2>
 </doc-anchor-target>
 <p>Proper tagging of all cloud resources provisioned through Terraform is required. This enables better resource tracking, accountability, cost analysis. There is a set of tags that should be attached to all existing and new resources. See <a href="resource-tagging/">Resource Tagging</a> for further details.</p>
-<doc-anchor-target id="cost-analysis">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#cost-analysis">#</doc-anchor-trigger>
-        <span>Cost Analysis</span>
-    </h2>
-</doc-anchor-target>
-<p>All the above efforts are eventually only useful if we closely monitor cloud costs. There are multiple ways to do this, including <a href="https://aws.amazon.com/aws-cost-management/aws-cost-explorer/">AWS Cost Explorer</a> and <a href="https://apps.cloudhealthtech.com">CloudHealth</a>. See [Cost Analysis] for further details.</p>
-<doc-anchor-target id="iac-with-terraform-work-in-progress">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#iac-with-terraform-work-in-progress">#</doc-anchor-trigger>
-        <span>IAC with Terraform (Work in Progress)</span>
-    </h2>
-</doc-anchor-target>
-<p>The <a href="/iac">iac</a> directory contains all Terraform configurations for managing the infrastructure across multiple AWS accounts and clusters.</p>
-<doc-anchor-target id="prerequisites">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#prerequisites">#</doc-anchor-trigger>
-        <span>Prerequisites</span>
-    </h3>
-</doc-anchor-target>
-<ol>
-<li><strong>saml2aws</strong>: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.</li>
-</ol>
-<doc-anchor-target id="aws-cli-setup">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#aws-cli-setup">#</doc-anchor-trigger>
-        <span>AWS Cli Setup</span>
-    </h3>
-</doc-anchor-target>
-<p>By default, submodules in this repo use the <code v-pre>default</code> aws cli profile when running commands. To use a custom profile, set the <code v-pre>TF_VAR_AWS_PROFILE</code> environment variable.</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">export TF_VAR_AWS_PROFILE=&lt;profile-name&gt;</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="usage">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#usage">#</doc-anchor-trigger>
-        <span>Usage</span>
-    </h3>
-</doc-anchor-target>
-<p>The <a href="/iac">iac</a> directory contains multiple submodules where each submodule resides under varying nesting levels. Essentially, any subdirectory that has <code v-pre>*.tf</code> files is a submodule. We don&#x27;t manage a root module config to avoid accidental disastrous actions and changes that end up impacting multiple accounts at the same time. To make changes to each module, change your present working directory to that module where the <code v-pre>*.tf</code> files reside.</p>
-<ol>
-<li>Change directory into the appropriate module. E.g., Do the following if you want to work on the EKS setup under the <code v-pre>cbioportal-prod</code> cluster in account <code v-pre>666628074417</code>.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">cd iac/aws/666628074417/clusters/cbioportal-prod/eks</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Now you can make changes to the Terraform files. After making changes format them to ensure consistent formatting.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">terraform fmt</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Initialize terraform submodule. This creates intermediate lock and state files.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">terraform init</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Pull remote module sources. This requires Git authentication when running for the first time.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">terraform get</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Validate your terraform files.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">terraform validate</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Dry run to see what changes you are making.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">terraform plan</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Apply changes.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">terraform apply</code></pre>
-</doc-codeblock></div>
-</li>
-</ol>
-<doc-anchor-target id="creating-new-submodule">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#creating-new-submodule">#</doc-anchor-trigger>
-        <span>Creating New Submodule</span>
-    </h3>
-</doc-anchor-target>
-<p>Follow the steps below to create a new submodule.</p>
-<ol>
-<li>Create a submodule directory under the appropriate nesting structure.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">mkdir -p iac/aws/&lt;account-number&gt;/clusters/&lt;cluster-name&gt;/&lt;submodule-name&gt;
-
-# E.g. For a s3 submodule, you would do this
-# mkdir -p iac/aws/203403084713/clusters/cbioportal-prod/s3</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Move into the new module.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">cd iac/aws/&lt;account-number&gt;/clusters/&lt;cluster-name&gt;/&lt;submodule-name&gt;</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Create a <code v-pre>terraform.tf</code> file for the terraform configuration for that specific submodule. Check other submodules in this repo for examples.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">touch terraform.tf</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Make sure you set the required resource tags and state backend for every new submodule you create. See <doc-anchor-trigger to="#resource-tagging">Resource Tagging</doc-anchor-trigger> and <doc-anchor-trigger to="#infrastructure-state">Infrastructure State</doc-anchor-trigger>.</li>
-</ol>
-<doc-anchor-target id="resource-tagging-1">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#resource-tagging-1">#</doc-anchor-trigger>
-        <span>Resource Tagging</span>
-    </h3>
-</doc-anchor-target>
-<p>Tagging all submodule is very important for tracking our AWS costs. All PRs are checked by a linting Github Action to make sure proper tags have been added to each submodule. PRs are blocked in case of failure. When creating a new submodule or managing existing ones, make sure that the <code v-pre>terraform.tf</code> file contains the following tags within the <code v-pre>provider &quot;aws&quot;</code> block. Check existing submodules for examples.</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-yaml"><code v-pre class="language-yaml">provider &quot;aws&quot; {
-  ...
-  default_tags {
-    tags = {
-      CDSI-Owner = &lt;team-owner-email&gt;
-      CDSI-Team  = &lt;team-name&gt;
-      CDSI-App   = &lt;app-name&gt;
-    }
-  }
-  ...
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="infrastructure-state">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#infrastructure-state">#</doc-anchor-trigger>
-        <span>Infrastructure State</span>
-    </h3>
-</doc-anchor-target>
-<blockquote>
-<doc-anchor-target id="-warning">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#-warning">#</doc-anchor-trigger>
-        <span><span class="docs-emoji">&#x26A0;&#xFE0F;</span> <strong>WARNING</strong></span>
-    </h3>
-</doc-anchor-target>
-<p>Making changes to state configuration, such as changing the bucket, key, or region, is a destructive action and can lead to out-of-sync terraform states. Always consult before making such changes as it would require state migration.</p>
-</blockquote>
-<p>Terraform uses <code v-pre>.tfstate</code> files to keep track of the infrastructure state. By default, terraform stores these files locally within the module subdirectory, which is insecure as state files can contain sensitive information. We use S3 Buckets to store our infrastructure state remotely. Each AWS account has a single S3 bucket called <code v-pre>k8s-terraform-state-storage-&lt;account-number&gt;</code> reserved for this purpose.</p>
-<p>When creating a new submodule, configure it to use its own state file in the S3 bucket by adding a <code v-pre>backend</code> block to the <em>terraform.tf</em> file. Check <a href="iac/aws/666628074417/clusters/cbioportal-prod/eks/terraform.tf">example</a>.</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-hcl"><code v-pre class="language-hcl">backend &quot;s3&quot; {
-   bucket       = &quot;k8s-terraform-state-storage-&lt;account-number&gt;&quot;
-   key          = &quot;terraform/&lt;account-number&gt;/eks.tfstate&quot;
-   region       = &quot;us-east-1&quot;
-   use_lockfile = false
-}</code></pre>
-</doc-codeblock></div>
 
                                 
                                 <!-- Required only on API pages -->
@@ -422,6 +271,6 @@
 
     <div id="docs-overlay-target"></div>
 
-    <script data-cfasync="false">window.__DOCS__ = { "title": "Infrastructure as Code (IaC)", level: 1, icon: "file", hasPrism: true, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
+    <script data-cfasync="false">window.__DOCS__ = { "title": "Infrastructure as Code (IaC)", level: 1, icon: "file", hasPrism: false, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
 </body>
 </html>

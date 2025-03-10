@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.6.0.794698288100">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.6.0.794925330608">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.6.0">
@@ -31,12 +31,12 @@
 
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
-    <link href="../../resources/css/retype.css?v=3.6.0.794698288100" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.6.0.794925330608" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.6.0.794698288100" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.6.0.794925330608" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.6.0.794698288100" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.6.0.794698288100" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.6.0.794925330608" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.6.0.794925330608" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -192,7 +192,7 @@
         <span>Syncing Changes</span>
     </h2>
 </doc-anchor-target>
-<p>The <a href="/argocd">argocd</a> directory contains manifests organized by <code v-pre>aws-account/cluster-name/app-name</code>. After making changes to manifests, push your changes to the repo. Once your changes are merged into the <code v-pre>master</code> branch, you can use the Argo CD dashboard to sync and deploy your changes.</p>
+<p>The <code v-pre>argocd</code> directory contains manifests organized by <code v-pre>aws-account/cluster-name/app-name</code>. After making changes to manifests, push your changes to the repo. Once your changes are merged into the <code v-pre>master</code> branch, you can use the Argo CD dashboard to sync and deploy your changes.</p>
 <doc-anchor-target id="accessing-the-argo-cd-dashboard">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#accessing-the-argo-cd-dashboard">#</doc-anchor-trigger>
@@ -200,34 +200,13 @@
     </h2>
 </doc-anchor-target>
 <p>Argo CD dashboard can be accessed in multiple ways.</p>
-<doc-anchor-target id="port-forwarding">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#port-forwarding">#</doc-anchor-trigger>
-        <span>Port-Forwarding</span>
-    </h3>
-</doc-anchor-target>
-<p>By default, all ArgoCD installations come with a built-in dashboard that you can access by port-forwarding. You will need <code v-pre>kubectl</code> and access to the cluster for this method.</p>
-<ol>
-<li>Confirm kubectl is using the correct context. E.g. if you want to work on the <code v-pre>my-cluster</code> cluster under account <code v-pre>123456789abc</code>, your output should be:
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">kubectl config current-context
-# Output: arn:aws:eks:us-east-1:123456789abc:cluster/my-cluster-&lt;random-number&gt;</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Port-forward ArgoCD dashboard from the cluster to your <a href="localhost:8080">localhost:8080</a>.
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-bash"><code v-pre class="language-bash">kubectl port-forward svc/argocd-server -n argocd 8080:443</code></pre>
-</doc-codeblock></div>
-</li>
-<li>Open ArgoCD at <a href="localhost:8080">localhost:8080</a> and login with credentials. For credentials, <a href="mailto:nasirz1@mskcc.org">email us</a>.</li>
-</ol>
 <doc-anchor-target id="public-instance">
     <h3>
         <doc-anchor-trigger class="header-anchor-trigger" to="#public-instance">#</doc-anchor-trigger>
         <span>Public Instance</span>
     </h3>
 </doc-anchor-target>
-<p>For some of our clusters, we have attached the Argo CD dashboard to a public domain. See table below for the list of apps that have Argo CD instance publicly available.</p>
+<p>For some of our clusters, we have attached the Argo CD dashboard to a public domain. See table below for the list of apps that have Argo CD instances publicly available.</p>
 <div class="table-wrapper scrollbar overflow-hidden">
 <table class="compact">
 <thead>
@@ -244,6 +223,27 @@
 </tbody>
 </table>
 </div>
+<doc-anchor-target id="port-forwarding">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#port-forwarding">#</doc-anchor-trigger>
+        <span>Port-Forwarding</span>
+    </h3>
+</doc-anchor-target>
+<p>By default, all ArgoCD installations come with a built-in dashboard that you can access by port-forwarding. You will need <code v-pre>kubectl</code> and access to the cluster for this method.</p>
+<ol>
+<li>Confirm kubectl is using the correct context. E.g. if you want to work on the <code v-pre>my-cluster</code> cluster under account <code v-pre>123456789abc</code>, your output should be:
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-bash"><code v-pre class="language-bash">kubectl config current-context
+# Output: arn:aws:eks:us-east-1:123456789abc:cluster/my-cluster</code></pre>
+</doc-codeblock></div>
+</li>
+<li>Port-forward ArgoCD dashboard from the cluster to your <a href="localhost:8080">localhost:8080</a>.
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-bash"><code v-pre class="language-bash">kubectl port-forward svc/argocd-server -n argocd 8080:443</code></pre>
+</doc-codeblock></div>
+</li>
+<li>Open ArgoCD at <a href="localhost:8080">localhost:8080</a> and login with your credentials.</li>
+</ol>
 <doc-anchor-target id="creating-new-apps">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#creating-new-apps">#</doc-anchor-trigger>
