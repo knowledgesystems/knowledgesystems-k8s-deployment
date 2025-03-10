@@ -1,5 +1,6 @@
 targetSystem: "linux"
 datadog:
+  clusterName: cbioportal-prod-a9438edd
   logs:
     enabled: true
     containerCollectAll: true
