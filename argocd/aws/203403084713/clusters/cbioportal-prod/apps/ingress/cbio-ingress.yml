@@ -24,7 +24,7 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: beta-argocd.cbioportal.org
+  - host: beta.cbioportal.org
     http:
       paths:
       - backend:
@@ -36,5 +36,5 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - beta-argocd.cbioportal.org
+    - beta.cbioportal.org
     secretName: cbioportal-beta-cert
