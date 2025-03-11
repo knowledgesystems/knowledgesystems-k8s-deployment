@@ -34,7 +34,20 @@ spec:
               number: 80
         path: /
         pathType: Prefix
+  - host: springboot.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: cbioportal
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
   tls:
   - hosts:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
+  - hosts:
+    - springboot.cbioportal.org
+    secretName: cbioportal-www-cert
