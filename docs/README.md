@@ -8,7 +8,6 @@ Welcome to the documentation site for the **Knowledge Systems Apps** in CDSI at 
 To eliminate the inconsistent directory structure in our repo, we are in the process of refactoring the directories. The goal is to group Infrastructure as Code (IaC) and ArgoCD-base GitOps configurations into dedicated folders:
 - **`iac/`** → Infrastructure as Code (Terraform, AWS, EKS)
   - **`aws/`** → Cloud provider
-    - **`shared/`** → Terraform modules shared by all accounts
     - **`<account-number/>`** → Terraform modules specific to each account
       - **`clusters/`**
         - **`<cluster-name>/`**
@@ -16,6 +15,11 @@ To eliminate the inconsistent directory structure in our repo, we are in the pro
             - **`main.tf`**
             - **`terraform.tf`**
             - **`variables.tf`**
+      - **`shared/`** → Terraform modules for resources that live outside of a cluster.
+        - **`<resource-type>/`** → Resource type, e.g. _eks_ or _s3_ for AWS.
+          - **`main.tf`**
+          - **`terraform.tf`**
+          - **`variables.tf`**
 - **`argocd/`** → GitOps configurations for Kubernetes applications
   - **`<account-number/>`** → Deployment files specific to each account
     - **`clusters/`**

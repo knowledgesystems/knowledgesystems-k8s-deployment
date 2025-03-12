@@ -70,11 +70,15 @@ Terraform uses `.tfstate` files to keep track of the infrastructure state. By de
 
 When creating a new submodule, create a new S3 bucket manually using AWS console and configure the submodule to use its own state file in the S3 bucket by adding a `terraform.backend` block to the _terraform.tf_ file. See other submodules in the repo for examples.
 
+!!!info Backend Key Should Be Unique
+When defining the backend block as shown below, make sure that the `key` is unique within that bucket.
+!!!
+
 ```terraform
 terraform {
    backend 's3' {
       bucket       = "k8s-terraform-state-storage-<account-number>"
-      key          = "terraform/<account-number>/<submodule-name>.tfstate"
+      key          = "terraform/<account-number>/<submodule-name>.tfstate" # Should be unique within the bucket
       region       = "us-east-1"
       use_lockfile = false
    }
