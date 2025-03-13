@@ -10,6 +10,7 @@ datadog:
   apm:
     instrumentation:
       skipKPITelemetry: true
+  logLevel: debug
 agents:
   enabled: true
   image:
