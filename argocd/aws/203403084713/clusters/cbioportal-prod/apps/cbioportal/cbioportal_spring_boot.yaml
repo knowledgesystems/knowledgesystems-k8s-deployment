@@ -27,7 +27,7 @@ spec:
         tags.datadoghq.com/version: 6.0.28
         admission.datadoghq.com/enabled: "true"
       annotations:
-        admission.datadoghq.com/java-lib.version: v1.24.2
+        admission.datadoghq.com/java-lib.version: v1.47.1
     spec:
       volumes:
       - name: cbioportal-frontend-config-volume
