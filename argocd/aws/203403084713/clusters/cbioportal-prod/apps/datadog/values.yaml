@@ -25,6 +25,8 @@ agents:
       value: "datadog"
       effect: "NoSchedule"
 clusterAgent:
+  admissionController:
+    enabled: true
   tokenExistingSecret: datadog
   image:
     name: cluster-agent
