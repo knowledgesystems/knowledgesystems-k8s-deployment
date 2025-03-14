@@ -1,56 +1,19 @@
-datadog:
-  clusterName: cbioportal-prod-a9438edd
-  logs:
-    enabled: true
-    containerCollectAll: true
-  clusterChecks:
-    enabled: true
-  apiKeyExistingSecret: datadog
-  apm:
-    instrumentation:
-      skipKPITelemetry: true
 agents:
   enabled: true
   image:
     name: agent
-    tag: 7.63.3
+    tag: 7.49.0
   tolerations:
-    - key: "workload"
-      operator: "Equal"
-      value: "cbioportal"
-      effect: "NoSchedule"
-    - key: "workload"
-      operator: "Equal"
-      value: "datadog"
-      effect: "NoSchedule"
+    - key: workload
+      operator: Equal
+      value: cbioportal
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: datadog
+      effect: NoSchedule
 clusterAgent:
-  admissionController:
-    enabled: true
-  tokenExistingSecret: datadog
-  image:
-    name: cluster-agent
-    tag: 7.63.3
-  enabled: true
-  replicas: 2
-  createPodDisruptionBudget: true
-  nodeSelector:
-    workload: datadog
-  tolerations:
-    - key: "workload"
-      operator: "Equal"
-      value: "datadog"
-      effect: "NoSchedule"
 #  confd:
-# To enable nginx, http-snippet is needed, we should enable that during the cluster migration
-# see reference at https://docs.datadoghq.com/integrations/nginx_ingress_controller/?tab=containerized
-#    nginx.yaml: |-
-#      cluster_check: true
-#      ad_identifiers:
-#        - nginx
-#        - controller
-#      init_config:
-#      instances:
-#        - nginx_status_url: http://%%host%%:18080/nginx_status
 #    nginx_ingress_controller.yaml: |-
 #      cluster_check: true
 #      init_config:
@@ -59,3 +22,25 @@ clusterAgent:
 #      logs:
 #        service: nginx-ingress-controller
 #        source: nginx-ingress-controller
+  tokenExistingSecret: datadog
+  createPodDisruptionBudget: true
+  enabled: true
+  image:
+    name: cluster-agent
+    tag: 7.49.0
+  replicas: 2
+  nodeSelector:
+    workload: datadog
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: datadog
+      effect: NoSchedule
+datadog:
+  apiKeyExistingSecret: datadog
+  clusterChecks:
+    enabled: true
+  logs:
+    containerCollectAll: true
+    enabled: true
+targetSystem: linux
