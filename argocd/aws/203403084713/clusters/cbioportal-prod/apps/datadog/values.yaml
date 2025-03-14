@@ -13,7 +13,7 @@ agents:
   enabled: true
   image:
     name: agent
-    tag: 7.64.0
+    tag: 7.63.3
   tolerations:
     - key: "workload"
       operator: "Equal"
@@ -29,7 +29,7 @@ clusterAgent:
   tokenExistingSecret: datadog
   image:
     name: cluster-agent
-    tag: 7.64.0
+    tag: 7.63.3
   enabled: true
   replicas: 2
   createPodDisruptionBudget: true
