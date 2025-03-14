@@ -1,4 +1,7 @@
 agents:
+  podAnnotations:
+    container.apparmor.security.beta.kubernetes.io/agent: unconfined
+    container.apparmor.security.beta.kubernetes.io/process-agent: unconfined
   enabled: true
   image:
     name: agent
