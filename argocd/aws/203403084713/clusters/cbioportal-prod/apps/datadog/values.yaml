@@ -7,12 +7,9 @@ datadog:
   clusterChecks:
     enabled: true
   apiKeyExistingSecret: datadog
-#  apm:
-#    instrumentation:
-#      skipKPITelemetry: true
   apm:
-    portEnabled: true
-  logLevel: debug
+    instrumentation:
+      skipKPITelemetry: true
 agents:
   enabled: true
   image:
@@ -30,7 +27,7 @@ agents:
 clusterAgent:
   admissionController:
     enabled: true
-#  tokenExistingSecret: datadog
+  tokenExistingSecret: datadog
   image:
     name: cluster-agent
     tag: 7.49.0
