@@ -12,7 +12,7 @@ spec:
         recurse: true
       ref: datadog
     - repoURL: https://helm.datadoghq.com
-      targetRevision: 3.97.0
+      targetRevision: 3.109.2
       chart: datadog
       helm:
         releaseName: datadog
