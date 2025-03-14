@@ -25,10 +25,9 @@ spec:
         tags.datadoghq.com/env: eks-public-argocd
         tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.0.28
+        admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.47.1
-        admission.datadoghq.com/enabled: "true"
-        apm.datadoghq.com/java-lib: "true"
     spec:
       volumes:
       - name: cbioportal-frontend-config-volume
