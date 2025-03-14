@@ -12,7 +12,12 @@ spec:
         spec:
           serviceAccountName: cbioportal-mysql-dump-weekly
           nodeSelector:
-            eks.amazonaws.com/nodegroup: eks-cbioportal-all-purpose
+            workload: cbioportal
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbioportal"
+              effect: "NoSchedule"
           containers:
             - envFrom:
                 - secretRef:
