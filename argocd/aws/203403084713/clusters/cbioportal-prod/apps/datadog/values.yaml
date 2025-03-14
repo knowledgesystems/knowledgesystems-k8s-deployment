@@ -10,6 +10,8 @@ datadog:
 #  apm:
 #    instrumentation:
 #      skipKPITelemetry: true
+  apm:
+    portEnabled: true
   logLevel: debug
 agents:
   enabled: true
