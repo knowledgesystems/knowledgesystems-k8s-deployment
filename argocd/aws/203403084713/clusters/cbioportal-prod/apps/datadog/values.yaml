@@ -1,4 +1,3 @@
-targetSystem: "linux"
 datadog:
   clusterName: cbioportal-prod-a9438edd
   logs:
@@ -14,7 +13,7 @@ agents:
   enabled: true
   image:
     name: agent
-    tag: 7.49.0
+    tag: 7.64.0
   tolerations:
     - key: "workload"
       operator: "Equal"
@@ -30,7 +29,7 @@ clusterAgent:
   tokenExistingSecret: datadog
   image:
     name: cluster-agent
-    tag: 7.49.0
+    tag: 7.64.0
   enabled: true
   replicas: 2
   createPodDisruptionBudget: true
@@ -41,7 +40,7 @@ clusterAgent:
       operator: "Equal"
       value: "datadog"
       effect: "NoSchedule"
-  confd:
+#  confd:
 # To enable nginx, http-snippet is needed, we should enable that during the cluster migration
 # see reference at https://docs.datadoghq.com/integrations/nginx_ingress_controller/?tab=containerized
 #    nginx.yaml: |-
