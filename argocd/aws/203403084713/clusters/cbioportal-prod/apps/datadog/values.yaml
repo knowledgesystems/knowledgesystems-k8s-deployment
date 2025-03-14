@@ -26,8 +26,7 @@ clusterAgent:
 #        service: nginx-ingress-controller
 #        source: nginx-ingress-controller
   podAnnotations:
-    container.apparmor.security.beta.kubernetes.io/agent: unconfined
-    container.apparmor.security.beta.kubernetes.io/process-agent: unconfined
+    container.apparmor.security.beta.kubernetes.io/cluster-agent: unconfined
   tokenExistingSecret: datadog
   createPodDisruptionBudget: true
   enabled: true
