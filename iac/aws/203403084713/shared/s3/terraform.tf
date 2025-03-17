@@ -10,7 +10,7 @@ terraform {
 
   backend "s3" {
     bucket       = "k8s-terraform-state-storage-203403084713"
-    key          = "terraform/890742576217/s3.tfstate"
+    key          = "terraform/203403084713/s3.tfstate"
     region       = "us-east-1"
     use_lockfile = false
   }
