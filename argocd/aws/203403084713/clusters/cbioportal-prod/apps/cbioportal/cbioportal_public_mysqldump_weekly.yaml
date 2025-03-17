@@ -38,7 +38,7 @@ spec:
               command: ["/bin/sh", "-c"]
               args:
                 - printf "Install libraries\n";
-                  apt-get update; apt-get install unzip curl less -y;
+                  apt-get update; apt-get install unzip curl less mysql-client -y;
                   printf "Done installing curl\n\n";
                   
                   printf "Install aws cli\n";
