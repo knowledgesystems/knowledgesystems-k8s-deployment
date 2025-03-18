@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.2.0"
+  required_version = "~> 1.6.0"
 
   required_providers {
     aws = {
@@ -12,7 +12,7 @@ terraform {
     bucket       = "k8s-terraform-state-storage-890742576217"
     key          = "terraform/890742576217/s3.tfstate"
     region       = "us-east-1"
-    use_lockfile = false
+    // use_lockfile = false // Not available on TF 1.6
   }
 }
 
