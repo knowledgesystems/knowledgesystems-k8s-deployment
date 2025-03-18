@@ -1,3 +1,12 @@
+module "mskscope_portal_bucket" {
+  source = "git@github.com:MSK-Staging/terraform-aws-hyc-akamai-s3-website.git?ref=0.2.0"
+  bucket_prefix    = var.bucket_prefix
+  tags             = var.tags
+  org_readers      = var.org_readers
+  org_writers      = var.org_writers
+  force_destroy    = var.force_destroy
+}
+
 // Scope Portal
 resource "aws_s3_bucket" "scope_portal_bucket" {
   bucket_prefix = "tf-scope-portal-"
@@ -6,7 +15,6 @@ resource "aws_s3_bucket" "scope_portal_bucket" {
   }
 }
 
-// Scope Logs
 resource "aws_s3_bucket" "scope_log_bucket" {
   bucket_prefix = "tf-scope-logs-"
   tags = {
@@ -14,7 +22,6 @@ resource "aws_s3_bucket" "scope_log_bucket" {
   }
 }
 
-// Scope Data
 resource "aws_s3_bucket" "scope_data" {
   bucket_prefix = "tf-scope-data-"
   tags = {
@@ -22,28 +29,9 @@ resource "aws_s3_bucket" "scope_data" {
   }
 }
 
-// Scope workflows
 resource "aws_s3_bucket" "scope_workflows" {
   bucket_prefix = "tf-scope-workflows-"
   tags = {
     cdsi-app = "scope-workflows"
   }
 }
-
-// Setting ACLs are not permitted
-/*
-resource "aws_s3_bucket_acl" "scope_portal_bucket_acl" {
-  bucket = aws_s3_bucket.scope_portal_bucket.id
-  acl    = "private"
-}
-resource "aws_s3_bucket_acl" "scope_log_bucket_acl" {
-  bucket = aws_s3_bucket.scope_log_bucket.id
-  acl    = "log-delivery-write"
-}
-// Logging Action
-resource "aws_s3_bucket_logging" "scope_portal_bucket" {
-  bucket        = aws_s3_bucket.scope_portal_bucket.id
-  target_bucket = aws_s3_bucket.scope_log_bucket.id
-  target_prefix = "log/"
-}
-*/
