@@ -25,6 +25,10 @@ clusterAgent:
 #      logs:
 #        service: nginx-ingress-controller
 #        source: nginx-ingress-controller
+  admissionController:
+    enabled: true
+    agentSidecarInjection:
+      enabled: true
   podAnnotations:
     container.apparmor.security.beta.kubernetes.io/cluster-agent: unconfined
   tokenExistingSecret: datadog
@@ -42,6 +46,7 @@ clusterAgent:
       value: datadog
       effect: NoSchedule
 datadog:
+  logLevel: debug
   clusterName: cbioportal-prod-a9438edd
   apiKeyExistingSecret: datadog
   clusterChecks:
