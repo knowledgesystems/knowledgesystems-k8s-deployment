@@ -1,0 +1,54 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: datadog
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: datadog
+    app.kubernetes.io/version: "7"
+    helm.sh/chart: datadog-3.109.2
+  name: datadog
+rules:
+- nonResourceURLs:
+  - /metrics
+  - /metrics/slis
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes/metrics
+  - nodes/spec
+  - nodes/proxy
+  - nodes/stats
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - datadog
+  - hostaccess
+  - privileged
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+- apiGroups:
+  - metrics.eks.amazonaws.com
+  resources:
+  - kcm/metrics
+  - ksh/metrics
+  verbs:
+  - get
