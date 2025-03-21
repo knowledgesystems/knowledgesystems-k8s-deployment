@@ -27,6 +27,7 @@ clusterAgent:
 #        source: nginx-ingress-controller
   admissionController:
     enabled: true
+    mutateUnlabelled: true
     agentSidecarInjection:
       enabled: true
   podAnnotations:
