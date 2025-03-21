@@ -1,0 +1,86 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: mysql-config
+  labels:
+    app: mysql
+data:
+  default_auth: |
+    [mysqld]
+    default-authentication-plugin=mysql_native_password
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  labels:
+    run: homo-sapiens-core-mysql
+  name: homo-sapiens-core-mysql
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      run: homo-sapiens-core-mysql
+  template:
+    metadata:
+      labels:
+        run: homo-sapiens-core-mysql
+    spec: 
+      containers:
+      - name: homo-sapiens-core-db
+        image: mysql:8.0
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: homo-sapiens-core-db-creds
+              key: mysql-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: homo-sapiens-core-db-creds
+              key: mysql-password
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: homo-sapiens-core-db-creds
+              key: mysql-root-password
+        - name: MYSQL_DATABASE
+          value: homo_sapiens_core_112_37
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: homo-sapiens-core-pv
+          mountPath: /var/lib/mysql
+        - name: mysql-config-volume
+          mountPath: /etc/mysql/conf.d/default_auth.cnf
+          subPath: default_auth
+      volumes: 
+      - name: homo-sapiens-core-pv
+        persistentVolumeClaim:
+          claimName: homo-sapiens-core-pv-claim
+      - name: mysql-config-volume
+        configMap:
+          name: mysql-config
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-genome-nexus-vep
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-genome-nexus-vep"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: homo-sapiens-core-mysql
+  name: homo-sapiens-core-mysql
+  namespace: genome-nexus
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    run: homo-sapiens-core-mysql
+  type: ClusterIP
