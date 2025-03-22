@@ -134,6 +134,16 @@ spec:
               number: 80
         path: /
         pathType: Prefix
+  - host: public-data.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-public-data-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
   - host: session-service.cbioportal.org
     http:
       paths:
@@ -196,6 +206,9 @@ spec:
   - hosts:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
+  - hosts:
+    - public-data.cbioportal.org
+    secretName: cbioportal-public-data-cert
   - hosts:
     - keycloak.cbioportal.org
     secretName: keycloak-cert
