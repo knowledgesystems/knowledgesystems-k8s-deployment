@@ -28,7 +28,7 @@ spec:
       - env:
         - name: SERVER_PORT
           value: "8888"
-        image: bprize15/vep:latest
+        image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
         securityContext:
           privileged: true
         imagePullPolicy: Always
