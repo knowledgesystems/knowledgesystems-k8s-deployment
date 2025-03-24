@@ -2,13 +2,13 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   labels:
-    run: gn-vep-2
-  name: gn-vep-2
+    run: gn-vep-2-extended
+  name: gn-vep-2-extended
 spec: 
   replicas: 1
   selector:
     matchLabels:
-      run: gn-vep-2
+      run: gn-vep-2-extended
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,15 +17,33 @@ spec:
   template:
     metadata:
       labels:
-        run: gn-vep-2
+        run: gn-vep-2-extended
     spec: 
       containers:
-      - name: gn-vep-2
-        image: genomenexus/gn-vep:112-2.0.0
+      - name: gn-vep-2-extended
+        image: genomenexus/gn-vep:112-2.0.0-extended
         imagePullPolicy: Always
-        envFrom:
-          - configMapRef:
-              name: oncokb-db-public-rds-oncokb-user
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_PORT
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_PASSWORD
         readinessProbe:
           httpGet:
             path: /vep/human/hgvs/ENST00000375759.3:c.10981A>T
@@ -58,12 +76,12 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: gn-vep-2
-  name: gn-vep-2
+    run: gn-vep-2-extended
+  name: gn-vep-2-extended
   namespace: genome-nexus
 spec:
   ports:
     - port: 8080
   selector:
-    run: gn-vep-2
+    run: gn-vep-2-extended
   type: ClusterIP
