@@ -95,7 +95,7 @@ spec:
             "-Dtomcat.catalina.scope=runtime",
             "-Dshow.transcript_dropdown=true",
             "-Dskin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
-            "-Dskin.email_contact=cbioportal@cbioportal.org",
+            "-Dskin.email_contact=cdsi@mskcc.org",
             "-Dskin.data_sets_footer=Data sets of published studies were curated from literature. Data sets of legacy TCGA studies were downloaded from the <a href=\"http://gdac.broadinstitute.org\">Broad Institute Firehose</a>, last updated 1/28/2016.",
             "-Dskin.data_sets_header=The table below lists the number of available samples per cancer study and data type.",
             "-Dskin.authorization_message=Welcome to cBioPortal. Logging in will allow you to access your studies and groups from any computer, and cBioPortal will also remember your study view charts preferences for each study (i.e. order of the charts, type of charts and visibility). Login is optional and not required to access any of the other features of cBioPortal.",

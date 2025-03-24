@@ -110,7 +110,7 @@ spec:
         - --show.civic=$(SHOW_CIVIC)
         - --show.signal=true
         - --skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)
-        - --skin.email_contact=cbioportal@cbioportal.org
+        - --skin.email_contact=cdsi@mskcc.org
         - --skin.data_sets_footer=Data sets of TCGA studies were downloaded from Broad
           Firehose (http://gdac.broadinstitute.org) and updated monthly. In some studies,
           data sets were from the working groups directly.
