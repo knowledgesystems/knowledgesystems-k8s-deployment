@@ -30,7 +30,7 @@ spec:
       - envFrom:
         - secretRef:
             name: cbioportal-beta-v6
-        image: cbioportal/cbioportal:demo-clickhouse-comparison-web-shenandoah
+        image: cbioportal/cbioportal:demo-home-imaging-filter-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -88,7 +88,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+            "--frontend.url=https://deploy-preview-5141--cbioportalfrontend.netlify.app",
             "--enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=false",
@@ -191,13 +191,13 @@ spec:
             # compress on client side
             "--enable_request_body_gzip_compression=true",
             "--persistence.cache_type_clickhouse=no-cache",
-            "--spring.datasource.mysql.url=jdbc:mysql://rfc80db.cbioportal.org:3306/db_2024_11_14?zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true",
-            "--spring.datasource.mysql.username=cgds_user",
-            "--spring.datasource.mysql.password=rfc80dbuserpw5",
+            "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
+            "--spring.datasource.mysql.username=$(DB_USER)",
+            "--spring.datasource.mysql.password=$(DB_PASSWORD)",
             "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
-            "--spring.datasource.clickhouse.url=jdbc:ch://mecgt250i0.us-east-1.aws.clickhouse.cloud:8443/sling_db_2024_11_14?ssl=true&sslmode=STRICT&connectTimeout=10000&socketTimeout=60000",
-            "--spring.datasource.clickhouse.username=P@ssword1976",
+            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
             "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--clickhouse_mode=true",
             "--spring.profiles.active=clickhouse",
