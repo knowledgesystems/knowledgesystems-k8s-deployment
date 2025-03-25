@@ -9,7 +9,7 @@ metadata:
     run: eks-msk-beta
     tags.datadoghq.com/env: eks-msk-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.0.28
+    tags.datadoghq.com/version: 6.1.0
   name: eks-msk-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-beta
 spec:
@@ -28,7 +28,7 @@ spec:
         run: eks-msk-beta
         tags.datadoghq.com/env: eks-msk-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.0.28
+        tags.datadoghq.com/version: 6.1.0
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -65,7 +65,7 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal:6.0.28-web-shenandoah
+          image: cbioportal/cbioportal:6.1.0-web-shenandoah
           volumeMounts:
             - name: msk-beta-eks-configmap-volume
               mountPath: /cbioportal/local.key
@@ -163,7 +163,7 @@ spec:
             "--show.civic=$(SHOW_CIVIC)",
             "--show.signal=true",
             "--skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
-            "--skin.email_contact=cdsi@mskcc.org",
+            "--skin.email_contact=cbioportal@cbioportal.org",
             "--skin.data_sets_footer=Data sets of TCGA studies were downloaded from Broad Firehose (http://gdac.broadinstitute.org) and updated monthly. In some studies, data sets were from the working groups directly.",
             "--skin.data_sets_header=The portal currently contains data from the following cancer genomics studies and MSKCC internal studies.  The table below lists the number of available samples per cancer study and data type.",
             "--skin.authorization_message=Access to this portal is only available to authorized users at MSKCC. [<a href=\"http://bit.ly/gdac-form\">Request Access</a>].",
@@ -245,8 +245,8 @@ spec:
             "--enable_study_tags=false",
             # *** msk specific settings ***
             "--msk_entity_translation_enabled=true",
-            "--patient_view.url=https://beta.cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID",
-            "--sample_view.url=https://beta.cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID",
+            "--patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID",
+            "--sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID",
             # msk whole slide viewer
             "--msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)",
             # darwin
