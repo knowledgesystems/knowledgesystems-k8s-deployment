@@ -29,21 +29,21 @@ spec:
       containers:
       - env:
         - name: SERVER_PORT
-          value: "8888"
+          value: "8080"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot32-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-v0dot32-beta-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:1.4.3
+        image: genomenexus/gn-spring-boot:2.0.0
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
             # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
             # include shenandoah)
-            "-Dvep.url=http://grch37.rest.ensembl.org/vep/human/hgvs/VARIANT?content-type=application/json&xref_refseq=1&ccds=1&canonical=1&domains=1&hgvs=1&numbers=1&protein=1&AlphaMissense=1",
+            "-Dvep.url=http://gn-vep-2-extended.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Xms100m",
             "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
@@ -58,7 +58,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
-            port: 8888
+            port: 8080
           initialDelaySeconds: 240
           timeoutSeconds: 30
           periodSeconds: 60
@@ -67,13 +67,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
-            port: 8888
+            port: 8080
           initialDelaySeconds: 240
           timeoutSeconds: 120
           periodSeconds: 240
         name: gn-spring-boot-beta
         ports:
-        - containerPort: 8888
+        - containerPort: 8080
           protocol: TCP
         resources:
           requests:
@@ -110,10 +110,10 @@ spec:
   ports:
   - port: 80
     name: http
-    targetPort: 8888
+    targetPort: 8080
   - port: 443
     name: https
-    targetPort: 8888
+    targetPort: 8080
   selector:
     run: gn-spring-boot-beta
   type: ClusterIP
