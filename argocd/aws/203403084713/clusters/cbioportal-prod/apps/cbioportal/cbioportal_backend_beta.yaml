@@ -30,7 +30,7 @@ spec:
       - envFrom:
         - secretRef:
             name: cbioportal-beta-v6
-        image: cbioportal/cbioportal:demo-home-imaging-filter-web-shenandoah
+        image: cbioportal/cbioportal:demo-fix-multistudies-frequency-ch-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
