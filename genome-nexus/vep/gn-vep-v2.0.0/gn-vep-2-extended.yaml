@@ -1,0 +1,87 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    run: gn-vep-2-extended
+  name: gn-vep-2-extended
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      run: gn-vep-2-extended
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        run: gn-vep-2-extended
+    spec: 
+      containers:
+      - name: gn-vep-2-extended
+        image: genomenexus/gn-vep:112-2.0.0-extended
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_PORT
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-rds-user
+              key: MYSQL_PASSWORD
+        readinessProbe:
+          httpGet:
+            path: /vep/human/hgvs/ENST00000375759.3:c.10981A>T
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 180
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /vep/human/hgvs/ENST00000375759.3:c.10981A>T
+            port: 8080
+          initialDelaySeconds: 190
+          timeoutSeconds: 60
+          periodSeconds: 30
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        ports:
+        - containerPort: 5005
+          protocol: TCP
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: eks-genome-nexus-vep
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "eks-genome-nexus-vep"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-vep-2-extended
+  name: gn-vep-2-extended
+  namespace: genome-nexus
+spec:
+  ports:
+    - port: 8080
+  selector:
+    run: gn-vep-2-extended
+  type: ClusterIP
