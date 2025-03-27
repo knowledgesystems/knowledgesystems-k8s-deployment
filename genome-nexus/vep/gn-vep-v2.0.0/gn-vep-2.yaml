@@ -78,6 +78,7 @@ metadata:
   labels:
     run: gn-vep-2
   name: gn-vep-2
+  namespace: genome-nexus
 spec:
   ports:
     - port: 8080
