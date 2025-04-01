@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.6.0.795117893078">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.6.0.796849031674">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.6.0">
@@ -31,12 +31,12 @@
 
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
-    <link href="../resources/css/retype.css?v=3.6.0.795117893078" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=3.6.0.796849031674" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.6.0.795117893078" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=3.6.0.796849031674" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=3.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.6.0.795117893078" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.6.0.795117893078" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.6.0.796849031674" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.6.0.796849031674" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -186,6 +186,36 @@
     </h1>
 </doc-anchor-target>
 <p>This list is used to track issues and their remedies.</p>
+<doc-anchor-target id="nginx-ingress-helm-upgrade-errors">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#nginx-ingress-helm-upgrade-errors">#</doc-anchor-trigger>
+        <span>Nginx Ingress Helm Upgrade Errors</span>
+    </h2>
+</doc-anchor-target>
+<p>For the <code v-pre>666628074417</code> account, upgrading Ingress controllers through Helm results in various errors due to the custom networking rules.</p>
+<doc-anchor-target id="400-bad-request---the-plain-http-request-was-sent-to-https-port">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#400-bad-request---the-plain-http-request-was-sent-to-https-port">#</doc-anchor-trigger>
+        <span>400 Bad Request - The plain HTTP request was sent to HTTPS port</span>
+    </h3>
+</doc-anchor-target>
+<p>To fix this issue, apply the correct nginx controller config defined <a href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/digits-eks/eks-prod/shared-services/ingress/eks_ingress_controller.yaml">here</a> after updating nginx.</p>
+<doc-anchor-target id="keycloak-invalid-requester-error">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#keycloak-invalid-requester-error">#</doc-anchor-trigger>
+        <span>Keycloak Invalid Requester Error</span>
+    </h3>
+</doc-anchor-target>
+<p>Keycloak fails to forward headers, which leads to the following error in the network tab when the site is accessed:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-bash"><code v-pre class="language-bash">Mixed Content: The page at 'https://keycloak.cbioportal.mskcc.org/auth/admin/master/console/' was loaded over HTTPS, but requested an insecure script 'http://keycloak.cbioportal.mskcc.org/auth/js/keycloak.js?version=4cbzu'. This request has been blocked; the content must be served over HTTPS.</code></pre>
+</doc-codeblock></div>
+<p>The following error is seen in the kubernetes pods for the keycloak instance:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-bash"><code v-pre class="language-bash">14:45:56,925 WARN  [org.keycloak.events] (default task-2) type=LOGIN_ERROR, realmId=msk, clientId=null, userId=null, ipAddress=10.1.141.180, error=invalid_authn_request, reason=invalid_destination
+14:46:39,551 WARN  [org.keycloak.events] (default task-5) type=LOGIN_ERROR, realmId=msk, clientId=null, userId=null, ipAddress=10.1.140.190, error=invalid_authn_request, reason=invalid_destination</code></pre>
+</doc-codeblock></div>
+<p>To solve this issue, use the correct forwarding rules by applying the configmap defined <a href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/digits-eks/eks-prod/shared-services/ingress/eks_ingress_configmap.yaml">here</a> after updating nginx.</p>
 <doc-anchor-target id="datadog-failed-to-auto-detect-cluster-name">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#datadog-failed-to-auto-detect-cluster-name">#</doc-anchor-trigger>
