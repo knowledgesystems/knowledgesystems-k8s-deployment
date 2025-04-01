@@ -11,8 +11,6 @@ spec:
       template:
         spec:
           serviceAccountName: cbioportal-mysql-dump-weekly
-          nodeSelector:
-            workload: cbioportal
           tolerations:
             - key: "workload"
               operator: "Equal"
