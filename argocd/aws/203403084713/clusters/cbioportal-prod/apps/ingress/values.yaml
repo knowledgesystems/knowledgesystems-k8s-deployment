@@ -21,7 +21,7 @@ controller:
     proxy-send-timeout: "300"
     use-proxy-protocol: "true"
   image:
-    tag: 0.27.0
+    tag: 1.12.1
   metrics:
     enabled: true
   replicaCount: 2
