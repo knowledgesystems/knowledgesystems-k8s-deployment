@@ -4,6 +4,23 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## Nginx Ingress Helm Upgrade Errors
+For the `666628074417` account, upgrading Ingress controllers through Helm results in various errors due to the custom networking rules. 
+### 400 Bad Request - The plain HTTP request was sent to HTTPS port
+To fix this issue, apply the correct nginx controller config defined [here](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/digits-eks/eks-prod/shared-services/ingress/eks_ingress_controller.yaml) after updating nginx.
+
+### Keycloak Invalid Requester Error
+Keycloak fails to forward headers, which leads to the following error in the network tab when the site is accessed:
+```shell
+Mixed Content: The page at 'https://keycloak.cbioportal.mskcc.org/auth/admin/master/console/' was loaded over HTTPS, but requested an insecure script 'http://keycloak.cbioportal.mskcc.org/auth/js/keycloak.js?version=4cbzu'. This request has been blocked; the content must be served over HTTPS.
+```
+The following error is seen in the kubernetes pods for the keycloak instance:
+```shell
+14:45:56,925 WARN  [org.keycloak.events] (default task-2) type=LOGIN_ERROR, realmId=msk, clientId=null, userId=null, ipAddress=10.1.141.180, error=invalid_authn_request, reason=invalid_destination
+14:46:39,551 WARN  [org.keycloak.events] (default task-5) type=LOGIN_ERROR, realmId=msk, clientId=null, userId=null, ipAddress=10.1.140.190, error=invalid_authn_request, reason=invalid_destination
+```
+To solve this issue, use the correct forwarding rules by applying the configmap defined [here](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/digits-eks/eks-prod/shared-services/ingress/eks_ingress_configmap.yaml) after updating nginx.
+
 ## Datadog failed to auto-detect cluster name
 When deployed on AWS EC2 nodes using the `BOTTLEROCKET_*` AMI types, Datadog fails to auto-detect the cluster name, resulting in the following errors:
 ```shell
