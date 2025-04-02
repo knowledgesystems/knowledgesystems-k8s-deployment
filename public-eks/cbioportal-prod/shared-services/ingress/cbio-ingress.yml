@@ -49,7 +49,7 @@ spec:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-genie-public-blue
+            name: cbioportal-backend-genie-public-green
             port:
               number: 80
         path: /
@@ -79,7 +79,7 @@ spec:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-genie-private-blue
+            name: cbioportal-backend-genie-private-green
             port:
               number: 80
         path: /
