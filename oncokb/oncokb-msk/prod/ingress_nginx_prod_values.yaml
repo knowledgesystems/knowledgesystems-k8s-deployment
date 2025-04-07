@@ -1,4 +1,6 @@
 controller:
+  image:
+    tag: "v1.12.1"
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
