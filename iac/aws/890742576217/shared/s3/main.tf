@@ -29,6 +29,13 @@ resource "aws_s3_bucket" "scope_data" {
   }
 }
 
+resource "aws_s3_bucket" "scope_data_staging" {
+  bucket_prefix = "tf-scope-data-staging-"
+  tags = {
+    cdsi-app = "scope-data-staging"
+  }
+}
+
 resource "aws_s3_bucket" "scope_workflows" {
   bucket_prefix = "tf-scope-workflows-"
   tags = {
