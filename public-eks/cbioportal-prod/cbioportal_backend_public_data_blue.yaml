@@ -163,7 +163,7 @@ spec:
             "--sentry.exception-resolver-order=-2147483647",
             #"--sentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)",
             "--db.suppress_schema_version_mismatch_errors=true",
-            "--sitemaps=true",
+            "--sitemaps=false",
             "--oncokb.public_api.url=https://www.oncokb.org/api/v1",
             "--oncokb.token=$(ONCOKB_TOKEN)",
             "--genomenexus.url=https://v1.genomenexus.org",
