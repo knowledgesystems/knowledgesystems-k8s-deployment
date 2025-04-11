@@ -16,6 +16,7 @@ spec:
     - sop.oncokb.org
     - beta.oncokb.org
     - staging.oncokb.org
+    - germline.oncokb.org
     - demo.oncokb.org
     - curation.oncokb.org
     - beta.curation.oncokb.org
