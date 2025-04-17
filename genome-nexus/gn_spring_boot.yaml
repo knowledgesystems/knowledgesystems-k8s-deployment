@@ -37,13 +37,14 @@ spec:
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:1.4.1
+        image: genomenexus/gn-spring-boot:2.0.2
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
             # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
             # include shenandoah)
             "-Dvep.url=http://grch37.rest.ensembl.org/vep/human/hgvs/VARIANT?content-type=application/json&xref_refseq=1&ccds=1&canonical=1&domains=1&hgvs=1&numbers=1&protein=1&AlphaMissense=1",
+            "-Dcache.enabled=true",
             "-Xms100m",
             "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
