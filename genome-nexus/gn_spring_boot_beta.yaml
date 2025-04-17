@@ -44,6 +44,7 @@ spec:
             # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
             # include shenandoah)
             "-Dvep.url=http://gn-vep-2-extended.genome-nexus:8080/vep/human/hgvs/VARIANT",
+            "-Dcache.enabled=false",
             "-Xms100m",
             "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
@@ -77,9 +78,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 3Gi
+              memory: 6Gi
           limits:
-              memory: 9Gi
+              memory: 12Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
