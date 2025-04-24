@@ -1,8 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "4"
   labels:
     run: cbioportal-backend-master
   name: cbioportal-backend-master
@@ -229,7 +227,6 @@ metadata:
   labels:
     run: cbioportal-backend-master
   name: cbioportal-backend-master
-  selfLink: /api/v1/namespaces/default/services/cbioportal-backend-master
 spec:
   ports:
   - port: 80
