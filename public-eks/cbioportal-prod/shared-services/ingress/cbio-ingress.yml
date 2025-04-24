@@ -54,26 +54,6 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  - host: master.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-master
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: beta.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-beta
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
   - host: public-data.cbioportal.org
     http:
       paths:
@@ -123,12 +103,6 @@ spec:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
   - hosts:
-    - master.cbioportal.org
-    secretName: master-cbio-cert
-  - hosts:
-    - beta.cbioportal.org
-    secretName: cbioportal-beta-cert
-  - hosts:
     - public-data.cbioportal.org
     secretName: cbioportal-public-data-cert
   - hosts:
@@ -140,7 +114,3 @@ spec:
   - hosts:
     - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
-#  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
-#  - hosts:
-#      - session-service-beta.cbioportal.org
-#    secretName: cbioportal-session-service-cert
