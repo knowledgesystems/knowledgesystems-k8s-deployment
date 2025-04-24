@@ -44,6 +44,16 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
+  - host: master-argocd.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: cbioportal-backend-master
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
   tls:
   - hosts:
     - beta.cbioportal.org
@@ -51,3 +61,6 @@ spec:
   - hosts:
     - springboot.cbioportal.org
     secretName: cbioportal-www-cert
+  - hosts:
+      - master-argocd.cbioportal.org
+    secretName: master-cbio-cert
