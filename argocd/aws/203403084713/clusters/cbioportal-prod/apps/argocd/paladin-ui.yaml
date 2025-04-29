@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: paladin-ui
+  name: paladin_ui
   namespace: argocd
 spec:
   project: default
