@@ -54,6 +54,16 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
+  - host: paladin.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: paladin-ui
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
   tls:
   - hosts:
     - beta.cbioportal.org
@@ -64,3 +74,6 @@ spec:
   - hosts:
       - master.cbioportal.org
     secretName: master-cbio-cert
+  - hosts:
+      - paladin.cbioportal.org
+    secretName: paladin-cert
