@@ -21,8 +21,6 @@ spec:
     spec:
       containers:
         - image: cbioportal/paladin:latest
-          command: [ "" ]
-          args: []
           imagePullPolicy: Always
           name: paladin-ui
           ports:
