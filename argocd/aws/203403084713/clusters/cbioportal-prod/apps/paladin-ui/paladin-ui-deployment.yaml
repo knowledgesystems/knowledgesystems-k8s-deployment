@@ -19,6 +19,7 @@ spec:
       labels:
         run: paladin-ui
     spec:
+      serviceAccountName: paladin-ui
       containers:
         - image: cbioportal/paladin:latest
           imagePullPolicy: Always
