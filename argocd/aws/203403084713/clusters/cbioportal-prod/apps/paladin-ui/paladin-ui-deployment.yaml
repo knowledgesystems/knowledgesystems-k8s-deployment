@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        run: cbioportal-backend-beta
+        run: paladin-ui
     spec:
       containers:
         - image: cbioportal/paladin:latest
