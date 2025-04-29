@@ -76,6 +76,28 @@ locals {
         (var.LABEL_KEY) = "ingress"
       }
     }
+    paladin = {
+      instance_types = ["t3.medium"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "paladin"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "paladin"
+      }
+      tags = {
+        cdsi-app = "paladin"
+        cdsi-team = "data-engineering"
+        cdsi-owner = "moored2@mskcc.org"
+      }
+    }
   }
 }
 
@@ -100,9 +122,12 @@ module "eks_cluster" {
   # EKS Managed Node Groups
   eks_managed_node_groups = {
     for name, config in local.node_groups : name => merge(config, {
-      tags = {
-        "nodegroup-name" = name
-      }
+      tags = merge(
+        try(config.tags, {}),
+        {
+          "nodegroup-name" = name
+        }
+      )
     })
   }
 }
