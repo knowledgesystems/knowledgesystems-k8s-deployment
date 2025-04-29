@@ -41,6 +41,8 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
+          - name: DD_APM_INSTRUMENTATION_DEBUG
+            value: "true"
         image: cbioportal/cbioportal:6.0.28-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
