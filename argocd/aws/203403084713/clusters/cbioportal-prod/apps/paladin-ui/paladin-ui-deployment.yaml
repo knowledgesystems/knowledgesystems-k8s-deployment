@@ -22,6 +22,9 @@ spec:
       serviceAccountName: paladin-ui
       containers:
         - image: cbioportal/paladin:latest
+          env:
+            - name: BUCKET_NAME
+              value: "paladin-webapp"
           imagePullPolicy: Always
           name: paladin-ui
           ports:
