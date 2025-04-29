@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: paladin-ui
+  name: paladin-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: paladin-ui
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: cbioportal-backend-beta
+    spec:
+      containers:
+        - image: cbioportal/paladin:latest
+          command: [ "" ]
+          env:
+            -
+          args: []
+          imagePullPolicy: Always
+          name: paladin-ui
+          ports:
+            - containerPort: 8501
+              protocol: TCP
+          resources:
+            requests:
+              memory: 2Gi
+            limits:
+              memory: 3Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      nodeSelector:
+        workload: paladin
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "paladin"
+          effect: "NoSchedule"
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: paladin-ui
+  name: paladin-ui
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8501
+  selector:
+    run: paladin-ui
+  type: ClusterIP
