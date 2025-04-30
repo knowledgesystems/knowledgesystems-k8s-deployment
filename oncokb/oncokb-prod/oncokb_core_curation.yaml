@@ -31,35 +31,36 @@ spec:
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:3.29.0
+          image: oncokb/oncokb:3.29.1
           command: ["java"]
-          args: [
-            "-Dapp.name=$(APP_NAME)",
-            "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=$(DB_URL)/oncokb_core_curation?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-            "-Djdbc.username=$(DB_USERNAME)",
-            "-Djdbc.password=$(DB_PASSWORD)",
-            "-Dgenomenexus.api=https://www.genomenexus.org/",
-            "-Doncokb_transcript.url=https://transcript.oncokb.org",
-            "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-            "-Dpublic_oncokb.token=$(PUBLIC_ONCOKB_TOKEN)",
-            "-Dredis.enable=true",
-            "-Dredis.type=$(REDIS_TYPE)",
-            "-Dredis.address=$(REDIS_ADDRESS)",
-            "-Dredis.password=$(REDIS_PASSWORD)",
-            "-Dredis.expiration=$(REDIS_EXPIRATION)",
-            "-Dswagger_url=https://beta.oncokb.org",
-            "-Dshow_sitemaps=false",
-            "-Dncbi.api.key=$(NCBI_API_KEY)",
-            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
-            "-Dsentry.sample.rate=1",
-            "-jar",
-            "/webapp-runner.jar",
-            "--enable-compression",
-            "--port",
-            "8888",
-            "/app.war"
-          ]
+          args:
+            [
+              "-Dapp.name=$(APP_NAME)",
+              "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_curation?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.username=$(DB_USERNAME)",
+              "-Djdbc.password=$(DB_PASSWORD)",
+              "-Dgenomenexus.api=https://www.genomenexus.org/",
+              "-Doncokb_transcript.url=https://transcript.oncokb.org",
+              "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+              "-Dpublic_oncokb.token=$(PUBLIC_ONCOKB_TOKEN)",
+              "-Dredis.enable=true",
+              "-Dredis.type=$(REDIS_TYPE)",
+              "-Dredis.address=$(REDIS_ADDRESS)",
+              "-Dredis.password=$(REDIS_PASSWORD)",
+              "-Dredis.expiration=$(REDIS_EXPIRATION)",
+              "-Dswagger_url=https://beta.oncokb.org",
+              "-Dshow_sitemaps=false",
+              "-Dncbi.api.key=$(NCBI_API_KEY)",
+              "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
+              "-Dsentry.sample.rate=1",
+              "-jar",
+              "/webapp-runner.jar",
+              "--enable-compression",
+              "--port",
+              "8888",
+              "/app.war",
+            ]
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:

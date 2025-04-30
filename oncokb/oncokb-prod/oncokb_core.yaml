@@ -37,53 +37,53 @@ spec:
                 name: oncokb-redis-cluster-ng
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.28.2
+          image: oncokb/oncokb:3.29.1
           command: ["java"]
           args: [
-            # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
-            "-Xms500m",
-            "-XX:+UseSerialGC",
-            # aggressive garbage collection
-            "-XX:MinHeapFreeRatio=20",
-            "-XX:MaxHeapFreeRatio=40",
-            "-XX:GCTimeRatio=4",
-            "-XX:AdaptiveSizePolicyWeight=90",
-            "-XX:+UnlockExperimentalVMOptions",
-            "-XX:+UseCGroupMemoryLimitForHeap",
-            # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
-            "-XX:MaxRAMFraction=2",
-            "-XX:+PrintFlagsFinal",
-            "-XshowSettings:vm",
-            # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
-            # from the limits
-            "-XX:MaxRAM=2g",
-            "-Dapp.name=$(APP_NAME)",
-            "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=$(DB_URL)/oncokb_core_v4_27?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-            "-Djdbc.username=$(DB_USERNAME)",
-            "-Djdbc.password=$(DB_PASSWORD)",
-            "-Dgenomenexus.api=https://www.genomenexus.org/",
-            "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
-            "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",
-            "-Daws.s3.region=$(AWS_REGION)",
-            "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
-            "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-            "-Dredis.enable=true",
-            "-Dredis.type=$(REDIS_TYPE)",
-            "-Dredis.address=$(REDIS_ADDRESS)",
-            "-Dredis.password=$(REDIS_PASSWROD)",
-            "-Dredis.expiration=$(REDIS_EXPIRATION)",
-            "-Dswagger_url=https://www.oncokb.org",
-            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
-            "-Dsentry.sample.rate=0.5",
-            "-Dshow_sitemaps=false",
-            "-jar",
-            "/webapp-runner.jar",
-            "--enable-compression",
-            "--port",
-            "8888",
-            "/app.war"
-          ]
+              # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
+              "-Xms500m",
+              "-XX:+UseSerialGC",
+              # aggressive garbage collection
+              "-XX:MinHeapFreeRatio=20",
+              "-XX:MaxHeapFreeRatio=40",
+              "-XX:GCTimeRatio=4",
+              "-XX:AdaptiveSizePolicyWeight=90",
+              "-XX:+UnlockExperimentalVMOptions",
+              "-XX:+UseCGroupMemoryLimitForHeap",
+              # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
+              "-XX:MaxRAMFraction=2",
+              "-XX:+PrintFlagsFinal",
+              "-XshowSettings:vm",
+              # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
+              # from the limits
+              "-XX:MaxRAM=2g",
+              "-Dapp.name=$(APP_NAME)",
+              "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+              "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.username=$(DB_USERNAME)",
+              "-Djdbc.password=$(DB_PASSWORD)",
+              "-Dgenomenexus.api=https://www.genomenexus.org/",
+              "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
+              "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",
+              "-Daws.s3.region=$(AWS_REGION)",
+              "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
+              "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+              "-Dredis.enable=true",
+              "-Dredis.type=$(REDIS_TYPE)",
+              "-Dredis.address=$(REDIS_ADDRESS)",
+              "-Dredis.password=$(REDIS_PASSWROD)",
+              "-Dredis.expiration=$(REDIS_EXPIRATION)",
+              "-Dswagger_url=https://www.oncokb.org",
+              "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
+              "-Dsentry.sample.rate=0.5",
+              "-Dshow_sitemaps=false",
+              "-jar",
+              "/webapp-runner.jar",
+              "--enable-compression",
+              "--port",
+              "8888",
+              "/app.war",
+            ]
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
