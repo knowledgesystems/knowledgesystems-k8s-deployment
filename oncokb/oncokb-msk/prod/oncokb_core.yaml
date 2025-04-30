@@ -30,31 +30,32 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - configMapRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:3.28.2
+          image: oncokb/oncokb:3.29.1
           command: ["java"]
-          args: [
-            "-Dapp.name=$(APP_NAME)",
-            "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v4_27?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-            "-Djdbc.username=$(DB_USERNAME)",
-            "-Djdbc.password=$(DB_PASSWORD)",
-            "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
-            "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-            "-Dredis.enable=true",
-            "-Dredis.type=$(REDIS_TYPE)",
-            "-Dredis.address=$(REDIS_ADDRESS)",
-            "-Dredis.password=$(REDIS_PASSWORD)",
-            "-Dredis.expiration=$(REDIS_EXPIRATION)",
-            "-Dshow_sitemaps=false",
-            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
-            "-Dsentry.sample.rate=1",
-            "-jar",
-            "/webapp-runner.jar",
-            "--enable-compression",
-            "--port",
-            "8888",
-            "/app.war"
-          ]
+          args:
+            [
+              "-Dapp.name=$(APP_NAME)",
+              "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v4_28?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.username=$(DB_USERNAME)",
+              "-Djdbc.password=$(DB_PASSWORD)",
+              "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
+              "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+              "-Dredis.enable=true",
+              "-Dredis.type=$(REDIS_TYPE)",
+              "-Dredis.address=$(REDIS_ADDRESS)",
+              "-Dredis.password=$(REDIS_PASSWORD)",
+              "-Dredis.expiration=$(REDIS_EXPIRATION)",
+              "-Dshow_sitemaps=false",
+              "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
+              "-Dsentry.sample.rate=1",
+              "-jar",
+              "/webapp-runner.jar",
+              "--enable-compression",
+              "--port",
+              "8888",
+              "/app.war",
+            ]
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
