@@ -33,44 +33,44 @@ spec:
                 name: oncokb-core-demo
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.28.2-no-frontend
+          image: oncokb/oncokb:3.29.1-no-frontend
           command: ["java"]
           args: [
-            # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
-            "-Xms250m",
-            "-XX:+UseSerialGC",
-            # aggressive garbage collection
-            "-XX:MinHeapFreeRatio=20",
-            "-XX:MaxHeapFreeRatio=40",
-            "-XX:GCTimeRatio=4",
-            "-XX:AdaptiveSizePolicyWeight=90",
-            "-XX:+UnlockExperimentalVMOptions",
-            "-XX:+UseCGroupMemoryLimitForHeap",
-            # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
-            "-XX:MaxRAMFraction=2",
-            "-XX:+PrintFlagsFinal",
-            "-XshowSettings:vm",
-            # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
-            # from the limits
-            "-XX:MaxRAM=1024m",
-            "-Dapp.name=oncokb-core-demo",
-            "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=$(DB_URL)/oncokb_core_demo?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-            "-Djdbc.username=$(DB_USERNAME)",
-            "-Djdbc.password=$(DB_PASSWORD)",
-            "-Dgenomenexus.api=https://www.genomenexus.org/",
-            "-Dshow_sitemaps=false",
-            "-Dswagger_description=This website is for demonstration purpose. Only information of BRAF, TP53 and ROS1 are available.",
-            "-Dswagger_url=https://demo.oncokb.org",
-            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
-            "-Dsentry.sample.rate=0.1",
-            "-jar",
-            "/webapp-runner.jar",
-            "--enable-compression",
-            "--port",
-            "8888",
-            "/app.war"
-          ]
+              # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
+              "-Xms250m",
+              "-XX:+UseSerialGC",
+              # aggressive garbage collection
+              "-XX:MinHeapFreeRatio=20",
+              "-XX:MaxHeapFreeRatio=40",
+              "-XX:GCTimeRatio=4",
+              "-XX:AdaptiveSizePolicyWeight=90",
+              "-XX:+UnlockExperimentalVMOptions",
+              "-XX:+UseCGroupMemoryLimitForHeap",
+              # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
+              "-XX:MaxRAMFraction=2",
+              "-XX:+PrintFlagsFinal",
+              "-XshowSettings:vm",
+              # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
+              # from the limits
+              "-XX:MaxRAM=1024m",
+              "-Dapp.name=oncokb-core-demo",
+              "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_demo?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.username=$(DB_USERNAME)",
+              "-Djdbc.password=$(DB_PASSWORD)",
+              "-Dgenomenexus.api=https://www.genomenexus.org/",
+              "-Dshow_sitemaps=false",
+              "-Dswagger_description=This website is for demonstration purpose. Only information of BRAF, TP53 and ROS1 are available.",
+              "-Dswagger_url=https://demo.oncokb.org",
+              "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
+              "-Dsentry.sample.rate=0.1",
+              "-jar",
+              "/webapp-runner.jar",
+              "--enable-compression",
+              "--port",
+              "8888",
+              "/app.war",
+            ]
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
@@ -126,9 +126,9 @@ metadata:
   selfLink: /api/v1/namespaces/oncokb/services/oncokb-core-demo
 spec:
   ports:
-  - port: 80
-    name: http
-    targetPort: 8888
+    - port: 80
+      name: http
+      targetPort: 8888
   selector:
     run: oncokb-core-demo
   type: ClusterIP

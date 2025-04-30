@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: oncokb-public
-      version: 'v1'
+      version: "v1"
   strategy:
     # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
     rollingUpdate:
@@ -19,50 +19,50 @@ spec:
     metadata:
       labels:
         app: oncokb-public
-        version: 'v1'
+        version: "v1"
     spec:
       containers:
         - name: oncokb-public
-          image: oncokb/oncokb-public:3.18.5
+          image: oncokb/oncokb-public:3.18.6
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
             - name: JAVA_OPTS
-              value: '-Xmx1024m -Xms512m'
+              value: "-Xmx1024m -Xms512m"
             - name: APPLICATION_API_PROXY_GERMLINE_URL
               value: "http://oncokb-core-germline:8888"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
-              value: '$(SERVICE_ACCOUNT_USERNAME)'
+              value: "$(SERVICE_ACCOUNT_USERNAME)"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
-              value: '$(SERVICE_ACCOUNT_PASSWORD)'
+              value: "$(SERVICE_ACCOUNT_PASSWORD)"
             - name: APPLICATION_SAMLAWS_PRINCIPALARN
-              value: '$(PRINCIPAL_ARN)'
+              value: "$(PRINCIPAL_ARN)"
             - name: APPLICATION_SAMLAWS_ROLEARN
-              value: '$(ROLE_ARN)'
+              value: "$(ROLE_ARN)"
             - name: APPLICATION_GITHUB_TOKEN
-              value: '$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)'
+              value: "$(ONCOKBDEV_PUBLIC_ACCESS_TOKEN)"
             - name: APPLICATION_DB_READ_ONLY
               value: "false"
             - name: APPLICATION_REDIS_TYPE
-              value: '$(REDIS_TYPE)'
+              value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
-              value: '$(REDIS_ADDRESS)'
+              value: "$(REDIS_ADDRESS)"
             - name: APPLICATION_REDIS_PASSWORD
-              value: '$(REDIS_PASSWROD)'
+              value: "$(REDIS_PASSWROD)"
             - name: APPLICATION_REDIS_EXPIRATION
-              value: '$(REDIS_EXPIRATION)'
+              value: "$(REDIS_EXPIRATION)"
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
-              value: '-2147483647'
+              value: "-2147483647"
             - name: SENTRY_TRACES_SAMPLE_RATE
-              value: '.2'
+              value: ".2"
             - name: SPRING_DATASOURCE_URL
-              value: '${DB_URL}/oncokb_public'
+              value: "${DB_URL}/oncokb_public"
             - name: SPRING_DATASOURCE_USERNAME
-              value: '${DB_USERNAME}'
+              value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
-              value: '${DB_PASSWORD}'
+              value: "${DB_PASSWORD}"
           envFrom:
             - configMapRef:
                 name: oncokb-public
