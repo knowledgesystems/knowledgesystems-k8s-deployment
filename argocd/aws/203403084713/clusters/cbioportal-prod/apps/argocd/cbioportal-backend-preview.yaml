@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cbioportal-backend-previews
+  name: cbioportal-backend-preview
   namespace: argocd
 spec:
   project: cbioportal-preview
   sources:
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-backend-previews
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-backend-preview
       targetRevision: HEAD
       directory:
         recurse: true
