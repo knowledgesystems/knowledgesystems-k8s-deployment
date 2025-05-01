@@ -7,7 +7,7 @@ spec:
   project: cbioportal-preview
   sources:
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal/cbioportal-backend-preview
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-backend-preview
       targetRevision: HEAD
   destination:
     namespace: argocd
