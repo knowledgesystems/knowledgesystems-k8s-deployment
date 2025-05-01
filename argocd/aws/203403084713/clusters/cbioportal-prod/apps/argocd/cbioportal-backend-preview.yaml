@@ -1,14 +1,33 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
   name: cbioportal-backend-preview
   namespace: argocd
 spec:
-  project: cbioportal-preview
-  sources:
-    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-backend-preview
-      targetRevision: HEAD
-  destination:
-    namespace: default
-    server: https://kubernetes.default.svc
+  generators:
+    - pullRequest:
+        github:
+          owner: cBioPortal
+          repo: cbioportal
+        requeueAfterSeconds: 60
+  template:
+    metadata:
+      name: 'cbioportal-backend-preview-{{branch}}-{{number}}'
+    spec:
+      destination:
+        namespace: 'default'
+        server: 'https://kubernetes.default.svc'
+      project: cbioportal-preview
+      source:
+        repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+        path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-backend-preview/
+        targetRevision: HEAD
+        helm:
+          parameters:
+            - name: name
+              value: cbioportal-backend-preview
+            - name: imageTag
+              value: 2979b0c838af9ceee67cc85e7b84f6b210918696-web-shenandoah
+      syncPolicy:
+        automated:
+          selfHeal: true
