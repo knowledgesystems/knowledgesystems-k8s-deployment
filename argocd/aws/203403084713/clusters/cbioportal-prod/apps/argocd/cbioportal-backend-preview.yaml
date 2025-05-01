@@ -15,7 +15,7 @@ spec:
       name: 'cbioportal-backend-preview-{{number}}'
     spec:
       destination:
-        namespace: 'default'
+        namespace: 'cbioportal-backend-preview-{{branch}}'
         server: 'https://kubernetes.default.svc'
       project: cbioportal-preview
       source:
@@ -26,6 +26,8 @@ spec:
           parameters:
             - name: name
               value: cbioportal-backend-preview
+            - name: namespace
+              value: 'cbioportal-backend-preview-{{branch}}'
             - name: imageTag
               value: 2979b0c838af9ceee67cc85e7b84f6b210918696-web-shenandoah
       syncPolicy:
