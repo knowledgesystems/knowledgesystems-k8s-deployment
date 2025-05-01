@@ -12,7 +12,7 @@ spec:
         requeueAfterSeconds: 60
   template:
     metadata:
-      name: 'cbioportal-backend-preview-{{branch}}-{{number}}'
+      name: 'cbioportal-backend-preview-{{number}}'
     spec:
       destination:
         namespace: 'default'
