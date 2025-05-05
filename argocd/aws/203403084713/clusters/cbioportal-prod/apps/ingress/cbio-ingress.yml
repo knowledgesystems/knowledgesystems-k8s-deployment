@@ -54,7 +54,7 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
-  - host: paladin.cbioportal.org
+  - host: mosaic.cbioportal.org
     http:
       paths:
         - backend:
@@ -75,5 +75,5 @@ spec:
       - master.cbioportal.org
     secretName: master-cbio-cert
   - hosts:
-      - paladin.cbioportal.org
-    secretName: paladin-cert
+      - mosaic.cbioportal.org
+    secretName: mosaic-cert
