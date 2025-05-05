@@ -104,6 +104,9 @@ workers:
     - name: genie-importer-ssh-keyfile
       mountPath: /opt/airflow/secrets/genie-importer-ssh-keyfile
       readOnly: true
+    - name: pipelines3-ssh-keyfile
+      mountPath: /opt/airflow/secrets/pipelines3-ssh-keyfile
+      readOnly: true
 
   extraVolumes:
     - name: pv
@@ -125,6 +128,10 @@ workers:
       secret:
         # Assumes that `Secret/airflow-genie-importer-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_operator`
         secretName: airflow-genie-importer-ssh-keyfile
+    - name: pipelines3-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-pipelines3-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_pipelines3`
+        secretName: airflow-pipelines3-ssh-keyfile
 
 logs:
   persistence:
@@ -145,9 +152,12 @@ secret:
   - envName: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
     secretName: "airflow-impact-pipeline-password"
     secretKey: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
-  - envName: "AIRFLOW_CONN_GENIE_IMPORTER_SSH"
+  - envName: "AIRFLOW_CONN_IMPORTER_SSH"
     secretName: "airflow-genie-importer-ssh-uri"
     secretKey: "AIRFLOW_CONN_GENIE_IMPORTER_SSH"
+  - envName: "AIRFLOW_CONN_PIPELINES3_SSH"
+    secretName: "airflow-pipelines3-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PIPELINES3_SSH"
 
 dags:
   gitSync:
