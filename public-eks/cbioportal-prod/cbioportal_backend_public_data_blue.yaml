@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    deployment.kubernetes.io/revision: "7"
+    deployment.kubernetes.io/revision: "8"
   creationTimestamp: null
   labels:
     run: cbioportal-backend-public-data-blue
@@ -11,7 +11,7 @@ metadata:
     tags.datadoghq.com/version: 6.2.1
   name: cbioportal-backend-public-data-blue
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-backend-public-data-blue
