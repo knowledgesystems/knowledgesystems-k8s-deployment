@@ -2,7 +2,8 @@
 The `iac` directory in the repo contains all Terraform configurations for managing the infrastructure across multiple AWS accounts and clusters.
 
 ## Prerequisites
-1. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
+1. **terrafrom**: Install the terraform CLI tool. The recommended way is to use [tfenv](https://github.com/tfutils/tfenv) to install and manage multiple versions of terraform as each cluster runs on a different version.
+2. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
 
 ## AWS CLI Setup
 By default, submodules inside `iac` directory use the `default` aws cli profile when running commands. To use a custom profile, set the `TF_VAR_AWS_PROFILE` environment variable.
@@ -16,27 +17,31 @@ The `iac` directory contains multiple submodules where each submodule resides un
    ```shell
    cd iac/aws/123456789abc/clusters/my-cluster/eks
    ```
-2. Now you can make changes to the Terraform files. After making changes format them to ensure consistent formatting.
+2. Make sure your CLI is using the correct version of terraform that is mentioned in the `terraform.tf` file.
+   ```shell
+   tfenv use <terraform-version>
+   ```
+3. Now you can make changes to the Terraform files. After making changes format them to ensure consistent formatting.
    ```shell
    terraform fmt
    ```
-3. Initialize terraform submodule. This creates intermediate lock and state files.
+4. Initialize terraform submodule. This creates intermediate lock and state files.
    ```shell
    terraform init
    ```
-4. Pull remote module sources. This requires Git authentication when running for the first time.
+5. Pull remote module sources. This requires Git authentication when running for the first time.
    ```shell
    terraform get
    ```
-5. Validate your terraform files.
+6. Validate your terraform files.
    ```shell
    terraform validate
    ```
-6. Dry run to see what changes you are making.
+7. Dry run to see what changes you are making.
    ```shell
    terraform plan
    ```
-7. Apply changes.
+8. Apply changes.
    ```shell
    terraform apply
    ```
