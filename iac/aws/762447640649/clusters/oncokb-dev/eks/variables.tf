@@ -45,10 +45,16 @@ variable "VPC_ID" {
   default     = "vpc-08330c6eeb2de84b1"
 }
 
-variable "VPC_AZ" {
-  description = "Availability zones from the VPC"
+variable "CONTROL_PLANE_SUBNET_IDS" {
+  description = "A list of subnet IDs where the EKS cluster control plane (ENIs) will be provisioned"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  default     = ["subnet-0f9926ece09dc2800", "subnet-01c3bd0d698f0c07a", "subnet-06d9a2a8ac316c03b"]
+}
+
+variable "SUBNET_IDS" {
+  description = "A list of subnet IDs where the nodes/node groups will be provisioned"
+  type        = list(string)
+  default     = ["subnet-0f9926ece09dc2800", "subnet-01c3bd0d698f0c07a", "subnet-06d9a2a8ac316c03b"]
 }
 
 variable "API_PUBLIC" {
@@ -60,7 +66,7 @@ variable "API_PUBLIC" {
 variable "API_PRIVATE" {
   description = "Enable/Disable private api endpoint for the cluster"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "TAINT_KEY" {
