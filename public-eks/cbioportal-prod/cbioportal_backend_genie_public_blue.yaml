@@ -194,8 +194,8 @@ spec:
         - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
         # NEW PROPERTIES START
         - --enable_persistent_cache=true
-        - --persistence.cache_type_clickhouse=redis
-        #- --persistence.cache_type_clickhouse=no-cache
+        #- --persistence.cache_type_clickhouse=redis
+        - --persistence.cache_type_clickhouse=no-cache
         - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
         - --spring.datasource.mysql.username=$(DB_USER)
         - --spring.datasource.mysql.password=$(DB_PASSWORD)
