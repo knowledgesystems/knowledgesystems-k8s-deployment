@@ -38,7 +38,7 @@ spec:
           value: Equal
         - name: master.tolerations[0].effect
           value: NoSchedule
-        - name: master.disableCommands[0]
+        - name: master.disableCommands
           value: "{}"
   destination:
     namespace: default
