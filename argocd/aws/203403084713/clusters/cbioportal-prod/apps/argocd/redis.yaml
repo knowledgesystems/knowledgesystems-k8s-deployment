@@ -39,9 +39,7 @@ spec:
         - name: master.tolerations[0].effect
           value: NoSchedule
         - name: master.disableCommands[0]
-          value: ''
-        - name: master.disableCommands[1]
-          value: ''
+          value: "{}"
   destination:
     namespace: default
     server: https://kubernetes.default.svc
