@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ingress
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/762447640649/clusters/oncokb-dev/apps/ingress
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: ingress
+    - repoURL: https://kubernetes.github.io/ingress-nginx
+      targetRevision: 4.12.0
+      chart: ingress-nginx
+      helm:
+        releaseName: oncokb-ingress-nginx-controller
+        valueFiles:
+          - $ingress/argocd/aws/203403084713/clusters/cbioportal-prod/apps/ingress/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
