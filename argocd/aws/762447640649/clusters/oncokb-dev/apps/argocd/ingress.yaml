@@ -18,7 +18,7 @@ spec:
       helm:
         releaseName: oncokb-ingress-nginx-controller
         valueFiles:
-          - $ingress/argocd/aws/203403084713/clusters/cbioportal-prod/apps/ingress/values.yaml
+          - $ingress/argocd/aws/762447640649/clusters/oncokb-dev/apps/ingress/values.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
