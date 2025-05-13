@@ -11,11 +11,6 @@ spec:
       targetRevision: HEAD
       directory:
         recurse: true
-    - repoURL: https://github.com/knowledgesystems/portal-configuration.git
-      path: argocd/aws/shared
-      targetRevision: HEAD
-      directory:
-        recurse: true
   destination:
     namespace: default
     server: https://kubernetes.default.svc
