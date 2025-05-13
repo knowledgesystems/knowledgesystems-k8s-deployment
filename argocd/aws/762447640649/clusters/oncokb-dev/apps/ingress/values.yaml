@@ -1,6 +1,6 @@
 controller:
   image:
-    tag: 1.12.1
+    tag: "v1.12.1"
   replicaCount: 1
   nodeSelector:
     workload: ingress
@@ -9,12 +9,15 @@ controller:
       operator: "Equal"
       value: "ingress"
       effect: "NoSchedule"
+  extraArgs:
+    default-ssl-certificate: null
   service:
     annotations:
-      service.beta.kubernetes.io/aws-load-balancer-internal: '0.0.0.0/0'
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-  stats:
-    enabled: true
-rbac:
-  create: true
+      service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "60"
+      # Enter the ARN of the ACM certificate
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:762447640649:certificate/a6f290b0-9193-4dc3-bf7a-df2048b223e1
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+    targetPorts:
+      # SSL termination at load balancer, so targetPort of https should be 80
+      https: 80
