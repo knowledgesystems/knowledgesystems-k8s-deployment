@@ -5,7 +5,7 @@ metadata:
     run: cbioportal-backend-public-data-blue
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal-backend-public-data-blue
-    tags.datadoghq.com/version: 6.2.1
+    tags.datadoghq.com/version: 6.2.2
   name: cbioportal-backend-public-data-blue
 spec:
   replicas: 1
@@ -24,7 +24,7 @@ spec:
         run: cbioportal-backend-public-data-blue
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal-backend-public-data-blue
-        tags.datadoghq.com/version: 6.2.1
+        tags.datadoghq.com/version: 6.2.2
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -43,7 +43,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.2.1-web-shenandoah
+        image: cbioportal/cbioportal:6.2.2-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
