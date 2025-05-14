@@ -141,6 +141,7 @@ spec:
           samples per cancer study and data type.
         - --skin.documentation.baseurl=https://raw.githubusercontent.com/cBioPortal/cbioportal/genie-documentation/docs/
         - --skin.documentation.news=https://docs.cbioportal.org/news-genie/
+        - --skin.show_study_help_button=true
         - --skin.query.max_tree_depth=0
         - --session.service.url=https://session-service.cbioportal.org/api/sessions/genie_portal/
         - --session.service.origin=*
