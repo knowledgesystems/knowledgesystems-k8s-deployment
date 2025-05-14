@@ -59,7 +59,7 @@ spec:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-public-data-green
+            name: cbioportal-backend-public-data-blue
             port:
               number: 80
         path: /
