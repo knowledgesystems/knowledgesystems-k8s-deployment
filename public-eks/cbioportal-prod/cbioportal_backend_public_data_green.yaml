@@ -8,7 +8,7 @@ metadata:
     tags.datadoghq.com/version: 6.2.2
   name: cbioportal-backend-public-data-green
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-backend-public-data-green
