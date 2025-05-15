@@ -94,7 +94,7 @@ locals {
       }
     }
     paladin = {
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 2
       min_size       = 2
@@ -110,8 +110,8 @@ locals {
         (var.LABEL_KEY) = "paladin"
       }
       tags = {
-        cdsi-app = "paladin"
-        cdsi-team = "data-engineering"
+        cdsi-app   = "paladin"
+        cdsi-team  = "data-engineering"
         cdsi-owner = "moored2@mskcc.org"
       }
     }
