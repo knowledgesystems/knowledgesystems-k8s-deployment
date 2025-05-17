@@ -34,32 +34,12 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-#  - host: webinar.cbioportal.org
-#    http:
-#      paths:
-#      - backend:
-#          service:
-#            name: cbioportal
-#            port:
-#              number: 80
-#        path: /
-#        pathType: Prefix
   - host: www.cbioportal.org
     http:
       paths:
       - backend:
           service:
-            name: cbioportal
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: public-data.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-public-data-green
+            name: cbioportal-backend-public-green
             port:
               number: 80
         path: /
@@ -102,9 +82,6 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
-  - hosts:
-    - public-data.cbioportal.org
-    secretName: cbioportal-public-data-cert
   - hosts:
     - keycloak.cbioportal.org
     secretName: keycloak-cert
