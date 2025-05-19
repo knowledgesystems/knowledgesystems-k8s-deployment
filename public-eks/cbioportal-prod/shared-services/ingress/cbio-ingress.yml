@@ -76,9 +76,6 @@ spec:
 #        path: /
 #        pathType: Prefix
   tls:
-#  - hosts:
-#    - webinar.cbioportal.org
-#    secretName: webinar-cbio-cert
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
