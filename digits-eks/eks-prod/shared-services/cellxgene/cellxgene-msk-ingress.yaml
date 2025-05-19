@@ -85,43 +85,14 @@ spec:
                 name: cellxgene-service-3
                 port:
                   number: 8080
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  annotations:
-    nginx.ingress.kubernetes.io/app-root: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    ingress.kubernetes.io/proxy-connect-timeout: "300"
-    ingress.kubernetes.io/proxy-read-timeout: "300"
-    ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-body-size: 512m
-    ingress.kubernetes.io/proxy-body-size: 512m
-    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: test-creds
-    # message to display with an appropriate context why the authentication is required
-    nginx.ingress.kubernetes.io/auth-realm: 'Testing - Authentication Required'
-
-  name: test-cellxgene-ingress
-spec:
-  ingressClassName: nginx
-  rules:
     - host: cellxgene.cbioportal.aws.mskcc.org
       http:
         paths:
-          - path: /test(/|$)(.*)
+          - path: /AML_2025-03-20_V3(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
-                name: cellxgene-service-4
+                name: cellxgene-service-5
                 port:
                   number: 8080
 

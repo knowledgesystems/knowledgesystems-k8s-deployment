@@ -225,19 +225,19 @@ spec:
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: cellxgene-deploy-4
+  name: cellxgene-deploy-5
   labels:
     app: cellxgene
-    dataset: test-pbmc3k.h5ad
+    dataset: AML_2025-03-20_V3.h5ad
 spec:
   replicas: 1
   selector:
     matchLabels:
-      dataset: test-pbmc3k.h5ad
+      dataset: AML_2025-03-20_V3.h5ad
   template:
     metadata:
       labels:
-        dataset: test-pbmc3k.h5ad
+        dataset: AML_2025-03-20_V3.h5ad
     spec:
       containers:
         - name: cellxgene-app
@@ -252,16 +252,16 @@ spec:
             "--backed", 
             "--disable-annotations", 
             "--disable-gene-sets-save", 
-            "s3://jason-test-workspace/pbmc3k.h5ad"
+            "s3://jason-test-workspace/AML_2025-03-20_V3.h5ad"
           ]
           ports:
           - containerPort: 8080
             protocol: TCP
           imagePullPolicy: IfNotPresent
-          resources:
-            limits:
-              memory: 500Mi 
-              cpu: 250m
+          # resources:
+          #   limits:
+          #     memory: 500Mi 
+          #     cpu: 250m
           readinessProbe: # Block traffic to container if not ready
             httpGet:
               path: /
@@ -339,12 +339,12 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: cellxgene-service-4
+  name: cellxgene-service-5
   labels: 
     app: cellxgene
-    dataset: test-pbmc3k.h5ad
+    dataset: AML_2025-03-20_V3.h5ad
 spec:
   selector:
-    dataset: test-pbmc3k.h5ad
+    dataset: AML_2025-03-20_V3.h5ad
   ports:
     - port: 8080
