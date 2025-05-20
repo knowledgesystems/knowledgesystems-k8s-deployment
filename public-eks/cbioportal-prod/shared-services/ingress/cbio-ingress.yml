@@ -44,6 +44,16 @@ spec:
               number: 80
         path: /
         pathType: Prefix
+  - host: rho.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
   - host: session-service.cbioportal.org
     http:
       paths:
@@ -79,6 +89,9 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
+  - hosts:
+    - rho.cbioportal.org
+    secretName: cbioportal-rho-cert
   - hosts:
     - keycloak.cbioportal.org
     secretName: keycloak-cert
