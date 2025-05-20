@@ -7,60 +7,37 @@ metadata:
     # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
     # increae max response size to avoid 413 errors see
     # https://github.com/kubernetes/ingress-nginx/issues/1824
-    ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 2G
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
     ingress.kubernetes.io/proxy-send-timeout: "300"
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-body-size: 2G
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
     # add proxy protocol to header
-    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-  name: cbioportal-ingress
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'  
+  name: mosaic-ingress
   namespace: default
 spec:
   rules:
-  - host: beta.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-beta
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: springboot.cbioportal.org
+  - host: mosaic.cbioportal.org
     http:
       paths:
         - backend:
             service:
-              name: cbioportal
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
-  - host: master.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal-backend-master
+              name: paladin-ui
               port:
                 number: 80
           path: /
           pathType: Prefix
   tls:
   - hosts:
-    - beta.cbioportal.org
-    secretName: cbioportal-beta-cert
-  - hosts:
-    - springboot.cbioportal.org
-    secretName: cbioportal-www-cert
-  - hosts:
-      - master.cbioportal.org
-    secretName: master-cbio-cert
+      - mosaic.cbioportal.org
+    secretName: mosaic-cert
