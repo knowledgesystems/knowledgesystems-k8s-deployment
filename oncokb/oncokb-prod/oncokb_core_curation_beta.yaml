@@ -31,7 +31,7 @@ spec:
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:3.29.0
+          image: oncokb/oncokb:3.30.0
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
@@ -85,9 +85,10 @@ spec:
           resources:
             requests:
               cpu: 500m
-              memory: 1Gi
-            limits:
               memory: 2Gi
+            limits:
+              cpu: 4000m
+              memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
