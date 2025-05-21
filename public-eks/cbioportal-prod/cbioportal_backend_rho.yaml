@@ -1,21 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "581"
-  creationTimestamp: null
-  generation: 1
   labels:
-    run: cbioportal-spring-boot
+    run: cbioportal-backend-rho
     tags.datadoghq.com/env: eks-public
-    tags.datadoghq.com/service: cbioportal
+    tags.datadoghq.com/service: cbioportal-backend-rho
     tags.datadoghq.com/version: 6.2.2
-  name: cbioportal-spring-boot
+  name: cbioportal-backend-rho
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
-      run: cbioportal-spring-boot
+      run: cbioportal-backend-rho
   strategy:
     rollingUpdate:
       maxSurge: 2
@@ -25,9 +21,9 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: cbioportal-spring-boot
+        run: cbioportal-backend-rho
         tags.datadoghq.com/env: eks-public
-        tags.datadoghq.com/service: cbioportal
+        tags.datadoghq.com/service: cbioportal-backend-rho
         tags.datadoghq.com/version: 6.2.2
         admission.datadoghq.com/enabled: "true"
       annotations:
@@ -36,17 +32,18 @@ spec:
       volumes:
       - name: cbioportal-frontend-config-volume
         configMap:
+          defaultMode: 420
           name: single-cell-frontend-config
       containers:
       - envFrom:
         - configMapRef:
-            name: cbioportal-public6
+            name: cbioportal-public-green
         env:
           - name: DD_PROFILING_ENABLED
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.2.2-web-shenandoah
+        image: cbioportal/cbioportal-dev:6193ae2906e2868decfa20ea231ab0a061512720-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -130,10 +127,9 @@ spec:
             "--db.password=$(DB_PASSWORD)",
             "--spring.datasource.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect",
-            "--spring.datasource.url=jdbc:mysql://publicdb.cbioportal.org:3306/cgds_public_v6?zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true",
+            "--spring.datasource.url=$(DB_CONNECTION_STRING)",
             "--spring.datasource.username=$(DB_USER)",
             "--spring.datasource.password=$(DB_PASSWORD)",
-#            "-Ddb.connection_string=$(DB_CONNECTION_STRING)",
             "--tomcat.catalina.scope=runtime",
             "--show.transcript_dropdown=true",
             "--skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
@@ -189,11 +185,26 @@ spec:
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
-            "--redis.database=8",
+            "--redis.database=9",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             "--redis.clear_on_startup=true",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
+            # NEW PROPERTIES START
+            "--enable_persistent_cache=true",
+            "--persistence.cache_type_clickhouse=redis",
+            #"--persistence.cache_type_clickhouse=no-cache",
+            "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
+            "--spring.datasource.mysql.username=$(DB_USER)",
+            "--spring.datasource.mysql.password=$(DB_PASSWORD)",
+            "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
+            "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
+            "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
+            "--clickhouse_mode=true",
+            "--spring.profiles.active=clickhouse",
+            # NEW PROPERTIES END
             # disable ehcache
 #            ??? Are we still using ehcache?
 #            "--ehcache.cache_type=none",
@@ -244,7 +255,7 @@ spec:
           timeoutSeconds: 1
           periodSeconds: 12
           failureThreshold: 5
-        name: cbioportal-spring-boot
+        name: cbioportal-backend-rho
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -277,14 +288,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: cbioportal-spring-boot
+    run: cbioportal-backend-rho
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
-  name: cbioportal
+  name: cbioportal-backend-rho
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: cbioportal-spring-boot
+    run: cbioportal-backend-rho
   type: ClusterIP
