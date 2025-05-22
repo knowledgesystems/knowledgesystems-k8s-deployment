@@ -44,6 +44,16 @@ spec:
               number: 80
         path: /
         pathType: Prefix
+  - host: prior.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
   - host: rho.cbioportal.org
     http:
       paths:
@@ -89,6 +99,9 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
+  - hosts:
+    - prior.cbioportal.org
+    secretName: cbioportal-prior-cert
   - hosts:
     - rho.cbioportal.org
     secretName: cbioportal-rho-cert
