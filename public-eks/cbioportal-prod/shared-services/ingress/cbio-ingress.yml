@@ -39,27 +39,17 @@ spec:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-public-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: prior.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
             name: cbioportal
             port:
               number: 80
         path: /
         pathType: Prefix
-  - host: rho.cbioportal.org
+  - host: public-data.cbioportal.org
     http:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-rho
+            name: cbioportal-backend-public-green
             port:
               number: 80
         path: /
@@ -100,11 +90,8 @@ spec:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
   - hosts:
-    - prior.cbioportal.org
-    secretName: cbioportal-prior-cert
-  - hosts:
-    - rho.cbioportal.org
-    secretName: cbioportal-rho-cert
+    - public-data.cbioportal.org
+    secretName: cbioportal-public-data-cert
   - hosts:
     - keycloak.cbioportal.org
     secretName: keycloak-cert
