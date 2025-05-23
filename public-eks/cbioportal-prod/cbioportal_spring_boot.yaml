@@ -12,7 +12,7 @@ metadata:
     tags.datadoghq.com/version: 6.2.2
   name: cbioportal-spring-boot
 spec:
-  replicas: 1
+  replicas: 4
   selector:
     matchLabels:
       run: cbioportal-spring-boot
