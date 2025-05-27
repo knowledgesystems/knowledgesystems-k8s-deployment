@@ -115,6 +115,14 @@ spec:
           value: Equal
         - name: replica.tolerations[0].effect
           value: NoSchedule
+        - name: master.disableCommands[0]
+          value: DEBUG
+        - name: master.disableCommands[1]
+          value: INFO
+        - name: replica.disableCommands[0]
+          value: DEBUB
+        - name: replica.disableCommands[1]
+          value: INFO
   destination:
     namespace: default
     server: https://kubernetes.default.svc
