@@ -11,9 +11,6 @@ spec:
     helm:
       releaseName: cbioportal-redis-public
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
-      fileParameters:
-        - name: master
-          path: redis-params.yaml
       parameters:
         - name: global.imagePullSecrets[0]
           value: dockerhub-creds
