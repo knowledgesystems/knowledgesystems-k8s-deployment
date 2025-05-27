@@ -44,7 +44,7 @@ spec:
         - name: master.disableCommands[1]
           value: INFO
         - name: replica.disableCommands[0]
-          value: DEBUB
+          value: DEBUG
         - name: replica.disableCommands[1]
           value: INFO
   destination:
@@ -120,7 +120,7 @@ spec:
         - name: master.disableCommands[1]
           value: INFO
         - name: replica.disableCommands[0]
-          value: DEBUB
+          value: DEBUG
         - name: replica.disableCommands[1]
           value: INFO
   destination:
