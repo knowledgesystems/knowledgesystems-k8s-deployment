@@ -38,10 +38,15 @@ spec:
           value: Equal
         - name: master.tolerations[0].effect
           value: NoSchedule
-        - name: master.configuration
-          value: |
-            rename-command FLUSHDB FLUSHDB
-            rename-command FLUSHALL FLUSHALL
+        # This is a hack to override default params and enable FLUSHDB and FLUSHALL commands
+        - name: master.disableCommands[0]
+          value: INFO
+        - name: master.disableCommands[1]
+          value: INFO
+        - name: replica.disableCommands[0]
+          value: INFO
+        - name: replica.disableCommands[1]
+          value: INFO
   destination:
     namespace: default
     server: https://kubernetes.default.svc
