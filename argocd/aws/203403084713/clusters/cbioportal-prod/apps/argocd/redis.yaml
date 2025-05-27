@@ -38,6 +38,10 @@ spec:
           value: Equal
         - name: master.tolerations[0].effect
           value: NoSchedule
+        - name: master.commonConfiguration
+          value: |
+            rename-command FLUSHDB FLUSHDB
+            rename-command FLUSHALL FLUSHALL
   destination:
     namespace: default
     server: https://kubernetes.default.svc
