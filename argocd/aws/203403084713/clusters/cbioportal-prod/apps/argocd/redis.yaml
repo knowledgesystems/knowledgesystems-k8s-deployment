@@ -42,11 +42,11 @@ spec:
         - name: master.disableCommands[0]
           value: DEBUG
         - name: master.disableCommands[1]
-          value: DEBUG
+          value: INFO
         - name: replica.disableCommands[0]
-          value: DEBUG
+          value: DEBUB
         - name: replica.disableCommands[1]
-          value: DEBUG
+          value: INFO
   destination:
     namespace: default
     server: https://kubernetes.default.svc
