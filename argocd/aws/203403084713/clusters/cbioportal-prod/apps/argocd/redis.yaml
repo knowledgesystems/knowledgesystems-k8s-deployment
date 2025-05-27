@@ -11,6 +11,9 @@ spec:
     helm:
       releaseName: cbioportal-redis-public
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
+      fileParameters:
+        - name: master
+          path: redis-params.yaml
       parameters:
         - name: global.imagePullSecrets[0]
           value: dockerhub-creds
@@ -38,8 +41,6 @@ spec:
           value: Equal
         - name: master.tolerations[0].effect
           value: NoSchedule
-        - name: master.disableCommands[0]
-          value: ""
   destination:
     namespace: default
     server: https://kubernetes.default.svc
