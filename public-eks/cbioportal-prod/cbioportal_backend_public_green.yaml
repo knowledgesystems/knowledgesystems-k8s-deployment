@@ -90,7 +90,8 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+            #"--frontend.url=https://frontend.cbioportal.org/",
+            "--frontend.url=https://deploy-preview-5200--cbioportalfrontend.netlify.app/",
             "--enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
@@ -192,7 +193,8 @@ spec:
             "--cache.endpoint.api-key=1kmfbftTb2iY",
             # NEW PROPERTIES START
             "--enable_persistent_cache=true",
-            "--persistence.cache_type_clickhouse=redis",
+            #"--persistence.cache_type_clickhouse=redis",
+            "--persistence.cache_type_clickhouse=no-cache",
             #"--persistence.cache_type_clickhouse=no-cache",
             "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
             "--spring.datasource.mysql.username=$(DB_USER)",
