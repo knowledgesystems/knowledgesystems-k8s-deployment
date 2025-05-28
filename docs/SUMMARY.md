@@ -8,5 +8,7 @@
   * [Argo CD](kubernetes-deployment-with-gitops/argocd.md)
 * [Tutorials](tutorials)
   * [IP Blocking](tutorials/ip-blocking.md)
+* [cBioPortal Deployment](cbioportal-deployment/README.md)
+  * [Database Migration Deployment](cbioportal-deployment/database-migration-deployment.md)
 * [Troubleshooting](troubleshooting.md)
 * [Incidents Log](incidents-log.md)
