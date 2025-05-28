@@ -273,11 +273,11 @@ spec:
         terminationMessagePolicy: File
       # run on eks-public-cbioportal node group
       nodeSelector:
-        workload: cbio-public
+        workload: cbioportal
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "cbio-public"
+          value: "cbioportal"
           effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
