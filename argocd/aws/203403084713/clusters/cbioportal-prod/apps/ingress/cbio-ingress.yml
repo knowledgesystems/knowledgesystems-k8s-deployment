@@ -54,6 +54,16 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
+  - host: public-data-argocd.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: cbioportal-backend-public-green
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
   tls:
   - hosts:
     - beta.cbioportal.org
@@ -64,3 +74,6 @@ spec:
   - hosts:
       - master.cbioportal.org
     secretName: master-cbio-cert
+  - hosts:
+      - public-data-argocd.cbioportal.org
+    secretName: cbioportal-public-data-cert
