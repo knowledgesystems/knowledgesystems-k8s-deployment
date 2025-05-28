@@ -12,11 +12,11 @@ spec:
         spec:
           serviceAccountName: cbioportal-mysql-dump-weekly
           nodeSelector:
-            workload: cbioportal
+            workload: cbio-dev
           tolerations:
             - key: "workload"
               operator: "Equal"
-              value: "cbioportal"
+              value: "cbio-dev"
               effect: "NoSchedule"
           containers:
             - envFrom:
