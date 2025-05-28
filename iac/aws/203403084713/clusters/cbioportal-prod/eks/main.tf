@@ -94,7 +94,7 @@ locals {
       }
     }
     paladin = {
-      instance_types = ["t3.large"]
+      instance_types = ["t3.xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 2
       min_size       = 2
