@@ -18,23 +18,6 @@ locals {
         (var.LABEL_KEY) = "cbioportal"
       }
     }
-    cbio-preview = {
-      instance_types = ["r7g.xlarge"]
-      ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      max_size       = 2
-      min_size       = 1
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "cbioportal-preview"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "cbioportal-preview"
-      }
-    }
     argocd = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
