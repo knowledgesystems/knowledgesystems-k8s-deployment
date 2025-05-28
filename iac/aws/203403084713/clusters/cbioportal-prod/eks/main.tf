@@ -35,23 +35,6 @@ locals {
         (var.LABEL_KEY) = "cbio-dev"
       }
     }
-    cbio-public = {
-      instance_types = ["r7g.large"]
-      ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      max_size       = 3
-      min_size       = 2
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "cbio-public"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "cbio-public"
-      }
-    }
     argocd = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
