@@ -32,7 +32,7 @@ locals {
         }
       }
       labels = {
-        (var.LABEL_KEY) = "cbioportal"
+        (var.LABEL_KEY) = "cbio-dev"
       }
     }
     argocd = {
