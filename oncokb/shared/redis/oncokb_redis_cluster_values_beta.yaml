@@ -1,0 +1,25 @@
+redis:
+  configmap: |-
+    maxmemory 1Gb
+    maxmemory-policy allkeys-lru
+  livenessProbe:
+    initialDelaySeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 10
+    timeoutSeconds: 5
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: eks-oncokb-beta
+  tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "eks-oncokb-beta"
+    effect: "NoSchedule"
+
+cluster:
+  # To successfully set the cluster up, it will need to have at least 3 master nodes. 
+  # The total number of nodes is calculated like: nodes = numOfMasterNodes + numOfMasterNodes * replicas. 
+  # Hence, the defaults cluster.nodes = 6 and cluster.replicas = 1 means, 3 master and 3 replica nodes will be deployed by the chart.
+  nodes: 1     # 1 master node  + (1 master nodes * 1 replicas) = 1 node
+  replicas: 1
