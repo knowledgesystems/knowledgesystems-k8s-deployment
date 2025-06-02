@@ -27,7 +27,7 @@ spec:
             - configMapRef:
                 name: oncokb-core-beta
             - configMapRef:
-                name: oncokb-redis-cluster-ng
+                name: oncokb-redis-cluster-ng-beta
             - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
@@ -100,10 +100,10 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "eks-oncokb"
+          value: "eks-oncokb-beta"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb-beta
 ---
 apiVersion: v1
 kind: Service
