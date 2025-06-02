@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: oncokb/oncokb-public:3.18.7
+          image: oncokb/oncokb-public:3.18.8-alpha.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -101,10 +101,10 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "eks-oncokb"
+          value: "eks-oncokb-beta"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb-beta
       volumes:
         - name: recaptcha-credentials
           secret:

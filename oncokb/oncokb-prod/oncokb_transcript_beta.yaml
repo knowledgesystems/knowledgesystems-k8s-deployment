@@ -28,21 +28,21 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs,no-liquibase
             - name: APPLICATION_ONCOKB_URL
-              value: 'https://beta.oncokb.org/api/v1'
+              value: "https://beta.oncokb.org/api/v1"
             - name: APPLICATION_REDIS_ENABLED
-              value: 'true'
+              value: "true"
             - name: APPLICATION_REDIS_TYPE
-              value: '$(REDIS_TYPE)'
+              value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
-              value: '$(REDIS_ADDRESS)'
+              value: "$(REDIS_ADDRESS)"
             - name: APPLICATION_REDIS_PASSWORD
-              value: '$(REDIS_PASSWROD)'
+              value: "$(REDIS_PASSWROD)"
             - name: SPRING_DATASOURCE_URL
-              value: '$(DB_URL)/oncokb_transcript_beta'
+              value: "$(DB_URL)/oncokb_transcript_beta"
             - name: SPRING_DATASOURCE_USERNAME
-              value: '$(DB_USERNAME)'
+              value: "$(DB_USERNAME)"
             - name: SPRING_DATASOURCE_PASSWORD
-              value: '$(DB_PASSWORD)'
+              value: "$(DB_PASSWORD)"
           envFrom:
             - configMapRef:
                 name: oncokb-transcript-beta
@@ -81,10 +81,10 @@ spec:
       tolerations:
         - key: "dedicated"
           operator: "Equal"
-          value: "eks-oncokb"
+          value: "eks-oncokb-beta"
           effect: "NoSchedule"
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-oncokb
+        eks.amazonaws.com/nodegroup: eks-oncokb-beta
 status: {}
 ---
 apiVersion: v1
@@ -94,9 +94,9 @@ metadata:
   namespace: oncokb
 spec:
   ports:
-  - port: 9090
-    name: http
-    targetPort: 9090
+    - port: 9090
+      name: http
+      targetPort: 9090
   selector:
     run: oncokb-transcript-beta
   type: ClusterIP
