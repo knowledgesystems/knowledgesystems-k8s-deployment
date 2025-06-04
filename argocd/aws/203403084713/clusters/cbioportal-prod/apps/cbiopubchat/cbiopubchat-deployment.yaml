@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbiopubchat
+  labels:
+    app: cbiopubchat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cbiopubchat
+  template:
+    metadata:
+      labels:
+        app: cbiopubchat
+    spec:
+      containers:
+        - name: cbiopubchat
+          image: cbioportal/cbioportal-dev:cbiopubchat
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api-key
+                  key: OPENAI_API_KEY
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: cbiopubchat
+  name: cbiopubchat
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8000
+  selector:
+    run: cbiopubchat
+  type: ClusterIP

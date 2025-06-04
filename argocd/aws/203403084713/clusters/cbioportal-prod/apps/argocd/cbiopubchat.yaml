@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbiopubchat
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbiopubchat
+      targetRevision: HEAD
+      directory:
+        recurse: true
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  revisionHistoryLimit: 3
