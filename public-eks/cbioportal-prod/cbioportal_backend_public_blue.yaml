@@ -43,7 +43,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:master-web-shenandoah@sha256:4ead5b67e47c5c4d634a6a3efa869026b6c123b4e84e39f95ad9d8fdf271471b
+        image: cbioportal/cbioportal-dev:b4625870146a3ba7a5cef72f82372b1c19c2b3fd-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -91,7 +91,7 @@ spec:
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
             #"--frontend.url=https://frontend.cbioportal.org/",
-            "--frontend.url=https://deploy-preview-5200--cbioportalfrontend.netlify.app/",
+            "--frontend.url=https://deploy-preview-5202--cbioportalfrontend.netlify.app/",
             "--enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
@@ -183,7 +183,7 @@ spec:
             # "--logging.level.org.cbioportal.persistence=DEBUG",
             # persistence cache settings (currently redis)
             #"-Dcache.statistics_endpoint_enabled=false",
-            "--persistence.cache_type=redis",
+            "--persistence.cache_type=no-cache",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=3",

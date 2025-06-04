@@ -2,16 +2,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    run: cbioportal-backend-public-green
+    run: cbioportal-backend-clickhouse-only-db
     tags.datadoghq.com/env: eks-public
-    tags.datadoghq.com/service: cbioportal-backend-public-green
+    tags.datadoghq.com/service: cbioportal-backend-clickhouse-only-db
     tags.datadoghq.com/version: 6.3.0
-  name: cbioportal-backend-public-green
+  name: cbioportal-backend-clickhouse-only-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: cbioportal-backend-public-green
+      run: cbioportal-backend-clickhouse-only-db
   strategy:
     rollingUpdate:
       maxSurge: 2
@@ -21,9 +21,9 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: cbioportal-backend-public-green
+        run: cbioportal-backend-clickhouse-only-db
         tags.datadoghq.com/env: eks-public
-        tags.datadoghq.com/service: cbioportal-backend-public-green
+        tags.datadoghq.com/service: cbioportal-backend-clickhouse-only-db
         tags.datadoghq.com/version: 6.3.0
         admission.datadoghq.com/enabled: "true"
       annotations:
@@ -43,7 +43,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal-dev:b4625870146a3ba7a5cef72f82372b1c19c2b3fd-web-shenandoah
+        image: cbioportal/cbioportal-dev:6544a5290bff47ff4a38867e5ba0b3c43a059633-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -105,7 +105,7 @@ spec:
             # connecting over dbcp
             "--dbconnector=dbcp",
             # Authentication settings
-            "--authenticate=optional_oauth2",
+            "--authenticate=false",
             "--authorization=false",
             "--security.method_authorization_enabled=false",
             "--always_show_study_group=PUBLIC",
@@ -124,13 +124,13 @@ spec:
             "--spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys",
             "--security.cors.allowed-origins=*",
             # db settings
-            "--db.user=$(DB_USER)",
-            "--db.password=$(DB_PASSWORD)",
-            "--spring.datasource.driver-class-name=com.mysql.jdbc.Driver",
+            ########"--db.user=$(DB_USER)",
+            ########"--db.password=$(DB_PASSWORD)",
+            ########"--spring.datasource.driver-class-name=com.mysql.jdbc.Driver",
+            ########"--spring.datasource.url=$(DB_CONNECTION_STRING)",
+            ########"--spring.datasource.username=$(DB_USER)",
+            ########"--spring.datasource.password=$(DB_PASSWORD)",
             "--spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect",
-            "--spring.datasource.url=$(DB_CONNECTION_STRING)",
-            "--spring.datasource.username=$(DB_USER)",
-            "--spring.datasource.password=$(DB_PASSWORD)",
             "--tomcat.catalina.scope=runtime",
             "--show.transcript_dropdown=true",
             "--skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)",
@@ -176,8 +176,7 @@ spec:
             # To enable redis session store, we need to set
             # spring.autoconfigure.exclude to a random value to override the
             # property in applications.properties.EXAMPLE
-            "--spring.autoconfigure.exclude=dontexcludeanythingplz",
-
+            "--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",
             # redis cache settings (currently redis)
             #"--cache.statistics_endpoint_enabled=false",
             # "--logging.level.org.cbioportal.persistence=DEBUG",
@@ -186,7 +185,7 @@ spec:
             "--persistence.cache_type=no-cache",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
-            "--redis.database=4",
+            "--redis.database=13",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             "--redis.clear_on_startup=true",
             "--cache.endpoint.enabled=true",
@@ -196,17 +195,24 @@ spec:
             #"--persistence.cache_type_clickhouse=redis",
             "--persistence.cache_type_clickhouse=no-cache",
             #"--persistence.cache_type_clickhouse=no-cache",
-            "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
-            "--spring.datasource.mysql.username=$(DB_USER)",
-            "--spring.datasource.mysql.password=$(DB_PASSWORD)",
-            "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
+            "--spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            "--spring.datasource.mysql.url=jdbc:ch:https://dl96orhu96.us-east-1.aws.clickhouse.cloud:8443/cgds_public_green?zeroDateTimeBehavior=convertToNull",
+            "--spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)",
+            "--spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)",
+            ########"--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
+            ########"--spring.datasource.mysql.username=$(DB_USER)",
+            ########"--spring.datasource.mysql.password=$(DB_PASSWORD)",
+            ########"--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
             "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
             "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
             "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
+            "--spring.datasource.clickhouse.maximum-pool-size=16",
+            "--spring.datasource.clickhouse.minimum-idle=5",
             "--clickhouse_mode=true",
             "--spring.profiles.active=clickhouse",
             # NEW PROPERTIES END
+            "--dat.method=none",
             # disable ehcache
 #            ??? Are we still using ehcache?
 #            "--ehcache.cache_type=none",
@@ -257,7 +263,7 @@ spec:
           timeoutSeconds: 1
           periodSeconds: 12
           failureThreshold: 5
-        name: cbioportal-backend-public-green
+        name: cbioportal-backend-clickhouse-only-db
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -290,14 +296,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: cbioportal-backend-public-green
+    run: cbioportal-backend-clickhouse-only-db
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
-  name: cbioportal-backend-public-green
+  name: cbioportal-backend-clickhouse-only-db
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: cbioportal-backend-public-green
+    run: cbioportal-backend-clickhouse-only-db
   type: ClusterIP
