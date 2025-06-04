@@ -64,16 +64,6 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
-  - host: cbiopubchat.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbiopubchat
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
   tls:
   - hosts:
     - beta.cbioportal.org
@@ -87,6 +77,3 @@ spec:
   - hosts:
       - public-data-argocd.cbioportal.org
     secretName: cbioportal-public-data-cert
-  - hosts:
-      - cbiopubchat.cbioportal.org
-    secretName: cbiopubchat-cert
