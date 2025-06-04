@@ -32,11 +32,12 @@ spec:
           value: "8888"
         - name: MONGODB_URI
           value: mongodb://gn-vep112-mongodb:27017/annotator?connectTimeoutMS=120000
-        image: genomenexus/gn-spring-boot:1.4.3
+        image: genomenexus/gn-spring-boot:2.0.2
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
+            "-Drevue.url=https://raw.githubusercontent.com/knowledgesystems/reVUE-data/refs/heads/main/generated/VUEs.json",
             # this is to use VEP running inside K8s. Remove to use
             # grch37.rest.ensembl.org instead
             "-Dgn_vep.region.url=http://gn-vep112-vep/vep/human/region/VARIANT",
