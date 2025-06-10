@@ -28,7 +28,7 @@ spec:
       - envFrom:
         - secretRef:
             name: cbioportal-public-green
-        image: cbioportal/cbioportal@sha256:19c21ecd23a42efcff9e83c139de66905801e7782f07fa026523ad0627f3f767
+        image: cbioportal/cbioportal-dev:8ba684640d33949bbdce62318ca60b3da085d855-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -81,7 +81,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://frontend.cbioportal.org/",
+            "--frontend.url=https://deploy-preview-5202--cbioportalfrontend.netlify.app/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
             "--skin.footer=",
