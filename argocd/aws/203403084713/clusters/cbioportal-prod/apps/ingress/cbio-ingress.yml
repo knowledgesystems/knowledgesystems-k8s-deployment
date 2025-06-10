@@ -20,6 +20,8 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+  labels:
+    app.kubernetes.io/instance: ingress
   name: cbioportal-ingress
   namespace: default
 spec:
