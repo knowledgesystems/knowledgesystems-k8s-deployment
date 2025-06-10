@@ -4,9 +4,9 @@ locals {
     cbioportal = {
       instance_types = ["r7g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 1
-      max_size       = 2
-      min_size       = 1
+      desired_size   = 4
+      max_size       = 5
+      min_size       = 4
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
