@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-master
   name: cbioportal-backend-master
 spec:
@@ -27,7 +28,7 @@ spec:
       - envFrom:
         - secretRef:
             name: cbioportal-public6
-        image: cbioportal/cbioportal@sha256:c719993b0366ae83437373b3e1a7f742f86c94dca7a8fb6520e774272191ad75
+        image: cbioportal/cbioportal-dev:8ba684640d33949bbdce62318ca60b3da085d855-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -225,6 +226,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-master
   name: cbioportal-backend-master
 spec:

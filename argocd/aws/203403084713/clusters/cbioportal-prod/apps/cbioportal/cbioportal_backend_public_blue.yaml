@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-public-blue
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal-backend-public-blue
@@ -290,6 +291,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-public-blue
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
   name: cbioportal-backend-public-blue

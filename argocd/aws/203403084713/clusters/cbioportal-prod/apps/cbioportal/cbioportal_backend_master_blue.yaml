@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-master-blue
   name: cbioportal-backend-master-blue
 spec:
@@ -241,6 +242,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-master-blue
   name: cbioportal-backend-master-blue
 spec:
