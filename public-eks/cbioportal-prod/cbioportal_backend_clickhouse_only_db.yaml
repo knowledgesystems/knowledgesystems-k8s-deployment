@@ -191,7 +191,7 @@ spec:
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
             # NEW PROPERTIES START
-            "--enable_persistent_cache=true",
+            "--enable_persistent_cache=false",
             #"--persistence.cache_type_clickhouse=redis",
             "--persistence.cache_type_clickhouse=no-cache",
             #"--persistence.cache_type_clickhouse=no-cache",
