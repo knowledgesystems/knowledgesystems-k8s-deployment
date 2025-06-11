@@ -31,6 +31,13 @@ spec:
           ports:
             - name: http
               containerPort: 80
+      nodeSelector:
+        workload: lg-general
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "lg-general"
+          effect: "NoSchedule"
 
 ---
 apiVersion: v1
