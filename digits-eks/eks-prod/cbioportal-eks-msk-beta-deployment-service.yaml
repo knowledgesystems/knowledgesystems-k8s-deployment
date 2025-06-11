@@ -9,7 +9,7 @@ metadata:
     run: eks-msk-beta
     tags.datadoghq.com/env: eks-msk-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.2.1
+    tags.datadoghq.com/version: 6.3.1
   name: eks-msk-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-beta
 spec:
@@ -28,7 +28,7 @@ spec:
         run: eks-msk-beta
         tags.datadoghq.com/env: eks-msk-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.2.1
+        tags.datadoghq.com/version: 6.3.1
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -48,12 +48,6 @@ spec:
             items:
               - key: frontendConfig.json
                 path: frontendConfig.json
-        - name: betacerts-volume
-          configMap:
-            name: betacerts
-            items:
-              - key: betacerts
-                path: betacerts
       containers:
         - envFrom:
             - configMapRef:
@@ -65,7 +59,7 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal:6.2.1-web-shenandoah
+          image: cbioportal/cbioportal:6.3.1-web-shenandoah
           volumeMounts:
             - name: msk-beta-eks-configmap-volume
               mountPath: /cbioportal/local.key
@@ -76,9 +70,6 @@ spec:
             - name: cbioportal-frontend-config-volume
               mountPath: /cbioportal/frontendConfig.json
               subPath: frontendConfig.json
-            - name: betacerts-volume
-              mountPath: /certs/betacerts
-              subPath: betacerts
           command: [ "java" ]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -111,7 +102,7 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #"-XX:MaxRAM=6500m",
-            "-Djavax.net.ssl.trustStore=/certs/betacerts",
+            "-Djavax.net.ssl.trustStore=/certs/betacerts2",
             "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)",
             "-jar",
             "/cbioportal-webapp/app.jar",
