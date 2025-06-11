@@ -26,11 +26,11 @@ spec:
       containers:
         - env:
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: oncokb-core
-            - configMapRef:
+            - secretRef:
                 name: oncokb-db-msk-dev-rds
-            - configMapRef:
+            - secretRef:
                 name: oncokb-redis-cluster
           image: oncokb/oncokb:3.12.13
           command: ["java"]
