@@ -7,7 +7,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/762447640649/clusters/oncokb-dev/oncotree
+      path: argocd/aws/762447640649/clusters/oncokb-dev/apps/oncotree
       targetRevision: HEAD
       directory:
         recurse: true
