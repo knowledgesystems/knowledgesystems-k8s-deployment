@@ -1,7 +1,7 @@
 image:
   tag: "4.2"
 nodeSelector:
-  eks.amazonaws.com/nodegroup: eks-session-service
+  eks.amazonaws.com/nodegroup: cbio-session
 persistence:
   size: 200Gi
 tolerations:
