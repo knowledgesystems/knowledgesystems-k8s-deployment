@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioportal-session-service
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 13.15.0
+      chart: mongodb
+      helm:
+        releaseName: cbioportal-session-service-mongodb
+        valueFiles:
+          - $cbioportal-session-service/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-session-service/mongodb-helm-values.yaml
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-session-service
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: cbioportal-session-service
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc

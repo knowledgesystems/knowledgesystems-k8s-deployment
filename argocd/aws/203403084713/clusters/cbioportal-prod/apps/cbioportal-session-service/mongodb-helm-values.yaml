@@ -1,0 +1,11 @@
+image:
+  tag: "4.2"
+nodeSelector:
+  eks.amazonaws.com/nodegroup: eks-session-service
+persistence:
+  size: 200Gi
+tolerations:
+  - effect: NoSchedule
+    key: workload
+    operator: Equal
+    value: cbio-session
