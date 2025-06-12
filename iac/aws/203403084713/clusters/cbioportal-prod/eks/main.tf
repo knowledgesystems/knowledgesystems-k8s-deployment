@@ -115,6 +115,28 @@ locals {
         cdsi-owner = "moored2@mskcc.org"
       }
     }
+    cbio-session = {
+      instance_types = ["r7i.xlarge"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbio-session"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbio-session"
+      }
+      tags = {
+        cdsi-app   = "cbioportal"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "nasirz1@mskcc.org"
+      }
+    }
   }
 }
 
