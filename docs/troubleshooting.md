@@ -4,6 +4,30 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## MongoDB Persistent Volume Claim Error
+When installing MongoDB Helm Chart in a new cluster, we sometimes run into an error where the helm chart is unable to create a persistent volume, which leads to the persistent volume claim failing to bind:
+```
+no persistent volumes available for this claim and no storage class is set
+```
+
+This happens because in a new cluster, a default storage class for Kubernetes has been set. Run the following commands to fix this:
+```shell
+# Get the name of the storage class
+kubectl get storageclasses.storage.k8s.io
+
+# If you get the following output, notice how there is no default tag next to the class name
+# NAME  PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+# gp2   kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  632d
+
+# Patch the storage class to make it default
+kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+# Now running the following should show default storage class
+kubectl get storageclasses.storage.k8s.io
+# NAME            PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+# gp2 (default)   kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  632d
+```
+
 ## Nginx Ingress Helm Upgrade Errors
 For the `666628074417` account, upgrading Ingress controllers through Helm results in various errors due to the custom networking rules. 
 ### 400 Bad Request - The plain HTTP request was sent to HTTPS port
