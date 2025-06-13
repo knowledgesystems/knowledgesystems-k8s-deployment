@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-master-blue
   name: cbioportal-backend-master-blue
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-backend-master-blue

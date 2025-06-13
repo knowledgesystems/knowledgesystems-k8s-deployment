@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-master-green
   name: cbioportal-backend-master-green
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       run: cbioportal-backend-master-green
