@@ -7,9 +7,8 @@ spec:
     - ReadWriteOnce
   awsElasticBlockStore:
     fsType: ext4
-    volumeID: vol-017ed151fa5a7a31b
+    volumeID: vol-02fde1a565ddbaaf2
   capacity:
     storage: 200Gi
-  persistentVolumeReclaimPolicy: Delete
   storageClassName: gp2
   volumeMode: Filesystem
