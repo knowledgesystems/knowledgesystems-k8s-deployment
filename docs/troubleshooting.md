@@ -10,7 +10,7 @@ When installing MongoDB Helm Chart in a new cluster, we sometimes run into an er
 no persistent volumes available for this claim and no storage class is set
 ```
 
-This happens because in a new cluster, a default storage class for Kubernetes has been set. Run the following commands to fix this:
+This happens because in a new cluster, a default storage class for Kubernetes has not been set. Run the following commands to fix this:
 ```shell
 # Get the name of the storage class
 kubectl get storageclasses.storage.k8s.io
