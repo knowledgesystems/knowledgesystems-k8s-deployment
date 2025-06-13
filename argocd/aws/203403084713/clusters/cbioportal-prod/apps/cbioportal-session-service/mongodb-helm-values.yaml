@@ -4,6 +4,7 @@ nodeSelector:
   workload: cbio-session
 persistence:
   size: 200Gi
+  existingClaim: mongodb-persistent-volume-claim
 tolerations:
   - effect: NoSchedule
     key: workload
