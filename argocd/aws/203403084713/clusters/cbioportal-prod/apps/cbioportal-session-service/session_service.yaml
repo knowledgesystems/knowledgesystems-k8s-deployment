@@ -29,7 +29,7 @@ spec:
               name: cbioportal-session-service-mongodb-creds
               key: mongodb-root-password
         envFrom:
-          - configMapRef:
+          - secretRef:
               name: cbioportal-session-service-user-creds
         image: cbioportal/session-service:0.6.1
         command: ["java"]
