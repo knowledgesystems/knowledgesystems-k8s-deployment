@@ -57,7 +57,7 @@ spec:
         terminationMessagePolicy: File
       # run on critical node group
       nodeSelector:
-        eks.amazonaws.com/nodegroup: cbio-session
+        workload: cbio-session
       tolerations:
         - key: "workload"
           operator: "Equal"
