@@ -64,16 +64,6 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  - host: session-service.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-session-service
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
   - host: crdc.cbioportal.org
     http:
       paths:
@@ -111,6 +101,3 @@ spec:
   - hosts:
     - crdc.cbioportal.org
     secretName: cbioportal-crdc-cert
-  - hosts:
-    - session-service.cbioportal.org
-    secretName: cbioportal-session-service-cert
