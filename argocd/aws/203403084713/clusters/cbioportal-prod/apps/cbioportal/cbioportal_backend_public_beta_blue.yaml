@@ -265,19 +265,18 @@ spec:
           protocol: TCP
         resources:
           requests:
-              cpu: 1500m
-              memory: 8Gi
+              memory: 2Gi
           limits:
-              memory: 12Gi
+              memory: 8Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on eks-public-cbioportal node group
       nodeSelector:
-        workload: cbioportal
+        workload: "cbio-dev"
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "cbioportal"
+          value: "cbio-dev"
           effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always

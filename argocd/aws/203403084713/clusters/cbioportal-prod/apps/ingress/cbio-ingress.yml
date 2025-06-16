@@ -26,6 +26,16 @@ metadata:
   namespace: default
 spec:
   rules:
+  - host: www.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: cbioportal-backend-public-green
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
   - host: public-data-argocd.cbioportal.org
     http:
       paths:
@@ -56,16 +66,6 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  - host: springboot.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
   - host: master.cbioportal.org
     http:
       paths:
@@ -88,6 +88,9 @@ spec:
           pathType: Prefix
   tls:
   - hosts:
+    - www.cbioportal.org
+    secretName: www-cbioportal-argocd-cert
+  - hosts:
     - public-data-argocd.cbioportal.org
     secretName: cbioportal-public-data-argocd-cert
   - hosts:
@@ -100,8 +103,8 @@ spec:
     - springboot.cbioportal.org
     secretName: cbioportal-www-cert
   - hosts:
-      - master.cbioportal.org
+    - master.cbioportal.org
     secretName: master-cbio-cert
   - hosts:
-      - clickhouse-only-db.cbioportal.org
+    - clickhouse-only-db.cbioportal.org
     secretName: clickhouse-only-db-cert
