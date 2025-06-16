@@ -273,7 +273,7 @@ spec:
         terminationMessagePolicy: File
       # run on eks-public-cbioportal node group
       nodeSelector:
-        workload: cbioportal
+        workload: "cbioportal"
       tolerations:
         - key: "workload"
           operator: "Equal"
