@@ -86,7 +86,7 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
-  - host: session-service-argocd.cbioportal.org
+  - host: session-service.cbioportal.org
     http:
       paths:
         - backend:
@@ -119,5 +119,5 @@ spec:
     - clickhouse-only-db.cbioportal.org
     secretName: clickhouse-only-db-cert
   - hosts:
-      - session-service-argocd.cbioportal.org
+      - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
