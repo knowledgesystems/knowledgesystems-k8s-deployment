@@ -45,8 +45,8 @@ locals {
     redis = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 1
-      max_size       = 1
+      desired_size   = 2
+      max_size       = 2
       min_size       = 1
       taints = {
         dedicated = {
