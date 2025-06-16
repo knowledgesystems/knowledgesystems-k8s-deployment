@@ -31,7 +31,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-public-blue
+              name: cbioportal-backend-public-green
               port:
                 number: 80
           path: /
@@ -41,7 +41,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-public-blue
+              name: cbioportal-backend-public-green
               port:
                 number: 80
           path: /
@@ -51,7 +51,7 @@ spec:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-beta-blue
+            name: cbioportal-backend-public-beta-green
             port:
               number: 80
         path: /
@@ -71,7 +71,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-master-blue
+              name: cbioportal-backend-master-green
               port:
                 number: 80
           path: /
@@ -81,7 +81,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-clickhouse-only-db-blue
+              name: cbioportal-backend-clickhouse-only-db-green
               port:
                 number: 80
           path: /
