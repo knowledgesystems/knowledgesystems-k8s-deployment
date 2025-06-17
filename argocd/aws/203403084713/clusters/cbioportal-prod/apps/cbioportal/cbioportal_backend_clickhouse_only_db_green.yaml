@@ -9,7 +9,7 @@ metadata:
     tags.datadoghq.com/version: 6.3.0
   name: cbioportal-backend-clickhouse-only-db-green
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       run: cbioportal-backend-clickhouse-only-db-green
