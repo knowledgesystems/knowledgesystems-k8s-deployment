@@ -81,7 +81,7 @@ spec:
             "--com.sun.management.jmxremote.local.only=false",
             "--java.rmi.server.hostname=localhost",
             # /enable remote debug
-            "--frontend.url=https://deploy-preview-5202--cbioportalfrontend.netlify.app/",
+            "--frontend.url=https://deploy-preview-5213--cbioportalfrontend.netlify.app/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
             "--quick_search.enabled=true",
             "--skin.footer=",
