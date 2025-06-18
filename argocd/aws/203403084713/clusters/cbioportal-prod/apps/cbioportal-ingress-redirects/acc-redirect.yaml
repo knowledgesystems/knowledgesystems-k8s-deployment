@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: http://argocd.cbioportal.org/
+  name: acc-ingress
+  namespace: default
+spec:
+  rules:
+    - host: www.public-data-argocd.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal
+                port:
+                  number: 80
+            path: /acc
+            pathType: Prefix
