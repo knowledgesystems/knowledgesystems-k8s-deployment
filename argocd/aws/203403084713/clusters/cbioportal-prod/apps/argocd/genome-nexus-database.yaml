@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: genome-nexus-database
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 7.3.1
+      chart: mongodb
+      helm:
+        releaseName: gn-mongo-v0dot32
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/gn_mongodb_grch37_helm_value.yaml
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+  destination:
+    namespace: genome-nexus
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
