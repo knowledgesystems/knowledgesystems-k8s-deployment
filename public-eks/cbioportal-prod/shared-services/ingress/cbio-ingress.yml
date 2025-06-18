@@ -54,16 +54,6 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  - host: crdc.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-nci
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
 #  session service beta is not in use for now, uncomment this to apply ingress for session-service-beta.cbioportal.org
 #  - host: session-service-beta.cbioportal.org
 #    http:
@@ -82,9 +72,6 @@ spec:
   - hosts:
     - keycloak.cbioportal.org
     secretName: keycloak-cert
-  - hosts:
-    - crdc.cbioportal.org
-    secretName: cbioportal-crdc-cert
   - hosts:
     - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
