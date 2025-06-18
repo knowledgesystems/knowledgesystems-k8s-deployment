@@ -44,26 +44,6 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  - host: public-data.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-public-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: clickhouse-only-db.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-clickhouse-only-db
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
   - host: session-service.cbioportal.org
     http:
       paths:
@@ -99,12 +79,6 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: cbioportal-www-cert
-  - hosts:
-    - public-data.cbioportal.org
-    secretName: cbioportal-public-data-cert
-  - hosts:
-    - clickhouse-only-db.cbioportal.org
-    secretName: cbioportal-clickhouse-only-db-cert
   - hosts:
     - keycloak.cbioportal.org
     secretName: keycloak-cert
