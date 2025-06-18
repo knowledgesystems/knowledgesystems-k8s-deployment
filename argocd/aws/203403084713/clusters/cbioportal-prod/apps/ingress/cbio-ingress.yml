@@ -89,7 +89,7 @@ spec:
   tls:
   - hosts:
     - www.cbioportal.org
-    secretName: www-cbioportal-argocd-cert
+    secretName: www-cbioportal-cert
   - hosts:
     - public-data-argocd.cbioportal.org
     secretName: cbioportal-public-data-argocd-cert
@@ -99,9 +99,6 @@ spec:
   - hosts:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
-  - hosts:
-    - springboot.cbioportal.org
-    secretName: cbioportal-www-cert
   - hosts:
     - master.cbioportal.org
     secretName: master-cbio-cert
