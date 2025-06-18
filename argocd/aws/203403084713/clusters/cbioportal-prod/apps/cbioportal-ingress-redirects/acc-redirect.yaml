@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/permanent-redirect: http://argocd.cbioportal.org/
+    kubernetes.io/ingress.class: nginx
   name: acc-ingress
   namespace: default
 spec:
