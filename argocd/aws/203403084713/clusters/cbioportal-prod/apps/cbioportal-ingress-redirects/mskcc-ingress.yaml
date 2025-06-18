@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/permanent-redirect: https://cbioportal.mskcc.org
+  name: mskcc-ingress
+  namespace: default
+spec:
+  rules:
+  - host: www.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal
+            port:
+              number: 80
+        path: /mskcc
+        pathType: Prefix
+  - host: mskcc.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
