@@ -86,6 +86,16 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
+  - host: session-service-argocd.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: cbioportal-session-service
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
   tls:
   - hosts:
     - www.cbioportal.org
@@ -105,3 +115,6 @@ spec:
   - hosts:
     - clickhouse-only-db.cbioportal.org
     secretName: clickhouse-only-db-cert
+  - hosts:
+      - session-service-argocd.cbioportal.org
+    secretName: cbioportal-session-service-argocd-cert
