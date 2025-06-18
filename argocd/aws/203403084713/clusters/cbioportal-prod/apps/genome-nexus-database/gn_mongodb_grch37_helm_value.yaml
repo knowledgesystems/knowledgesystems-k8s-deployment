@@ -18,13 +18,13 @@ persistence:
 #               -  # Replace with the exact node name
 
 tolerations:
-  - key: dedicated
+  - key: workload
     operator: Equal
-    value: eks-genome-nexus-database
+    value: gn-database
     effect: NoSchedule
 
 nodeSelector:
-  eks.amazonaws.com/nodegroup: eks-genome-nexus-database
+  workload: gn-database
   # kubernetes.io/hostname: # Replace with the exact node name
 
 resources:
