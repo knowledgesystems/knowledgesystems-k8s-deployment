@@ -27,7 +27,7 @@ spec:
                 name: oncokb-db-msk-dev-rds
             - secretRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:4.0.0-germline.10
+          image: oncokb/oncokb:4.0.0-germline.9
           command: ["java"]
           args:
             [
