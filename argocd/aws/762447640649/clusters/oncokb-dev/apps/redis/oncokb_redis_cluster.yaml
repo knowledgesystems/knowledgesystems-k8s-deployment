@@ -1,0 +1,25 @@
+redis:
+  configmap: |-
+    maxmemory 1Gb
+    maxmemory-policy allkeys-lru
+  livenessProbe:
+    initialDelaySeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 10
+    timeoutSeconds: 5
+  nodeSelector:
+    workload: lg-general
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "lg-general"
+      effect: "NoSchedule"
+
+cluster:
+  # To successfully set the cluster up, it will need to have at least 3 master nodes.
+  # The total number of nodes is calculated like: nodes = numOfMasterNodes + numOfMasterNodes * replicas.
+  # Hence, the defaults cluster.nodes = 6 and cluster.replicas = 1 means, 3 master and 3 replica nodes will be deployed by the chart.
+  nodes: 3 # 3 master node  + (3 master nodes * 0 replicas) = 3 node
+  replicas: 0
