@@ -7,6 +7,8 @@ Append the following values to the [values file](https://github.com/knowledgesys
 controller:
   enableAnnotationValidations: false
   allowSnippetAnnotations: true
+  config:
+    annotations-risk-level: Critical
   maxmindLicenseKey: "<maxmindLicenseKey>"
   extraArgs:
     maxmind-edition-ids: GeoLite2-Country
@@ -26,10 +28,6 @@ config:
 ```
 Apply the new helm values. Make sure you set the `maxMindLicenseKey` with your license key:
 ```shell
-helm upgrade <release-name> ingress-nginx/ingress-nginx -f ingress/ingress_values.yml --set controller.maxmindLicenseKey=<license-key>
-```
-Edit the nginx controller configmap through `kubectl` and add the following property to the 'data' section:
-```yaml
-annotations-risk-level: Critical
+helm upgrade <release-name> ingress-nginx/ingress-nginx -f ingress/ingress_values.yml --set controller.maxmindLicenseKey=<license-key> --version <helm-chart-version>
 ```
 Add `http-snippet` to the ingress rules that you want to block. For Genie portals, this was done by separating the ingress rules in its own file [here](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/public-eks/cbioportal-prod/shared-services/ingress/genie-ingress.yml)
