@@ -117,7 +117,7 @@ spec:
             "--com.sun.management.jmxremote.ssl=false",
             "--com.sun.management.jmxremote.authenticate=false",
             "--com.sun.management.jmxremote.local.only=false",
-            "--java.rmi.server.hostname=localhost",
+            "--java.rmi.server.hostname=0.0.0.0",
             # /enable remote debug
             "--frontend.url=https://frontend.cbioportal.org/",
             "--default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296",
