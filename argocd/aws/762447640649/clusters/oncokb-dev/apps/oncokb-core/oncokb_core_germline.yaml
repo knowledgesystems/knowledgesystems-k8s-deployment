@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: oncokb-core-germline
+  name: oncokb-core-germline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-core-germline
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-core-germline
+    spec:
+      containers:
+        - env:
+          envFrom:
+            - secretRef:
+                name: oncokb-core-germline
+            - secretRef:
+                name: oncokb-db-msk-dev-rds
+            - secretRef:
+                name: oncokb-redis-cluster
+          image: oncokb/oncokb:4.0.0-germline.10
+          command: ["java"]
+          args:
+            [
+              "-Dapp.name=$(APP_NAME)",
+              "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_germline_v2?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.username=$(DB_USERNAME)",
+              "-Djdbc.password=$(DB_PASSWORD)",
+              "-Dgenomenexus.api=https://www.genomenexus.org/",
+              "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+              "-Dredis.enable=false",
+              "-Dredis.type=$(REDIS_TYPE)",
+              "-Dredis.address=$(REDIS_ADDRESS)",
+              "-Dredis.password=$(REDIS_PASSWROD)",
+              "-Dredis.masterName=$(REDIS_MASTERNAME)",
+              "-Dredis.expiration=$(REDIS_EXPIRATION)",
+              "-Dshow_sitemaps=false",
+              "-jar",
+              "/webapp-runner.jar",
+              "--enable-compression",
+              "--port",
+              "8888",
+              "/app.war",
+            ]
+          imagePullPolicy: Always
+          # use actionable variants endpoint to cache everything
+          readinessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 20
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            # wait for the pod is ready
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 60
+          name: oncokb-core-germline
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 4000m
+              memory: 4Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "lg-general"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: lg-general
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: oncokb-core-germline
+  name: oncokb-core-germline
+spec:
+  ports:
+    - port: 8888
+  selector:
+    run: oncokb-core-germline
+  type: ClusterIP
