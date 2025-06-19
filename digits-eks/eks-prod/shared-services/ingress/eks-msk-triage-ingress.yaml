@@ -15,22 +15,22 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-#    nginx.ingress.kubernetes.io/configuration-snippet: |
-#      location /dsa/ {
-#        proxy_set_header Host $proxy_host;
-#        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-#        proxy_set_header X-Forwarded-Host $host;
-#        proxy_set_header X-Forwarded-Proto $scheme;
-#        proxy_pass http://tlvicdsidremio8:8080/;
-#        proxy_redirect default;
-#        proxy_buffering off;
-#        proxy_cache off;
-#        proxy_set_header Connection '';
-#        proxy_http_version 1.1;
-#        chunked_transfer_encoding off;
-#        proxy_read_timeout 6000s;
-#        proxy_send_timeout 6000s;
-#      }
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location /dsa/ {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://tlvicdsidremio8:8080/;
+        proxy_redirect default;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_set_header Connection '';
+        proxy_http_version 1.1;
+        chunked_transfer_encoding off;
+        proxy_read_timeout 6000s;
+        proxy_send_timeout 6000s;
+      }
   name: msk-eks-prod-triage-ingress
   namespace: default
 spec:
