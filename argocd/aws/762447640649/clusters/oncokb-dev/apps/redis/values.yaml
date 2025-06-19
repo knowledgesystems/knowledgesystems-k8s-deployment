@@ -16,7 +16,8 @@ redis:
       operator: "Equal"
       value: "lg-general"
       effect: "NoSchedule"
-
+existingSecret: oncokb-redis-cluster
+existingSecretPasswordKey: REDIS_PASSWORD
 cluster:
   # To successfully set the cluster up, it will need to have at least 3 master nodes.
   # The total number of nodes is calculated like: nodes = numOfMasterNodes + numOfMasterNodes * replicas.
