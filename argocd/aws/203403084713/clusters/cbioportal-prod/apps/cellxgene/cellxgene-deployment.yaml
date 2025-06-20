@@ -71,11 +71,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -145,11 +145,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -221,11 +221,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -299,11 +299,11 @@ spec:
             value: https://raw.githubusercontent.com/hweej/single-cell-tools/main/cellxgene/genesets/example_genesets.csv
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -373,11 +373,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -447,11 +447,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -521,11 +521,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -595,11 +595,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -669,11 +669,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Service
