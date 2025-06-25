@@ -51,7 +51,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-public-blue
+              name: cbioportal-backend-public-green
               port:
                 number: 80
           path: /
@@ -61,7 +61,7 @@ spec:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-public-beta-blue
+            name: cbioportal-backend-public-beta-green
             port:
               number: 80
         path: /
@@ -71,7 +71,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-master-blue
+              name: cbioportal-backend-master-green
               port:
                 number: 80
           path: /
@@ -81,7 +81,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-clickhouse-only-db-blue
+              name: cbioportal-backend-clickhouse-only-db-green
               port:
                 number: 80
           path: /
@@ -116,5 +116,5 @@ spec:
     - clickhouse-only-db.cbioportal.org
     secretName: clickhouse-only-db-cert
   - hosts:
-      - session-service-argocd.cbioportal.org
+    - session-service-argocd.cbioportal.org
     secretName: cbioportal-session-service-argocd-cert
