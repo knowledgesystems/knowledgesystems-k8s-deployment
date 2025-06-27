@@ -1,0 +1,105 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/denylist-source-range: 1.186.0.0/17
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      if ($allowed_country = no) {
+        return 451;
+      }
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+  name: genie-ingress
+  namespace: default
+spec:
+  rules:
+  - host: genie.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-public-blue.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-public-green.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-public-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-private.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-private-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-private-blue.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-private-blue
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: genie-private-green.cbioportal.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: cbioportal-backend-genie-private-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - genie.cbioportal.org
+    secretName: geniepublic-cbio-cert
+  - hosts:
+    - genie-public-blue.cbioportal.org
+    secretName: geniepublicblue-cbio-cert
+  - hosts:
+    - genie-public-green.cbioportal.org
+    secretName: geniepublicgreen-cbio-cert
+  - hosts:
+    - genie-private.cbioportal.org
+    secretName: genieprivate-cbio-cert
+  - hosts:
+    - genie-private-blue.cbioportal.org
+    secretName: genieprivateblue-cbio-cert
+  - hosts:
+    - genie-private-green.cbioportal.org
+    secretName: genieprivategreen-cbio-cert
