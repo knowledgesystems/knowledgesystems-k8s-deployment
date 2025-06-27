@@ -13,7 +13,7 @@ spec:
         recurse: true
       ref: ingress
     - repoURL: git@github.com:knowledgesystems/portal-configuration.git
-      path: argocd/aws/203403084713/clusters/cbioportal-prod
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/helm
       targetRevision: HEAD
       directory:
         recurse: true
