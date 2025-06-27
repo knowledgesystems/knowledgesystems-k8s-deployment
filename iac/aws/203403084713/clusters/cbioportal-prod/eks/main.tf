@@ -18,6 +18,23 @@ locals {
         (var.LABEL_KEY) = "cbioportal"
       }
     }
+    cbio-genie = {
+      instance_types = ["r7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 3
+      max_size       = 4
+      min_size       = 3
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbio-genie"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbio-genie"
+      }
+    }
     cbio-dev = {
       instance_types = ["r7g.medium"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -45,9 +62,9 @@ locals {
     redis = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      max_size       = 2
-      min_size       = 1
+      desired_size   = 3
+      max_size       = 4
+      min_size       = 2
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
