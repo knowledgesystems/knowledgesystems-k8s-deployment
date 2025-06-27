@@ -4,7 +4,7 @@ image:
   pullPolicy: Always
 persistence:
   enabled: true
-  size: 80Gi
+  size: 100Gi
 
 # If want to deploy the MongoDB pods on a specific node, uncomment the following lines
 # affinity:
@@ -29,8 +29,8 @@ nodeSelector:
 
 resources:
   requests:
-    memory: 10Gi
-    cpu: 3
+    memory: 12Gi
+    cpu: 2
   limits:
-    memory: 18Gi
-    cpu: 4
+    memory: 20Gi
+    cpu: 3
