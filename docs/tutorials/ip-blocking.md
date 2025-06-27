@@ -9,22 +9,20 @@ controller:
   allowSnippetAnnotations: true
   config:
     annotations-risk-level: Critical
+    client-header-buffers: 16k
+    http-snippet: |
+      map $geoip2_country_code $allowed_country {
+        default yes;
+        IR no;
+        KP no;
+        CU no;
+        CN no;
+        RU no;
+        VE no;
+      }
   maxmindLicenseKey: "<maxmindLicenseKey>"
   extraArgs:
     maxmind-edition-ids: GeoLite2-Country
-config:
-  use-geoip: "false"
-  use-geoip2: "true"
-  http-snippet: |
-    map $geoip2_country_code $allowed_country {
-      default yes;
-      IR no;
-      KP no;
-      CU no;
-      CN no;
-      RU no;
-      VE no;
-    }
 ```
 Apply the new helm values. Make sure you set the `maxMindLicenseKey` with your license key:
 ```shell
