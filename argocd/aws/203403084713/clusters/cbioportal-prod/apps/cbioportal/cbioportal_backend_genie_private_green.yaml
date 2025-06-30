@@ -315,14 +315,14 @@ spec:
         operator: Equal
         value: eks-genie-cbioportal-ec2-test
       volumes:
-      - configMap:
+      - secret:
           defaultMode: 420
           items:
           - key: local.key
             path: local.key
           - key: local.crt
             path: local.crt
-          name: eks-v6-shared-kc-dec-2029
+          secretName: eks-v6-shared-kc-dec-2029
         name: cbioportal-genie-private-configmap-volume
 ---
 apiVersion: v1
