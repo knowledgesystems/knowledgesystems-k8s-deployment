@@ -195,8 +195,8 @@ spec:
         - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
         # NEW PROPERTIES START
         - --enable_persistent_cache=true
-        #- --persistence.cache_type_clickhouse=redis
-        - --persistence.cache_type_clickhouse=no-cache
+        - --persistence.cache_type_clickhouse=redis
+        #- --persistence.cache_type_clickhouse=no-cache
         - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
         - --spring.datasource.mysql.username=$(DB_USER)
         - --spring.datasource.mysql.password=$(DB_PASSWORD)
@@ -232,7 +232,7 @@ spec:
         - name: DD_LOGS_INJECTION
           value: "true"
         envFrom:
-        - configMapRef:
+        - secretRef:
             name: cbioportal-genie-public-blue
         image: cbioportal/cbioportal:6.3.1-web-shenandoah
         imagePullPolicy: Always
@@ -270,18 +270,17 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
-      # run test on eks-genie-cbioportal-ec2-test node group
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genie-cbioportal-ec2-test
+        workload: "cbio-genie"
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
       tolerations:
       - effect: NoSchedule
-        key: dedicated
+        key: workload
         operator: Equal
-        value: eks-genie-cbioportal-ec2-test
+        value: cbio-genie
 ---
 apiVersion: v1
 kind: Service

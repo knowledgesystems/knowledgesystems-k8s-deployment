@@ -118,8 +118,6 @@ spec:
         - --authorization=false
         - --db.user=$(DB_USER)
         - --db.password=$(DB_PASSWORD)
-        #- --db.host=$(DB_HOST)
-        #- --db.portal_db_name=$(DB_PORTAL_DB_NAME)
         - --tomcat.catalina.scope=runtime
         - --db.connection_string=$(DB_CONNECTION_STRING)
         - --enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId)
@@ -186,7 +184,7 @@ spec:
         - --redis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379
         - --redis.database=3
         - --redis.clear_on_startup=false
-        - --redis.password=$(REDIS_PASSWORD)
+        - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
         # misc. frontend settings (this is NOT a persistence layer caching property!)
         - --enable_persistent_cache=true
         # NEW PROPERTIES START
@@ -233,15 +231,6 @@ spec:
         # set this if one doesn't want to forward https -> http -> https
         # when logging in through google auth. Somehow this goes over http
         # otherwise.
-        #- --proxy-base-url
-        # https://genie-private-blue.cbioportal.org
-        #- --max-threads
-        # "0",
-        #- --session-store
-        # redis
-        #- --session-store-operation-timeout
-        # "10000"
-        # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
         - --server.compression.enabled=true
         - --server.tomcat.connection-timeout=20000
         - --server.tomcat.max-http-response-header-size=16384
@@ -257,7 +246,7 @@ spec:
         - name: DD_LOGS_INJECTION
           value: "true"
         envFrom:
-        - configMapRef:
+        - secretRef:
             name: cbioportal-genie-private-blue
         image: cbioportal/cbioportal:6.3.1-web-shenandoah
         imagePullPolicy: Always
@@ -302,18 +291,17 @@ spec:
           name: cbioportal-genie-private-configmap-volume
           subPath: local.crt
       dnsPolicy: ClusterFirst
-      # run test on eks-genie-cbioportal-ec2-test node group
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genie-cbioportal-ec2-test
+        workload: "cbio-genie"
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
       tolerations:
       - effect: NoSchedule
-        key: dedicated
+        key: workload
         operator: Equal
-        value: eks-genie-cbioportal-ec2-test
+        value: cbio-genie
       volumes:
       - secret:
           defaultMode: 420
