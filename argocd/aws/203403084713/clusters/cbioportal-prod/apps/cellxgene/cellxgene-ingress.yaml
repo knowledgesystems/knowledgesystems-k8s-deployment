@@ -104,16 +104,16 @@ metadata:
     # nginx.ingress.kubernetes.io/auth-secret: basic-auth
     # message to display with an appropriate context why the authentication is required
     # nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
-#    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.cbioportal.org/oauth2/auth
-#    nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy.cbioportal.org/oauth2/auth/oauth2/start?rd=https://cellxgene.cbioportal.org$escaped_request_uri"
-#    nginx.ingress.kubernetes.io/configuration-snippet: |
-#      auth_request_set $name_upstream_1 $upstream_cookie__oauth2_proxy_gbm_1;
-#
-#      access_by_lua_block {
-#        if ngx.var.name_upstream_1 ~= "" then
-#          ngx.header["Set-Cookie"] = "_oauth2_proxy_gbm_1=" .. ngx.var.name_upstream_1 .. ngx.var.auth_cookie:match("(; .*)")
-#        end
-#      }
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.cbioportal.org/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy.cbioportal.org/oauth2/auth/oauth2/start?rd=https://cellxgene.cbioportal.org$escaped_request_uri"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $name_upstream_1 $upstream_cookie__oauth2_proxy_gbm_1;
+
+      access_by_lua_block {
+        if ngx.var.name_upstream_1 ~= "" then
+          ngx.header["Set-Cookie"] = "_oauth2_proxy_gbm_1=" .. ngx.var.name_upstream_1 .. ngx.var.auth_cookie:match("(; .*)")
+        end
+      }
   name: cellxgene-ingress-with-auth
 spec:
   ingressClassName: nginx
