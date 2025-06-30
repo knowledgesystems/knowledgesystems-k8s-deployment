@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metrics-server
+spec:
+  project: default
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/metrics-server/
+      targetRevision: 3.12.2
+      chart: metrics-server
+      helm:
+        releaseName: metrics-server
+  destination:
+    namespace: kube-system
+    server: https://kubernetes.default.svc
