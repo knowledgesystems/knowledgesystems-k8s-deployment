@@ -21,9 +21,9 @@ locals {
     cbio-genie = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 3
-      max_size       = 4
-      min_size       = 3
+      desired_size   = 6
+      max_size       = 7
+      min_size       = 6
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
