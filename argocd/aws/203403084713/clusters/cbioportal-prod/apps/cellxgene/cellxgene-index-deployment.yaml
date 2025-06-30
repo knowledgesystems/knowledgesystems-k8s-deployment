@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-cellxgene-index-deployment
+  namespace: cellxgene
 spec:
   replicas: 1
   selector:
@@ -25,17 +26,18 @@ spec:
           configMap:
             name: nginx-cellxgene-index-page
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-cellxgene-btc-index-deployment
+  namespace: cellxgene
 spec:
   replicas: 1
   selector:
@@ -59,11 +61,11 @@ spec:
           configMap:
             name: nginx-cellxgene-btc-index-page
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 
 ---
@@ -71,6 +73,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: nginx-service
+  namespace: cellxgene
   labels:  # For convenience
     app: cellxgene-index-page
 spec:
@@ -83,6 +86,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: nginx-btc-service
+  namespace: cellxgene
   labels:  # For convenience
     app: cellxgene-btc-index-page
 spec:
