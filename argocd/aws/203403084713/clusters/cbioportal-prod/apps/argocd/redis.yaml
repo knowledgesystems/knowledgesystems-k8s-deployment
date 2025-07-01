@@ -95,8 +95,16 @@ spec:
           value: NoSchedule
         - name: master.resources.limits.memory
           value: 10Gi
+        - name: master.resources.limits.cpu
+          value: 150m
+        - name: master.resources.limits.ephemeral-storage
+          value: 2Gi
         - name: master.resources.requests.memory
           value: 8Gi
+        - name: master.resources.requests.cpu
+          value: 100m
+        - name: master.resources.requests.ephemeral-storage
+          value: 50mi
         - name: replica.replicaCount
           value: "2"
         - name: replica.autoscaling.enabled
