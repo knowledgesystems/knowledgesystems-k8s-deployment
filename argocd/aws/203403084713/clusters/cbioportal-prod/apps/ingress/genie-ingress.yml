@@ -36,47 +36,7 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  - host: genie-public-blue.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-public-blue
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: genie-public-green.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-public-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
   - host: genie-private.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-private-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: genie-private-blue.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-private-blue
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: genie-private-green.cbioportal.org
     http:
       paths:
       - backend:
@@ -91,17 +51,5 @@ spec:
     - genie.cbioportal.org
     secretName: geniepublic-cbio-cert
   - hosts:
-    - genie-public-blue.cbioportal.org
-    secretName: geniepublicblue-cbio-cert
-  - hosts:
-    - genie-public-green.cbioportal.org
-    secretName: geniepublicgreen-cbio-cert
-  - hosts:
     - genie-private.cbioportal.org
     secretName: genieprivate-cbio-cert
-  - hosts:
-    - genie-private-blue.cbioportal.org
-    secretName: genieprivateblue-cbio-cert
-  - hosts:
-    - genie-private-green.cbioportal.org
-    secretName: genieprivategreen-cbio-cert
