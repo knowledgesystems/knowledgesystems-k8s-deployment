@@ -104,7 +104,7 @@ spec:
         - name: master.resources.requests.cpu
           value: 100m
         - name: master.resources.requests.ephemeral-storage
-          value: 50mi
+          value: 50Mi
         - name: replica.replicaCount
           value: "2"
         - name: replica.autoscaling.enabled
