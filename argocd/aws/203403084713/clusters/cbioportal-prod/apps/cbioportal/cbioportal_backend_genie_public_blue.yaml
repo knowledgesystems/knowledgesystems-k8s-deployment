@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-genie-public-blue
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
@@ -286,6 +287,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-genie-public-blue
   name: cbioportal-backend-genie-public-blue
   namespace: default
