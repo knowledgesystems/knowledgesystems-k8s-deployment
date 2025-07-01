@@ -55,9 +55,9 @@ locals {
     argocd = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      max_size       = 1
-      min_size       = 1
+      desired_size   = 2
+      max_size       = 3
+      min_size       = 2
     }
     redis = {
       instance_types = ["r7g.large"]
@@ -196,6 +196,23 @@ locals {
         cdsi-app   = "cellxgene"
         cdsi-team  = "data-visualization"
         cdsi-owner = "hweej@mskcc.org"
+      }
+    }
+    keycloak = {
+      instance_types = ["t3.medium"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "keycloak"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "keycloak"
       }
     }
   }
