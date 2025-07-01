@@ -317,6 +317,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-genie-private-green
   name: cbioportal-backend-genie-private-green
   namespace: default
