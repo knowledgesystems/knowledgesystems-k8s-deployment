@@ -103,3 +103,8 @@ tolerations:
     effect: NoSchedule
 postgresql:
   enabled: false
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: 11.0.0
+imagePullSecrets:
+  - name: dockerhub-creds
