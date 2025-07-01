@@ -135,6 +135,18 @@ spec:
           value: DEBUG
         - name: replica.disableCommands[1]
           value: INFO
+        - name: replica.resources.limits.memory
+          value: 6Gi
+        - name: replica.resources.limits.cpu
+          value: 150m
+        - name: replica.resources.limits.ephemeral-storage
+          value: 2Gi
+        - name: replica.resources.requests.memory
+          value: 4Gi
+        - name: replica.resources.requests.cpu
+          value: 100m
+        - name: replica.resources.requests.ephemeral-storage
+          value: 50Mi
   destination:
     namespace: default
     server: https://kubernetes.default.svc
