@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/keycloak
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s
+    - repoURL: git@github.com:knowledgesystems/portal-configuration.git
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/helm
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: portal-configuration
+    - repoURL: https://codecentric.github.io/helm-charts
+      targetRevision: 9.0.1
+      chart: keycloak
+      helm:
+        releaseName: keycloak
+        valueFiles:
+          - $k8s/argocd/aws/203403084713/clusters/cbioportal-prod/apps/keycloak/values.yaml
+          - $portal-configuration/argocd/aws/203403084713/clusters/cbioportal-prod/helm/keycloak-values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc

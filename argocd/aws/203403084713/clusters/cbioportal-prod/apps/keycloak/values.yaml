@@ -1,0 +1,100 @@
+extraEnv: "# setup ssl and use truststore containing AWS-RDS certs\n- name: JDBC_PARAMS\n
+  \ value: useSSL=true&requireSSL=true&trustCertificateKeyStoreUrl=file:/opt/aws-rds-tls-jks/aws-rds-tls.jks&trustCertificateKeyStorePassword=changeit&enabledTLSProtocols=TLSv1.2\n#
+  Tell keycloak we are already behind https\n- name: PROXY_ADDRESS_FORWARDING\n  value:
+  \"true\"\n- name: DB_VENDOR\n  value: mysql \n- name: DB_ADDR\n  value: {{ .Values.DB_ADDR
+  }}\n- name: DB_PORT\n  value: \"3306\"\n- name: DB_DATABASE\n  value: {{ .Values.DB_DATABASE
+  }}\n- name: DB_USER\n  value: {{ .Values.DB_USER }}\n- name: DB_PASSWORD\n  value:
+  {{ .Values.DB_PASSWORD }}\n- name: KEYCLOAK_USER\n  value: {{ .Values.KEYCLOAK_USER
+  }}\n- name: KEYCLOAK_PASSWORD\n  value: {{ .Values.KEYCLOAK_PASSWORD }}\n- name:
+  KEYCLOAK_LOGLEVEL\n  value: INFO\n- name: WILDFLY_LOGLEVEL\n  value: INFO\n"
+extraInitContainers: |
+  - name: genie-private-cbioportal-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/genie-private-cbioportal/* /genie-private-cbioportal-theme
+    volumeMounts:
+      - name: genie-private-cbioportal-theme
+        mountPath: /genie-private-cbioportal-theme
+  - name: htan-cbioportal-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/htan-cbioportal/* /htan-cbioportal-theme
+    volumeMounts:
+      - name: htan-cbioportal-theme
+        mountPath: /htan-cbioportal-theme
+  - name: external-cbioportal-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/external-cbioportal/* /external-cbioportal-theme
+    volumeMounts:
+      - name: external-cbioportal-theme
+        mountPath: /external-cbioportal-theme
+  - name: keycloak12-cbioportal-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/keycloak12-cbioportal/* /keycloak12-cbioportal-theme
+    volumeMounts:
+      - name: keycloak12-cbioportal-theme
+        mountPath: /keycloak12-cbioportal-theme
+  - name: keycloak12-triage-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/keycloak12-triage/* /keycloak12-triage-theme
+    volumeMounts:
+      - name: keycloak12-triage-theme
+        mountPath: /keycloak12-triage-theme
+  - name: keycloak12-sclc-theme-provider
+    image: cbioportal/keycloak:cbioportal-keycloak-custom-themes-v2.3
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "-c"]
+    args:
+      - cp -R /themes/keycloak12-sclc/* /keycloak12-sclc-theme
+    volumeMounts:
+      - name: keycloak12-sclc-theme
+        mountPath: /keycloak12-sclc-theme
+extraVolumeMounts: |
+  - name: aws-rds-tls-jks
+    mountPath: /opt/aws-rds-tls-jks
+    readOnly: true
+  - name: genie-private-cbioportal-theme
+    mountPath: /opt/jboss/keycloak/themes/genie-private-cbioportal
+  - name: htan-cbioportal-theme
+    mountPath: /opt/jboss/keycloak/themes/htan-cbioportal
+  - name: external-cbioportal-theme
+    mountPath: /opt/jboss/keycloak/themes/external-cbioportal
+  - name: keycloak12-cbioportal-theme
+    mountPath: /opt/jboss/keycloak/themes/keycloak12-cbioportal
+  - name: keycloak12-triage-theme
+    mountPath: /opt/jboss/keycloak/themes/keycloak12-triage
+  - name: keycloak12-sclc-theme
+    mountPath: /opt/jboss/keycloak/themes/keycloak12-sclc
+extraVolumes: |
+  - name: aws-rds-tls-jks
+    secret:
+      secretName: aws-rds-tls-jks
+  - name: genie-private-cbioportal-theme
+    emptyDir: {}
+  - name: htan-cbioportal-theme
+    emptyDir: {}
+  - name: external-cbioportal-theme
+    emptyDir: {}
+  - name: keycloak12-cbioportal-theme
+    emptyDir: {}
+  - name: keycloak12-triage-theme
+    emptyDir: {}
+  - name: keycloak12-sclc-theme
+    emptyDir: {}
+nodeSelector:
+  workload: keycloak
+postgresql:
+  enabled: false

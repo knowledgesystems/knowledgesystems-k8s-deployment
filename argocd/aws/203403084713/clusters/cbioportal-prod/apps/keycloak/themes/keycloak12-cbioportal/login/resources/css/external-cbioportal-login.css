@@ -1,0 +1,86 @@
+/* background of page */
+.login-pf body {
+    background: White none;
+}
+
+/* properties for html realm display name */
+#kc-header-wrapper {
+    font-size: 29px;
+    text-transform: none;
+    letter-spacing: 3px;
+    line-height: 1.2em;
+    padding: 12px 10px 10px;
+    white-space: normal;
+    color: black;
+    font-family: 'Arial';
+}
+
+/* properties for "tagline" */
+div#kc-header::after {
+    content: 'Access to this portal is only available to authorized users.';
+    font-size: 18px;
+    line-height: 25px;
+    color: black;
+    font-family: 'Arial';
+}
+
+/* hide the keycloak login form */
+div#kc-form-wrapper {
+    padding-right: 0px;
+    margin-right: 0px;
+    border-right: none;
+    visibility: hidden;
+    width: 25%;
+}
+
+/* hide the left border attached to the social options */
+div#kc-social-providers {
+    padding-left: 0px;
+    border-left: none;
+    margin: auto;
+}
+
+/* between header::after and link-out to synapse */
+@media (min-width: 768px) {
+    .login-pf-page .login-pf-page-header {
+        margin-bottom: 5px;
+    }
+}
+
+/* margin between Log In form and link-out to synapse */
+h1 {
+    margin-top: 20px;
+}
+
+/* turn off provided button content */
+a.zocial.google span {
+    display:none;
+}
+a.zocial.google:before {
+    display: none;
+}
+
+/* add google images to various button states */
+a.zocial.google {
+    background: url("../img/btn_google_signin_dark_normal_web.png") no-repeat center top;
+    height: 46px;
+    width: auto;
+}
+a.zocial.google:hover {
+    background: url("../img/btn_google_signin_dark_focus_web.png") no-repeat center top !important;
+    height: 46px;
+    width: auto;
+}
+a.zocial.google:active {
+    background: url("../img/btn_google_signin_dark_pressed_web.png") no-repeat center top !important;
+    height: 46px;
+    width: auto;
+}
+
+/* turn off provided button content */
+a.zocial.oidc span {
+    display:none;
+}
+a.zocial.oidc:before {
+    display: none;
+}
