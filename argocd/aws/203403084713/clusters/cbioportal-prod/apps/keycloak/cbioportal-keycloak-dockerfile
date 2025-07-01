@@ -1,0 +1,9 @@
+
+# Since 7.0.1, Keycloak has switched to Redhat UBI base images (registry.access.redhat.com/ubi8-minimal) which contains a modified/restrictive version of OpenJDK-11.
+# Specifically, the Java security policy did not allow the necessary protocols to connect to MySQL via SSL.  As a result, this Dockerfile was created to replace the
+# Java security file found in the latest keycloak Dockerfile with a more permissive security policy found in the general openjdk-11 Dockerfile.
+
+FROM openjdk:11.0.6-jdk as openjdk
+FROM jboss/keycloak:9.0.0
+
+COPY --from=openjdk /usr/local/openjdk-11/conf/security/java.security /usr/share/crypto-policies/DEFAULT/java.txt
