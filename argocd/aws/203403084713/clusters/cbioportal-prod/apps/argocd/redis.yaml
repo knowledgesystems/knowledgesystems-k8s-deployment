@@ -38,6 +38,10 @@ spec:
           value: Equal
         - name: master.tolerations[0].effect
           value: NoSchedule
+        - name: master.resources.limits.memory
+          value: 10Gi
+        - name: master.resources.requests.memory
+          value: 8Gi
         # This is a hack to override default params and enable FLUSHDB and FLUSHALL commands
         - name: master.disableCommands[0]
           value: DEBUG
