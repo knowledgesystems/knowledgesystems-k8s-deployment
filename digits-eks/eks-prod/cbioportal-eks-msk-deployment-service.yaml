@@ -48,12 +48,12 @@ spec:
             items:
               - key: frontendConfig.json
                 path: frontendConfig.json
-        - name: mskcerts-volume
+        - name: mskcerts2-volume
           configMap:
-            name: mskcerts
+            name: mskcerts2
             items:
-              - key: mskcerts
-                path: mskcerts
+              - key: mskcerts2
+                path: mskcerts2
       containers:
         - envFrom:
             - configMapRef:
@@ -76,9 +76,9 @@ spec:
             - name: cbioportal-frontend-config-volume
               mountPath: /cbioportal/frontendConfig.json
               subPath: frontendConfig.json
-            - name: mskcerts-volume
-              mountPath: /certs/mskcerts
-              subPath: mskcerts
+            - name: mskcerts2-volume
+              mountPath: /certs/mskcerts2
+              subPath: mskcerts2
           command: [ "java" ]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -111,7 +111,7 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #"-XX:MaxRAM=6500m",
-            "-Djavax.net.ssl.trustStore=/certs/mskcerts",
+            "-Djavax.net.ssl.trustStore=/certs/mskcerts2",
             "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)",
             "-jar",
             "/cbioportal-webapp/app.jar",
