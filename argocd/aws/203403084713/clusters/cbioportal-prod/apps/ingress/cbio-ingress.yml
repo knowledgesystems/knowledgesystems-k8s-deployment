@@ -36,16 +36,6 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
-  - host: public-data-argocd.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
   - host: public-data.cbioportal.org
     http:
       paths:
@@ -100,9 +90,6 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: www-cbioportal-cert
-  - hosts:
-    - public-data-argocd.cbioportal.org
-    secretName: cbioportal-public-data-argocd-cert
   - hosts:
     - public-data.cbioportal.org
     secretName: cbioportal-public-data-cert
