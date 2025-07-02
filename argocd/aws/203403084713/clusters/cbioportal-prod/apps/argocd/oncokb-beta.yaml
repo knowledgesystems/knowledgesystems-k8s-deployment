@@ -12,5 +12,8 @@ spec:
       directory:
         recurse: true
   destination:
-    namespace: default
+    namespace: oncokb
     server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
