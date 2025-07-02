@@ -20,7 +20,7 @@ spec:
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb-beta/values.yaml
     - repoURL: registry-1.docker.io/bitnamicharts
-      targetRevision: 14.8.4
+      targetRevision: 20.8.0
       chart: redis
       helm:
         releaseName: oncokb-curation-redis
