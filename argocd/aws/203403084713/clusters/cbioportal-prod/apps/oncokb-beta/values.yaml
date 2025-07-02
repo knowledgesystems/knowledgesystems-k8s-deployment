@@ -1,0 +1,23 @@
+cluster:
+  nodes: 3
+  replicas: 0
+existingSecret: oncokb-redis-cluster
+existingSecretPasswordKey: REDIS_PASSWORD
+redis:
+  configmap: |-
+    maxmemory 1Gb
+    maxmemory-policy allkeys-lru
+  livenessProbe:
+    failureThreshold: 10
+    initialDelaySeconds: 60
+    timeoutSeconds: 5
+  nodeSelector:
+    workload: oncokb-beta
+  readinessProbe:
+    failureThreshold: 10
+    timeoutSeconds: 5
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: oncokb-beta
