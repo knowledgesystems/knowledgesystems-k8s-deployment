@@ -11,6 +11,14 @@ spec:
       targetRevision: HEAD
       directory:
         recurse: true
+      ref: k8s-repo
+    - repoURL: https://charts.bitnami.com/bitnami
+      targetRevision: 8.4.0
+      chart: redis-cluster
+      helm:
+        releaseName: oncokb-redis-cluster-ng-beta
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb-beta/values.yaml
   destination:
     namespace: oncokb
     server: https://kubernetes.default.svc
