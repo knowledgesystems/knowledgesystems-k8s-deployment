@@ -63,7 +63,7 @@ spec:
             - secretRef:
                 name: oncokb-schultz-lab-sa
             - secretRef:
-                name: oncokb-redis-cluster-ng
+                name: oncokb-redis-cluster-ng-beta
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
