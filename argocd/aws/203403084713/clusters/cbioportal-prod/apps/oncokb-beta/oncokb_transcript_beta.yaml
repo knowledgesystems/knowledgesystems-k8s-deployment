@@ -48,7 +48,7 @@ spec:
             - secretRef:
                 name: oncokb-db-oncokb-transcript
             - secretRef:
-                name: oncokb-redis-cluster-ng
+                name: oncokb-redis-cluster-ng-beta
           image: oncokb/oncokb-transcript:0.9.4
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
