@@ -215,6 +215,28 @@ locals {
         (var.LABEL_KEY) = "keycloak"
       }
     }
+    oncokb-beta = {
+      instance_types = ["r7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "oncokb-beta"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "oncokb-beta"
+      }
+      tags = {
+        cdsi-app   = "oncokb"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
   }
 }
 
