@@ -20,7 +20,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         run: cbioportal-backend-public-beta-green
         tags.datadoghq.com/env: eks-public-argocd
@@ -283,7 +282,6 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-status: {}
 ---
 apiVersion: v1
 kind: Service

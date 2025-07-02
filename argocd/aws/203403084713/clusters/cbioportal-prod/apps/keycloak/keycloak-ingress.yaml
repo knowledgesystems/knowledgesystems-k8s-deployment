@@ -24,7 +24,7 @@ metadata:
   namespace: default
 spec:
   rules:
-    - host: keycloak-argocd.cbioportal.org
+    - host: keycloak.cbioportal.org
       http:
         paths:
           - backend:
@@ -36,5 +36,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - keycloak-argocd.cbioportal.org
+        - keycloak.cbioportal.org
       secretName: keycloak-cert
