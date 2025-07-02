@@ -161,7 +161,7 @@ spec:
             "--skin.blurb=<p>Please adhere to the Memorial Hospital Research Data Governance guidelines regarding <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Abstract-&amp;-Manuscript-Submission-for-MH-RDG-Review.aspx?source=https%3A%2F%2Fmskcc.sharepoint.com%2Fsites%2Fpub-ResearchDG%2FSitePages%2FForms%2FByAuthor.aspx\">abstract and manuscript submission</a>, <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Policies.aspx?csf=1&amp;web=1&amp;share=EZhGGgAuvUdMkI7dTo25OyABYkazBEq5LtO--jhVL-UuTw&amp;e=hA3Lh2\">guiding principles</a>, and <a href=\"https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/ResearchDG-Policies.aspx\">authorship policies</a> when using unpublished MSK patient-derived clinical data.</p></p>When writing manuscripts, please do not include private links to this portal.</p>",
             "--show.mdacc.heatmap=true",
             "--priority_studies=Shared institutional Data Sets#mskimpact,mskarcher,cellline_mskcc,mixed_cbe_solitd_MSK_cfDNA_IMPACT,mixed_impact_wes_2017,msk_impact_ch_2020",
-            "--session.service.url=https://session-service-argocd.cbioportal.org/api/sessions/msk_portal/",
+            "--session.service.url=https://session-service.cbioportal.org/api/sessions/msk_portal/",
             "--session.service.origin=*",
             "--session.service.user=$(SESSION_SERVICE_USER_NAME)",
             "--session.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
@@ -273,7 +273,7 @@ spec:
             httpGet:
               path: /api/health
               port: 8888
-            initialDelaySeconds: 180
+            initialDelaySeconds: 45
             timeoutSeconds: 2
             periodSeconds: 12
             failureThreshold: 20
