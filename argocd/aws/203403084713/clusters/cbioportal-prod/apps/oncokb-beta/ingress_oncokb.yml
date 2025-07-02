@@ -32,13 +32,13 @@ spec:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
   - hosts:
     # - oncokb.org
-    - beta-argocd.oncokb.org
+    - beta.oncokb.org
     - beta.transcript.oncokb.org
     - beta.curation.oncokb.org
     secretName: oncokb-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
-  - host: beta-argocd.oncokb.org
+  - host: beta.oncokb.org
     http:
       paths:
       - path: "/"
