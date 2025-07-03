@@ -1,0 +1,222 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oncokb-ingress
+  namespace: oncokb
+  annotations:
+    # kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    # nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    # # the following has to be added due to an issue of from-to-www-redirect. https://github.com/kubernetes/ingress-nginx/issues/2043
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   if ($host = 'oncokb.org' ) {
+    #     rewrite ^ https://www.oncokb.org$request_uri permanent;
+    #   }
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # increae max response size to avoid 413 errors see
+    # https://github.com/kubernetes/ingress-nginx/issues/1824
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    # add proxy protocol to header
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+spec:
+  tls:
+  # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
+  - hosts:
+    # - oncokb.org
+    - www.oncokb.org
+    - staging.oncokb.org
+    - germline.oncokb.org
+    - legacy.oncokb.org
+    - demo.oncokb.org
+    - sop.oncokb.org
+    - public.api.oncokb.org
+    - transcript.oncokb.org
+    - curation.oncokb.org
+    - keycloak.oncokb.org
+    - airflow.oncokb.org
+    - data-4-9.oncokb.org
+    - data-4-5.oncokb.org
+    - data-4-0.oncokb.org
+    - data-3-11.oncokb.org
+    secretName: oncokb-cert
+  rules:
+  # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
+  - host: oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
+  - host: www.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
+  - host: www.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
+  - host: staging.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public-staging
+            port:
+              name: http
+  - host: germline.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public-germline
+            port:
+              name: http
+  - host: demo.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-demo
+            port:
+              name: http
+  - host: public.api.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-public
+            port:
+              name: http
+  - host: legacy.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-legacy
+            port:
+              name: http
+  - host: sop.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-sop
+              port:
+                number: 80
+  - host: transcript.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-transcript
+              port:
+                name: http
+  - host: curation.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-curation
+              port:
+                name: http
+  - host: keycloak.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-keycloak-code-http
+              port:
+                name: http
+  - host: airflow.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-airflow-stable-web
+            port:
+              number: 8080
+  - host: data-4-9.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-public-data-4-9
+              port:
+                name: http
+  - host: data-4-5.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-public-data-4-5
+              port:
+                name: http
+  - host: data-4-0.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-public-data-4-0
+              port:
+                name: http
+  - host: data-3-11.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-public-data-3-11
+              port:
+                name: http

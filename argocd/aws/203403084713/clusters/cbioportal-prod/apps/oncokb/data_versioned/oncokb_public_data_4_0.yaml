@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oncokb-public-data-4-0
+  namespace: oncokb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oncokb-public-data-4-0
+      version: 'v1'
+  strategy:
+    # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: oncokb-public-data-4-0
+        version: 'v1'
+    spec:
+      containers:
+        - name: oncokb-public
+          image: oncokb/oncokb-public:3.9.7
+          env:
+            # Database schema update takes a lot of especially when changing a table with a lot of table
+            # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,no-liquibase
+            - name: JAVA_OPTS
+              value: '-Xmx1024m -Xms512m'
+            - name: APPLICATION_FRONTEND_ENABLE_AUTH
+              value: "FALSE"
+            - name: APPLICATION_REDIS_TYPE
+              value: '$(REDIS_TYPE)'
+            - name: APPLICATION_REDIS_ADDRESS
+              value: '$(REDIS_ADDRESS)'
+            - name: APPLICATION_REDIS_PASSWORD
+              value: '$(REDIS_PASSWORD)'
+            - name: APPLICATION_REDIS_EXPIRATION
+              value: '$(REDIS_EXPIRATION)'
+            - name: SENTRY_EXCEPTION_RESOLVER_ORDER
+              value: '-2147483647'
+            - name: SENTRY_TRACES_SAMPLE_RATE
+              value: '.2'
+            - name: SPRING_DATASOURCE_URL
+              value: '${DB_URL}/oncokb_public'
+            - name: SPRING_DATASOURCE_USERNAME
+              value: '${DB_USERNAME}'
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: '${DB_PASSWORD}'
+          envFrom:
+            - secretRef:
+                name: oncokb-public-data-4-0
+            - secretRef:
+                name: oncokb-redis-cluster-ng
+            - secretRef:
+                name: oncokb-db-public-rds-oncokb-public
+          readinessProbe:
+            httpGet:
+              path: /v2/api-docs
+              port: 9095
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9095
+            initialDelaySeconds: 90
+            timeoutSeconds: 15
+            periodSeconds: 15
+            failureThreshold: 10
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 500m
+            limits:
+              memory: 2Gi
+              cpu: 2000m
+          ports:
+            - name: http
+              containerPort: 9095
+          volumeMounts:
+            # The subPath is needed so that mounting the secret as a single file doesn't override
+            # the contents of the existing directory.
+            - mountPath: /app/resources/config/recaptcha/oncokb-recaptcha-credentials.json
+              subPath: oncokb-recaptcha-credentials.json
+              name: recaptcha-credentials
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "oncokb"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: oncokb
+      volumes:
+      - name: recaptcha-credentials
+        secret:
+          secretName: oncokb-recaptcha-credentials
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-public-data-4-0
+  namespace: oncokb
+  labels:
+    app: oncokb-public-data-4-0
+spec:
+  selector:
+    app: oncokb-public-data-4-0
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9095
