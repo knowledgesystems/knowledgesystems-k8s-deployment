@@ -19,43 +19,43 @@ spec:
         releaseName: oncokb-redis-cluster-ng
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/values.yaml
-#    - repoURL: registry-1.docker.io/bitnamicharts
-#      targetRevision: 20.8.0
-#      chart: redis
-#      helm:
-#        releaseName: oncokb-curation-redis
-#        # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
-#        parameters:
-#          - name: global.imagePullSecrets[0]
-#            value: dockerhub-creds
-#          - name: architecture
-#            value: replication
-#          - name: auth.enabled
-#            value: "true"
-#          - name: auth.existingSecret
-#            value: oncokb-redis-cluster
-#          - name: auth.existingSecretPasswordKey
-#            value: REDIS_PASSWORD
-#          - name: master.nodeSelector.workload
-#            value: oncokb-beta
-#          - name: master.tolerations[0].key
-#            value: workload
-#          - name: master.tolerations[0].value
-#            value: oncokb-beta
-#          - name: master.tolerations[0].operator
-#            value: Equal
-#          - name: master.tolerations[0].effect
-#            value: NoSchedule
-#          - name: replica.nodeSelector.workload
-#            value: oncokb-beta
-#          - name: replica.tolerations[0].key
-#            value: workload
-#          - name: replica.tolerations[0].value
-#            value: oncokb-beta
-#          - name: replica.tolerations[0].operator
-#            value: Equal
-#          - name: replica.tolerations[0].effect
-#            value: NoSchedule
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 20.8.0
+      chart: redis
+      helm:
+        releaseName: oncokb-curation-redis
+        # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
+        parameters:
+          - name: global.imagePullSecrets[0]
+            value: dockerhub-creds
+          - name: architecture
+            value: replication
+          - name: auth.enabled
+            value: "true"
+          - name: auth.existingSecret
+            value: oncokb-redis-cluster
+          - name: auth.existingSecretPasswordKey
+            value: REDIS_PASSWORD
+          - name: master.nodeSelector.workload
+            value: oncokb
+          - name: master.tolerations[0].key
+            value: workload
+          - name: master.tolerations[0].value
+            value: oncokb
+          - name: master.tolerations[0].operator
+            value: Equal
+          - name: master.tolerations[0].effect
+            value: NoSchedule
+          - name: replica.nodeSelector.workload
+            value: oncokb
+          - name: replica.tolerations[0].key
+            value: workload
+          - name: replica.tolerations[0].value
+            value: oncokb
+          - name: replica.tolerations[0].operator
+            value: Equal
+          - name: replica.tolerations[0].effect
+            value: NoSchedule
   destination:
     namespace: oncokb
     server: https://kubernetes.default.svc
