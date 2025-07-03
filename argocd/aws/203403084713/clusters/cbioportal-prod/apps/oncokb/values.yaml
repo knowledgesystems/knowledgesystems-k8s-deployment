@@ -1,5 +1,5 @@
 cluster:
-  nodes: 20
+  nodes: 3
   replicas: 1
 existingSecret: oncokb-redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
