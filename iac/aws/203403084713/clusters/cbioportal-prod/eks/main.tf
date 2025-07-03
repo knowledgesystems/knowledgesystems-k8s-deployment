@@ -237,6 +237,28 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
+    oncokb = {
+      instance_types = ["r7i.2xlarge"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 3
+      min_size       = 3
+      max_size       = 3
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "oncokb"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "oncokb"
+      }
+      tags = {
+        cdsi-app   = "oncokb"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
   }
 }
 
