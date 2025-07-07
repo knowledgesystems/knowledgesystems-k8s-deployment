@@ -8,6 +8,7 @@
   * [Argo CD](kubernetes-deployment-with-gitops/argocd.md)
 * [Essential Services](essential-services/README.md)
   * [Keycloak](essential-services/keycloak.md)
+  * [Monitoring](essential-services/monitoring.md)
 * [Tutorials](tutorials)
   * [IP Blocking](tutorials/ip-blocking.md)
 * [Troubleshooting](troubleshooting.md)
