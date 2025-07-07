@@ -11,7 +11,7 @@ spec:
       - www.oncokb.dev.aws.mskcc.org
       - core.oncokb.dev.aws.mskcc.org
       - germline.oncokb.dev.aws.mskcc.org
-      - keycloak.oncokb.org
+      - keycloak.oncokb.dev.aws.mskcc.org
   rules:
     - host: "www.oncokb.dev.aws.mskcc.org"
       http:
@@ -43,7 +43,7 @@ spec:
                 name: oncokb-core-germline
                 port:
                   number: 8888
-    - host: keycloak.oncokb.org
+    - host: keycloak.oncokb.dev.aws.mskcc.org
       http:
         paths:
           - path: "/"
