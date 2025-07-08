@@ -38,7 +38,7 @@ extraEnv: |
   - name: KEYCLOAK_PASSWORD
     value: '$(KEYCLOAK_PASSWORD)'
   - name: KEYCLOAK_FRONTEND_URL
-    value: 'https://keycloak.oncokb.dev.aws.mskcc.org'
+    value: 'https://keycloak.oncokb.dev.aws.mskcc.org/auth'
   - name: KEYCLOAK_LOGLEVEL
     value: INFO
 
