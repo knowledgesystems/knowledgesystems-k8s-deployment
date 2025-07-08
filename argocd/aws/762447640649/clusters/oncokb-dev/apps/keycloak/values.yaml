@@ -38,7 +38,7 @@ extraEnv: |
   - name: KEYCLOAK_PASSWORD
     value: '$(KEYCLOAK_PASSWORD)'
   - name: KEYCLOAK_FRONTEND_URL
-    value: 'http://localhost:8081'
+    value: 'https://keycloak.oncokb.dev.aws.mskcc.org'
   - name: KEYCLOAK_LOGLEVEL
     value: INFO
 
