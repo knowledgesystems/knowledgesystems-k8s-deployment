@@ -10,7 +10,7 @@ spec:
       path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb
       targetRevision: HEAD
       directory:
-        recurse: false
+        recurse: true
       ref: k8s-repo
     - repoURL: https://charts.bitnami.com/bitnami
       targetRevision: 8.4.0
