@@ -37,6 +37,12 @@ extraEnv: |
     value: '$(KEYCLOAK_USER)'
   - name: KEYCLOAK_PASSWORD
     value: '$(KEYCLOAK_PASSWORD)'
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+  - name: KC_HTTP_RELATIVE_PATH
+    value: "/auth"
   - name: KEYCLOAK_LOGLEVEL
     value: INFO
 
