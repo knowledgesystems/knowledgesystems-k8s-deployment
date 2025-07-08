@@ -39,7 +39,7 @@ locals {
       instance_types = ["r7g.medium"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 3
-      max_size       = 3
+      max_size       = 4
       min_size       = 2
       taints = {
         dedicated = {
