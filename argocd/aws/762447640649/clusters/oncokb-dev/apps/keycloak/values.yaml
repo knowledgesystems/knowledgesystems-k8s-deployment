@@ -44,7 +44,7 @@ extraEnvFrom: |
   - secretRef:
       name: oncokb-keycloak
   - secretRef:
-      name: oncokb-db-public-rds-oncokb-transcript
+      name: oncokb-db-msk-dev-rds
 
 # Node labels for Pod assignment
 nodeSelector:
