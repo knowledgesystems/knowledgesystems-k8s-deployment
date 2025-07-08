@@ -77,7 +77,7 @@ locals {
       }
     }
     datadog = {
-      instance_types = ["t3.small"]
+      instance_types = ["t3.medium"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 2
       min_size       = 1
