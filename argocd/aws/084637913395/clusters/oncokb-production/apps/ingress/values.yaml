@@ -10,3 +10,10 @@ controller:
       service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
     targetPorts:
       https: 80
+  nodeSelector:
+    workload: ingress
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "ingress"
+      effect: "NoSchedule"
