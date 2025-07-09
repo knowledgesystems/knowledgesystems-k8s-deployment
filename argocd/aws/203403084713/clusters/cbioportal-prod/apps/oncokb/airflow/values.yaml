@@ -129,7 +129,7 @@ airflow:
         }
   connectionsTemplates:
     ONCOKB_REDIS_CLUSTER_PASSWORD:
-      kind: configmap
+      kind: secret
       name: oncokb-redis-cluster-ng
       key: REDIS_PASSWORD
     ONCOKB_SLACK_HOOK_PASSWORD:
@@ -149,15 +149,15 @@ airflow:
       name: oncokb-db-public-rds-oncokb-user
       key: DB_HOST
     SERVICE_ACCOUNT_USERNAME:
-      kind: configmap
+      kind: secret
       name: oncokb-schultz-lab-sa
       key: SERVICE_ACCOUNT_USERNAME
     SERVICE_ACCOUNT_PASSWORD:
-      kind: configmap
+      kind: secret
       name: oncokb-schultz-lab-sa
       key: SERVICE_ACCOUNT_PASSWORD
     ONCOKB_ADMIN_EMAIL_PASSWORD:
-      kind: configmap
+      kind: secret
       name: oncokb-usage-analysis-config
       key: ADMIN_EMAIL_PASSWORD
   variables:
