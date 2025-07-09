@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  generation: 1
   labels:
     run: oncokb-curation
   name: oncokb-curation
