@@ -1,0 +1,178 @@
+dags:
+  gitSync:
+    enabled: true
+    repo: https://github.com/oncokb/oncokb-pipeline.git
+    branch: master
+    # Path where DAGs are located. For MSK cluster, change to msk_dags
+    repoSubPath: oncokb-airflow/oncokb/dags
+    syncWait: 60
+    httpSecret: oncokb-github
+    httpSecretUsernameKey: USERNAME
+    httpSecretPasswordKey: PRIVATE_ACCESS_TOKEN
+
+postgresql:
+  # to use the external db, the embedded one must be disabled
+  enabled: false
+
+externalDatabase:
+  # WARNING: Must complete this step to use MySQL: https://airflow.apache.org/docs/apache-airflow/stable/howto/set-up-database.html#setting-up-a-mysql-database
+  # Note that there is nothing to do if using MySQL 8 because "explicit_defaults_for_timestamp" is on by default.
+  type: mysql
+  # the database/schema to use
+  database: oncokb_airflow
+  # Update database depending on cluster
+  host: oncokb-public-db.caakrwnbyjl6.us-east-1.rds.amazonaws.com
+  port: 3306
+  userSecret: oncokb-db-public-rds-admin
+  userSecretKey: DB_USERNAME
+  passwordSecret: oncokb-db-public-rds-admin
+  passwordSecretKey: DB_PASSWORD
+
+scheduler:
+  logCleanup:
+    enabled: true
+    retentionMinutes: 43800 # retain logs for 1 month
+worker:
+  logCleanup:
+    enabled: true
+    retentionMinutes: 43800
+
+rbac:
+  create: false
+serviceAccount:
+  # Used by KuberenetesExecutor pods
+  create: false
+  name: oncokb-airflow-service-account
+
+airflow:
+  executor: CeleryExecutor
+  image:
+    repository: apache/airflow
+    tag: 2.6.3-python3.9
+  # Environment variables for airflow configs
+  config:
+    # Helps resolve some python import errors due to some shared packages being on same level as dags folder
+    PYTHONPATH: "/opt/airflow/dags/repo/oncokb-airflow/"
+    # Enabling xcom pickling allows objects to be serialized. https://docs.python.org/3/library/pickle.html
+    AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
+    # The base url for airflow web. This is used so we get the correct log urls. https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#base-url
+    AIRFLOW__WEBSERVER__BASE_URL: "https://airflow.oncokb.org"
+    # Should be disabled in production. https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#load-default-connections
+    AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS: "false"
+  # Installs python packages on all pods
+  extraPipPackages:
+    - "apache-airflow-providers-http==4.1.1"
+    - "apache-airflow-providers-slack==7.2.0"
+    - "apache-airflow-providers-amazon==7.1.0"
+    - "apache-airflow-providers-github==2.2.0"
+    - "apache-airflow-providers-ssh==3.4.0"
+    - "apache-airflow-providers-mysql==4.0.2"
+    - "apache-airflow-providers-cncf-kubernetes==8.0.0"
+    - "kubernetes==28.1.0"
+    - "boto3==1.34.13"
+    - "redis==4.4.2"
+    - "inflect==6.0.2"
+    - "pandas==1.5.3"
+    - "psycopg2-binary==2.9.5"
+    - "simplejson==3.18.1"
+    - "deepdiff==6.3.0"
+  users:
+    - username: admin
+      role: admin
+      firstName: OncoKB
+      lastName: Admin
+      password: ${ADMIN_PASSWORD}
+      email: dev.oncokb@gmail.com
+  usersTemplates:
+    ADMIN_PASSWORD:
+      kind: secret
+      name: oncokb-airflow-admin-user
+      key: PASSWORD
+  connections:
+    - id: oncokb_redis_cluster_headless
+      type: redis
+      login: ""
+      password: ${ONCOKB_REDIS_CLUSTER_PASSWORD}
+      host: oncokb-redis-cluster-ng-headless
+      port: 6379
+    - id: slack_alerts_connection
+      type: http
+      login: ""
+      password: ${ONCOKB_SLACK_HOOK_PASSWORD}
+      host: "https://hooks.slack.com/services/"
+    - id: oncokb_public_db_conn_id
+      type: "mysql"
+      login: ${ONCOKB_DATABASE_USERNAME}
+      password: ${ONCOKB_DATABASE_PASSWORD}
+      host: ${ONCOKB_DATABASE_HOST}
+      port: 3306
+    - id: aws_service_account
+      type: generic
+      login: ${SERVICE_ACCOUNT_USERNAME}
+      password: ${SERVICE_ACCOUNT_PASSWORD}
+      extra: |
+        {
+          "role_arn": "arn:aws:iam::203403084713:role/mskAutomationUser"
+        }
+    - id: oncokb_admin_gmail
+      type: email
+      login: "admin@oncokb.org"
+      password: ${ONCOKB_ADMIN_EMAIL_PASSWORD}
+      extra: |
+        {
+          "address": {
+            "contact": "contact@oncokb.org",
+            "license": "licenses@oncokb.org",
+            "registration": "registration@oncokb.org",
+            "techDev": "dev@oncokb.org"
+          }
+        }
+  connectionsTemplates:
+    ONCOKB_REDIS_CLUSTER_PASSWORD:
+      kind: configmap
+      name: oncokb-redis-cluster-ng
+      key: REDIS_PASSWORD
+    ONCOKB_SLACK_HOOK_PASSWORD:
+      kind: secret
+      name: oncokb-slack
+      key: PASSWORD
+    ONCOKB_DATABASE_USERNAME:
+      kind: secret
+      name: oncokb-db-public-rds-oncokb-user
+      key: DB_USERNAME
+    ONCOKB_DATABASE_PASSWORD:
+      kind: secret
+      name: oncokb-db-public-rds-oncokb-user
+      key: DB_PASSWORD
+    ONCOKB_DATABASE_HOST:
+      kind: secret
+      name: oncokb-db-public-rds-oncokb-user
+      key: DB_HOST
+    SERVICE_ACCOUNT_USERNAME:
+      kind: configmap
+      name: oncokb-schultz-lab-sa
+      key: SERVICE_ACCOUNT_USERNAME
+    SERVICE_ACCOUNT_PASSWORD:
+      kind: configmap
+      name: oncokb-schultz-lab-sa
+      key: SERVICE_ACCOUNT_PASSWORD
+    ONCOKB_ADMIN_EMAIL_PASSWORD:
+      kind: configmap
+      name: oncokb-usage-analysis-config
+      key: ADMIN_EMAIL_PASSWORD
+  variables:
+    - key: oncokb_k8_namespace
+      value: oncokb
+    - key: oncokb_redis_cluster_num_replicas_per_master
+      value: 1
+    - key: oncokb_redis_cluster_total_num_masters
+      value: 10
+    - key: oncokb_redis_cluster_usage_threshold
+      value: 0.8
+  defaultNodeSelector:
+    workload: oncokb
+  defaultTolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "oncokb"
+      effect: "NoSchedule"
