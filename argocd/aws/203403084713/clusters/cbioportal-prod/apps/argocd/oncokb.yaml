@@ -18,7 +18,14 @@ spec:
       helm:
         releaseName: oncokb-redis-cluster-ng
         valueFiles:
-          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/values.yaml
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/redis-cluster/values.yaml
+    - repoURL: https://codecentric.github.io/helm-charts
+      targetRevision: 14.0.0
+      chart: keycloak
+      helm:
+        releaseName: oncokb-keycloak
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/keycloak/values.yaml
   destination:
     namespace: oncokb
     server: https://kubernetes.default.svc

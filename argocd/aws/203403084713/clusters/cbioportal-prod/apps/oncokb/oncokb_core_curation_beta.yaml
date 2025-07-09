@@ -1,54 +1,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
-    run: oncokb-core-data-4-0
-  name: oncokb-core-data-4-0
+    run: oncokb-core-curation-beta
+  name: oncokb-core-curation-beta
   namespace: oncokb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: oncokb-core-data-4-0
+      run: oncokb-core-curation-beta
   strategy:
     rollingUpdate:
-      # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
       maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        run: oncokb-core-data-4-0
+        run: oncokb-core-curation-beta
     spec:
       containers:
         - env:
           envFrom:
-            - secretRef:
-                name: oncokb-core-data-4-0
-            - secretRef:
+            - configMapRef:
+                name: oncokb-core-curation-beta
+            - configMapRef:
                 name: oncokb-redis-cluster-ng
-            - secretRef:
+            - configMapRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:3.12.13
+          # The beta current is used to showcase a new search endpoint
+          image: oncokb/oncokb:3.30.0
           command: ["java"]
           args: [
             "-Dapp.name=$(APP_NAME)",
             "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=$(DB_URL)/oncokb_core_v4_0?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+            "-Djdbc.url=$(DB_URL)/oncokb_core_curation_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
             "-Djdbc.username=$(DB_USERNAME)",
             "-Djdbc.password=$(DB_PASSWORD)",
+            "-Dgenomenexus.api=https://www.genomenexus.org/",
+            "-Doncokb_transcript.url=https://transcript.oncokb.org",
             "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+            "-Dpublic_oncokb.token=$(PUBLIC_ONCOKB_TOKEN)",
             "-Dredis.enable=true",
             "-Dredis.type=$(REDIS_TYPE)",
             "-Dredis.address=$(REDIS_ADDRESS)",
-            "-Dredis.password=$(REDIS_PASSWROD)",
+            "-Dredis.password=$(REDIS_PASSWORD)",
             "-Dredis.expiration=$(REDIS_EXPIRATION)",
-            "-Dswagger_url=https://data-4-0.oncokb.org",
-            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
-            "-Dsentry.sample.rate=0.5",
+            "-Dswagger_url=https://beta.oncokb.org",
             "-Dshow_sitemaps=false",
+            "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
+            "-Dsentry.sample.rate=1",
             "-jar",
             "/webapp-runner.jar",
             "--enable-compression",
@@ -75,7 +76,7 @@ spec:
             timeoutSeconds: 5
             periodSeconds: 20
             failureThreshold: 60
-          name: oncokb-core-data-4-0
+          name: oncokb-core-curation-beta
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -100,18 +101,17 @@ spec:
           effect: "NoSchedule"
       nodeSelector:
         workload: oncokb
-status: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: oncokb-core-data-4-0
-  name: oncokb-core-data-4-0
+    run: oncokb-core-curation-beta
+  name: oncokb-core-curation-beta
   namespace: oncokb
 spec:
   ports:
     - port: 8888
   selector:
-    run: oncokb-core-data-4-0
+    run: oncokb-core-curation-beta
   type: ClusterIP
