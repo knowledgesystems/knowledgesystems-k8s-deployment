@@ -7,7 +7,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/knowledgesystems/portal-configuration.git
-      path: argocd/aws/762447640649/clusters/oncokb-dev
+      path: argocd/aws/084637913395/clusters/oncokb-dev
       targetRevision: HEAD
       directory:
         recurse: true
