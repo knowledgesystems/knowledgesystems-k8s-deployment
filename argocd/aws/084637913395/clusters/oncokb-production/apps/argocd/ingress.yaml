@@ -7,7 +7,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/762447640649/clusters/oncokb-dev/apps/ingress
+      path: argocd/aws/084637913395/clusters/oncokb-production/apps/ingress
       targetRevision: HEAD
       directory:
         recurse: true
@@ -16,9 +16,9 @@ spec:
       targetRevision: 4.12.0
       chart: ingress-nginx
       helm:
-        releaseName: oncokb-ingress-nginx-controller
+        releaseName: oncokb-ingress-nginx
         valueFiles:
-          - $k8s-repo/argocd/aws/762447640649/clusters/oncokb-dev/apps/ingress/values.yaml
+          - $k8s-repo/argocd/aws/084637913395/clusters/oncokb-production/apps/ingress/values.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
