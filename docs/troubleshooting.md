@@ -4,6 +4,16 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## Datadog Failing to Inject Init-Containers
+In an AWS EKS cluster, if datadog is failing to inject init-containers because the deployments are somehow invisible to the Cluster Agent or the Cluster Agent is failing to detect them, then it could be a [networking issue](https://docs.datadoghq.com/containers/troubleshooting/admission-controller/?tab=helm#amazon-elastic-kubernetes-service-eks). To fix it, add the following inbound rule to the security groups attached to EC2 instances in the cluster:
+- **Protocol**: TCP
+- **Port range**: `8000`, or a range that covers `8000`
+- **Source**: The ID of either the cluster security group, or one of your cluster’s additional security groups. You can find these IDs in the EKS console, under the Networking tab for your EKS cluster.
+
+This security group rule allows the control plane to access the node and the downstream Cluster Agent over port `8000`.
+
+If you have multiple managed node groups, each with distinct security groups, add this inbound rule to each security group.
+
 ## MongoDB Persistent Volume Claim Error
 When installing MongoDB Helm Chart in a new cluster, we sometimes run into an error where the helm chart is unable to create a persistent volume, which leads to the persistent volume claim failing to bind:
 ```
