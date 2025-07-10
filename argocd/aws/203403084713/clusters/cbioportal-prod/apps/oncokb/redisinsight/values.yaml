@@ -6,3 +6,6 @@ tolerations:
     operator: "Equal"
     value: "oncokb"
     effect: "NoSchedule"
+
+persistence:
+  enabled: false
