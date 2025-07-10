@@ -259,6 +259,23 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
+    cbioagent = {
+      instance_types = ["m7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbioagent"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbioagent"
+      }
+    }
   }
 }
 
