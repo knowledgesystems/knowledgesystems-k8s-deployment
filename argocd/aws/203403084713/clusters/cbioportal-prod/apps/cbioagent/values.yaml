@@ -6,7 +6,7 @@ global:
 
 librechat:
   existingSecretName: "librechat-credentials-env"
-  existingConfigYaml: ""
+  existingConfigYaml: "librechat-config"
 
 image:
   repository: cbioportal/cbioagent
