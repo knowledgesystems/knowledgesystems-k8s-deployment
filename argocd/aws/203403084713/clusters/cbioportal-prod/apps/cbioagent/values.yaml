@@ -26,3 +26,20 @@ tolerations:
 
 ingress:
   enabled: false
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  timeoutSeconds: 1
+  periodSeconds: 5
+  failureThreshold: 3
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 20
+  timeoutSeconds: 1
+  periodSeconds: 12
+  failureThreshold: 5
