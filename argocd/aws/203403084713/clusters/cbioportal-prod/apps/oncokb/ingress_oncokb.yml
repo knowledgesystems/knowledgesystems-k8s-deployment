@@ -35,7 +35,6 @@ spec:
     # - www.oncokb.org
     # - staging.oncokb.org
     # - germline.oncokb.org
-    # - legacy.oncokb.org
     - demo.oncokb.org
     - sop.oncokb.org
     - public.api.oncokb.org
@@ -120,16 +119,6 @@ spec:
             name: oncokb-core-public
             port:
               name: http
-  # - host: legacy.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-core-legacy
-  #           port:
-  #             name: http
   - host: sop.oncokb.org
     http:
       paths:
