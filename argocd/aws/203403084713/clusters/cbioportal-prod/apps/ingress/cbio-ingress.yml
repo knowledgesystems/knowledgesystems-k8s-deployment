@@ -117,3 +117,4 @@ spec:
     secretName: cbioportal-session-service-argocd-cert
   - hosts:
       - session-service.cbioportal.org
+    secretName: cbioportal-session-service-cert
