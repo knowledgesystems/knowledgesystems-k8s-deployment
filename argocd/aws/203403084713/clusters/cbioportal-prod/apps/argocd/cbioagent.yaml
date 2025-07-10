@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioagent
+spec:
+  project: default
+  sources:
+#    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+#      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent
+#      targetRevision: HEAD
+#      directory:
+#        recurse: true
+#      ref: k8s-repo
+    - repoURL: https://github.com/danny-avila/LibreChat
+      targetRevision: v0.7.9-rc1
+      chart: librechat
+      path: helm
+      helm:
+        releaseName: cbioagent
+#        valueFiles:
+#          - $k8/argocd/aws/203403084713/clusters/cbioportal-prod/apps/datadog/values.yaml
+  destination:
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
