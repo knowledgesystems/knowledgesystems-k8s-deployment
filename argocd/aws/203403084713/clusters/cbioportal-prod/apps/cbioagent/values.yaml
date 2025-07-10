@@ -23,3 +23,6 @@ tolerations:
     operator: "Equal"
     value: "cbioagent"
     effect: "NoSchedule"
+
+ingress:
+  enabled: false
