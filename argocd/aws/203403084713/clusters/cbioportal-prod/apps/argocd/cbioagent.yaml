@@ -13,11 +13,10 @@ spec:
 #      ref: k8s-repo
     - path: helm/librechat
       repoURL: https://github.com/danny-avila/LibreChat.git
-      targetRevision: HEAD
+      targetRevision: v0.7.9-rc1
       helm:
         releaseName: cbioagent
         valueFiles:
-          - values.yaml
 #          - $k8/argocd/aws/203403084713/clusters/cbioportal-prod/apps/datadog/values.yaml
   destination:
     namespace: default
