@@ -1,0 +1,8 @@
+nodeSelector:
+  workload: oncokb
+
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "oncokb"
+    effect: "NoSchedule"
