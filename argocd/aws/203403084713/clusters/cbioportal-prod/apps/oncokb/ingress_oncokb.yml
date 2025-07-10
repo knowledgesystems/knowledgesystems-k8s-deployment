@@ -47,7 +47,7 @@ spec:
     - data-4-5.oncokb.org
     - data-4-0.oncokb.org
     - data-3-11.oncokb.org
-    secretName: oncokb-cert
+    secretName: oncokb-prod-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
   - host: oncokb.org
