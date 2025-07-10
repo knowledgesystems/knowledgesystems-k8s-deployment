@@ -4,45 +4,45 @@ metadata:
   name: oncokb-ingress
   namespace: oncokb
   annotations:
-    # kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/limit-rps: "100"
-    # nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
-    # # the following has to be added due to an issue of from-to-www-redirect. https://github.com/kubernetes/ingress-nginx/issues/2043
-    # nginx.ingress.kubernetes.io/configuration-snippet: |
-    #   if ($host = 'oncokb.org' ) {
-    #     rewrite ^ https://www.oncokb.org$request_uri permanent;
-    #   }
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    ingress.kubernetes.io/proxy-connect-timeout: "300"
-    ingress.kubernetes.io/proxy-read-timeout: "300"
-    ingress.kubernetes.io/proxy-send-timeout: "300"
-    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
-    # increae max response size to avoid 413 errors see
-    # https://github.com/kubernetes/ingress-nginx/issues/1824
-    nginx.ingress.kubernetes.io/proxy-body-size: 512m
-    ingress.kubernetes.io/proxy-body-size: 512m
-    # add proxy protocol to header
-    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-    #     # add an annotation indicating the issuer to use.
-    # cert-manager.io/cluster-issuer: letsencrypt-prod
-    # # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
-    # # increae max response size to avoid 413 errors see
-    # # https://github.com/kubernetes/ingress-nginx/issues/1824
-    # ingress.kubernetes.io/proxy-body-size: 512m
-    # ingress.kubernetes.io/proxy-connect-timeout: "300"
-    # ingress.kubernetes.io/proxy-read-timeout: "300"
-    # ingress.kubernetes.io/proxy-send-timeout: "300"
+    # # kubernetes.io/tls-acme: "true"
     # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-    # nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/limit-rps: "100"
+    # # nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    # # # the following has to be added due to an issue of from-to-www-redirect. https://github.com/kubernetes/ingress-nginx/issues/2043
+    # # nginx.ingress.kubernetes.io/configuration-snippet: |
+    # #   if ($host = 'oncokb.org' ) {
+    # #     rewrite ^ https://www.oncokb.org$request_uri permanent;
+    # #   }
     # nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     # nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     # nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # ingress.kubernetes.io/proxy-connect-timeout: "300"
+    # ingress.kubernetes.io/proxy-read-timeout: "300"
+    # ingress.kubernetes.io/proxy-send-timeout: "300"
+    # # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # # increae max response size to avoid 413 errors see
+    # # https://github.com/kubernetes/ingress-nginx/issues/1824
+    # nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    # ingress.kubernetes.io/proxy-body-size: 512m
+    # # add proxy protocol to header
+    # service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+        # add an annotation indicating the issuer to use.
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # increae max response size to avoid 413 errors see
+    # https://github.com/kubernetes/ingress-nginx/issues/1824
+    ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   tls:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
