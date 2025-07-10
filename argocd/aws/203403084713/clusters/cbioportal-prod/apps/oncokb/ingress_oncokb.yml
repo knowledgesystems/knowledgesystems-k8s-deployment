@@ -27,6 +27,22 @@ metadata:
     ingress.kubernetes.io/proxy-body-size: 512m
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+    #     # add an annotation indicating the issuer to use.
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # # ingress.kubernetes.io/large-client-header-buffers: "4 32k"
+    # # increae max response size to avoid 413 errors see
+    # # https://github.com/kubernetes/ingress-nginx/issues/1824
+    # ingress.kubernetes.io/proxy-body-size: 512m
+    # ingress.kubernetes.io/proxy-connect-timeout: "300"
+    # ingress.kubernetes.io/proxy-read-timeout: "300"
+    # ingress.kubernetes.io/proxy-send-timeout: "300"
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    # nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   tls:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
@@ -36,7 +52,6 @@ spec:
     # - staging.oncokb.org
     # - germline.oncokb.org
     - demo.oncokb.org
-    - sop.oncokb.org
     - public.api.oncokb.org
     # - transcript.oncokb.org
     # - curation.oncokb.org
@@ -47,6 +62,9 @@ spec:
     # - data-4-0.oncokb.org
     # - data-3-11.oncokb.org
     secretName: oncokb-prod-cert
+  - hosts:
+    - sop.oncokb.org
+    secretName: oncokb-sop-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
   # - host: oncokb.org
