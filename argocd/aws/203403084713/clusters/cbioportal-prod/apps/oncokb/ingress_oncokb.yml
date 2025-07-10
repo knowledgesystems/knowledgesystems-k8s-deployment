@@ -38,7 +38,7 @@ spec:
     # - legacy.oncokb.org
     - demo.oncokb.org
     - sop.oncokb.org
-    # - public.api.oncokb.org
+    - public.api.oncokb.org
     # - transcript.oncokb.org
     # - curation.oncokb.org
     # - keycloak.oncokb.org
@@ -110,16 +110,16 @@ spec:
             name: oncokb-core-demo
             port:
               name: http
-  # - host: public.api.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-core-public
-  #           port:
-  #             name: http
+  - host: public.api.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-public
+            port:
+              name: http
   # - host: legacy.oncokb.org
   #   http:
   #     paths:
