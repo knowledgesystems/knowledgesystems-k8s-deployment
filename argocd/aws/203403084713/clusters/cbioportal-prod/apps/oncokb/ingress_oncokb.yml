@@ -128,7 +128,7 @@ spec:
             service:
               name: oncokb-sop
               port:
-                number: 80
+                name: http
   # - host: transcript.oncokb.org
   #   http:
   #     paths:
