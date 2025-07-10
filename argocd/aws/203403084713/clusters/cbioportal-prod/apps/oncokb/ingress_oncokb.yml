@@ -36,7 +36,7 @@ spec:
     # - staging.oncokb.org
     # - germline.oncokb.org
     # - legacy.oncokb.org
-    # - demo.oncokb.org
+    - demo.oncokb.org
     - sop.oncokb.org
     # - public.api.oncokb.org
     # - transcript.oncokb.org
@@ -100,16 +100,16 @@ spec:
   #           name: oncokb-public-germline
   #           port:
   #             name: http
-  # - host: demo.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-core-demo
-  #           port:
-  #             name: http
+  - host: demo.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-core-demo
+            port:
+              name: http
   # - host: public.api.oncokb.org
   #   http:
   #     paths:
