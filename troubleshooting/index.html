@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.805228240939">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.805470079197">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -31,12 +31,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../resources/css/retype.css?v=3.11.0.805228240939" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=3.11.0.805470079197" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.11.0.805228240939" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=3.11.0.805470079197" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.11.0.805228240939" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.11.0.805228240939" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.11.0.805470079197" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.11.0.805470079197" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -186,6 +186,20 @@
     </h1>
 </doc-anchor-target>
 <p>This list is used to track issues and their remedies.</p>
+<doc-anchor-target id="datadog-failing-to-inject-init-containers">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#datadog-failing-to-inject-init-containers">#</doc-anchor-trigger>
+        <span>Datadog Failing to Inject Init-Containers</span>
+    </h2>
+</doc-anchor-target>
+<p>In an AWS EKS cluster, if datadog is failing to inject init-containers because the deployments are somehow invisible to the Cluster Agent or the Cluster Agent is failing to detect them, then it could be a <a href="https://docs.datadoghq.com/containers/troubleshooting/admission-controller/?tab=helm#amazon-elastic-kubernetes-service-eks">networking issue</a>. To fix it, add the following inbound rule to the security groups attached to EC2 instances in the cluster:</p>
+<ul>
+<li><strong>Protocol</strong>: TCP</li>
+<li><strong>Port range</strong>: <code v-pre>8000</code>, or a range that covers <code v-pre>8000</code></li>
+<li><strong>Source</strong>: The ID of either the cluster security group, or one of your cluster’s additional security groups. You can find these IDs in the EKS console, under the Networking tab for your EKS cluster.</li>
+</ul>
+<p>This security group rule allows the control plane to access the node and the downstream Cluster Agent over port <code v-pre>8000</code>.</p>
+<p>If you have multiple managed node groups, each with distinct security groups, add this inbound rule to each security group.</p>
 <doc-anchor-target id="mongodb-persistent-volume-claim-error">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#mongodb-persistent-volume-claim-error">#</doc-anchor-trigger>
