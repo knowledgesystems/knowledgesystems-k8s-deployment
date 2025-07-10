@@ -1,0 +1,25 @@
+replicaCount: 1
+global:
+  librechat:
+    existingSecretName: "librechat-credentials-env"
+    existingSecretApiKey: ANTRHOPIC_API_KEY
+
+librechat:
+  existingSecretName: "librechat-credentials-env"
+  existingConfigYaml: ""
+
+image:
+  repository: cbioportal/cbioagent
+  registry: docker.io
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "librechat-latest"
+
+nodeSelector:
+  workload: cbioagent
+
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "cbioagent"
+    effect: "NoSchedule"
