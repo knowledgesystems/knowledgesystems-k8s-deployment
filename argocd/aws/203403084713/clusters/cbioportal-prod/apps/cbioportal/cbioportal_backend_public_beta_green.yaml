@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-beta-green
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal-backend-public-beta-green
-    tags.datadoghq.com/version: 6.3.0
+    tags.datadoghq.com/version: 6.3.2
   name: cbioportal-backend-public-beta-green
 spec:
   replicas: 0
@@ -24,7 +24,7 @@ spec:
         run: cbioportal-backend-public-beta-green
         tags.datadoghq.com/env: eks-public-argocd
         tags.datadoghq.com/service: cbioportal-backend-public-beta-green
-        tags.datadoghq.com/version: 6.3.0
+        tags.datadoghq.com/version: 6.3.2
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -43,7 +43,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal-dev:b4625870146a3ba7a5cef72f82372b1c19c2b3fd-web-shenandoah
+        image: cbioportal/cbioportal:6.3.2-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -187,13 +187,12 @@ spec:
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=7",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
-            "--redis.clear_on_startup=true",
+            "--redis.clear_on_startup=false",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
             # NEW PROPERTIES START
             "--enable_persistent_cache=true",
-            #"--persistence.cache_type_clickhouse=redis",
-            "--persistence.cache_type_clickhouse=no-cache",
+            "--persistence.cache_type_clickhouse=redis",
             #"--persistence.cache_type_clickhouse=no-cache",
             "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
             "--spring.datasource.mysql.username=$(DB_USER)",
