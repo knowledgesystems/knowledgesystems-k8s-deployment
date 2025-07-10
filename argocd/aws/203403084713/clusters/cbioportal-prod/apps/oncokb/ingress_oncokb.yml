@@ -41,7 +41,7 @@ spec:
     - public.api.oncokb.org
     # - transcript.oncokb.org
     # - curation.oncokb.org
-    # - keycloak.oncokb.org
+    - keycloak.oncokb.org
     # - airflow.oncokb.org
     # - data-4-9.oncokb.org
     # - data-4-5.oncokb.org
@@ -160,16 +160,16 @@ spec:
   #             name: oncokb-curation
   #             port:
   #               name: http
-  # - host: keycloak.oncokb.org
-  #   http:
-  #     paths:
-  #       - path: "/"
-  #         pathType: Prefix
-  #         backend:
-  #           service:
-  #             name: oncokb-keycloak-code-http
-  #             port:
-  #               name: http
+  - host: keycloak.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-keycloak-http
+              port:
+                name: http
   # - host: airflow.oncokb.org
   #   http:
   #     paths:
