@@ -31,16 +31,6 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
-  - host: public-data.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
               name: cbioportal-backend-public-green
               port:
                 number: 80
@@ -100,9 +90,6 @@ spec:
   - hosts:
     - www.cbioportal.org
     secretName: www-cbioportal-cert
-  - hosts:
-    - public-data.cbioportal.org
-    secretName: cbioportal-public-data-cert
   - hosts:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
