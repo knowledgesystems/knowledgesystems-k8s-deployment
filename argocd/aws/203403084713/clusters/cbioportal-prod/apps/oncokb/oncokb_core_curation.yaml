@@ -33,13 +33,29 @@ spec:
           command: ["java"]
           args:
             [
+              # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
+              "-Xms500m",
+              "-XX:+UseSerialGC",
+              # aggressive garbage collection
+              "-XX:MinHeapFreeRatio=20",
+              "-XX:MaxHeapFreeRatio=40",
+              "-XX:GCTimeRatio=4",
+              "-XX:AdaptiveSizePolicyWeight=90",
+              "-XX:+UnlockExperimentalVMOptions",
+              "-XX:+UseCGroupMemoryLimitForHeap",
+              # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
+              "-XX:MaxRAMFraction=2",
+              "-XX:+PrintFlagsFinal",
+              "-XshowSettings:vm",
+              # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
+              # from the limits
+              "-XX:MaxRAM=2g",
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_curation?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Dgenomenexus.api=https://www.genomenexus.org/",
-              "-Doncokb_transcript.url=https://transcript.oncokb.org",
               "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
               "-Dpublic_oncokb.token=$(PUBLIC_ONCOKB_TOKEN)",
               "-Dredis.enable=true",
@@ -49,9 +65,6 @@ spec:
               "-Dredis.expiration=$(REDIS_EXPIRATION)",
               "-Dswagger_url=https://beta.oncokb.org",
               "-Dshow_sitemaps=false",
-              "-Dncbi.api.key=$(NCBI_API_KEY)",
-              "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
-              "-Dsentry.sample.rate=1",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
