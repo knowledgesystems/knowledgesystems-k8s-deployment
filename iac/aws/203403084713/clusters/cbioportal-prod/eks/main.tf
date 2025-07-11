@@ -259,6 +259,28 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
+    oncokb-redis = {
+      instance_types = ["r7i.2xlarge"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "oncokb-redis"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "oncokb-redis"
+      }
+      tags = {
+        cdsi-app   = "oncokb"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
     cbioagent = {
       instance_types = ["m7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
