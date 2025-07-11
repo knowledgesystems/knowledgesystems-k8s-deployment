@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.805503381821">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.805572263285">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -31,12 +31,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../resources/css/retype.css?v=3.11.0.805503381821" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=3.11.0.805572263285" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.11.0.805503381821" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=3.11.0.805572263285" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.11.0.805503381821" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.11.0.805503381821" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.11.0.805572263285" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.11.0.805572263285" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -186,6 +186,17 @@
     </h1>
 </doc-anchor-target>
 <p>This list is used to track issues and their remedies.</p>
+<doc-anchor-target id="aws-cni-failing-to-assign-ip-addresses">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#aws-cni-failing-to-assign-ip-addresses">#</doc-anchor-trigger>
+        <span>AWS-CNI Failing to Assign IP Addresses</span>
+    </h2>
+</doc-anchor-target>
+<p>If a AWS EKS managed nodegroup has too many pods deployed on one of its EC2 nodes, it can run out of IP Addresses with the error:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">plugin type=&quot;aws-cni&quot; name=&quot;aws-cni&quot; failed (add): add cmd: failed to assign an IP address to container</code></pre>
+</doc-codeblock></div>
+<p>To resolve this issue, analyze the deployments in the nodegroup and see if a specific deployment group can be separated into its own nodegroup. E.g., For oncokb production workload, redis deployment needed 20 pods. In such cases, the better approach was to deploy redis in its own nodegroup called <code v-pre>oncokb-redis</code>.</p>
 <doc-anchor-target id="datadog-failing-to-inject-init-containers">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#datadog-failing-to-inject-init-containers">#</doc-anchor-trigger>
