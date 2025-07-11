@@ -34,11 +34,10 @@ spec:
     # - oncokb.org
     # - www.oncokb.org
     # - staging.oncokb.org
-    # - germline.oncokb.org
     - demo.oncokb.org
     - sop.oncokb.org
     - public.api.oncokb.org
-    # - transcript.oncokb.org
+    - transcript.oncokb.org
     # - curation.oncokb.org
     - keycloak.oncokb.org
     # - airflow.oncokb.org
@@ -89,16 +88,6 @@ spec:
   #           name: oncokb-public-staging
   #           port:
   #             name: http
-  # - host: germline.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-public-germline
-  #           port:
-  #             name: http
   - host: demo.oncokb.org
     http:
       paths:
@@ -129,16 +118,16 @@ spec:
               name: oncokb-sop
               port:
                 number: 80
-  # - host: transcript.oncokb.org
-  #   http:
-  #     paths:
-  #       - path: "/"
-  #         pathType: Prefix
-  #         backend:
-  #           service:
-  #             name: oncokb-transcript
-  #             port:
-  #               name: http
+  - host: transcript.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-transcript
+              port:
+                name: http
   # - host: curation.oncokb.org
   #   http:
   #     paths:
