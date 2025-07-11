@@ -35,7 +35,7 @@ spec:
             [
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=$(DB_URL)/oncokb_core_curation?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Dgenomenexus.api=https://www.genomenexus.org/",
@@ -65,8 +65,8 @@ spec:
             httpGet:
               path: /v1/health
               port: 8888
-            initialDelaySeconds: 15
-            timeoutSeconds: 10
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
             periodSeconds: 20
             failureThreshold: 60
           livenessProbe:
