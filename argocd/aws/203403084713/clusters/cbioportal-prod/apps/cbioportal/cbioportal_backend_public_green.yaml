@@ -44,7 +44,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal:6.3.2-web-shenandoah
+        image: cbioportal/cbioportal-dev:cf60c855c3c00db8d6f42fb31fd7ae96b9969aef-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -265,9 +265,9 @@ spec:
         resources:
           requests:
               cpu: 1500m
-              memory: 8Gi
+              memory: 15Gi
           limits:
-              memory: 12Gi
+              memory: 26Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on eks-public-cbioportal node group
