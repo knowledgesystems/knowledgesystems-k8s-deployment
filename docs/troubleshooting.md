@@ -4,6 +4,13 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## AWS-CNI Failing to Assign IP Addresses
+If a AWS EKS managed nodegroup has too many pods deployed on one of its EC2 nodes, it can run out of IP Addresses with the error:
+```
+plugin type="aws-cni" name="aws-cni" failed (add): add cmd: failed to assign an IP address to container
+```
+To resolve this issue, analyze the deployments in the nodegroup and see if a specific deployment group can be separated into its own nodegroup. E.g., For oncokb production workload, redis deployment needed 20 pods. In such cases, the better approach was to deploy redis in its own nodegroup called `oncokb-redis`.
+
 ## Datadog Failing to Inject Init-Containers
 In an AWS EKS cluster, if datadog is failing to inject init-containers because the deployments are somehow invisible to the Cluster Agent or the Cluster Agent is failing to detect them, then it could be a [networking issue](https://docs.datadoghq.com/containers/troubleshooting/admission-controller/?tab=helm#amazon-elastic-kubernetes-service-eks). To fix it, add the following inbound rule to the security groups attached to EC2 instances in the cluster:
 - **Protocol**: TCP
