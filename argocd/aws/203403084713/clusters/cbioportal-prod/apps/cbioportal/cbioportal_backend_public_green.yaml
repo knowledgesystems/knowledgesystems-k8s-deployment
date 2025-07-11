@@ -9,13 +9,13 @@ metadata:
     tags.datadoghq.com/version: 6.3.2
   name: cbioportal-backend-public-green
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       run: cbioportal-backend-public-green
   strategy:
     rollingUpdate:
-      maxSurge: 2
+      maxSurge: 4
       maxUnavailable: 1
     type: RollingUpdate
   template:
