@@ -33,12 +33,12 @@ spec:
   - hosts:
     # - oncokb.org
     - www.oncokb.org
-    # - staging.oncokb.org
+    - staging.oncokb.org
     - demo.oncokb.org
     - sop.oncokb.org
     - public.api.oncokb.org
     - transcript.oncokb.org
-    # - curation.oncokb.org
+    - curation.oncokb.org
     - keycloak.oncokb.org
     # - airflow.oncokb.org
     # - data-4-9.oncokb.org
@@ -68,16 +68,16 @@ spec:
             name: oncokb-public
             port:
               name: http
-  # - host: staging.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-public-staging
-  #           port:
-  #             name: http
+  - host: staging.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public-staging
+            port:
+              name: http
   - host: demo.oncokb.org
     http:
       paths:
@@ -118,16 +118,16 @@ spec:
               name: oncokb-transcript
               port:
                 name: http
-  # - host: curation.oncokb.org
-  #   http:
-  #     paths:
-  #       - path: "/"
-  #         pathType: Prefix
-  #         backend:
-  #           service:
-  #             name: oncokb-curation
-  #             port:
-  #               name: http
+  - host: curation.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-curation
+              port:
+                name: http
   - host: keycloak.oncokb.org
     http:
       paths:
