@@ -24,11 +24,11 @@ spec:
       containers:
         - env:
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: oncokb-core-curation-beta
-            - configMapRef:
+            - secretRef:
                 name: oncokb-redis-cluster-ng
-            - configMapRef:
+            - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
           image: oncokb/oncokb:3.32.0
