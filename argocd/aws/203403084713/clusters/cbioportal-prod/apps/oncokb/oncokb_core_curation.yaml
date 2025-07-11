@@ -63,7 +63,7 @@ spec:
           # use actionable variants endpoint to cache everything
           readinessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
@@ -71,7 +71,7 @@ spec:
             failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             # wait for the pod is ready
             initialDelaySeconds: 300
@@ -84,11 +84,11 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: "1"
-              memory: "2Gi"
+              cpu: 500m
+              memory: 2Gi
             limits:
-              cpu: "2"
-              memory: "4Gi"
+              cpu: 4000m
+              memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
