@@ -26,13 +26,13 @@ spec:
         releaseName: oncokb-keycloak
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/keycloak/values.yaml
-    # - repoURL: https://airflow-helm.github.io/charts
-    #   targetRevision: 8.9.0
-    #   chart: airflow
-    #   helm:
-    #     releaseName: oncokb-airflow
-    #     valueFiles:
-    #       - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/airflow/values.yaml
+    - repoURL: https://airflow-helm.github.io/charts
+      targetRevision: 8.9.0
+      chart: airflow
+      helm:
+        releaseName: oncokb-airflow
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/airflow/values.yaml
     - repoURL: https://mrnim94.github.io/redisinsight/
       targetRevision: 1.3.1
       chart: redisinsight
