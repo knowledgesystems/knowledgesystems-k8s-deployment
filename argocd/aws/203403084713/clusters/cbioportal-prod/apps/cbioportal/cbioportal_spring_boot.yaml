@@ -8,13 +8,13 @@ metadata:
     tags.datadoghq.com/version: 6.3.2
   name: cbioportal-spring-boot
 spec:
-  replicas: 2
+  replicas: 0
   selector:
     matchLabels:
       run: cbioportal-spring-boot
   strategy:
     rollingUpdate:
-      maxSurge: 2
+      maxSurge: 0
       maxUnavailable: 1
     type: RollingUpdate
   template:
