@@ -152,6 +152,7 @@ spec:
             "--session.service.user=$(SESSION_SERVICE_USER_NAME)",
             "--session.service.password=$(SESSION_SERVICE_USER_PASSWORD)",
             "--google_analytics_profile_id=G-5260NDGD6Z",
+            "--google_tag_manager_id=GTM-TLXCGKK",
             "--bitly.url=$(BITLY_URL)",
             "--bitly.access.token=$(BITLY_ACCESS_TOKEN)",
             "--sentry.dsn=$(SENTRY_DSN)",
