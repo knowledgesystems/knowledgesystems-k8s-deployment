@@ -32,7 +32,7 @@ spec:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
   - hosts:
     # - oncokb.org
-    # - www.oncokb.org
+    - www.oncokb.org
     # - staging.oncokb.org
     - demo.oncokb.org
     - sop.oncokb.org
@@ -48,36 +48,26 @@ spec:
     secretName: oncokb-prod-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
-  # - host: oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-public
-  #           port:
-  #             name: http
-  # - host: www.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-public
-  #           port:
-  #             name: http
-  # - host: www.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-public
-  #           port:
-  #             name: http
+  - host: oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
+  - host: www.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public
+            port:
+              name: http
   # - host: staging.oncokb.org
   #   http:
   #     paths:
