@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/084637913395/clusters/oncokb-production/apps/redis
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://charts.bitnami.com/bitnami
+      targetRevision: 8.4.0
+      chart: redis-cluster
+      helm:
+        releaseName: oncokb-redis-cluster
+        valueFiles:
+          - $k8s-repo/argocd/aws/084637913395/clusters/oncokb-production/apps/redis/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
