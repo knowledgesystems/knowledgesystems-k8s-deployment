@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/084637913395/clusters/oncokb-production/apps/redisinsight
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://mrnim94.github.io/redisinsight/
+      targetRevision: 1.3.1
+      chart: redisinsight
+      helm:
+        releaseName: redisinsight
+        valueFiles:
+          - $k8s-repo/argocd/aws/084637913395/clusters/oncokb-production/apps/redisinsight/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
