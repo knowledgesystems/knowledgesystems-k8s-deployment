@@ -50,11 +50,11 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: oncokb-public
-            - configMapRef:
+            - secretRef:
                 name: oncokb-redis-cluster
-            - configMapRef:
+            - secretRef:
                 name: oncokb-db-msk-prod-rds
           readinessProbe:
             httpGet:
