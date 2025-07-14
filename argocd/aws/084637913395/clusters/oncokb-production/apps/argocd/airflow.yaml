@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/084637913395/clusters/oncokb-production/apps/airflow
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://airflow-helm.github.io/charts
+      targetRevision: 8.9.0
+      chart: airflow
+      helm:
+        releaseName: oncokb-airflow
+        valueFiles:
+          - $k8s-repo/argocd/aws/084637913395/clusters/oncokb-production/apps/airflow/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
