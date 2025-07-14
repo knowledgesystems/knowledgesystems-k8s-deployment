@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - env:
-          image: oncokb/oncokb-sop:5.1.0
+          image: oncokb/oncokb-sop:6.0.0-beta.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
@@ -41,7 +41,7 @@ spec:
             periodSeconds: 3000
           name: oncokb-sop
           ports:
-            - containerPort: 80
+            - containerPort: 4321
               name: http
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -65,8 +65,9 @@ metadata:
   namespace: oncokb
 spec:
   ports:
-    - port: 80
+    - port: 4321
       name: http
+      targetPort: 4321
   selector:
     run: oncokb-sop
   type: ClusterIP
