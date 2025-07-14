@@ -56,17 +56,17 @@ spec:
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
+            periodSeconds: 20
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 1800
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 60
           name: oncokb-core-pub-data-2017
           ports:
             - containerPort: 8888
