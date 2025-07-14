@@ -4,6 +4,7 @@ metadata:
   name: oncokb-beta
   namespace: argocd
 spec:
+  revisionHistoryLimit: 2
   project: default
   sources:
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
