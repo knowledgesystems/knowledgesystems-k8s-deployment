@@ -36,6 +36,7 @@ spec:
     - staging.oncokb.org
     - demo.oncokb.org
     - sop.oncokb.org
+    - sop-argocd.oncokb.org
     - public.api.oncokb.org
     - transcript.oncokb.org
     - curation.oncokb.org
@@ -98,7 +99,7 @@ spec:
             name: oncokb-core-public
             port:
               name: http
-  - host: sop.oncokb.org
+  - host: sop-argocd.oncokb.org
     http:
       paths:
         - path: "/"
