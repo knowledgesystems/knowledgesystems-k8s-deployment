@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: oncokb
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      targetRevision: 54.2.2
+      chart: kube-prometheus-stack
+      helm:
+        releaseName: oncokb-kube-prometheus-stack
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/kube-prometheus-stack/values.yaml
+  destination:
+    namespace: oncokb
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

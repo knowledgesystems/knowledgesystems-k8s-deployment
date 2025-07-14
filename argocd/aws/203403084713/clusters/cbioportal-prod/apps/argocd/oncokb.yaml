@@ -40,13 +40,6 @@ spec:
         releaseName: redisinsight
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/redisinsight/values.yaml
-    - repoURL: https://prometheus-community.github.io/helm-charts
-      targetRevision: 54.2.2
-      chart: kube-prometheus-stack
-      helm:
-        releaseName: oncokb-kube-prometheus-stack
-        valueFiles:
-          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/oncokb/kube-prometheus-stack/values.yaml
   destination:
     namespace: oncokb
     server: https://kubernetes.default.svc

@@ -11,7 +11,17 @@ grafana:
       value: "oncokb"
       effect: "NoSchedule"
 
-nodeExporter:
+prometheus:
+  prometheusSpec:
+    nodeSelector:
+      workload: oncokb
+    tolerations:
+      - key: "workload"
+        operator: "Equal"
+        value: "oncokb"
+        effect: "NoSchedule"
+
+kubeStateMetrics:
   nodeSelector:
     workload: oncokb
   tolerations:
@@ -20,17 +30,7 @@ nodeExporter:
       value: "oncokb"
       effect: "NoSchedule"
 
-prometheus:
-  prometheusSpec:
-    nodeSelector:
-      workload: oncokb
-  tolerations:
-    - key: "workload"
-      operator: "Equal"
-      value: "oncokb"
-      effect: "NoSchedule"
-
-kubeStateMetrics:
+nodeExporter:
   nodeSelector:
     workload: oncokb
   tolerations:
