@@ -3,3 +3,23 @@ grafana:
     existingSecret: "grafana-admin"
     userKey: ADMIN_USER
     passwordKey: ADMIN_PASSWORD
+  nodeSelector:
+    workload: oncokb
+
+nodeExporter:
+  nodeSelector:
+    workload: oncokb
+
+prometheus:
+  prometheusSpec:
+    nodeSelector:
+      workload: oncokb
+
+kubeStateMetrics:
+  nodeSelector:
+    workload: oncokb
+
+alertmanager:
+  alertmanagerSpec:
+    nodeSelector:
+      workload: oncokb
