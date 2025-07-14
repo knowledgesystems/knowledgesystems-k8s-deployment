@@ -7,7 +7,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/prometheus
       targetRevision: HEAD
       directory:
         recurse: true
@@ -18,7 +18,7 @@ spec:
       helm:
         releaseName: oncokb-kube-prometheus-stack
         valueFiles:
-          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/kube-prometheus-stack/values.yaml
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/prometheus/values.yaml
   destination:
     namespace: oncokb
     server: https://kubernetes.default.svc
