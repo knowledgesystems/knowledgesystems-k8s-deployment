@@ -21,11 +21,11 @@ spec:
       containers:
         - env:
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: oncokb-core-data-legacy
-            - configMapRef:
+            - secretRef:
                 name: oncokb-db-msk-prod-rds
-            - configMapRef:
+            - secretRef:
                 name: oncokb-redis-cluster
           image: oncokb/oncokb:1.4.10
           command: ["java"]

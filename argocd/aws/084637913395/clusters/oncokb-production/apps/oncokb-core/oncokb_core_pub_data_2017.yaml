@@ -22,11 +22,11 @@ spec:
       containers:
         - env:
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: oncokb-core-pub-data-2017
-            - configMapRef:
+            - secretRef:
                 name: oncokb-db-msk-prod-rds
-            - configMapRef:
+            - secretRef:
                 name: oncokb-redis-cluster
           image: oncokb/oncokb:pub-data-2017.alpha.0
           command: ["java"]
