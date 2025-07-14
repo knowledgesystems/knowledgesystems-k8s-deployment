@@ -109,7 +109,7 @@ spec:
             service:
               name: oncokb-sop
               port:
-                number: 80
+                number: 4321
   - host: transcript.oncokb.org
     http:
       paths:
