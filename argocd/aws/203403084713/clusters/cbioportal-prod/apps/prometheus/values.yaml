@@ -4,47 +4,47 @@ grafana:
     userKey: ADMIN_USER
     passwordKey: ADMIN_PASSWORD
   nodeSelector:
-    workload: oncokb
+    workload: prometheus
   tolerations:
     - key: "workload"
       operator: "Equal"
-      value: "oncokb"
+      value: "prometheus"
       effect: "NoSchedule"
 
 prometheus:
   prometheusSpec:
     nodeSelector:
-      workload: oncokb
+      workload: prometheus
     tolerations:
       - key: "workload"
         operator: "Equal"
-        value: "oncokb"
+        value: "prometheus"
         effect: "NoSchedule"
 
 kubeStateMetrics:
   nodeSelector:
-    workload: oncokb
+    workload: prometheus
   tolerations:
     - key: "workload"
       operator: "Equal"
-      value: "oncokb"
+      value: "prometheus"
       effect: "NoSchedule"
 
 nodeExporter:
   nodeSelector:
-    workload: oncokb
+    workload: prometheus
   tolerations:
     - key: "workload"
       operator: "Equal"
-      value: "oncokb"
+      value: "prometheus"
       effect: "NoSchedule"
 
 alertmanager:
   alertmanagerSpec:
     nodeSelector:
-      workload: oncokb
+      workload: prometheus
     tolerations:
       - key: "workload"
         operator: "Equal"
-        value: "oncokb"
+        value: "prometheus"
         effect: "NoSchedule"
