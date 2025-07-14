@@ -6,6 +6,7 @@ metadata:
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.2
+    deprecated-deployment: true
   name: cbioportal-spring-boot
 spec:
   replicas: 0
@@ -270,6 +271,7 @@ kind: Service
 metadata:
   labels:
     run: cbioportal-spring-boot
+    deprecated-service: true
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
   name: cbioportal
 spec:
