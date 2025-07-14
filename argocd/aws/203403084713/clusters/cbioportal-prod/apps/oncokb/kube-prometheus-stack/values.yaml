@@ -1,0 +1,5 @@
+grafana:
+  admin:
+    existingSecret: "grafana-admin"
+    userKey: ADMIN_USER
+    passwordKey: ADMIN_PASSWORD
