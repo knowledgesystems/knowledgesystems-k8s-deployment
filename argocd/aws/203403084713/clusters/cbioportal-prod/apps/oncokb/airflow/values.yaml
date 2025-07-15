@@ -47,8 +47,8 @@ serviceAccount:
 airflow:
   executor: CeleryExecutor
   image:
-    repository: apache/airflow
-    tag: 2.6.3-python3.9
+    repository: oncokb/airflow
+    tag: 2.8.4-python3.9
   # Environment variables for airflow configs
   config:
     # Helps resolve some python import errors due to some shared packages being on same level as dags folder
@@ -59,23 +59,23 @@ airflow:
     AIRFLOW__WEBSERVER__BASE_URL: "https://airflow.oncokb.org"
     # Should be disabled in production. https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#load-default-connections
     AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS: "false"
-  # Installs python packages on all pods
-  extraPipPackages:
-    - "apache-airflow-providers-http==4.1.1"
-    - "apache-airflow-providers-slack==7.2.0"
-    - "apache-airflow-providers-amazon==7.1.0"
-    - "apache-airflow-providers-github==2.2.0"
-    - "apache-airflow-providers-ssh==3.4.0"
-    - "apache-airflow-providers-mysql==4.0.2"
-    - "apache-airflow-providers-cncf-kubernetes==8.0.0"
-    - "kubernetes==28.1.0"
-    - "boto3==1.34.13"
-    - "redis==4.4.2"
-    - "inflect==6.0.2"
-    - "pandas==1.5.3"
-    - "psycopg2-binary==2.9.5"
-    - "simplejson==3.18.1"
-    - "deepdiff==6.3.0"
+  # # Installs python packages on all pods
+  # extraPipPackages:
+  #   - "apache-airflow-providers-http==4.1.1"
+  #   - "apache-airflow-providers-slack==7.2.0"
+  #   - "apache-airflow-providers-amazon==7.1.0"
+  #   - "apache-airflow-providers-github==2.2.0"
+  #   - "apache-airflow-providers-ssh==3.4.0"
+  #   - "apache-airflow-providers-mysql==4.0.2"
+  #   - "apache-airflow-providers-cncf-kubernetes==8.0.0"
+  #   - "kubernetes==28.1.0"
+  #   - "boto3==1.34.13"
+  #   - "redis==4.4.2"
+  #   - "inflect==6.0.2"
+  #   - "pandas==1.5.3"
+  #   - "psycopg2-binary==2.9.5"
+  #   - "simplejson==3.18.1"
+  #   - "deepdiff==6.3.0"
   users:
     - username: admin
       role: admin
