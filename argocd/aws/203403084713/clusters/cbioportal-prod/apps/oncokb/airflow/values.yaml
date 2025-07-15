@@ -170,9 +170,9 @@ airflow:
     - key: oncokb_redis_cluster_usage_threshold
       value: 0.8
   defaultNodeSelector:
-    workload: airflow
+    workload: oncokb-af
   defaultTolerations:
     - key: "workload"
       operator: "Equal"
-      value: "airflow"
+      value: "oncokb-af"
       effect: "NoSchedule"
