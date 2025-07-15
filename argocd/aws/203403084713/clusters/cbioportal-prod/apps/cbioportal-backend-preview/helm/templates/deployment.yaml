@@ -21,7 +21,7 @@ spec:
       containers:
         - envFrom:
             - secretRef:
-                name: cbioportal-public6
+                name: cbioportal-public-blue
           image: cbioportal/cbioportal-dev:{{ .Values.imageTag }}
           volumeMounts:
             - name: cbioportal-frontend-config-volume
