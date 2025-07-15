@@ -11,9 +11,9 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - repoURL: https://airflow-helm.github.io/charts
-      targetRevision: 8.9.0
-      chart: airflow
+    - repoURL: https://github.com/airflow-helm/charts.git
+      targetRevision: airflow-8.9.0
+      path: charts/airflow
       helm:
         releaseName: oncokb-airflow
         valueFiles:
