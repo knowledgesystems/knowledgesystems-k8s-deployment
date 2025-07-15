@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.805572263285">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.805906601175">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -31,12 +31,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../resources/css/retype.css?v=3.11.0.805572263285" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=3.11.0.805906601175" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.11.0.805572263285" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=3.11.0.805906601175" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.11.0.805572263285" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.11.0.805572263285" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.11.0.805906601175" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.11.0.805906601175" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -186,6 +186,25 @@
     </h1>
 </doc-anchor-target>
 <p>This list is used to track issues and their remedies.</p>
+<doc-anchor-target id="low-ephemeral-storage-issue">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#low-ephemeral-storage-issue">#</doc-anchor-trigger>
+        <span>Low Ephemeral Storage Issue</span>
+    </h2>
+</doc-anchor-target>
+<p>Our new Terraform modules use a default ephemeral storage which might not be enough for certain workloads. This leads to an error similar to the following on deployments:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">The node was low on resource: ephemeral-storage. Threshold quantity: 123456789, available: 123456Ki.</code></pre>
+</doc-codeblock></div>
+<p>To increase the ephemeral storage capacity for the nodegroup, update the terraform modules to use a custom value:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-hcl"><code v-pre class="language-hcl">nodegroup-name = {
+  ...
+  disk_size                  = 50 # New capacity in GB
+  use_custom_launch_template = false # Important
+  ...
+}</code></pre>
+</doc-codeblock></div>
 <doc-anchor-target id="aws-cni-failing-to-assign-ip-addresses">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#aws-cni-failing-to-assign-ip-addresses">#</doc-anchor-trigger>
