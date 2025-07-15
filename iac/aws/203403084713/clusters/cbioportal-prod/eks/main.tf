@@ -291,7 +291,6 @@ locals {
       max_size                   = 1
       disk_size                  = 50
       use_custom_launch_template = false
-      subnet_ids = ["subnet-06f2712e78e593152"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
