@@ -1,6 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  labels:
+    app.kubernetes.io/instance: argocd
   name: redis-session
 spec:
   project: default
@@ -19,7 +21,7 @@ spec:
         - name: auth.enabled
           value: "true"
         - name: auth.existingSecret
-          value: cbioportal-public6
+          value: cbioportal-public-blue
         - name: auth.existingSecretPasswordKey
           value: REDIS_SESSION_PASSWORD
         - name: master.persistence.enabled
@@ -54,6 +56,8 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  labels:
+    app.kubernetes.io/instance: argocd
   name: redis-persistence-cache
 spec:
   project: default
@@ -72,7 +76,7 @@ spec:
         - name: auth.enabled
           value: "true"
         - name: auth.existingSecret
-          value: cbioportal-public6
+          value: cbioportal-public-blue
         - name: auth.existingSecretPasswordKey
           value: REDIS_PERSISTENCE_PASSWORD
         - name: master.persistence.enabled
