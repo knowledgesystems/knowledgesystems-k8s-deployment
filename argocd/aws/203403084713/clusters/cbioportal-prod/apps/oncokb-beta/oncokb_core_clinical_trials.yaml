@@ -31,7 +31,7 @@ spec:
             - secretRef:
                 name: aws-cli-credentials
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:ct-alpha.0
+          image: oncokb/oncokb:ct-alpha.1
           command: ["java"]
           args:
             [
@@ -44,7 +44,7 @@ spec:
               "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
               "-Doncokb_transcript.url=https://beta.transcript.oncokb.org",
               "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-              "-Dredis.enable=true",
+              "-Dredis.enable=false",
               "-Dredis.type=$(REDIS_TYPE)",
               "-Dredis.address=$(REDIS_ADDRESS)",
               "-Dredis.password=$(REDIS_PASSWROD)",
