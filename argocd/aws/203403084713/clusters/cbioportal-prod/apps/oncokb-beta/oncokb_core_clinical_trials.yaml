@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: oncokb-core-clinical-trials
+  name: oncokb-core-clinical-trials
+  namespace: oncokb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-core-clinical-trials
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-core-clinical-trials
+    spec:
+      containers:
+        - env:
+          envFrom:
+            - secretRef:
+                name: oncokb-core-beta
+            - secretRef:
+                name: oncokb-redis-cluster-ng-beta
+            - secretRef:
+                name: oncokb-db-public-rds-oncokb-user
+            - secretRef:
+                name: aws-cli-credentials
+          # The beta current is used to showcase a new search endpoint
+          image: oncokb/oncokb:ct-alpha.0
+          command: ["java"]
+          args:
+            [
+              "-Dapp.name=$(APP_NAME)",
+              "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.username=$(DB_USERNAME)",
+              "-Djdbc.password=$(DB_PASSWORD)",
+              "-Dgenomenexus.api=https://www.genomenexus.org/",
+              "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
+              "-Doncokb_transcript.url=https://beta.transcript.oncokb.org",
+              "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+              "-Dredis.enable=true",
+              "-Dredis.type=$(REDIS_TYPE)",
+              "-Dredis.address=$(REDIS_ADDRESS)",
+              "-Dredis.password=$(REDIS_PASSWROD)",
+              "-Dredis.expiration=$(REDIS_EXPIRATION)",
+              "-Dswagger_url=https://beta.oncokb.org",
+              "-Dshow_sitemaps=false",
+              "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
+              "-Dsentry.sample.rate=1",
+              "-Daws.s3.accessKey=$(ACCESS_KEY_ID)",
+              "-Daws.s3.secretKey=$(SECRET_ACCESS_KEY)",
+              "-Daws.s3.region=$(AWS_REGION)",
+              "-jar",
+              "/webapp-runner.jar",
+              "--enable-compression",
+              "--port",
+              "8888",
+              "/app.war",
+            ]
+          imagePullPolicy: Always
+          # use actionable variants endpoint to cache everything
+          readinessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 20
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            # wait for the pod is ready
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 60
+          name: oncokb-core-curation-beta
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 4000m
+              memory: 4Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "oncokb-beta"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: oncokb-beta
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: oncokb-core-clinical-trials
+  name: oncokb-core-clinical-trials
+  namespace: oncokb
+spec:
+  ports:
+    - port: 8888
+  selector:
+    run: oncokb-core-clinical-trials
+  type: ClusterIP
