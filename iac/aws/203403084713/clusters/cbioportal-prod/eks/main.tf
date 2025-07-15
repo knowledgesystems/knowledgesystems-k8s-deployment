@@ -284,11 +284,13 @@ locals {
       }
     }
     oncokb-af = {
-      instance_types = ["t4g.large"]
-      ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
+      instance_types             = ["t4g.large"]
+      ami_type                   = "BOTTLEROCKET_ARM_64"
+      desired_size               = 1
+      min_size                   = 1
+      max_size                   = 1
+      disk_size                  = 80
+      use_custom_launch_template = false
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
