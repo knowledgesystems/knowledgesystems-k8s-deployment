@@ -100,7 +100,7 @@ spec:
             name: oncokb-core-public
             port:
               name: http
-  - host: sop-argocd.oncokb.org
+  - host: sop.oncokb.org
     http:
       paths:
         - path: "/"
