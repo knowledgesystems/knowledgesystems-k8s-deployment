@@ -4,6 +4,21 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## Low Ephemeral Storage Issue
+Our new Terraform modules use a default ephemeral storage which might not be enough for certain workloads. This leads to an error similar to the following on deployments:
+```
+The node was low on resource: ephemeral-storage. Threshold quantity: 123456789, available: 123456Ki.
+```
+To increase the ephemeral storage capacity for the nodegroup, update the terraform modules to use a custom value:
+```terraform
+nodegroup-name = {
+  ...
+  disk_size                  = 50 # New capacity in GB
+  use_custom_launch_template = false # Important
+  ...
+}
+```
+
 ## AWS-CNI Failing to Assign IP Addresses
 If a AWS EKS managed nodegroup has too many pods deployed on one of its EC2 nodes, it can run out of IP Addresses with the error:
 ```
