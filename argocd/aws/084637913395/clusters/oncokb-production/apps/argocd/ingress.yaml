@@ -12,9 +12,9 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - repoURL: https://kubernetes.github.io/ingress-nginx
+    - repoURL: https://github.com/kubernetes/ingress-nginx.git
       targetRevision: 4.12.1
-      chart: ingress-nginx
+      path: charts/ingress-nginx
       helm:
         releaseName: oncokb-ingress-nginx
         valueFiles:
