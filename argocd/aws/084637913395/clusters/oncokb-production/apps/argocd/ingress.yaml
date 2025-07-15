@@ -13,7 +13,7 @@ spec:
         recurse: true
       ref: k8s-repo
     - repoURL: https://github.com/kubernetes/ingress-nginx.git
-      targetRevision: 4.12.1
+      targetRevision: helm-chart-4.12.1
       path: charts/ingress-nginx
       helm:
         releaseName: oncokb-ingress-nginx
