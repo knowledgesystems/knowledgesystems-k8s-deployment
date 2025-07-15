@@ -1,0 +1,50 @@
+grafana:
+  admin:
+    existingSecret: "grafana-admin"
+    userKey: ADMIN_USER
+    passwordKey: ADMIN_PASSWORD
+  nodeSelector:
+    workload: lg-general
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "lg-general"
+      effect: "NoSchedule"
+
+prometheus:
+  prometheusSpec:
+    nodeSelector:
+      workload: lg-general
+    tolerations:
+      - key: "workload"
+        operator: "Equal"
+        value: "lg-general"
+        effect: "NoSchedule"
+
+kubeStateMetrics:
+  nodeSelector:
+    workload: lg-general
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "lg-general"
+      effect: "NoSchedule"
+
+nodeExporter:
+  nodeSelector:
+    workload: lg-general
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "lg-general"
+      effect: "NoSchedule"
+
+alertmanager:
+  alertmanagerSpec:
+    nodeSelector:
+      workload: lg-general
+    tolerations:
+      - key: "workload"
+        operator: "Equal"
+        value: "lg-general"
+        effect: "NoSchedule"
