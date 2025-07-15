@@ -5,11 +5,19 @@ metadata:
 spec:
   project: default
   sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/084637913395/clusters/oncokb-production/apps/prometheus
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
     - repoURL: https://github.com/prometheus-community/helm-charts.git
       targetRevision: kube-prometheus-stack-54.2.2
       path: charts/kube-prometheus-stack
       helm:
         releaseName: kube-prometheus-stack
+        valueFiles:
+          - $k8s-repo/argocd/aws/084637913395/clusters/oncokb-production/apps/prometheus/values.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
