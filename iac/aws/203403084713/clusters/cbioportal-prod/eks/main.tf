@@ -36,11 +36,11 @@ locals {
       }
     }
     cbio-dev = {
-      instance_types = ["r7g.medium"]
+      instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 5
-      max_size       = 6
-      min_size       = 4
+      desired_size   = 3
+      max_size       = 3
+      min_size       = 2
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -155,11 +155,13 @@ locals {
       }
     }
     gn-database = {
-      instance_types = ["r7i.2xlarge"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
+      instance_types             = ["r7i.2xlarge"]
+      ami_type                   = "BOTTLEROCKET_x86_64"
+      desired_size               = 2
+      min_size                   = 2
+      max_size                   = 2
+      disk_size                  = 80
+      use_custom_launch_template = false
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
