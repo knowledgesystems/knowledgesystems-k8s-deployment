@@ -4,7 +4,7 @@ metadata:
   name: oncokb-public
   namespace: oncokb
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
       app: oncokb-public
