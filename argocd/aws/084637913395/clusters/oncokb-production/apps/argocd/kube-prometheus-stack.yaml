@@ -11,8 +11,8 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - repoURL: https://github.com/prometheus-community/helm-charts.git
-      targetRevision: kube-prometheus-stack-54.2.2
+    - repoURL: https://github.com/oncokb/oncokb-helm-charts.git
+      targetRevision: HEAD
       path: charts/kube-prometheus-stack
       helm:
         releaseName: kube-prometheus-stack
