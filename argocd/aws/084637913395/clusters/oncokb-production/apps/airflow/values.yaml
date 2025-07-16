@@ -171,8 +171,3 @@ airflow:
       value: 0.8
   defaultNodeSelector:
     workload: oncokb
-  defaultTolerations:
-    - key: "workload"
-      operator: "Equal"
-      value: "oncokb"
-      effect: "NoSchedule"

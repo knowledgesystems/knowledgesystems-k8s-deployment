@@ -1,11 +1,4 @@
 nodeSelector:
   workload: lg-general
-
-tolerations:
-  - key: "workload"
-    operator: "Equal"
-    value: "lg-general"
-    effect: "NoSchedule"
-
 persistence:
   enabled: false
