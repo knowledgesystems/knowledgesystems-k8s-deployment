@@ -12,8 +12,3 @@ controller:
       https: 80
   nodeSelector:
     workload: ingress
-  tolerations:
-    - key: "workload"
-      operator: "Equal"
-      value: "ingress"
-      effect: "NoSchedule"

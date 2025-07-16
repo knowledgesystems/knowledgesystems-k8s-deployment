@@ -82,11 +82,6 @@ spec:
           ports:
             - name: http
               containerPort: 9095
-      tolerations:
-        - key: "workload"
-          operator: "Equal"
-          value: "lg-general"
-          effect: "NoSchedule"
       nodeSelector:
         workload: lg-general
 

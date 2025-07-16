@@ -11,11 +11,6 @@ redis:
     timeoutSeconds: 5
   nodeSelector:
     workload: lg-general
-  tolerations:
-    - key: "workload"
-      operator: "Equal"
-      value: "lg-general"
-      effect: "NoSchedule"
 existingSecret: oncokb-redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
 cluster:
