@@ -355,8 +355,9 @@ module "eks_cluster" {
   }
 
   # Network Config
-  vpc_id = var.VPC_ID
-  azs    = var.VPC_AZ
+  vpc_id                   = var.VPC_ID
+  control_plane_subnet_ids = var.CONTROL_PLANE_SUBNET_IDS
+  subnet_ids               = var.SUBNET_IDS
 
   # API Controls
   cluster_endpoint_public  = var.API_PUBLIC
