@@ -49,6 +49,7 @@ airflow:
   image:
     repository: oncokb/airflow
     tag: 2.8.4-python3.9
+    imagePullPolicy: Always
   # Environment variables for airflow configs
   config:
     # Helps resolve some python import errors due to some shared packages being on same level as dags folder
