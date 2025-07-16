@@ -94,7 +94,7 @@ airflow:
       type: redis
       login: ""
       password: ${ONCOKB_REDIS_CLUSTER_PASSWORD}
-      host: oncokb-redis-cluster-ng-headless
+      host: oncokb-redis-cluster-headless
       port: 6379
     - id: slack_alerts_connection
       type: http
@@ -110,7 +110,7 @@ airflow:
   connectionsTemplates:
     ONCOKB_REDIS_CLUSTER_PASSWORD:
       kind: secret
-      name: oncokb-redis-cluster-ng
+      name: oncokb-redis-cluster
       key: REDIS_PASSWORD
     ONCOKB_SLACK_HOOK_PASSWORD:
       kind: secret
