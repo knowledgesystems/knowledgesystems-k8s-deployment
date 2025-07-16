@@ -14,7 +14,7 @@ spec:
         spec:
           containers:
             - envFrom:
-                - configMapRef:
+                - secretRef:
                     name: oncokb-public-bot
               name: main
               image: "oncokb/k8s-with-tools:1.0.0-beta.0"

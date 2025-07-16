@@ -16,7 +16,7 @@ spec:
         spec:
           containers:
           - envFrom:
-            - configMapRef:
+            - secretRef:
                 name: oncokb-public-bot
             name: main
             image: "ubuntu:latest"
