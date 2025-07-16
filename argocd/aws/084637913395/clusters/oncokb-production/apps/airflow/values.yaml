@@ -133,7 +133,7 @@ airflow:
     - key: oncokb_redis_cluster_num_replicas_per_master
       value: 1
     - key: oncokb_redis_cluster_total_num_masters
-      value: 10
+      value: 5
     - key: oncokb_redis_cluster_usage_threshold
       value: 0.8
   defaultNodeSelector:
