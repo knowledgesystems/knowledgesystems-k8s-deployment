@@ -12,8 +12,8 @@ spec:
         recurse: true
       ref: k8s-repo
     - repoURL: https://github.com/mrnim94/redisinsight.git
-      targetRevision: master
-      chart: helm-chart/redisinsight
+      targetRevision: HEAD
+      path: helm-chart/redisinsight
       helm:
         releaseName: redisinsight
         valueFiles:
