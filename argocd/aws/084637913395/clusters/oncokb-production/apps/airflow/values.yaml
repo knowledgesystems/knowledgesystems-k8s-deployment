@@ -48,7 +48,7 @@ airflow:
   executor: CeleryExecutor
   image:
     repository: oncokb/airflow
-    tag: 2.8.4-python3.9-v2
+    tag: 2.8.4-python3.9-v3
     imagePullPolicy: Always
   # Environment variables for airflow configs
   config:
