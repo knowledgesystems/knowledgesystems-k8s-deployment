@@ -11,4 +11,4 @@ controller:
     targetPorts:
       https: 80
   nodeSelector:
-    workload: ingress
+    workload: lg-general

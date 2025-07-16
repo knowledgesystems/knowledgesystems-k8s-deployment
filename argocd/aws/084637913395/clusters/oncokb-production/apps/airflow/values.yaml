@@ -170,4 +170,4 @@ airflow:
     - key: oncokb_redis_cluster_usage_threshold
       value: 0.8
   defaultNodeSelector:
-    workload: oncokb
+    workload: lg-general
