@@ -71,9 +71,10 @@ spec:
           resources:
             requests:
               cpu: 500m
-              memory: 1Gi
-            limits:
               memory: 2Gi
+            limits:
+              cpu: 2
+              memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
