@@ -9,15 +9,15 @@ metadata:
 spec:
   tls:
     - hosts:
-      - www.oncokb.aws.mskcc.org
-      - core.oncokb.aws.mskcc.org
-      - germline-v2-core.oncokb.aws.mskcc.org
-      - cbx.oncokb.aws.mskcc.org
-      - pub-data-17.oncokb.aws.mskcc.org
-      - data-legacy.oncokb.aws.mskcc.org
-      - airflow.oncokb.aws.mskcc.org
+      - www.argo.oncokb.aws.mskcc.org
+      - core.argo.oncokb.aws.mskcc.org
+      - germline-v2-core.argo.oncokb.aws.mskcc.org
+      - cbx.argo.oncokb.aws.mskcc.org
+      - pub-data-17.argo.oncokb.aws.mskcc.org
+      - data-legacy.argo.oncokb.aws.mskcc.org
+      - airflow.argo.oncokb.aws.mskcc.org
   rules:
-    - host: "www.oncokb.aws.mskcc.org"
+    - host: "www.argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
@@ -27,7 +27,7 @@ spec:
                 name: oncokb-public
                 port:
                   number: 9095
-    - host: "core.oncokb.aws.mskcc.org"
+    - host: "core.argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
@@ -37,7 +37,7 @@ spec:
                 name: oncokb-core
                 port:
                   number: 8888
-    - host: "germline-v2-core.oncokb.aws.mskcc.org"
+    - host: "germline-v2-core.argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
@@ -47,7 +47,7 @@ spec:
                 name: oncokb-core-germline-v2
                 port:
                   number: 8888
-    - host: "cbx.oncokb.aws.mskcc.org"
+    - host: "cbx.argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
@@ -57,7 +57,7 @@ spec:
                 name: oncokb-core-cbx
                 port:
                   number: 8888
-    - host: "pub-data-17.oncokb.aws.mskcc.org"
+    - host: "pub-data-17.argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
@@ -67,7 +67,7 @@ spec:
                 name: oncokb-core-pub-data-2017
                 port:
                   number: 8888
-    - host: "data-legacy.oncokb.aws.mskcc.org"
+    - host: "data-legacy.argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
@@ -77,7 +77,7 @@ spec:
                 name: oncokb-core-data-legacy
                 port:
                   number: 8888
-    - host: "airflow.oncokb.aws.mskcc.org"
+    - host: "airflow.argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
