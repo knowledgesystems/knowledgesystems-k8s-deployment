@@ -138,6 +138,8 @@ locals {
       desired_size   = 1
       min_size       = 1
       max_size       = 2
+      # Pin to specific subnets. This prevents nodegroup to be created in a availability zone different from the underlying mongodb volume
+      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -267,6 +269,8 @@ locals {
       desired_size   = 1
       min_size       = 1
       max_size       = 1
+      # Pin to specific subnets. This prevents nodegroup to be created in a availability zone different from the underlying persistent volumes
+      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY

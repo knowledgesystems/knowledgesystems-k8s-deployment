@@ -48,14 +48,13 @@ variable "VPC_ID" {
 variable "CONTROL_PLANE_SUBNET_IDS" {
   description = "A list of subnet IDs where the EKS cluster control plane (ENIs) will be provisioned"
   type        = list(string)
-  default     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91"]
+  default     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7", "subnet-01e2143c0b3d4f8a6"]
 }
 
 variable "SUBNET_IDS" {
   description = "A list of subnet IDs where the nodes/node groups will be provisioned"
   type        = list(string)
-  default     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91"]
-  # default     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7", "subnet-01e2143c0b3d4f8a6"]
+  default     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7", "subnet-01e2143c0b3d4f8a6"]
 }
 
 variable "API_PUBLIC" {
