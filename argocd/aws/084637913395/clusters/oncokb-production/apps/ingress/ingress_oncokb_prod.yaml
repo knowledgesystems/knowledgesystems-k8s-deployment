@@ -27,7 +27,7 @@ spec:
                 name: oncokb-public
                 port:
                   number: 9095
-    - host: "core-argo.oncokb.aws.mskcc.org"
+    - host: "core.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
