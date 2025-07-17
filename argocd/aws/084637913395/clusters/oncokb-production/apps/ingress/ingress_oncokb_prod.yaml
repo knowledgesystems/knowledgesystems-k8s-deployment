@@ -16,6 +16,7 @@ spec:
       - pub-data-17.oncokb.aws.mskcc.org
       - data-legacy.oncokb.aws.mskcc.org
       - airflow.oncokb.aws.mskcc.org
+      - grafana.oncokb.org
   rules:
     - host: "www.oncokb.aws.mskcc.org"
       http:
@@ -87,4 +88,14 @@ spec:
                 name: oncokb-airflow-web
                 port:
                   number: 8080
+    - host: grafana.oncokb.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-grafana
+                port:
+                  number: 80
   ingressClassName: nginx
