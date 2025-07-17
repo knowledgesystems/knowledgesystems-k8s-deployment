@@ -10,7 +10,7 @@ spec:
   tls:
     - hosts:
       - www.argo.oncokb.aws.mskcc.org
-      - core.argo.oncokb.aws.mskcc.org
+      - core-argo.oncokb.aws.mskcc.org
       - germline-v2-core.argo.oncokb.aws.mskcc.org
       - cbx.argo.oncokb.aws.mskcc.org
       - pub-data-17.argo.oncokb.aws.mskcc.org
@@ -27,7 +27,7 @@ spec:
                 name: oncokb-public
                 port:
                   number: 9095
-    - host: "core.argo.oncokb.aws.mskcc.org"
+    - host: "core-argo.oncokb.aws.mskcc.org"
       http:
         paths:
           - path: "/"
