@@ -16,7 +16,7 @@ spec:
       - pub-data-17.oncokb.aws.mskcc.org
       - data-legacy.oncokb.aws.mskcc.org
       - airflow.oncokb.aws.mskcc.org
-      - grafana.oncokb.org
+      - grafana.oncokb.aws.mskcc.org
   rules:
     - host: "www.oncokb.aws.mskcc.org"
       http:
@@ -88,7 +88,7 @@ spec:
                 name: oncokb-airflow-web
                 port:
                   number: 8080
-    - host: grafana.oncokb.org
+    - host: grafana.oncokb.aws.mskcc.org
       http:
         paths:
           - path: /
