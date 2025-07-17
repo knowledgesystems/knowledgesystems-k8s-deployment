@@ -157,13 +157,25 @@ locals {
       }
     }
     gn-database = {
-      instance_types             = ["r7i.2xlarge"]
-      ami_type                   = "BOTTLEROCKET_x86_64"
-      desired_size               = 2
-      min_size                   = 2
-      max_size                   = 2
-      disk_size                  = 80
-      use_custom_launch_template = false
+      instance_types = ["r7i.2xlarge"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+        data_vol = {
+          device_name = "/dev/xvdb"
+          ebs = {
+            volume_size           = 50
+            volume_type           = "gp3"
+            iops                  = 3000
+            throughput            = 125
+            encrypted             = true
+            delete_on_termination = true
+          }
+        }
+      }
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -288,13 +300,14 @@ locals {
       }
     }
     oncokb-af = {
-      instance_types             = ["t4g.large"]
-      ami_type                   = "BOTTLEROCKET_ARM_64"
-      desired_size               = 1
-      min_size                   = 1
-      max_size                   = 1
-      disk_size                  = 50
-      use_custom_launch_template = false
+      instance_types = ["t4g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+      }
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
