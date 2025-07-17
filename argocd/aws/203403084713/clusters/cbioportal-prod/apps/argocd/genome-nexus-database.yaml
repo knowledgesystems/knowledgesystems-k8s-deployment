@@ -27,13 +27,13 @@ spec:
         releaseName: genie-gn-mongo
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/genie_gn_mongodb_helm_value.yaml
-    - repoURL: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-      targetRevision: 7.3.1
-      chart: mongodb
-      helm:
-        releaseName: gn-mongo-v0dot32-beta
-        valueFiles:
-          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/gn_mongodb_beta_helm_value.yaml
+    # - repoURL: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+    #   targetRevision: 7.3.1
+    #   chart: mongodb
+    #   helm:
+    #     releaseName: gn-mongo-v0dot32-beta
+    #     valueFiles:
+    #       - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/gn_mongodb_beta_helm_value.yaml
     - repoURL: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
       targetRevision: 7.3.1
       chart: mongodb
