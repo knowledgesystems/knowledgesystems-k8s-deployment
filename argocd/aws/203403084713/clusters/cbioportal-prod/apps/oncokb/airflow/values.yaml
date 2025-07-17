@@ -19,7 +19,7 @@ externalDatabase:
   # Note that there is nothing to do if using MySQL 8 because "explicit_defaults_for_timestamp" is on by default.
   type: mysql
   # the database/schema to use
-  database: oncokb_airflow
+  database: oncokb_airflow_v2
   # Update database depending on cluster
   host: oncokb-public-db.caakrwnbyjl6.us-east-1.rds.amazonaws.com
   port: 3306
