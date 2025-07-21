@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: gn-spring-boot-beta
+  name: gn-spring-boot-beta
+  namespace: genome-nexus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: gn-spring-boot-beta
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: gn-spring-boot-beta
+    spec:
+      containers:
+      - env:
+        - name: SERVER_PORT
+          value: "8080"
+        - name: MONGODB_URI
+          value: mongodb://gn-mongo-v0dot32-beta-mongodb:27017/annotator?connectTimeoutMS=120000
+        - name: SENTRY_DSN
+          valueFrom: 
+            secretKeyRef:
+              name: genome-nexus-sentry-dsn
+              key: dsn
+        image: genomenexus/gn-spring-boot:2.0.2
+        imagePullPolicy: Always
+        command: [ "java" ]
+        args: [
+            # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
+            # include shenandoah)
+            "-Dvep.url=http://gn-vep-2-extended.genome-nexus:8080/vep/human/hgvs/VARIANT",
+            "-Dcache.enabled=true",
+            "-Xms100m",
+            "-Xmx8g",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseZGC",
+            "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
+            # this is to use VEP running inside K8s. Remove to use
+            # grch37.rest.ensembl.org instead
+            # "-Dgn_vep.region.url=http://gn-vep/vep/human/region/VARIANT",
+            "-jar",
+            "/app.war"
+        ]
+        readinessProbe:
+          httpGet:
+            path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+            port: 8080
+          initialDelaySeconds: 240
+          timeoutSeconds: 30
+          periodSeconds: 60
+        # TODO: create a better liveness probe (this is just readiness with
+        # more lenience)
+        livenessProbe:
+          httpGet:
+            path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+            port: 8080
+          initialDelaySeconds: 240
+          timeoutSeconds: 120
+          periodSeconds: 240
+        name: gn-spring-boot-beta
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          requests:
+              memory: 6Gi
+          limits:
+              memory: 12Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      # run on genome nexus machines
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "genome-nexus"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: genome-nexus
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-spring-boot-beta
+    app: gn-spring-boot-beta
+  name: genome-nexus-beta
+  namespace: genome-nexus
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
+  - port: 443
+    name: https
+    targetPort: 8080
+  selector:
+    run: gn-spring-boot-beta
+  type: ClusterIP
