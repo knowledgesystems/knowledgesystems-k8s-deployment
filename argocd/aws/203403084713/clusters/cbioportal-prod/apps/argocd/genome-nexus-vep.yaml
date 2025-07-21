@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: genome-nexus-vep
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-vep
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+  destination:
+    namespace: genome-nexus
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
