@@ -192,6 +192,78 @@ locals {
         cdsi-owner = "lix2@mskcc.org"
       }
     }
+    gn-vep = {
+      instance_types = ["r7i.xlarge"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+        data_vol = {
+          device_name = "/dev/xvdb"
+          ebs = {
+            volume_size           = 50
+            volume_type           = "gp3"
+            iops                  = 3000
+            throughput            = 125
+            encrypted             = true
+            delete_on_termination = true
+          }
+        }
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "gn-vep"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "gn-vep"
+      }
+      tags = {
+        cdsi-app   = "gn-vep"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "lix2@mskcc.org"
+      }
+    }
+    genome-nexus = {
+      instance_types = ["r7i.xlarge"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+        data_vol = {
+          device_name = "/dev/xvdb"
+          ebs = {
+            volume_size           = 50
+            volume_type           = "gp3"
+            iops                  = 3000
+            throughput            = 125
+            encrypted             = true
+            delete_on_termination = true
+          }
+        }
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "genome-nexus"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "genome-nexus"
+      }
+      tags = {
+        cdsi-app   = "genome-nexus"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "lix2@mskcc.org"
+      }
+    }
     cellxgene = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
