@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: gn-spring-boot-grch38
+  name: gn-spring-boot-grch38
+  namespace: genome-nexus
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: gn-spring-boot-grch38
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: gn-spring-boot-grch38
+    spec:
+      containers:
+      - env:
+        - name: SERVER_PORT
+          value: "8888"
+        - name: MONGODB_URI
+          value: mongodb://gn-mongo-v0dot32-grch38-ensembl95-mongodb:27017/annotator?connectTimeoutMS=120000
+        - name: SENTRY_DSN
+          valueFrom: 
+            secretKeyRef:
+              name: genome-nexus-sentry-dsn
+              key: dsn
+        image: genomenexus/gn-spring-boot:1.4.1
+        imagePullPolicy: Always
+        command: [ "java" ]
+        args: [
+            # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
+            # include shenandoah)
+            "-Xms100m",
+            "-Xmx8g",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseShenandoahGC",
+            "-XX:ShenandoahUncommitDelay=1000",
+            "-XX:ShenandoahGuaranteedGCInterval=10000",
+            "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
+            # this is to use VEP running inside K8s. Remove to use
+            # rest.ensembl.org (grch38) instead
+            # "-Dgn_vep.region.url=http://gn-vep/vep/human/region/VARIANT",
+            "-Dgenexrefs.url=https://rest.ensembl.org/xrefs/id/ACCESSION?content-type=application/json",
+            "-Dvep.url=https://rest.ensembl.org/vep/human/hgvs/VARIANT?content-type=application/json&xref_refseq=1&ccds=1&canonical=1&domains=1&hgvs=1&numbers=1&protein=1",
+            "-DmutationAssessor.url=http://mutationassessor.org/r3/?cm=var&var=hg38,VARIANT&frm=json&fts=input,rgaa,rgvt,msa,pdb,F_impact,F_score,vc_score,vs_score,info,var,gene,uprot,rsprot,gaps,msa_height,chr,rs_pos,rs_res,up_pos,up_res,cnt_cosmic,cnt_snps",
+            "-Dmyvariantinfo.url=https://myvariant.info/v1/variant/VARIANT?assembly=hg38",
+            "-jar",
+            "/app.war"
+        ]
+        # TODO: create a better readiness probe
+        readinessProbe:
+          httpGet:
+            path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+            port: 8888
+          initialDelaySeconds: 240
+          timeoutSeconds: 30
+          periodSeconds: 60
+        # TODO: create a better liveness probe (this is just readiness with
+        # more lenience)
+        livenessProbe:
+          httpGet:
+            path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
+            port: 8888
+          initialDelaySeconds: 240
+          timeoutSeconds: 120
+          periodSeconds: 240
+        name: gn-spring-boot-grch38
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        resources:
+          requests:
+              memory: 3Gi
+          limits:
+              memory: 11Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      # run on genome nexus machines
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "genome-nexus"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: genome-nexus
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-spring-boot-grch38
+    app: gn-spring-boot-grch38
+  name: genome-nexus-grch38
+  namespace: genome-nexus
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+  - port: 443
+    name: https
+    targetPort: 8888
+  selector:
+    run: gn-spring-boot-grch38
+  type: ClusterIP
