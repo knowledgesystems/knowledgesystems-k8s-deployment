@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         run: cbioportal-backend-public-beta-blue
-        tags.datadoghq.com/env: eks-public-argocd
+        tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal-backend-public-beta-blue
         tags.datadoghq.com/version: 6.3.2
         admission.datadoghq.com/enabled: "true"
