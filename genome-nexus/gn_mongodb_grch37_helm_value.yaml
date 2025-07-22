@@ -26,11 +26,3 @@ tolerations:
 nodeSelector:
   eks.amazonaws.com/nodegroup: eks-genome-nexus-database
   # kubernetes.io/hostname: # Replace with the exact node name
-
-resources:
-  requests:
-    memory: 16Gi
-    cpu: 3
-  limits:
-    memory: 24Gi
-    cpu: 4
