@@ -61,14 +61,14 @@ spec:
                   then active_public_database_name="${PUBLIC_BLUE_DB_NAME}";
                   elif [ "${active_database_color}" = "green" ];
                   then active_public_database_name="${PUBLIC_GREEN_DB_NAME}";
-                  else printf "Unable to determine active database color/name\n"; exit 1;
+                  else { printf "Unable to determine active database color/name\n"; exit 1; }
                   fi;
                   printf "active database name for backup is ${active_public_database_name}\n";
                   SCHEMA_VERSION=$(mysql -h"${PUBLIC_DB_HOST}" -u"${DB_USER}" -p"${DB_PASSWORD}" "${active_public_database_name}" -s -N -e "${GET_DB_SCHEMA_VERSION_SQL_QUERY}" | sed "s/\./_/g");
                   MYSQL_DUMP_FILE_NAME=dump_$(date "+%Y_%m_%d")_v${SCHEMA_VERSION}.sql.gz;
 
                   printf "Dump database to aws s3 bucket\n";
-                  mysqldump -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASSWORD}" --quick --compress "${active_public_database_name}" | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/dumps/${MYSQL_DUMP_FILE_NAME};
+                  mysqldump -h"${PUBLIC_DB_HOST}" -u"${DB_USER}" -p"${DB_PASSWORD}" --set-gtid-purged=OFF --quick --compress "${active_public_database_name}" | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/dumps/${MYSQL_DUMP_FILE_NAME};
                   printf "Done dumping to bucket\n\n";
                 
                   printf "Create an index page for object listing\n";
