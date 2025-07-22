@@ -54,7 +54,7 @@ spec:
                 name: oncokb-keycloak-http
                 port:
                   name: http
-    - host: "ct.oncokb.aws.mskcc.org"
+    - host: "ct.oncokb.dev.aws.mskcc.org"
       http:
         paths:
           - path: "/"
