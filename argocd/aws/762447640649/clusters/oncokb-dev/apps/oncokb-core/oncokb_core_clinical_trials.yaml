@@ -30,7 +30,7 @@ spec:
             - secretRef:
                 name: aws-cli-credentials
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:ct-alpha.2
+          image: oncokb/oncokb:ct-alpha.3
           command: ["java"]
           args:
             [
