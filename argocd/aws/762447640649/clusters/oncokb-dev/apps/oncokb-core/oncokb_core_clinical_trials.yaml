@@ -50,7 +50,6 @@ spec:
               "-Dredis.password=$(REDIS_PASSWROD)",
               "-Dredis.masterName=$(REDIS_MASTERNAME)",
               "-Dredis.expiration=$(REDIS_EXPIRATION)",
-              "-Dswagger_url=https://ct.oncokb.dev.aws.mskcc.org",
               "-Dshow_sitemaps=false",
               "-jar",
               "/webapp-runner.jar",
