@@ -17,7 +17,6 @@ spec:
       - data-legacy.oncokb.aws.mskcc.org
       - airflow.oncokb.aws.mskcc.org
       - grafana.oncokb.aws.mskcc.org
-      - ct.oncokb.aws.mskcc.org
   rules:
     - host: "www.oncokb.aws.mskcc.org"
       http:
@@ -99,14 +98,4 @@ spec:
                 name: kube-prometheus-stack-grafana
                 port:
                   number: 80
-    - host: "ct.oncokb.aws.mskcc.org"
-      http:
-        paths:
-          - path: "/"
-            pathType: Prefix
-            backend:
-              service:
-                name: oncokb-core-clinical-trials
-                port:
-                  number: 8888
   ingressClassName: nginx
