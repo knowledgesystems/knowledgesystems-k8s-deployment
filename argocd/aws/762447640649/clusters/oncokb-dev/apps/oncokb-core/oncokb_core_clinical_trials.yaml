@@ -34,6 +34,23 @@ spec:
           command: ["java"]
           args:
             [
+              # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
+              "-Xms500m",
+              "-XX:+UseSerialGC",
+              # aggressive garbage collection
+              "-XX:MinHeapFreeRatio=20",
+              "-XX:MaxHeapFreeRatio=40",
+              "-XX:GCTimeRatio=4",
+              "-XX:AdaptiveSizePolicyWeight=90",
+              "-XX:+UnlockExperimentalVMOptions",
+              "-XX:+UseCGroupMemoryLimitForHeap",
+              # use maxRAMFraction > 1 https://github.com/akka/akka/issues/23499
+              "-XX:MaxRAMFraction=2",
+              "-XX:+PrintFlagsFinal",
+              "-XshowSettings:vm",
+              # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
+              # from the limits
+              "-XX:MaxRAM=2g",
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
               "-Djdbc.url=$(DB_URL)/oncokb_core_v4_7?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
