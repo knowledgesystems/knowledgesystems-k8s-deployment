@@ -99,6 +99,11 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "lg-general"
+          effect: "NoSchedule"
       nodeSelector:
         workload: lg-general
 ---
