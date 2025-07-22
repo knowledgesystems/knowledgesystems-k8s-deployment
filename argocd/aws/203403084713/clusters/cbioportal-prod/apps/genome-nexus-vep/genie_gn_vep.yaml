@@ -1,15 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "4"
-  creationTimestamp: null
-  generation: 1
   labels:
     run: genie-gn-vep
   name: genie-gn-vep
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/genie-gn-vep
 spec:
   replicas: 1
   selector:
@@ -22,7 +17,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         run: genie-gn-vep
     spec:
@@ -59,11 +53,11 @@ spec:
         terminationMessagePolicy: File
       # run on genome nexus machines
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-genome-nexus
+        workload: gn-vep
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-genome-nexus"
+          value: "gn-vep"
           effect: "NoSchedule"
       # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
