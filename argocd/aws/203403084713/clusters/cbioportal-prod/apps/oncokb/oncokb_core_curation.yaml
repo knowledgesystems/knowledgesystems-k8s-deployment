@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   labels:
     run: oncokb-core-curation
+    tags.datadoghq.com/env: staging
+    tags.datadoghq.com/service: oncokb-core
   name: oncokb-core-curation
   namespace: oncokb
 spec:
@@ -18,6 +20,8 @@ spec:
     metadata:
       labels:
         run: oncokb-core-curation
+        tags.datadoghq.com/env: staging
+        tags.datadoghq.com/service: oncokb-core
     spec:
       containers:
         - env:
@@ -31,8 +35,7 @@ spec:
           # The beta current is used to showcase a new search endpoint
           image: oncokb/oncokb:3.32.0
           command: ["java"]
-          args:
-            [
+          args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
               "-Xms500m",
               "-XX:+UseSerialGC",
