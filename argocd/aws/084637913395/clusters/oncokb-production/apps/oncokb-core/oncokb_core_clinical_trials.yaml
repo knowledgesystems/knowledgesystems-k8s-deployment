@@ -4,7 +4,6 @@ metadata:
   labels:
     run: oncokb-core-clinical-trials
   name: oncokb-core-clinical-trials
-  namespace: oncokb
 spec:
   replicas: 1
   selector:
@@ -100,13 +99,8 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-      tolerations:
-        - key: "workload"
-          operator: "Equal"
-          value: "oncokb-beta"
-          effect: "NoSchedule"
       nodeSelector:
-        workload: oncokb-beta
+        workload: lg-general
 ---
 apiVersion: v1
 kind: Service
@@ -114,7 +108,6 @@ metadata:
   labels:
     run: oncokb-core-clinical-trials
   name: oncokb-core-clinical-trials
-  namespace: oncokb
 spec:
   ports:
     - port: 8888
