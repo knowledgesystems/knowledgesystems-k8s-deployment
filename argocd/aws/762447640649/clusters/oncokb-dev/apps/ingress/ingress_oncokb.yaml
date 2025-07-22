@@ -12,6 +12,7 @@ spec:
       - core.oncokb.dev.aws.mskcc.org
       - germline.oncokb.dev.aws.mskcc.org
       - keycloak.oncokb.dev.aws.mskcc.org
+      - ct.oncokb.dev.aws.mskcc.org
   rules:
     - host: "www.oncokb.dev.aws.mskcc.org"
       http:
@@ -53,4 +54,14 @@ spec:
                 name: oncokb-keycloak-http
                 port:
                   name: http
+    - host: "ct.oncokb.aws.mskcc.org"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: oncokb-core-clinical-trials
+                port:
+                  number: 8888
   ingressClassName: nginx

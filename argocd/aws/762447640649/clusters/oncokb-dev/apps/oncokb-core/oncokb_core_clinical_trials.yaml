@@ -26,7 +26,7 @@ spec:
             - secretRef:
                 name: oncokb-redis-cluster
             - secretRef:
-                name: oncokb-db-msk-prod-rds
+                name: oncokb-db-msk-dev-rds
             - secretRef:
                 name: aws-cli-credentials
           # The beta current is used to showcase a new search endpoint
