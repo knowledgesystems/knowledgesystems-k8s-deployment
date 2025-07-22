@@ -19,6 +19,14 @@ agents:
       operator: Equal
       value: datadog
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: oncokb
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: oncokb-beta
+      effect: NoSchedule
 clusterAgent:
 #  confd:
 #    nginx_ingress_controller.yaml: |-
