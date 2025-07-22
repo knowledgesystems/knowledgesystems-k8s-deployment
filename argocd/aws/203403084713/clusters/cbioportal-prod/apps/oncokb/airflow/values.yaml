@@ -6,7 +6,7 @@ dags:
     # Path where DAGs are located. For MSK cluster, change to msk_dags
     repoSubPath: oncokb-airflow/oncokb/dags
     syncWait: 60
-    httpSecret: oncokb-github
+    httpSecret: oncokb-github-airflow
     httpSecretUsernameKey: USERNAME
     httpSecretPasswordKey: PRIVATE_ACCESS_TOKEN
 
