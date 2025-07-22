@@ -5,7 +5,7 @@ metadata:
     app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-public-beta-green
     tags.datadoghq.com/env: eks-public
-    tags.datadoghq.com/service: cbioportal-backend-public-beta-green
+    tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.2
   name: cbioportal-backend-public-beta-green
 spec:
@@ -23,7 +23,7 @@ spec:
       labels:
         run: cbioportal-backend-public-beta-green
         tags.datadoghq.com/env: eks-public
-        tags.datadoghq.com/service: cbioportal-backend-public-beta-green
+        tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.3.2
         admission.datadoghq.com/enabled: "true"
       annotations:

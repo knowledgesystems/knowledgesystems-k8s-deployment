@@ -4,8 +4,8 @@ metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-clickhouse-only-db-blue
-    tags.datadoghq.com/env: eks-public
-    tags.datadoghq.com/service: cbioportal-backend-clickhouse-only-db-blue
+    tags.datadoghq.com/env: eks-public-clickhouse-only
+    tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.0
   name: cbioportal-backend-clickhouse-only-db-blue
 spec:
@@ -23,8 +23,8 @@ spec:
       creationTimestamp: null
       labels:
         run: cbioportal-backend-clickhouse-only-db-blue
-        tags.datadoghq.com/env: eks-public
-        tags.datadoghq.com/service: cbioportal-backend-clickhouse-only-db-blue
+        tags.datadoghq.com/env: eks-public-clickhouse-only
+        tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.3.0
         admission.datadoghq.com/enabled: "true"
       annotations:
