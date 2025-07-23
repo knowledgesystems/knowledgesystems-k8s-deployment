@@ -39,7 +39,7 @@ spec:
           # The beta current is used to showcase a new search endpoint
           image: oncokb/oncokb:3.32.0
           volumeMounts:
-            - mountPath: /config/log4j.properties
+            - mountPath: /config/
               name: log4j-properties
           command: ["java"]
           args: [
