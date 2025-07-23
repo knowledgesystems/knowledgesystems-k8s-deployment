@@ -68,14 +68,35 @@ spec:
                   MYSQL_DUMP_FILE_NAME=dump_$(date "+%Y_%m_%d")_v${SCHEMA_VERSION}.sql.gz;
 
                   printf "Dump database to aws s3 bucket\n";
-                  mysqldump -h"${PUBLIC_DB_HOST}" -u"${DB_USER}" -p"${DB_PASSWORD}" --set-gtid-purged=OFF --quick --compress "${active_public_database_name}" | gzip | aws s3 cp - s3://${AWS_S3_DUMP_BUCKET}/dumps/${MYSQL_DUMP_FILE_NAME};
+                  mysqldump -h"${PUBLIC_DB_HOST}" -u"${DB_USER}" -p"${DB_PASSWORD}" --set-gtid-purged=OFF --quick --compress "${active_public_database_name}" | gzip | aws s3 cp - "s3://${AWS_S3_DUMP_BUCKET}/dumps/${MYSQL_DUMP_FILE_NAME}";
                   printf "Done dumping to bucket\n\n";
                 
+                  printf "Delete overage dump files\n";
+                  MAXIMUM_RETAINED_FILE_AGE_SECONDS=$((70*24*60*60))
+                  bucket_file_list_file="$(mktemp)"
+                  aws s3 ls "s3://${AWS_S3_DUMP_BUCKET}/dumps/" > "${bucket_file_list_file}"
+                  while IFS='' read -r filename; do
+                  date_line_with_suffix="${filename#*dump_}";
+                  date_line="${date_line_with_suffix%%_v*}";
+                  year="${date_line%%_*}";
+                  month_day="${date_line#*_}";
+                  month="${month_day%%_*}";
+                  day="${month_day#*_}";
+                  seconds_since_epoc_now="$(date +%s)";
+                  seconds_since_epoc_file="$(date +%s --date "${year}-${month}-${day}")";
+                  age_of_file_in_seconds=$((${seconds_since_epoc_now}-${seconds_since_epoc_file}));
+                  if [ "${age_of_file_in_seconds}" -gt "${MAXIMUM_RETAINED_FILE_AGE_SECONDS}" ] ; then
+                  aws s3 rm "s3://${AWS_S3_DUMP_BUCKET}/dumps/${filename}";
+                  fi;
+                  done < "${bucket_file_list_file}";
+                  rm "${bucket_file_list_file}";
+                  printf "Done deleting overage dump files\n";
+
                   printf "Create an index page for object listing\n";
-                  OBJECTS=$(aws s3 ls s3://${AWS_S3_DUMP_BUCKET}/dumps/ | sort -r -k4 | awk '{size_gb = $3 / (1024^3); printf "<tr><td><a href=\"dumps/%s\">%s</a></td><td>%.2f GB</td><td><a href=\"dumps/%s\">Download</a></td></tr>\\n", $4, $4, size_gb, $4}');
+                  OBJECTS=$(aws s3 ls "s3://${AWS_S3_DUMP_BUCKET}/dumps/" | sort -r -k4 | awk '{size_gb = $3 / (1024^3); printf "<tr><td><a href=\"dumps/%s\">%s</a></td><td>%.2f GB</td><td><a href=\"dumps/%s\">Download</a></td></tr>\\n", $4, $4, size_gb, $4}');
                   aws s3api get-object --bucket ${AWS_S3_DUMP_BUCKET} --key site/template.html template.html > /dev/null;
                   sed "s|{{ S3_FILES }}|$OBJECTS|g" template.html > index.html;
-                  aws s3 cp --content-type 'text/html' index.html s3://${AWS_S3_DUMP_BUCKET}/index.html;
+                  aws s3 cp --content-type 'text/html' index.html "s3://${AWS_S3_DUMP_BUCKET}/index.html";
                   printf "Done creating index page\n";
 
           restartPolicy: OnFailure
