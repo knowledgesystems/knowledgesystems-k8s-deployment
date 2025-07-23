@@ -69,6 +69,7 @@ spec:
               "-Dredis.expiration=$(REDIS_EXPIRATION)",
               "-Dswagger_url=https://beta.oncokb.org",
               "-Dshow_sitemaps=false",
+              "-Dlog4j.configuration=file:/config/log4j.properties",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
@@ -108,6 +109,9 @@ spec:
               memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /config/log4j.properties
+              name: log4j-properties
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -120,7 +124,11 @@ spec:
           effect: "NoSchedule"
       nodeSelector:
         workload: oncokb
----
+    volumes:
+      - name: log4j-properties
+        configMap:
+          name: oncokb-core-log4j-properties
+  ---
 apiVersion: v1
 kind: Service
 metadata:
