@@ -41,7 +41,7 @@ spec:
     - transcript.oncokb.org
     - curation.oncokb.org
     - keycloak.oncokb.org
-    # - airflow.oncokb.org
+    - airflow.oncokb.org
     - data-4-9.oncokb.org
     - data-4-5.oncokb.org
     - data-4-0.oncokb.org
@@ -150,16 +150,16 @@ spec:
               name: oncokb-kube-prometheus-stack-grafana
               port:
                 number: 80
-  # - host: airflow.oncokb.org
-  #   http:
-  #     paths:
-  #     - path: "/"
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: oncokb-airflow-stable-web
-  #           port:
-  #             number: 8080
+  - host: airflow.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-airflow-web
+            port:
+              number: 8080
   - host: data-4-9.oncokb.org
     http:
       paths:
