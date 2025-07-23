@@ -120,7 +120,6 @@ spec:
           effect: "NoSchedule"
       nodeSelector:
         workload: oncokb
-  ---
 apiVersion: v1
 kind: Service
 metadata:
