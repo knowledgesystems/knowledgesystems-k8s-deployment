@@ -33,7 +33,7 @@ spec:
               service:
                 name: cbioagent-librechat
                 port:
-                  number: 80
+                  number: 3080
             path: /
             pathType: Prefix
   tls:
