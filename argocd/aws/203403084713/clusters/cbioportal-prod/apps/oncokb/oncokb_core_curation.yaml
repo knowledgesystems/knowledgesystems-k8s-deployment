@@ -23,6 +23,10 @@ spec:
         tags.datadoghq.com/env: staging
         tags.datadoghq.com/service: oncokb-core
     spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
       containers:
         - env:
           envFrom:
@@ -34,6 +38,9 @@ spec:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
           image: oncokb/oncokb:3.32.0
+          volumeMounts:
+            - mountPath: /config/log4j.properties
+              name: log4j-properties
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -109,9 +116,6 @@ spec:
               memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /config/log4j.properties
-              name: log4j-properties
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -124,10 +128,6 @@ spec:
           effect: "NoSchedule"
       nodeSelector:
         workload: oncokb
-    volumes:
-      - name: log4j-properties
-        configMap:
-          name: oncokb-core-log4j-properties
   ---
 apiVersion: v1
 kind: Service
