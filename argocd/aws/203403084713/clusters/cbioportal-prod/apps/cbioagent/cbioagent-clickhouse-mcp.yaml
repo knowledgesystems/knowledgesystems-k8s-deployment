@@ -22,6 +22,11 @@ spec:
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
+          resources:
+            requests:
+              memory: 2Gi
+            limits:
+              memory: 4Gi
       nodeSelector:
         workload: "cbioagent"
       tolerations:
