@@ -87,7 +87,6 @@ variable "LABEL_KEY" {
   default     = "workload"
 }
 
-
 variable "ROOT_VOL_CONFIG" {
   description = "This is the custom root disk config for nodegroups that need a larger disk size"
   type = object({
