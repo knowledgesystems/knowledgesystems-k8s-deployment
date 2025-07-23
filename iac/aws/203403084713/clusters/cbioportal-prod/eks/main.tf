@@ -452,6 +452,9 @@ module "eks_cluster" {
   cluster_endpoint_public  = var.API_PUBLIC
   cluster_endpoint_private = var.API_PRIVATE
 
+  # Addon config
+  hyc_addon_configs = var.ADDON_CONFIG
+
   # EKS Managed Node Groups
   eks_managed_node_groups = {
     for name, config in local.node_groups : name => merge(config, {
