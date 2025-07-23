@@ -33,10 +33,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cbioportal-clickhouse-mcp
+  name: cbioagent-clickhouse-mcp
 spec:
   selector:
-    run: cbioportal-clickhouse-mcp
+    run: cbioagent-clickhouse-mcp
   ports:
     - port: 80
       name: http
