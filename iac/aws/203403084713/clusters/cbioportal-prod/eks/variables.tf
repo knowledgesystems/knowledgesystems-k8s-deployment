@@ -112,3 +112,28 @@ variable "ROOT_VOL_CONFIG" {
     }
   }
 }
+
+variable "ADDON_CONFIG" {
+  description = "Override default HYC addon config"
+  type = any
+  default = {
+    observability = {
+      create = false
+    }
+    ebscsi = {
+      create = true
+    }
+    efscsi = {
+      create = true
+    }
+    lbc = {
+      create = true
+    }
+    identity = {
+      create = true
+    }
+    autoscaler = {
+      create = true
+    }
+  }
+}
