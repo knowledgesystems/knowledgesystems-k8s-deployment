@@ -27,6 +27,12 @@ tolerations:
 ingress:
   enabled: false
 
+resources:
+  requests:
+    memory: 2Gi
+  limits:
+    memory: 4Gi
+
 readinessProbe:
   httpGet:
     path: /health
