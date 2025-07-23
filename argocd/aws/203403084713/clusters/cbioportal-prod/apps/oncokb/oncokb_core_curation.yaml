@@ -23,10 +23,6 @@ spec:
         tags.datadoghq.com/env: staging
         tags.datadoghq.com/service: oncokb-core
     spec:
-      volumes:
-        - name: log4j-properties
-          configMap:
-            name: oncokb-core-log4j-properties
       containers:
         - env:
           envFrom:
@@ -38,9 +34,6 @@ spec:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
           image: oncokb/oncokb:3.32.0
-          volumeMounts:
-            - mountPath: /config/
-              name: log4j-properties
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
