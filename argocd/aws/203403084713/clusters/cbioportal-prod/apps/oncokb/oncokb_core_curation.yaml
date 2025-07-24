@@ -37,7 +37,7 @@ spec:
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:3.32.0
+          image: oncokb/oncokb:5.0.0-beta.0
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
@@ -76,7 +76,7 @@ spec:
               "-Dredis.expiration=$(REDIS_EXPIRATION)",
               "-Dswagger_url=https://beta.oncokb.org",
               "-Dshow_sitemaps=false",
-              "-Dlog4j.configuration=file:/config/log4j.properties",
+              # "-Dlog4j.configurationFile=file:/config/log4j2.xml",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
