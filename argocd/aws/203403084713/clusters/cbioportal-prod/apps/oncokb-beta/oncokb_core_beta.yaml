@@ -29,7 +29,7 @@ spec:
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:3.32.0
+          image: oncokb/oncokb:4.0.0
           command: ["java"]
           args:
             [
