@@ -29,6 +29,10 @@ spec:
             name: oncokb-core-log4j-properties
       containers:
         - env:
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_LOGS_INJECTION
+              value: "true"
           envFrom:
             - secretRef:
                 name: oncokb-core-curation
