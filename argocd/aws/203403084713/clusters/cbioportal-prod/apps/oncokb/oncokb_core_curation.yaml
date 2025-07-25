@@ -76,7 +76,7 @@ spec:
               "-Dredis.expiration=$(REDIS_EXPIRATION)",
               "-Dswagger_url=https://beta.oncokb.org",
               "-Dshow_sitemaps=false",
-              "-Dlog4j.configurationFile=file:/config/log4j.properties",
+              "-Dlog4j.configuration=file:/config/log4j.properties",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
