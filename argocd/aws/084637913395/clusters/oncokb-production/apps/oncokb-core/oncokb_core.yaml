@@ -28,7 +28,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - secretRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:3.32.0
+          image: oncokb/oncokb:4.0.0
           command: ["java"]
           args:
             [
