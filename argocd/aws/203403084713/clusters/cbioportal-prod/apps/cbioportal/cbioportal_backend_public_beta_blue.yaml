@@ -43,7 +43,7 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
-        image: cbioportal/cbioportal-dev:cf60c855c3c00db8d6f42fb31fd7ae96b9969aef-web-shenandoah
+        image: cbioportal/cbioportal-dev:483eae22616edc52f7671e71f6698646b4429b83-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
