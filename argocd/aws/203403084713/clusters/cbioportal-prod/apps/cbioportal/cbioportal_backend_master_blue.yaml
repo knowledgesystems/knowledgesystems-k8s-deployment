@@ -17,7 +17,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         run: cbioportal-backend-master-blue
     spec:
@@ -29,7 +28,7 @@ spec:
       - envFrom:
         - secretRef:
             name: cbioportal-public-blue
-        image: cbioportal/cbioportal@sha256:48dca7ed0df06351d0f540e81cbb88894f110097b3cd208863b416463078b08f
+        image: cbioportal/cbioportal@sha256:eb38c5207fbb22a569f97df2fdcefadd92eb80dce3961e23010ac9a2b9a64f2e
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
