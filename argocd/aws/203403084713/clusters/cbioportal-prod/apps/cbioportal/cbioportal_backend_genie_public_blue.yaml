@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-genie-public-blue
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.2
+    tags.datadoghq.com/version: 6.3.3
   name: cbioportal-backend-genie-public-blue
   namespace: default
 spec:
@@ -31,7 +31,7 @@ spec:
         run: cbioportal-backend-genie-public-blue
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.2
+        tags.datadoghq.com/version: 6.3.3
     spec:
       containers:
       - args:
@@ -236,7 +236,7 @@ spec:
         envFrom:
         - secretRef:
             name: cbioportal-genie-public-blue
-        image: cbioportal/cbioportal:6.3.2-web-shenandoah
+        image: cbioportal/cbioportal:6.3.3-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
