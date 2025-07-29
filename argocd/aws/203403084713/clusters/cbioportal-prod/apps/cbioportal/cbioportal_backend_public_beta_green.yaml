@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-beta-green
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.2
+    tags.datadoghq.com/version: 6.3.3
   name: cbioportal-backend-public-beta-green
 spec:
   replicas: 0
@@ -24,7 +24,7 @@ spec:
         run: cbioportal-backend-public-beta-green
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.2
+        tags.datadoghq.com/version: 6.3.3
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
