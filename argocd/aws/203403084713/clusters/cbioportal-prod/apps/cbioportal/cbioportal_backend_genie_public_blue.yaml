@@ -12,7 +12,6 @@ metadata:
 spec:
   progressDeadlineSeconds: 600
   replicas: 0
-  revisionHistoryLimit: 10
   selector:
     matchLabels:
       run: cbioportal-backend-genie-public-blue
