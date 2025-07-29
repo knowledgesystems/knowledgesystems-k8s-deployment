@@ -4,7 +4,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
     run: cbioportal-backend-public-beta-blue
-    tags.datadoghq.com/env: eks-public
+    tags.datadoghq.com/env: eks-public-beta
     tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.3
   name: cbioportal-backend-public-beta-blue
@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         run: cbioportal-backend-public-beta-blue
-        tags.datadoghq.com/env: eks-public
+        tags.datadoghq.com/env: eks-public-beta
         tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.3.3
         admission.datadoghq.com/enabled: "true"
