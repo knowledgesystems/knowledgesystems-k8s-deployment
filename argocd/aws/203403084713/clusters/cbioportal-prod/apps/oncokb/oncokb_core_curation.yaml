@@ -41,6 +41,9 @@ spec:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
           image: oncokb/oncokb:5.0.0-beta.3
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
