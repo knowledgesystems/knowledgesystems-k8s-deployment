@@ -53,7 +53,7 @@ spec:
           value: "true"
         - name: DD_LOGS_INJECTION
           value: "true"
-        image: cbioportal/cbioportal:6.3.3-web-shenandoah
+        image: cbioportal/cbioportal-dev:0ca764de1fecf054a1ef6e8a74a72ce211052c33-web-shenandoah
         volumeMounts:
         - name: sclc-eks-configmap-volume
           mountPath: /cbioportal/local.key
