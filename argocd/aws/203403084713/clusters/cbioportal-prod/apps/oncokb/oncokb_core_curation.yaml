@@ -5,9 +5,6 @@ metadata:
     run: oncokb-core-curation
     tags.datadoghq.com/env: staging
     tags.datadoghq.com/service: oncokb-core
-    admission.datadoghq.com/enabled: "true"
-  annotations:
-    admission.datadoghq.com/java-lib.version: v1.24.2
   name: oncokb-core-curation
   namespace: oncokb
 spec:
@@ -25,6 +22,9 @@ spec:
         run: oncokb-core-curation
         tags.datadoghq.com/env: staging
         tags.datadoghq.com/service: oncokb-core
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
         - name: log4j-properties
