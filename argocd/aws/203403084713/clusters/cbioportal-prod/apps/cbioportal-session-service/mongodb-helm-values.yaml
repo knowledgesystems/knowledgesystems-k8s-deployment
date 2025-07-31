@@ -4,7 +4,6 @@ nodeSelector:
   workload: cbio-session
 persistence:
   size: 200Gi
-  resourcePolicy: "keep"
 tolerations:
   - effect: NoSchedule
     key: workload
