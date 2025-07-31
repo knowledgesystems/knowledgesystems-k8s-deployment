@@ -11,3 +11,7 @@ tolerations:
     value: cbio-session
 auth:
   existingSecret: cbioportal-session-service-mongodb-creds
+persistentVolumeClaimRetentionPolicy:
+  enabled: true
+  whenScaled: Retain
+  whenDeleted: Retain

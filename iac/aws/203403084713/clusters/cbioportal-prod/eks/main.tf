@@ -458,6 +458,7 @@ module "eks_cluster" {
   # EKS Managed Node Groups
   eks_managed_node_groups = {
     for name, config in local.node_groups : name => merge(config, {
+      cluster_version = try(config.version, var.NODEGROUP_VER)
       tags = merge(
         try(config.tags, {}),
         {
