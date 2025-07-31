@@ -98,13 +98,13 @@ spec:
         - name: master.resources.limits.cpu
           value: 150m
         - name: master.resources.limits.ephemeral-storage
-          value: 2Gi
+          value: 25Gi
         - name: master.resources.requests.memory
           value: 8Gi
         - name: master.resources.requests.cpu
           value: 100m
         - name: master.resources.requests.ephemeral-storage
-          value: 50Mi
+          value: 20Gi
         - name: replica.replicaCount
           value: "2"
         - name: replica.autoscaling.enabled
@@ -140,13 +140,13 @@ spec:
         - name: replica.resources.limits.cpu
           value: 150m
         - name: replica.resources.limits.ephemeral-storage
-          value: 2Gi
+          value: 25Gi
         - name: replica.resources.requests.memory
           value: 4Gi
         - name: replica.resources.requests.cpu
           value: 100m
         - name: replica.resources.requests.ephemeral-storage
-          value: 50Mi
+          value: 20Gi
   destination:
     namespace: default
     server: https://kubernetes.default.svc
