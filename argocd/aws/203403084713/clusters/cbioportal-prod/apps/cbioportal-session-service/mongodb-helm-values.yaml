@@ -4,6 +4,7 @@ nodeSelector:
   workload: cbio-session
 persistence:
   size: 200Gi
+  resourcePolicy: "keep"
 tolerations:
   - effect: NoSchedule
     key: workload
@@ -11,7 +12,3 @@ tolerations:
     value: cbio-session
 auth:
   existingSecret: cbioportal-session-service-mongodb-creds
-persistentVolumeClaimRetentionPolicy:
-  enabled: true
-  whenScaled: Retain
-  whenDeleted: Retain
