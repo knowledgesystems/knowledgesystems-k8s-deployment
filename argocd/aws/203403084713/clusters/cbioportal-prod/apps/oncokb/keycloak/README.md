@@ -1,30 +1,5 @@
 # OncoKB Keycloak
 
-### Keycloak service
-
-Since our Kubernetes server version is not compatible with codecentric keycloak helm chart, we modified their keycloak chart and the chart is located at: https://github.com/oncokb/oncokb-helm-charts.
-
-Add oncokb helm chart repo.
-
-```
-helm repo add oncokb https://oncokb.github.io/oncokb-helm-charts/releases
-```
-
-In `keycloak.config.yaml` adjust the DB env variables to connect to an existing database. 
-
-One way to start a MySQL database is with helm
-
-
-```
-helm install keycloak-mysql --set auth.rootPassword=root,auth.database=keycloak bitnami/mysql
-```
-
-Create a keycloak service with `keycloak-config.yaml` configuration file.
-
-```
-helm install keycloak -f ./keycloak-config.yaml oncokb/keycloak
-```
-
 #### Custom themes
 
 Keycloak allows you to add your own themes. [[Documentation]](https://www.keycloak.org/docs/latest/server_development/#_themes)
