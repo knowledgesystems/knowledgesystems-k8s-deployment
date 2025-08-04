@@ -10,33 +10,32 @@
     <meta name="generator" content="Retype 3.11.0">
 
     <!-- Primary Meta Tags -->
-    <title>Troubleshooting | CDSI K8s Documentation</title>
-    <meta name="title" content="Troubleshooting | CDSI K8s Documentation">
-    <meta name="description" content="This list is used to track issues and their remedies.">
+    <title>OncoKB System | CDSI K8s Documentation</title>
+    <meta name="title" content="OncoKB System | CDSI K8s Documentation">
+    <meta name="description" content="This is the documentation describing the current running apps in varies production environments.">
 
     <!-- Canonical -->
-    <link rel="canonical" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/troubleshooting/">
+    <link rel="canonical" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/oncokb/system/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/troubleshooting/">
-    <meta property="og:title" content="Troubleshooting | CDSI K8s Documentation">
-    <meta property="og:description" content="This list is used to track issues and their remedies.">
+    <meta property="og:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/oncokb/system/">
+    <meta property="og:title" content="OncoKB System | CDSI K8s Documentation">
+    <meta property="og:description" content="This is the documentation describing the current running apps in varies production environments.">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/troubleshooting/">
-    <meta property="twitter:title" content="Troubleshooting | CDSI K8s Documentation">
-    <meta property="twitter:description" content="This list is used to track issues and their remedies.">
+    <meta property="twitter:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/oncokb/system/">
+    <meta property="twitter:title" content="OncoKB System | CDSI K8s Documentation">
+    <meta property="twitter:description" content="This is the documentation describing the current running apps in varies production environments.">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../resources/css/retype.css?v=3.11.0.807636966055" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.807636966055" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.11.0.807636966055" data-turbo-eval="false" defer></script>
-    <script data-cfasync="false" src="../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.11.0.807636966055" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=3.11.0.807636966055" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.807636966055" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.807636966055" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -51,7 +50,7 @@
                 <!-- Logo -->
                 <div class="flex items-center justify-between h-full py-2 md:w-75">
                     <div class="flex items-center px-2 md:px-6">
-                        <a id="retype-branding-logo" href="../" class="flex items-center leading-snug text-2xl">
+                        <a id="retype-branding-logo" href="../../" class="flex items-center leading-snug text-2xl">
                             <span class="dark:text-white font-bold line-clamp-1 md:line-clamp-2">CDSI K8s</span>
                         </a><span id="retype-branding-label" class="inline-flex mt-1 px-2 py-1 ml-4 text-xs font-medium leading-none items-center rounded-md bg-branding-label-bg text-branding-label-text ring-1 ring-branding-label-border ring-inset md:inline-block">Docs</span>
                     </div>
@@ -179,178 +178,110 @@
                                 <!-- Rendered if sidebar right is enabled -->
                                 <div id="retype-sidebar-right-toggle"></div>
                                 <!-- Page content  -->
-<doc-anchor-target id="troubleshooting" class="break-words">
+<doc-anchor-target id="oncokb-system" class="break-words">
     <h1>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#troubleshooting">#</doc-anchor-trigger>
-        <span>Troubleshooting</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#oncokb-system">#</doc-anchor-trigger>
+        <span>OncoKB System</span>
     </h1>
 </doc-anchor-target>
-<p>This list is used to track issues and their remedies.</p>
-<doc-anchor-target id="low-ephemeral-storage-issue">
+<p>This is the documentation describing the current running apps in varies production environments.</p>
+<doc-anchor-target id="environments">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#low-ephemeral-storage-issue">#</doc-anchor-trigger>
-        <span>Low Ephemeral Storage Issue</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#environments">#</doc-anchor-trigger>
+        <span>Environments</span>
     </h2>
 </doc-anchor-target>
-<p>Our new Terraform modules use a default ephemeral storage which might not be enough for certain workloads. This leads to an error similar to the following on deployments:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-none"><code v-pre class="language-none">The node was low on resource: ephemeral-storage. Threshold quantity: 123456789, available: 123456Ki.</code></pre>
-</doc-codeblock></div>
-<p>To increase the ephemeral storage capacity for the nodegroup, update the terraform modules to use a custom value:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-hcl"><code v-pre class="language-hcl">nodegroup-name = {
-  ...
-  disk_size                  = 50 # New capacity in GB
-  use_custom_launch_template = false # Important
-  ...
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="aws-cni-failing-to-assign-ip-addresses">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#aws-cni-failing-to-assign-ip-addresses">#</doc-anchor-trigger>
-        <span>AWS-CNI Failing to Assign IP Addresses</span>
-    </h2>
+<doc-anchor-target id="oncokborg">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#oncokborg">#</doc-anchor-trigger>
+        <span>oncokb.org</span>
+    </h3>
 </doc-anchor-target>
-<p>If a AWS EKS managed nodegroup has too many pods deployed on one of its EC2 nodes, it can run out of IP Addresses with the error:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-none"><code v-pre class="language-none">plugin type=&quot;aws-cni&quot; name=&quot;aws-cni&quot; failed (add): add cmd: failed to assign an IP address to container</code></pre>
-</doc-codeblock></div>
-<p>To resolve this issue, analyze the deployments in the nodegroup and see if a specific deployment group can be separated into its own nodegroup. E.g., For oncokb production workload, redis deployment needed 20 pods. In such cases, the better approach was to deploy redis in its own nodegroup called <code v-pre>oncokb-redis</code>.</p>
-<doc-anchor-target id="datadog-failing-to-inject-init-containers">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#datadog-failing-to-inject-init-containers">#</doc-anchor-trigger>
-        <span>Datadog Failing to Inject Init-Containers</span>
-    </h2>
-</doc-anchor-target>
-<p>In an AWS EKS cluster, if datadog is failing to inject init-containers because the deployments are somehow invisible to the Cluster Agent or the Cluster Agent is failing to detect them, then it could be a <a href="https://docs.datadoghq.com/containers/troubleshooting/admission-controller/?tab=helm#amazon-elastic-kubernetes-service-eks">networking issue</a>. To fix it, add the following inbound rule to the security groups attached to EC2 instances in the cluster:</p>
 <ul>
-<li><strong>Protocol</strong>: TCP</li>
-<li><strong>Port range</strong>: <code v-pre>8000</code>, or a range that covers <code v-pre>8000</code></li>
-<li><strong>Source</strong>: The ID of either the cluster security group, or one of your cluster’s additional security groups. You can find these IDs in the EKS console, under the Networking tab for your EKS cluster.</li>
+<li>All apps under oncokb.org is managed by ArgoCD.</li>
+<li>Cluster is in us-east-1</li>
+<li>Access cluster
+<ul>
+<li>We shared the AWS account with cBioPortal. Please reach out to Ino de Bruijn(<a href="mailto:debruiji@mskcc.org">debruiji@mskcc.org</a>) for access</li>
+<li>See <a href="https://github.mskcc.org/CloudArchitecture/CloudDocs/blob/master/user-docs/aws/accounts.md#logging-in-to-aws">HERE</a> for details on how to log in to the cluster</li>
+<li>Once logged in, you need to switch to k8s context to see the cluster.
+<ul>
+<li>Use <code v-pre>aws eks --region us-east-1 update-kubeconfig --name &lt;cluster name&gt;</code> if it&#x27;s first time accessing the cluster</li>
+<li>Use <code v-pre>kubectl config use-context &lt;cluster name&gt;</code>to switch to cluster</li>
 </ul>
-<p>This security group rule allows the control plane to access the node and the downstream Cluster Agent over port <code v-pre>8000</code>.</p>
-<p>If you have multiple managed node groups, each with distinct security groups, add this inbound rule to each security group.</p>
-<doc-anchor-target id="mongodb-persistent-volume-claim-error">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#mongodb-persistent-volume-claim-error">#</doc-anchor-trigger>
-        <span>MongoDB Persistent Volume Claim Error</span>
-    </h2>
-</doc-anchor-target>
-<p>When installing MongoDB Helm Chart in a new cluster, we sometimes run into an error where the helm chart is unable to create a persistent volume, which leads to the persistent volume claim failing to bind:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-none"><code v-pre class="language-none">no persistent volumes available for this claim and no storage class is set</code></pre>
-</doc-codeblock></div>
-<p>This happens because in a new cluster, a default storage class for Kubernetes has not been set. Run the following commands to fix this:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash"># Get the name of the storage class
-kubectl get storageclasses.storage.k8s.io
-
-# If you get the following output, notice how there is no default tag next to the class name
-# NAME  PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
-# gp2   kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  632d
-
-# Patch the storage class to make it default
-kubectl patch storageclass gp2 -p '{&quot;metadata&quot;: {&quot;annotations&quot;:{&quot;storageclass.kubernetes.io/is-default-class&quot;:&quot;true&quot;}}}'
-
-# Now running the following should show default storage class
-kubectl get storageclasses.storage.k8s.io
-# NAME            PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
-# gp2 (default)   kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  632d</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="nginx-ingress-helm-upgrade-errors">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#nginx-ingress-helm-upgrade-errors">#</doc-anchor-trigger>
-        <span>Nginx Ingress Helm Upgrade Errors</span>
-    </h2>
-</doc-anchor-target>
-<p>For the <code v-pre>666628074417</code> account, upgrading Ingress controllers through Helm results in various errors due to the custom networking rules.</p>
-<doc-anchor-target id="400-bad-request---the-plain-http-request-was-sent-to-https-port">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#400-bad-request---the-plain-http-request-was-sent-to-https-port">#</doc-anchor-trigger>
-        <span>400 Bad Request - The plain HTTP request was sent to HTTPS port</span>
-    </h3>
-</doc-anchor-target>
-<p>To fix this issue, apply the correct nginx controller config defined <a href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/digits-eks/eks-prod/shared-services/ingress/eks_ingress_controller.yaml">here</a> after updating nginx.</p>
-<doc-anchor-target id="keycloak-invalid-requester-error">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#keycloak-invalid-requester-error">#</doc-anchor-trigger>
-        <span>Keycloak Invalid Requester Error</span>
-    </h3>
-</doc-anchor-target>
-<p>Keycloak fails to forward headers, which leads to the following error in the network tab when the site is accessed:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash">Mixed Content: The page at 'https://keycloak.cbioportal.mskcc.org/auth/admin/master/console/' was loaded over HTTPS, but requested an insecure script 'http://keycloak.cbioportal.mskcc.org/auth/js/keycloak.js?version=4cbzu'. This request has been blocked; the content must be served over HTTPS.</code></pre>
-</doc-codeblock></div>
-<p>The following error is seen in the kubernetes pods for the keycloak instance:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash">14:45:56,925 WARN  [org.keycloak.events] (default task-2) type=LOGIN_ERROR, realmId=msk, clientId=null, userId=null, ipAddress=10.1.141.180, error=invalid_authn_request, reason=invalid_destination
-14:46:39,551 WARN  [org.keycloak.events] (default task-5) type=LOGIN_ERROR, realmId=msk, clientId=null, userId=null, ipAddress=10.1.140.190, error=invalid_authn_request, reason=invalid_destination</code></pre>
-</doc-codeblock></div>
-<p>To solve this issue, use the correct forwarding rules by applying the configmap defined <a href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/digits-eks/eks-prod/shared-services/ingress/eks_ingress_configmap.yaml">here</a> after updating nginx.</p>
-<doc-anchor-target id="datadog-failed-to-auto-detect-cluster-name">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#datadog-failed-to-auto-detect-cluster-name">#</doc-anchor-trigger>
-        <span>Datadog failed to auto-detect cluster name</span>
-    </h2>
-</doc-anchor-target>
-<p>When deployed on AWS EC2 nodes using the <code v-pre>BOTTLEROCKET_*</code> AMI types, Datadog fails to auto-detect the cluster name, resulting in the following errors:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash">2025-03-10 17:39:09 UTC | CLUSTER | WARN | (subcommands/start/command.go:235 in start) | Failed to auto-detect a Kubernetes cluster name. We recommend you set it manually via the cluster_name config option
-2025-03-10 17:39:10 UTC | CLUSTER | ERROR | (pkg/collector/corechecks/loader.go:64 in Load) | core.loader: could not configure check orchestrator: orchestrator check is configured but the cluster name is empty
-2025-03-10 17:39:10 UTC | CLUSTER | ERROR | (pkg/collector/scheduler.go:208 in getChecks) | Unable to load a check from instance of config 'orchestrator': Core Check Loader: Could not configure check orchestrator: orchestrator check is configured but the cluster name is empty</code></pre>
-</doc-codeblock></div>
-<p>To solve this, either use the <code v-pre>AL2_*</code> AMI type (NOT RECOMMENDED) or manually specify the cluster name in the Datadog helm values:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">datadog:
-  clusterName: &lt;cluster-name&gt;</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="datadog-always-out-of-sync-with-helm-and-argocd">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#datadog-always-out-of-sync-with-helm-and-argocd">#</doc-anchor-trigger>
-        <span>Datadog always out-of-sync with helm and argocd</span>
-    </h2>
-</doc-anchor-target>
-<p>By default, Datadog auto-assigns random values to the following on restarts:</p>
-<ol>
-<li>Token used for authentication between the cluster agent and node agents.</li>
-<li>Configmap for the APM Instrumentation KPIs.</li>
-</ol>
-<p>This leads to Datadog being permanently out-of-sync when deployed with Helm and ArgoCD. To solve this issue, follow the steps below:</p>
-<ol>
-<li><p>Provide a cluster agent token as a secret.</p>
-<ul>
-<li><p>Generate a random 32-digit hexadecimal number.</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash">openssl rand -hex 32</code></pre>
-</doc-codeblock></div>
-</li>
-<li><p>Create a secret with the number generated above.</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">apiVersion: v1
-kind: Secret
-metadata:
-  name: datadog
-stringData:
-  token: &lt;random-hex-32&gt;</code></pre>
-</doc-codeblock></div>
-</li>
-<li><p>Use existing secret in Datadog helm values.</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">clusterAgent:
-  tokenExistingSecret: datadog</code></pre>
-</doc-codeblock></div>
 </li>
 </ul>
 </li>
-<li><p>Disable API Instrumentation KPIs by setting the <code v-pre>datadog.apm.instrumentation.skipKPITelemetry</code> to <code v-pre>false</code> in the datadog helm values.</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">datadog:
-  apm:
-    instrumentation:
-      skipKPITelemetry: true</code></pre>
-</doc-codeblock></div>
+<li>Update infrastructure
+<ul>
+<li>We use Terraform to manage infrastructure. Reach out to Zain Nasir (<a href="mailto:nasirz1@mskcc.org">nasirz1@mskcc.org</a>) for more info.</li>
+</ul>
 </li>
-</ol>
+</ul>
+<doc-anchor-target id="eucentraloncokborg">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#eucentraloncokborg">#</doc-anchor-trigger>
+        <span>eucentral.oncokb.org</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>All apps under eucentral.oncokb.org is managed by k8s.</li>
+<li>Cluster is in eu-central-1</li>
+<li>This is under the legacy AWS account. Please reach out to Ino de Bruijn(<a href="mailto:debruiji@mskcc.org">debruiji@mskcc.org</a>) for access</li>
+<li>Update infrastructure
+<ul>
+<li>We use aws eks created/updated ec2 resource. Other resource through website or aws cli.</li>
+</ul>
+</li>
+</ul>
+<doc-anchor-target id="oncokbawsmskccorg">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#oncokbawsmskccorg">#</doc-anchor-trigger>
+        <span>oncokb.aws.mskcc.org</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>All apps under oncokb.dev.aws.mskcc.org is managed by ArgoCD.</li>
+<li>Cluster is in us-east-1</li>
+<li>We use standard private VPC account from MSK. Please reach out to <a href="https://thespot.mskcc.org/esc/?id=sc_cat_item&amp;sys_id=cee42b7cdb09a010701a2a591396198b">MSK security for access</a>.</li>
+<li>Access cluster
+<ul>
+<li>We use standard private VPC account from MSK. Please reach out to <a href="https://thespot.mskcc.org/esc/?id=sc_cat_item&amp;sys_id=cee42b7cdb09a010701a2a591396198b">MSK security for access</a>.</li>
+<li>See <a href="https://github.mskcc.org/CloudArchitecture/CloudDocs/blob/master/user-docs/aws/accounts.md#logging-in-to-aws">HERE</a> for details on how to log in to the cluster</li>
+<li>Once logged in, you need to switch to k8s context to see the cluster.
+<ul>
+<li>Use <code v-pre>aws eks --region us-east-1 update-kubeconfig --name &lt;cluster name&gt;</code> if it&#x27;s first time accessing the cluster</li>
+<li>Use <code v-pre>kubectl config use-context &lt;cluster name&gt;</code>to switch to cluster</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Update infrastructure
+<ul>
+<li>We use Terraform to manage infrastructure. Reach out to Zain Nasir (<a href="mailto:nasirz1@mskcc.org">nasirz1@mskcc.org</a>) for more info.</li>
+</ul>
+</li>
+</ul>
+<doc-anchor-target id="oncokbdevawsmskccorg">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#oncokbdevawsmskccorg">#</doc-anchor-trigger>
+        <span>oncokb.dev.aws.mskcc.org</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>All apps under oncokb.dev.aws.mskcc.org is managed by ArgoCD.</li>
+<li>Cluster is in us-east-1</li>
+<li>Access cluster
+<ul>
+<li>See the same section of <code v-pre>oncokb.aws.mskcc.org</code> environment for details</li>
+</ul>
+</li>
+<li>Update infrastructure
+<ul>
+<li>See the same section of <code v-pre>oncokb.aws.mskcc.org</code> environment for details</li>
+</ul>
+</li>
+</ul>
 
                                 
                                 <!-- Required only on API pages -->
@@ -358,33 +289,12 @@ stringData:
                             </div>
                             <footer id="retype-content-footer" class="clear-both">
                                 <div class="flex flex-wrap items-center justify-between mt-14">
-                                    <a id="retype-edit-this-page" class="my-2.5 inline-flex items-center text-sm whitespace-nowrap text-body-link font-body-link-weight hover:text-body-link-hover hover:underline" href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/docs/troubleshooting.md" target="_blank" rel="noopener">
+                                    <a id="retype-edit-this-page" class="my-2.5 inline-flex items-center text-sm whitespace-nowrap text-body-link font-body-link-weight hover:text-body-link-hover hover:underline" href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/docs/oncokb/SYSTEM.md" target="_blank" rel="noopener">
                                         <svg class="mr-1.5" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" overflow="visible"><path d="M20 12c-.55 0-1 .45-1 1v7c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h7c.55 0 1-.45 1-1s-.45-1-1-1H4C2.35 3 1 4.35 1 6v14c0 1.65 1.35 3 3 3h14c1.65 0 3-1.35 3-3v-7c0-.55-.45-1-1-1z" /><path d="M22.21 1.79c-1.18-1.18-3.24-1.18-4.41 0l-9.5 9.5c-.13.13-.22.29-.26.46l-1 4c-.08.34.01.7.26.95.18.2.44.3.7.3.08 0 .16-.01.24-.03l4-1c.18-.04.34-.13.46-.26l9.5-9.5c1.22-1.22 1.22-3.2.01-4.42zm-1.42 3l-9.3 9.3-2.11.53.53-2.11 9.3-9.3c.42-.42 1.16-.42 1.59 0 .43.43.43 1.15-.01 1.58z" /><path fill="none" d="M0 0h24v24H0z" /></svg>
                                         <span>Edit on GitHub</span>
                                     </a>
                                 </div>
                             
-                                <nav id="retype-nextprev" class="print:hidden flex mt-14">
-                                    <div class="w-1/2">
-                                        <a class="px-5 py-4 h-full flex items-center break-normal font-medium text-body-link border border-base-border hover:border-base-border-hover rounded-l-lg transition-colors duration-150 relative hover:z-5" href="../tutorials/ip-blocking/">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-3" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" overflow="visible"><path d="M19 11H7.41l5.29-5.29a.996.996 0 10-1.41-1.41l-7 7a1 1 0 000 1.42l7 7a1.024 1.024 0 001.42-.01.996.996 0 000-1.41L7.41 13H19c.55 0 1-.45 1-1s-.45-1-1-1z" /><path fill="none" d="M0 0h24v24H0z" /></svg>
-                                            <span>
-                                                <span class="block text-xs font-normal text-base-text-muted">Previous</span>
-                                                <span class="block mt-1">IP Blocking</span>
-                                            </span>
-                                        </a>
-                                    </div>
-                            
-                                    <div class="w-1/2">
-                                        <a class="px-5 py-4 -mx-px h-full flex items-center justify-end break-normal font-medium text-body-link border border-base-border hover:border-base-border-hover rounded-r-lg transition-colors duration-150 relative hover:z-5" href="../incidents-log/">
-                                            <span>
-                                                <span class="block text-xs font-normal text-right text-base-text-muted">Next</span>
-                                                <span class="block mt-1">Incidents Log</span>
-                                            </span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="ml-3" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" overflow="visible"><path d="M19.92 12.38a1 1 0 00-.22-1.09l-7-7a.996.996 0 10-1.41 1.41l5.3 5.3H5c-.55 0-1 .45-1 1s.45 1 1 1h11.59l-5.29 5.29a.996.996 0 000 1.41c.19.2.44.3.7.3s.51-.1.71-.29l7-7c.09-.09.16-.21.21-.33z" /><path fill="none" d="M0 0h24v24H0z" /></svg>
-                                        </a>
-                                    </div>
-                                </nav>
                             </footer>
                         </main>
                 
@@ -423,6 +333,6 @@ stringData:
 
     <div id="retype-overlay-target"></div>
 
-    <script data-cfasync="false">window.__DOCS__ = { "title": "Troubleshooting", level: 1, icon: "file", hasPrism: true, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
+    <script data-cfasync="false">window.__DOCS__ = { "title": "OncoKB System", level: 2, icon: "file", hasPrism: false, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
 </body>
 </html>
