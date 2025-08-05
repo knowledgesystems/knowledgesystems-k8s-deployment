@@ -15,7 +15,7 @@ spec:
       run: cbioportal-backend-public
   strategy:
     blueGreen:
-      activeService: cbioportal-backend-public-test
+      activeService: cbioportal-backend-public
       autoPromotionEnabled: true
       previewReplicaCount: 1
   template:
