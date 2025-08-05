@@ -1,28 +1,28 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
-    run: cbioportal-backend-public-green
+    run: cbioportal-backend-public
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.3
-  name: cbioportal-backend-public-green
+  name: cbioportal-backend-public
 spec:
-  replicas: 4
+  replicas: 0
   selector:
     matchLabels:
-      run: cbioportal-backend-public-green
+      run: cbioportal-backend-public
   strategy:
-    rollingUpdate:
-      maxSurge: 4
-      maxUnavailable: 1
-    type: RollingUpdate
+    blueGreen:
+      activeService: cbioportal-backend-public-test
+      autoPromotionEnabled: true
+      previewReplicaCount: 1
   template:
     metadata:
       creationTimestamp: null
       labels:
-        run: cbioportal-backend-public-green
+        run: cbioportal-backend-public
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.3.3
@@ -38,7 +38,9 @@ spec:
       containers:
       - envFrom:
         - secretRef:
-            name: cbioportal-public-green
+            name: cbioportal-public
+        - secretRef:
+            name: cbioportal-public-db-green
         env:
           - name: DD_PROFILING_ENABLED
             value: "true"
@@ -187,7 +189,7 @@ spec:
             "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
-            "--redis.database=9",
+            "--redis.database=$(REDIS_DATABASE)",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             "--redis.clear_on_startup=false",
             "--cache.endpoint.enabled=true",
@@ -257,7 +259,7 @@ spec:
           timeoutSeconds: 1
           periodSeconds: 12
           failureThreshold: 5
-        name: cbioportal-backend-public-green
+        name: cbioportal-backend-public
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -291,14 +293,14 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
-    run: cbioportal-backend-public-green
+    run: cbioportal-backend-public
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
-  name: cbioportal-backend-public-green
+  name: cbioportal-backend-public
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: cbioportal-backend-public-green
+    run: cbioportal-backend-public
   type: ClusterIP
