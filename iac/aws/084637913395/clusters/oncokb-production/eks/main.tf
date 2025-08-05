@@ -37,6 +37,9 @@ module "eks_cluster" {
     efscsi = {
       create = false
     }
+    observability = {
+      create = false
+    }
   }
 
   # EKS Managed Node Groups

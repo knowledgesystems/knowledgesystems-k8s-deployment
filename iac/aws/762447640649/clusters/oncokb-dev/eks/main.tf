@@ -85,6 +85,15 @@ module "eks_cluster" {
   cluster_endpoint_public_access  = var.API_PUBLIC
   cluster_endpoint_private_access = var.API_PRIVATE
 
+  hyc_addon_configs = {
+    efscsi = {
+      create = false
+    }
+    observability = {
+      create = false
+    }
+  }
+
   # EKS Managed Node Groups
   eks_managed_node_groups = {
     for name, config in local.node_groups : name => merge(config, {
