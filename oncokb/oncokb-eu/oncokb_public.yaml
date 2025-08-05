@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: oncokb-public
 spec:
-  replicas: 4
+  replicas: 2
   selector:
     matchLabels:
       app: oncokb-public
@@ -90,7 +90,8 @@ spec:
           ports:
             - name: http
               containerPort: 9095
-
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "general"
 ---
 apiVersion: v1
 kind: Service

@@ -76,6 +76,8 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "general"
 status: {}
 ---
 apiVersion: v1
