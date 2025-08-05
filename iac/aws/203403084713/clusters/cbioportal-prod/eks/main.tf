@@ -67,6 +67,7 @@ locals {
       min_size       = 4
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
+        data_vol = var.DATA_VOL_CONFIG
       }
       taints = {
         dedicated = {
@@ -167,17 +168,7 @@ locals {
       max_size       = 2
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
-        data_vol = {
-          device_name = "/dev/xvdb"
-          ebs = {
-            volume_size           = 50
-            volume_type           = "gp3"
-            iops                  = 3000
-            throughput            = 125
-            encrypted             = true
-            delete_on_termination = true
-          }
-        }
+        data_vol = var.DATA_VOL_CONFIG
       }
       taints = {
         dedicated = {
@@ -203,17 +194,7 @@ locals {
       max_size       = 1
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
-        data_vol = {
-          device_name = "/dev/xvdb"
-          ebs = {
-            volume_size           = 50
-            volume_type           = "gp3"
-            iops                  = 3000
-            throughput            = 125
-            encrypted             = true
-            delete_on_termination = true
-          }
-        }
+        data_vol = var.DATA_VOL_CONFIG
       }
       taints = {
         dedicated = {
@@ -239,17 +220,7 @@ locals {
       max_size       = 2
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
-        data_vol = {
-          device_name = "/dev/xvdb"
-          ebs = {
-            volume_size           = 50
-            volume_type           = "gp3"
-            iops                  = 3000
-            throughput            = 125
-            encrypted             = true
-            delete_on_termination = true
-          }
-        }
+        data_vol = var.DATA_VOL_CONFIG
       }
       taints = {
         dedicated = {
