@@ -18,6 +18,10 @@ spec:
       labels:
         run: oncokb-core-clinical-trials
     spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
       containers:
         - env:
           envFrom:
@@ -31,6 +35,9 @@ spec:
                 name: aws-cli-credentials
           # The beta current is used to showcase a new search endpoint
           image: oncokb/oncokb:ct-alpha.4
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
           command: ["java"]
           args:
             [
@@ -51,6 +58,7 @@ spec:
               "-Dredis.masterName=$(REDIS_MASTERNAME)",
               "-Dredis.expiration=$(REDIS_EXPIRATION)",
               "-Dshow_sitemaps=false",
+              "-Dlog4j.configuration=file:/config/log4j.properties",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",

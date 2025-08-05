@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   labels:
     run: oncokb-core-beta
+    tags.datadoghq.com/env: eks-beta-oncokb
+    tags.datadoghq.com/service: oncokb-core
   name: oncokb-core-beta
   namespace: oncokb
 spec:
@@ -18,7 +20,14 @@ spec:
     metadata:
       labels:
         run: oncokb-core-beta
+        tags.datadoghq.com/env: eks-beta-oncokb
+        tags.datadoghq.com/service: oncokb-core
+        admission.datadoghq.com/enabled: "true"
     spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
       containers:
         - env:
           envFrom:
@@ -29,7 +38,10 @@ spec:
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:4.0.0
+          image: oncokb/oncokb:4.1.0
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
           command: ["java"]
           args:
             [
@@ -51,6 +63,7 @@ spec:
               "-Dshow_sitemaps=false",
               "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
               "-Dsentry.sample.rate=1",
+              "-Dlog4j.configuration=file:/config/log4j.properties",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
