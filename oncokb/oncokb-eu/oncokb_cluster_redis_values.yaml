@@ -9,7 +9,8 @@ redis:
   readinessProbe:
     failureThreshold: 10
     timeoutSeconds: 5
-
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: "general"
 cluster:
   nodes: 6
   replicas: 1

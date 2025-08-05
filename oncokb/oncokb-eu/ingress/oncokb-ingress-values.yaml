@@ -21,5 +21,7 @@ controller:
       service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
   stats:
     enabled: true
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: "general"
 rbac:
   create: true

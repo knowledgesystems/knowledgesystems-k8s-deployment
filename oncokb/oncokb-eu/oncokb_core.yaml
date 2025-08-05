@@ -9,14 +9,14 @@ metadata:
     run: oncokb-core
   name: oncokb-core
 spec:
-  replicas: 4
+  replicas: 2
   selector:
     matchLabels:
       run: oncokb-core
   strategy:
     rollingUpdate:
       # We want to do a rolling updates to make sure all old instances removed before last new pod is initialized.
-      maxUnavailable: 2
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
@@ -123,6 +123,8 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "general"
 status: {}
 ---
 apiVersion: v1

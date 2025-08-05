@@ -1,0 +1,9 @@
+image:
+  repository: genomenexus/gn-mongo
+  tag: 0.32_grch38_ensembl95
+  pullPolicy: Always
+persistence:
+  enabled: true
+  size: 35Gi
+nodeSelector:
+  eks.amazonaws.com/nodegroup: "general"

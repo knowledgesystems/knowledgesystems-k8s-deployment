@@ -79,6 +79,13 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "gn-grch37"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "gn-grch37"
+          effect: "NoSchedule"
 status: {}
 ---
 apiVersion: v1
