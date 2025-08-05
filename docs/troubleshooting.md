@@ -9,15 +9,7 @@ Our new Terraform modules use a default ephemeral storage which might not be eno
 ```
 The node was low on resource: ephemeral-storage. Threshold quantity: 123456789, available: 123456Ki.
 ```
-To increase the ephemeral storage capacity for the nodegroup, update the terraform modules to use a custom value:
-```terraform
-nodegroup-name = {
-  ...
-  disk_size                  = 50 # New capacity in GB
-  use_custom_launch_template = false # Important
-  ...
-}
-```
+To increase the ephemeral storage capacity for the nodegroup, update the terraform modules to use custom disk sizes. As an example, look at the current nodegroups [here](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/iac/aws/203403084713/clusters/cbioportal-prod/eks/main.tf#L68-L71).
 
 ## AWS-CNI Failing to Assign IP Addresses
 If a AWS EKS managed nodegroup has too many pods deployed on one of its EC2 nodes, it can run out of IP Addresses with the error:
