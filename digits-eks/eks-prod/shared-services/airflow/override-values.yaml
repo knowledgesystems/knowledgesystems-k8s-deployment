@@ -98,6 +98,9 @@ workers:
     - name: git-secret
       mountPath: /home/airflow/.ssh
       readOnly: true
+    - name: hpc2-ssh-keyfile
+      mountPath: /opt/airflow/secrets/hpc2-ssh-keyfile
+      readOnly: true
     - name: hpc3-ssh-keyfile
       mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
       readOnly: true
@@ -106,6 +109,9 @@ workers:
       readOnly: true
     - name: pipelines3-ssh-keyfile
       mountPath: /opt/airflow/secrets/pipelines3-ssh-keyfile
+      readOnly: true
+    - name: pipelines5-ssh-keyfile
+      mountPath: /opt/airflow/secrets/pipelines5-ssh-keyfile
       readOnly: true
 
   extraVolumes:
@@ -120,6 +126,10 @@ workers:
       secret:
         # Assumes that `Secret/airflow-git-secret` contains an SSH key called `id_ed25519`
         secretName: airflow-git-secret
+    - name: hpc2-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-hpc2-ssh-keyfile` contains an SSH key called `id_rsa`
+        secretName: airflow-hpc2-ssh-keyfile
     - name: hpc3-ssh-keyfile
       secret:
         # Assumes that `Secret/airflow-hpc3-ssh-keyfile` contains an SSH key called `id_rsa`
@@ -132,6 +142,10 @@ workers:
       secret:
         # Assumes that `Secret/airflow-pipelines3-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_pipelines3`
         secretName: airflow-pipelines3-ssh-keyfile
+    - name: pipelines5-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-pipelines5-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_pipelines5`
+        secretName: airflow-pipelines5-ssh-keyfile
 
 logs:
   persistence:
@@ -146,6 +160,9 @@ secret:
   - envName: "AIRFLOW_CONN_SMTP_DEFAULT"
     secretName: "airflow-smtp-uri"
     secretKey: "AIRFLOW_CONN_SMTP_DEFAULT"
+  - envName: "AIRFLOW_CONN_PLLIMSKHPC2_CF_SSH"
+    secretName: "airflow-hpc2-cf-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PLLIMSKHPC2_CF_SSH"
   - envName: "AIRFLOW_CONN_PLLIMSKHPC3_SSH"
     secretName: "airflow-hpc3-ssh-uri"
     secretKey: "AIRFLOW_CONN_PLLIMSKHPC3_SSH"
@@ -158,6 +175,9 @@ secret:
   - envName: "AIRFLOW_CONN_PIPELINES3_SSH"
     secretName: "airflow-pipelines3-ssh-uri"
     secretKey: "AIRFLOW_CONN_PIPELINES3_SSH"
+  - envName: "AIRFLOW_CONN_PIPELINES5_SSH"
+    secretName: "airflow-pipelines5-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PIPELINES5_SSH"
 
 dags:
   gitSync:
