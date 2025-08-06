@@ -19,6 +19,10 @@ spec:
       labels:
         run: oncokb-core-cbx
     spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
       containers:
         - env:
           envFrom:
@@ -28,7 +32,10 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - secretRef:
                 name: oncokb-redis-cluster
-          image: oncokb/oncokb:4.0.0
+          image: oncokb/oncokb:4.1.0
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
           command: ["java"]
           args:
             [
@@ -47,6 +54,7 @@ spec:
               "-Dshow_sitemaps=false",
               "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
               "-Dsentry.sample.rate=1",
+              "-Dlog4j.configuration=file:/config/log4j.properties",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
