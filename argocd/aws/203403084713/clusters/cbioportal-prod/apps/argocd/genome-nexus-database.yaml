@@ -17,6 +17,13 @@ spec:
       targetRevision: 7.3.1
       chart: mongodb
       helm:
+        releaseName: gn-mongo-v0dot32-useast1b
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/gn_mongodb_grch37_useast1b_helm_value.yaml
+    - repoURL: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+      targetRevision: 7.3.1
+      chart: mongodb
+      helm:
         releaseName: gn-mongo-v0dot32-grch38-ensembl95
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/gn_mongodb_grch38_helm_value.yaml
