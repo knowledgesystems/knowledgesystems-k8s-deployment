@@ -1,5 +1,4 @@
 terraform {
-  # Lock Terraform version to “~> 1.10.4” using pessimistic version constraint
   required_version = "~> 1.11.4"
 
   # Lock AWS Provider to major version “~> 5.0” using pessimistic version constraint
