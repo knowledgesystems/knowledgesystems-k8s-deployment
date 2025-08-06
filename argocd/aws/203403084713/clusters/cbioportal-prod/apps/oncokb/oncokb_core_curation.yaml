@@ -3,8 +3,8 @@ kind: Deployment
 metadata:
   labels:
     run: oncokb-core-curation
-    tags.datadoghq.com/env: eks-staging-oncokb
-    tags.datadoghq.com/service: oncokb-core
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: oncokb-core-curation
   name: oncokb-core-curation
   namespace: oncokb
 spec:
