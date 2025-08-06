@@ -24,6 +24,10 @@ spec:
       labels:
         run: oncokb-core
     spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
       containers:
         - env:
           envFrom:
@@ -37,7 +41,10 @@ spec:
                 name: oncokb-redis-cluster
             - configMapRef:
                 name: oncokb-db-eucentral-rds
-          image: oncokb/oncokb:4.0.0
+          image: oncokb/oncokb:4.1.0
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -79,6 +86,7 @@ spec:
               "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
               "-Dsentry.sample.rate=0.5",
               "-Dshow_sitemaps=false",
+              "-Dlog4j.configuration=file:/config/log4j.properties",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
