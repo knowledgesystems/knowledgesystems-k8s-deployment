@@ -4,6 +4,8 @@ metadata:
   creationTimestamp: null
   labels:
     run: oncokb-core-public
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: oncokb-core-public
   name: oncokb-core-public
   namespace: oncokb
 spec:
@@ -21,7 +23,16 @@ spec:
       creationTimestamp: null
       labels:
         run: oncokb-core-public
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: oncokb-core-public
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
       containers:
         - env:
           envFrom:
@@ -29,7 +40,10 @@ spec:
                 name: oncokb-core-public
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:4.0.0-no-frontend
+          image: oncokb/oncokb:4.1.0-no-frontend
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
           command: ["java"]
           args: [
               # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
@@ -60,6 +74,7 @@ spec:
               "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus",
               "-Dsentry.sample.rate=0.1",
               "-Dis_public_instance=true",
+              "-Dlog4j.configuration=file:/config/log4j.properties",
               "-jar",
               "/webapp-runner.jar",
               "--enable-compression",
