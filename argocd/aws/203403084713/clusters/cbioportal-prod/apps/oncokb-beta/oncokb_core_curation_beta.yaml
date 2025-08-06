@@ -20,9 +20,11 @@ spec:
     metadata:
       labels:
         run: oncokb-core-curation-beta
-        tags.datadoghq.com/env: eks-beta-staging-oncokb
-        tags.datadoghq.com/service: oncokb-core
+        tags.datadoghq.com/env: eks-beta-oncokb
+        tags.datadoghq.com/service: oncokb-core-curation
         admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
         - name: log4j-properties

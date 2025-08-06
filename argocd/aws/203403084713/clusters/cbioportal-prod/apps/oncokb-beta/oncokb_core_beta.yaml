@@ -23,6 +23,8 @@ spec:
         tags.datadoghq.com/env: eks-beta-oncokb
         tags.datadoghq.com/service: oncokb-core
         admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
         - name: log4j-properties
