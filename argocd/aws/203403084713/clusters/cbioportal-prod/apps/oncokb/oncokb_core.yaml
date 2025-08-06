@@ -46,7 +46,7 @@ spec:
                 name: oncokb-redis-cluster-ng
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:4.0.0
+          image: oncokb/oncokb:4.1.0
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
