@@ -4,6 +4,11 @@ image:
   pullPolicy: Always
 persistence:
   enabled: true
-  size: 35Gi
+  size: 20Gi
 nodeSelector:
-  eks.amazonaws.com/nodegroup: "general"
+  eks.amazonaws.com/nodegroup: "gn-grch37"
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "gn-grch37"
+    effect: "NoSchedule"
