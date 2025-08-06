@@ -29,7 +29,7 @@ spec:
       volumes:
         - name: log4j-properties
           configMap:
-            name: oncokb-core-log4j-properties
+            name: oncokb-core-log4j-properties-beta
       containers:
         - env:
           envFrom:
