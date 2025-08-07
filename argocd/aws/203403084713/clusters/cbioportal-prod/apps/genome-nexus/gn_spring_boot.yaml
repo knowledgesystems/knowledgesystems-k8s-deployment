@@ -26,7 +26,7 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot32-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-v0dot32-useast1b-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
