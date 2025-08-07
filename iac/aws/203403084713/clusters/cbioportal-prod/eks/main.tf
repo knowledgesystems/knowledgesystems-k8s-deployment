@@ -201,6 +201,7 @@ locals {
       desired_size   = 1
       min_size       = 1
       max_size       = 1
+      version        = 1.31
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
         data_vol = var.DATA_VOL_CONFIG
@@ -362,9 +363,9 @@ locals {
     oncokb-af = {
       instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
       }
