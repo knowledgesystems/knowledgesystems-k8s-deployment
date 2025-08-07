@@ -25,5 +25,5 @@ tolerations:
 
 nodeSelector:
   workload: gn-database
-  zone: us-east-1b
+  topology.kubernetes.io/zone: us-east-1b
   # kubernetes.io/hostname: # Replace with the exact node name
