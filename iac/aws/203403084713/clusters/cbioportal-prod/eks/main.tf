@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.31.0"
+    }
+  }
+}
 locals {
   # Use locals for node groups to enforce required tags
   node_groups = {
@@ -457,4 +465,17 @@ module "eks_cluster" {
       )
     })
   }
+}
+
+module "iam" {
+  source = "../../../shared/iam"
+}
+
+resource "aws_eks_addon" "s3_mountpoint_addon" {
+  addon_name   = "aws-mountpoint-s3-csi-driver"
+  addon_version = "v1.15.0-eksbuild.1"
+  cluster_name = var.CLUSTER_NAME
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+  service_account_role_arn = module.iam.cellxgene_s3_mountpoint_role_arn
 }
