@@ -35,8 +35,8 @@ variable "CLUSTER_VER" {
 
 variable "NODEGROUP_VER" {
   description = "Kubernetes version of the nodegroups"
-  type = string
-  default = "1.30"
+  type        = string
+  default     = "1.30"
 }
 
 variable "CLUSTER_ENV" {
@@ -147,7 +147,7 @@ variable "DATA_VOL_CONFIG" {
 
 variable "ADDON_CONFIG" {
   description = "Override default HYC addon config"
-  type = any
+  type        = any
   default = {
     observability = {
       create = false

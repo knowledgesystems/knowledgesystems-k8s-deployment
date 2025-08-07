@@ -7,7 +7,7 @@ locals {
       desired_size   = 4
       max_size       = 5
       min_size       = 4
-      version = 1.31
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -25,7 +25,7 @@ locals {
       desired_size   = 3
       max_size       = 4
       min_size       = 3
-      version = 1.31
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -43,7 +43,7 @@ locals {
       desired_size   = 3
       max_size       = 3
       min_size       = 2
-      version = 1.31
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -61,7 +61,7 @@ locals {
       desired_size   = 2
       max_size       = 3
       min_size       = 2
-      version = 1.31
+      version        = 1.31
     }
     redis = {
       instance_types = ["r7g.large"]
@@ -69,7 +69,7 @@ locals {
       desired_size   = 4
       max_size       = 5
       min_size       = 4
-      version = 1.31
+      version        = 1.31
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
         data_vol = var.DATA_VOL_CONFIG
@@ -91,7 +91,7 @@ locals {
       desired_size   = 2
       min_size       = 1
       max_size       = 3
-      version = 1.31
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -109,6 +109,7 @@ locals {
       desired_size   = 1
       min_size       = 1
       max_size       = 2
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -126,6 +127,7 @@ locals {
       desired_size   = 2
       min_size       = 2
       max_size       = 2
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -148,6 +150,7 @@ locals {
       desired_size   = 1
       min_size       = 1
       max_size       = 2
+      version        = 1.31
       # Pin to a single subnet. This prevents nodegroup to be created in a availability zone different from the underlying mongodb volume during rolling upgrades
       subnet_ids = ["subnet-066aca23688737c91"]
       taints = {
@@ -250,6 +253,7 @@ locals {
       desired_size   = 2
       min_size       = 1
       max_size       = 3
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -386,6 +390,7 @@ locals {
       desired_size   = 2
       max_size       = 2
       min_size       = 2
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -403,6 +408,7 @@ locals {
       desired_size   = 1
       max_size       = 1
       min_size       = 1
+      version        = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
