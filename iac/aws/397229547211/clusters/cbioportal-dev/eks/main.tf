@@ -1,7 +1,7 @@
 locals {
   # Use locals for node groups to enforce required tags
   node_groups = {
-    argocd = {
+    addons = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 2
@@ -32,6 +32,13 @@ module "eks_cluster" {
   # API Controls
   cluster_endpoint_public_access  = var.API_PUBLIC
   cluster_endpoint_private_access = var.API_PRIVATE
+
+  # HYC addons
+  hyc_addon_configs = {
+    observability = {
+      create = false
+    }
+  }
 
   # EKS Managed Node Groups
   eks_managed_node_groups = {
