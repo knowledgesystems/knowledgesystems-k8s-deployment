@@ -31,11 +31,11 @@ externalDatabase:
 scheduler:
   logCleanup:
     enabled: true
-    retentionMinutes: 43800 # retain logs for 1 month
+    retentionMinutes: 10080 # retain logs for 1 month
 worker:
   logCleanup:
     enabled: true
-    retentionMinutes: 43800
+    retentionMinutes: 10080
 
 rbac:
   create: false
