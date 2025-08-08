@@ -31,6 +31,18 @@ agents:
       operator: Equal
       value: cbioportal-redis
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: gn-database
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: gn-vep
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: genome-nexus
+      effect: NoSchedule
 clusterAgent:
 #  confd:
 #    nginx_ingress_controller.yaml: |-
