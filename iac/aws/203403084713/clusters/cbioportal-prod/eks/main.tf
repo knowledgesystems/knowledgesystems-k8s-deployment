@@ -294,6 +294,7 @@ locals {
       desired_size   = 2
       min_size       = 2
       max_size       = 2
+      version = 1.31
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
         data_vol = var.DATA_VOL_CONFIG
@@ -320,6 +321,7 @@ locals {
       desired_size   = 3
       min_size       = 3
       max_size       = 3
+      version = 1.31
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -342,8 +344,9 @@ locals {
       desired_size   = 1
       min_size       = 1
       max_size       = 1
-      # Pin to specific subnets. This prevents nodegroup to be created in a availability zone different from the underlying persistent volumes
-      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91"]
+      version = 1.31
+      # Pin to a single subnet. This prevents nodegroup to be created in a availability zone different from the underlying persistent volumes
+      subnet_ids = ["subnet-0b42183b1df0e9061"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -366,6 +369,7 @@ locals {
       desired_size   = 2
       min_size       = 2
       max_size       = 2
+      version = 1.31
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
       }
