@@ -31,7 +31,7 @@ spec:
             "--backed", 
             "--disable-annotations", 
             "--disable-gene-sets-save", 
-            "s3://nf-tower-staging/data/cellxgene/pbmc3k.h5ad"
+            "/mountpoint-s3/data/cellxgene/pbmc3k.h5ad"
           ]
           ports:
           - containerPort: 8080
