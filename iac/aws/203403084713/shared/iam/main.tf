@@ -1,40 +1,41 @@
 locals {
-  cluster_oidc_provier_arn = "oidc.eks.us-east-1.amazonaws.com/id/E4307C7D0E9D1085785B32B8849A07BF"
-  account_id = data.aws_caller_identity.current.account_id
+  cluster_oidc_provier_arn    = "oidc.eks.us-east-1.amazonaws.com/id/E4307C7D0E9D1085785B32B8849A07BF"
+  account_id                  = data.aws_caller_identity.current.account_id
+  permissions_boundary_policy = "AutomationOrUserServiceRolePermissions"
 }
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_iam_policy" "cellxgene_s3_mountpoint_policy" {
-  name        = "cellxgene-s3-mountpoint-policy"
+resource "aws_iam_policy" "userServicePolicyCellxgeneS3Mountpoint" {
+  name        = "userServicePolicyCellxgeneS3Mountpoint"
   path        = "/"
   description = "Policy to allow S3 Mountpoint CSI cluster add-on to access S3 buckets"
 
   policy = jsonencode(
     {
-      "Version": "2012-10-17",
-      "Statement": [
+      "Version" : "2012-10-17",
+      "Statement" : [
         {
-          "Sid": "MountpointFullBucketAccess",
-          "Effect": "Allow",
-          "Action": [
+          "Sid" : "MountpointFullBucketAccess",
+          "Effect" : "Allow",
+          "Action" : [
             "s3:ListBucket"
           ],
-          "Resource": [
-            "arn:aws:s3:::cbioportal-session-service-dump"
+          "Resource" : [
+            "arn:aws:s3:::nf-tower-staging"
           ]
         },
         {
-          "Sid": "MountpointFullObjectAccess",
-          "Effect": "Allow",
-          "Action": [
+          "Sid" : "MountpointFullObjectAccess",
+          "Effect" : "Allow",
+          "Action" : [
             "s3:GetObject",
             "s3:PutObject",
             "s3:AbortMultipartUpload",
             "s3:DeleteObject"
           ],
-          "Resource": [
-            "arn:aws:s3:::cbioportal-session-service-dump/*"
+          "Resource" : [
+            "arn:aws:s3:::nf-tower-staging/*"
           ]
         }
       ]
@@ -48,8 +49,8 @@ resource "aws_iam_policy" "cellxgene_s3_mountpoint_policy" {
   }
 }
 
-resource "aws_iam_role" "cellxgene_s3_mountpoint_role" {
-  name = "cellxgene_s3_mountpoint_role"
+resource "aws_iam_role" "userServiceRoleCellxgeneS3Mountpoint" {
+  name = "userServiceRoleCellxgeneS3Mountpoint"
 
   assume_role_policy = jsonencode(
     {
@@ -71,6 +72,8 @@ resource "aws_iam_role" "cellxgene_s3_mountpoint_role" {
     }
   )
 
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+
   tags = {
     cdsi-owner = "hweej@mskcc.org"
     cdsi-app   = "cellxgene"
@@ -78,7 +81,7 @@ resource "aws_iam_role" "cellxgene_s3_mountpoint_role" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "cellxgene_s3_mountpoint_role_policy_attachment" {
-  policy_arn = aws_iam_role.cellxgene_s3_mountpoint_role.arn
-  role       = aws_iam_policy.cellxgene_s3_mountpoint_policy.arn
+resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentCellxgeneS3Mountpoint" {
+  policy_arn = aws_iam_policy.userServicePolicyCellxgeneS3Mountpoint.arn
+  role       = aws_iam_role.userServiceRoleCellxgeneS3Mountpoint.name
 }
