@@ -64,7 +64,7 @@ locals {
       version        = 1.31
     }
     redis = {
-      instance_types = ["r7g.large"]
+      instance_types = ["r7g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 4
       max_size       = 5
