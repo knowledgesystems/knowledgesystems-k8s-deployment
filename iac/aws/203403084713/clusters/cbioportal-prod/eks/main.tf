@@ -467,4 +467,16 @@ resource "aws_eks_addon" "s3_mountpoint_addon" {
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
   service_account_role_arn    = "arn:aws:iam::203403084713:role/userServiceRoleCellxgeneS3Mountpoint"
+  configuration_values = jsonencode({
+    node = {
+      tolerations = [
+        {
+          key      = "workload"
+          operator = "Equal"
+          value    = "cellxgene"
+          effect   = "NoSchedule"
+        }
+      ]
+    }
+  })
 }

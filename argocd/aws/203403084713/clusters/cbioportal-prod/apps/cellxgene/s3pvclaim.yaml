@@ -10,10 +10,10 @@ spec:
     - ReadWriteMany
   mountOptions:
     - allow-delete
-    - allow-other
-    - uid=1000
-    - gid=1000
-    - region='us-east-1'
+    - region us-east-1
+  claimRef:
+    namespace: cellxgene
+    name: s3-pvc
   csi:
     driver: s3.csi.aws.com
     volumeHandle: s3-csi-driver-volume
