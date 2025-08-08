@@ -27,6 +27,10 @@ agents:
       operator: Equal
       value: oncokb-beta
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cbioportal-redis
+      effect: NoSchedule
 clusterAgent:
 #  confd:
 #    nginx_ingress_controller.yaml: |-
