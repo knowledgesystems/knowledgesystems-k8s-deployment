@@ -13,7 +13,7 @@ spec:
     - region us-east-1
   claimRef:
     namespace: cellxgene
-    name: s3-pvc
+    name: s3-claim
   csi:
     driver: s3.csi.aws.com
     volumeHandle: s3-csi-driver-volume
