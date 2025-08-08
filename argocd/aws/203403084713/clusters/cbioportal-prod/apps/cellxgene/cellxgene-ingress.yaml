@@ -54,6 +54,16 @@ spec:
     - host: cellxgene.cbioportal.org
       http:
         paths:
+          - path: /pbmc3k-s3-access-example(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-s3-access-example
+                port:
+                  number: 8080
+    - host: cellxgene.cbioportal.org
+      http:
+        paths:
           - path: /Q3_norm_all_batch_reduced_meta_1(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
