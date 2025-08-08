@@ -63,10 +63,31 @@ spec:
       # TODO: It might be better to create a volume from an existing snapshot.
       initContainers:
       - name: download-vep-cache
-        image: busybox:1.30.0
-        command: ['sh', '-c',
-            'cd /vep_data; if [ -d "cache" ]; then cd cache; if [ -f homo_sapiens/98_GRCh37/LRG_7/all_vars.gz.csi ]; then exit 0; fi; fi; mkdir -p cache/tmp; chmod a+w cache/tmp; wget https://genome-nexus-vep-data.s3.amazonaws.com/file_list.txt; for f in $(cat file_list.txt); do mkdir -p $(dirname $f); wget https://genome-nexus-vep-data.s3.amazonaws.com/$f -O $f; done; cd cache; tar xvf homo_sapiens_vep_98_GRCh37.tar'
-        ]
+        image: curlimages/curl:8.7.1
+        command: ['sh','-c']
+        args:
+          - |
+            set -euo pipefail
+            cd /vep_data
+            if [ -d cache ] && [ -f cache/homo_sapiens/98_GRCh37/LRG_7/all_vars.gz.csi ]; then
+              exit 0
+            fi
+            mkdir -p cache/tmp
+            chmod a+w cache/tmp
+
+            # Overwrite file_list.txt if present; retry & follow redirects
+            curl -fL --retry 5 -o file_list.txt https://genome-nexus-vep-data.s3.amazonaws.com/file_list.txt
+
+            # Download each file listed (paths in list are relative; preserve structure)
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              mkdir -p "$(dirname "$f")"
+              curl -fL --retry 5 "https://genome-nexus-vep-data.s3.amazonaws.com/$f" -o "$f"
+            done < file_list.txt
+
+            # Extract
+            cd cache
+            tar xvf homo_sapiens_vep_98_GRCh37.tar
         volumeMounts:
         - name: vep-data
           mountPath: /vep_data
