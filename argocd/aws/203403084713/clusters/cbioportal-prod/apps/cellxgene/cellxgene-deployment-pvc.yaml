@@ -84,3 +84,10 @@ spec:
     dataset: pbmc3k-test.h5ad
   ports:
     - port: 8080
+---
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: s3.csi.aws.com
+spec:
+  attachRequired: false
