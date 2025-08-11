@@ -18,3 +18,10 @@ resource "aws_servicecatalog_provisioned_product" "cBioPortal_Public_DB_Dump" {
     ignore_changes = [tags_all, tags]
   }
 }
+
+resource "aws_s3_bucket" "cellxgene_data" {
+  bucket = "cellxgene-data"
+  tags = {
+    cdsi-app = "cellxgene"
+  }
+}
