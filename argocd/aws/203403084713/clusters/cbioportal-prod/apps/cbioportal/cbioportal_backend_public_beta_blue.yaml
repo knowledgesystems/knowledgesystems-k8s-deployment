@@ -9,7 +9,7 @@ metadata:
     tags.datadoghq.com/version: 6.3.3
   name: cbioportal-backend-public-beta-blue
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       run: cbioportal-backend-public-beta-blue
