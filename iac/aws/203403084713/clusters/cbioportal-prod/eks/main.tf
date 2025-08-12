@@ -170,9 +170,9 @@ locals {
     gn-database = {
       instance_types = ["r7i.2xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
+      desired_size   = 4
+      min_size       = 4
+      max_size       = 4
       subnet_ids     = ["subnet-01e2143c0b3d4f8a6"]
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
