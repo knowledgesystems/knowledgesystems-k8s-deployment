@@ -83,7 +83,12 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       nodeSelector:
-        workload: lg-general
+        workload: legacy-apps
+      tolerations:
+      - key: "workload"
+        operator: "Equal"
+        value: "legacy-apps"
+        effect: "NoSchedule"
 ---
 apiVersion: v1
 kind: Service
