@@ -18,7 +18,7 @@ spec:
     driver: s3.csi.aws.com
     volumeHandle: s3-csi-driver-volume
     volumeAttributes:
-      bucketName: 'nf-tower-staging'
+      bucketName: 'cellxgene-data'
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
