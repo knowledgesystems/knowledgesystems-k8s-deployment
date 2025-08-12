@@ -22,7 +22,7 @@ resource "aws_iam_policy" "userServicePolicyCellxgeneS3Mountpoint" {
             "s3:ListBucket"
           ],
           "Resource" : [
-            "arn:aws:s3:::nf-tower-staging"
+            "arn:aws:s3:::cellxgene-data"
           ]
         },
         {
@@ -35,7 +35,7 @@ resource "aws_iam_policy" "userServicePolicyCellxgeneS3Mountpoint" {
             "s3:DeleteObject"
           ],
           "Resource" : [
-            "arn:aws:s3:::nf-tower-staging/*"
+            "arn:aws:s3:::cellxgene-data/*"
           ]
         }
       ]
