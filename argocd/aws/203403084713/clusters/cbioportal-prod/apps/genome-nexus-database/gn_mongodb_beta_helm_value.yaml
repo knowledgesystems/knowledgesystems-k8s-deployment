@@ -1,6 +1,6 @@
 image:
   repository: genomenexus/gn-mongo
-  tag: sha-317d6fa9d7349d850c948ce3e63a556596a013c4-grch37_ensembl92-ma_true
+  tag: sha-6ce3181e7924f45971005d6aba1c4483a75b5f59-grch37_ensembl92-ma_true
   pullPolicy: Always
 persistence:
   enabled: true
