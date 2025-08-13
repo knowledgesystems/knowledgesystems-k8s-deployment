@@ -1,6 +1,6 @@
 image:
   repository: genomenexus/gn-mongo
-  tag: 0.32_mutationassessor
+  tag: sha-317d6fa9d7349d850c948ce3e63a556596a013c4-grch37_ensembl92-ma_true
   pullPolicy: Always
 persistence:
   enabled: true
@@ -16,6 +16,15 @@ persistence:
 #             operator: In
 #             values:
 #               -  # Replace with the exact node name
+
+# env used by import_mongo.sh
+extraEnvVars:
+  - name: COLLECTION_UPDATE_LIST
+    # Example: force-update these even if they already exist
+    value: "hotspot.mutation,signal.mutation"
+  # Optional: make the DB explicit so shell checks don’t need to parse URI
+  - name: MONGO_DB
+    value: "annotator"
 
 tolerations:
   - key: workload
