@@ -1,6 +1,6 @@
 image:
   repository: genomenexus/gn-mongo
-  tag: 0.32_mutationassessor
+  tag: sha-6ce3181e7924f45971005d6aba1c4483a75b5f59-grch37_ensembl92-ma_true
   pullPolicy: Always
 persistence:
   enabled: true
