@@ -26,8 +26,4 @@ tolerations:
 nodeSelector:
   workload: gn-database
   # kubernetes.io/hostname: # Replace with the exact node name
-
-resources:
-  limits:
-    memory: 18Gi
-    cpu: 3
+  
