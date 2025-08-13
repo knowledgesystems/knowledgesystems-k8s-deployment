@@ -178,7 +178,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://shah-data-upload/gastric-wholecohort-regularUMAP-annotated-dec13.h5ad"
+            "s3://jason-test-workspace/gastric-wholecohort-regularUMAP-annotated-dec13.h5ad"
           ]
           ports:
           - containerPort: 8080
