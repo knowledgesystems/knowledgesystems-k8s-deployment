@@ -6,6 +6,9 @@ persistence:
   enabled: true
   size: 150Gi
 
+updateStrategy:
+  type: Recreate   # ensures old pods are deleted before new ones are created
+
 # If want to deploy the MongoDB pods on a specific node, uncomment the following lines
 # affinity:
 # nodeAffinity:
