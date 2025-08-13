@@ -88,6 +88,16 @@ spec:
     - host: cellxgene.cbioportal.aws.mskcc.org
       http:
         paths:
+          - path: /atlas_scvi_with_ct_umaps_reduced(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-4
+                port:
+                  number: 8080
+    - host: cellxgene.cbioportal.aws.mskcc.org
+      http:
+        paths:
           - path: /AML_2025-03-20_V3(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
