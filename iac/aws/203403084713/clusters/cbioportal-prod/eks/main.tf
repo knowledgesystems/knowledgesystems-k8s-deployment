@@ -464,13 +464,18 @@ module "eks_cluster" {
   }
 }
 
+module "iam" {
+  source                    = "../iam"
+  cluster_oidc_provider_arn = module.eks_cluster.cluster_oidc_provider
+}
+
 resource "aws_eks_addon" "s3_mountpoint_addon" {
   addon_name                  = "aws-mountpoint-s3-csi-driver"
   addon_version               = "v1.15.0-eksbuild.1"
-  cluster_name                = "cbioportal-prod-a9438edd"
+  cluster_name                = basename(module.eks_cluster.cluster_arn)
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
-  service_account_role_arn    = "arn:aws:iam::203403084713:role/userServiceRoleCellxgeneS3Mountpoint"
+  service_account_role_arn    = module.iam.cellxgene_s3_mountpoint_role_arn
   configuration_values = jsonencode({
     node = {
       tolerations = [
