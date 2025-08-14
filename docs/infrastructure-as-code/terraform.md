@@ -63,7 +63,7 @@ If you want to migrate from your current setup to Terraform-based resource manag
 
 ## Infrastructure State
 
-!!!warning Warning
+!!!danger Warning
 Making changes to state configuration, such as changing the bucket, key, or region, is a destructive action and can lead to out-of-sync terraform states. Always consult before making such changes as it would require state migration.
 !!!
 
