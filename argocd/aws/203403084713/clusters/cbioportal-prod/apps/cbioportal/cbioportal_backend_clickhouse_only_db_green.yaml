@@ -44,6 +44,10 @@ spec:
             value: "true"
           - name: DD_LOGS_INJECTION
             value: "true"
+          - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+            value: "true"
+          - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
+            value: "true"
         image: cbioportal/cbioportal-dev:6544a5290bff47ff4a38867e5ba0b3c43a059633-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
@@ -183,6 +187,7 @@ spec:
             "--redis.database=13",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             "--redis.clear_on_startup=true",
+            "--redis.ttl_mins=60",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
             # NEW PROPERTIES START

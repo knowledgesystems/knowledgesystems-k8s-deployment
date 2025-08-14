@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-genie-public-blue
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.3
+    tags.datadoghq.com/version: 6.3.4
   name: cbioportal-backend-genie-public-blue
   namespace: default
 spec:
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-genie-public-blue
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.3
+        tags.datadoghq.com/version: 6.3.4
     spec:
       containers:
       - args:
@@ -194,6 +194,7 @@ spec:
         - --redis.database=1
         - --redis.clear_on_startup=false
         - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
+        - --redis.ttl_mins=60
         # NEW PROPERTIES START
         - --enable_persistent_cache=true
         - --persistence.cache_type_clickhouse=redis
@@ -232,10 +233,14 @@ spec:
           value: "true"
         - name: DD_LOGS_INJECTION
           value: "true"
+        - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+          value: "true"
+        - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
+          value: "true"
         envFrom:
         - secretRef:
             name: cbioportal-genie-public-blue
-        image: cbioportal/cbioportal-dev:0ca764de1fecf054a1ef6e8a74a72ce211052c33-web-shenandoah
+        image: cbioportal/cbioportal:6.3.4-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
