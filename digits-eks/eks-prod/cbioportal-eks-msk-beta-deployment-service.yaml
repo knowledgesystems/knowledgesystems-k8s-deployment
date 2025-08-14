@@ -9,7 +9,7 @@ metadata:
     run: eks-msk-beta
     tags.datadoghq.com/env: eks-msk-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.3
+    tags.datadoghq.com/version: 6.3.4
   name: eks-msk-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-beta
 spec:
@@ -28,7 +28,7 @@ spec:
         run: eks-msk-beta
         tags.datadoghq.com/env: eks-msk-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.3
+        tags.datadoghq.com/version: 6.3.4
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -59,7 +59,11 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
-          image: cbioportal/cbioportal-dev:0ca764de1fecf054a1ef6e8a74a72ce211052c33-web-shenandoah
+            - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+              value: "true"
+            - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
+              value: "true"
+          image: cbioportal/cbioportal:6.3.4-web-shenandoah
           volumeMounts:
             - name: msk-beta-eks-configmap-volume
               mountPath: /cbioportal/local.key
@@ -208,6 +212,7 @@ spec:
             "--cache.endpoint.api-key=$(CACHE_API_KEY)",
             "--cache.endpoint.enabled=true",
             "--redis.clear_on_startup=false",
+            "--redis.ttl_mins=60",
             # misc frontend settings (this is NOT for backend persistence layer caching)
             "--enable_persistent_cache=false",
             # auth
