@@ -29,19 +29,15 @@ The `iac` directory contains multiple submodules where each submodule resides un
    ```shell
    terraform init
    ```
-5. Pull remote module sources. This requires Git authentication when running for the first time.
-   ```shell
-   terraform get
-   ```
-6. Validate your terraform files.
+5. Validate your terraform files.
    ```shell
    terraform validate
    ```
-7. Dry run to see what changes you are making.
+6. Dry run to see what changes you are making.
    ```shell
    terraform plan
    ```
-8. Apply changes.
+7. Apply changes.
    ```shell
    terraform apply
    ```
