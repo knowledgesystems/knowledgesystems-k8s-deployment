@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-beta-green
     tags.datadoghq.com/env: eks-public-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.3
+    tags.datadoghq.com/version: 6.3.4
   name: cbioportal-backend-public-beta-green
 spec:
   replicas: 0
@@ -24,7 +24,7 @@ spec:
         run: cbioportal-backend-public-beta-green
         tags.datadoghq.com/env: eks-public-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.3
+        tags.datadoghq.com/version: 6.3.4
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -42,6 +42,10 @@ spec:
           - name: DD_PROFILING_ENABLED
             value: "true"
           - name: DD_LOGS_INJECTION
+            value: "true"
+          - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+            value: "true"
+          - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
             value: "true"
         image: cbioportal/cbioportal-dev:3fe9d6267c33652e1716c2ced4abe0414b3f9207-web-shenandoah
         volumeMounts:
@@ -188,6 +192,7 @@ spec:
             "--redis.database=7",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
             "--redis.clear_on_startup=false",
+            "--redis.ttl_mins=60",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
             # NEW PROPERTIES START
