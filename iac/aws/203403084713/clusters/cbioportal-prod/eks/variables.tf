@@ -145,31 +145,6 @@ variable "DATA_VOL_CONFIG" {
   }
 }
 
-variable "CLUSTER_ADDONS" {
-  description = "Default addons for the cluster"
-  type        = any
-  default = {
-    coredns = {
-      most_recent = true
-    }
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      most_recent = true
-      configuration_values = {
-        env = {
-          AWS_VPC_K8S_CNI_EXTERNALSNAT = "false"
-        }
-      }
-    }
-    aws-mountpoint-s3-csi-driver = {
-      most_recent              = true
-      service_account_role_arn = "arn:aws:iam::203403084713:role/userServiceRoleCellxgeneS3Mountpoint"
-    }
-  }
-}
-
 variable "ADDON_CONFIG" {
   description = "Override default HYC addon config"
   type        = any

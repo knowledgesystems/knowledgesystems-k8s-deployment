@@ -1,7 +1,7 @@
 locals {
-  cluster_oidc_provier_arn    = "oidc.eks.us-east-1.amazonaws.com/id/E4307C7D0E9D1085785B32B8849A07BF"
-  account_id                  = data.aws_caller_identity.current.account_id
-  permissions_boundary_policy = "AutomationOrUserServiceRolePermissions"
+  account_id                     = data.aws_caller_identity.current.account_id
+  permissions_boundary_policy    = "AutomationOrUserServiceRolePermissions"
+  cellxgene_s3_mountpoint_bucket = "cellxgene-data"
 }
 
 data "aws_caller_identity" "current" {}
@@ -22,7 +22,7 @@ resource "aws_iam_policy" "userServicePolicyCellxgeneS3Mountpoint" {
             "s3:ListBucket"
           ],
           "Resource" : [
-            "arn:aws:s3:::cellxgene-data"
+            "arn:aws:s3:::${local.cellxgene_s3_mountpoint_bucket}"
           ]
         },
         {
@@ -35,7 +35,7 @@ resource "aws_iam_policy" "userServicePolicyCellxgeneS3Mountpoint" {
             "s3:DeleteObject"
           ],
           "Resource" : [
-            "arn:aws:s3:::cellxgene-data/*"
+            "arn:aws:s3:::${local.cellxgene_s3_mountpoint_bucket}/*"
           ]
         }
       ]
@@ -60,11 +60,11 @@ resource "aws_iam_role" "userServiceRoleCellxgeneS3Mountpoint" {
           Effect = "Allow"
           Action = "sts:AssumeRoleWithWebIdentity",
           Principal = {
-            Federated = "arn:aws:iam::${local.account_id}:oidc-provider/${local.cluster_oidc_provier_arn}"
+            Federated = "arn:aws:iam::${local.account_id}:oidc-provider/${var.cluster_oidc_provider_arn}"
           },
           Condition = {
             StringEquals = {
-              "${local.cluster_oidc_provier_arn}:aud" = "sts.amazonaws.com"
+              "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com"
             }
           }
         }
