@@ -21,7 +21,6 @@ spec:
       labels:
         dataset: pbmc3k.h5ad
     spec:
-      # serviceAccountName: cellxgene-service-account
       containers:
         - name: cellxgene-app
           image: 'edit01/cellxgene:1.2.0'
@@ -106,7 +105,7 @@ spec:
             "--backed", 
             "--disable-annotations", 
             "--disable-gene-sets-save", 
-            "s3://jason-test-workspace/Q3_norm_all_batch_reduced_meta_1.h5ad"
+            "/mountpoint-s3/Q3_norm_all_batch_reduced_meta_1.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -130,17 +129,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom: 
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom: 
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -183,7 +178,7 @@ spec:
             "--disable-gene-sets-save",
             "--gene-sets-file",
             "/genesets/gbm_filtered_processing2_fixed_genesets.csv",
-            "s3://jason-test-workspace/gbm_filtered_processing2_fixed.h5ad"
+            "/mountpoint-s3/btc-gbm/gbm_filtered_processing2_fixed.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -207,17 +202,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -260,7 +251,7 @@ spec:
             "--disable-gene-sets-save",
             "--gene-sets-file",
             "/genesets/example_genesets.csv",
-            "s3://jason-test-workspace/btc-gbm/pilot_sharmalab_processed_scrna_MDA_with_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
+            "/mountpoint-s3/btc-gbm/pilot/pilot_sharmalab_processed_scrna_MDA_with_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -285,18 +276,15 @@ spec:
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
           env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
           - name: GENESET_FILE
             value: https://raw.githubusercontent.com/hweej/single-cell-tools/main/cellxgene/genesets/example_genesets.csv
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -337,7 +325,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/btc-gbm/pilot_sharmalab_processed_scrna_MDA_without_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
+            "/mountpoint-s3/btc-gbm/pilot/pilot_sharmalab_processed_scrna_MDA_without_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -361,17 +349,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -412,7 +396,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/btc-gbm/pilot_sharmalab_processed_scrna_MSK_no_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
+            "/mountpoint-s3/btc-gbm/pilot/pilot_sharmalab_processed_scrna_MSK_no_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -436,17 +420,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -487,7 +467,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/btc-gbm/pilot_sharmalab_processed_scrna_MSK_with_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
+            "/mountpoint-s3/btc-gbm/pilot/pilot_sharmalab_processed_scrna_MSK_with_inhibitor_filtered_feature_bc_matrix_prepared.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -511,17 +491,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -562,7 +538,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/btc-gbm/trial1a_sharma_lab_scrna_DFCI1_BTC-GBM-001-003-GEX_filtered_feature_bc_matrix_prepared.h5ad"
+            "/mountpoint-s3/btc-gbm/trial1a_sharma_lab_scrna_DFCI1_BTC-GBM-001-003-GEX_filtered_feature_bc_matrix_prepared.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -586,17 +562,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -734,48 +706,6 @@ metadata:
 spec:
   selector:
     dataset: Q3_norm_all_batch_reduced_meta_1.h5ad
-  ports:
-    - port: 8080
----
-kind: Service
-apiVersion: v1
-metadata:
-  namespace: cellxgene
-  name: cellxgene-service-5
-  labels:  # For convenience
-    app: cellxgene
-    dataset: BTC_GBM_001.h5ad
-spec:
-  selector:
-    dataset: BTC_GBM_001.h5ad
-  ports:
-    - port: 8080
----
-kind: Service
-apiVersion: v1
-metadata:
-  namespace: cellxgene
-  name: cellxgene-service-6
-  labels:  # For convenience
-    app: cellxgene
-    dataset: BTC_GBM_002.h5ad
-spec:
-  selector:
-    dataset: BTC_GBM_002.h5ad
-  ports:
-    - port: 8080
----
-kind: Service
-apiVersion: v1
-metadata:
-  namespace: cellxgene
-  name: cellxgene-service-7
-  labels:  # For convenience
-    app: cellxgene
-    dataset: BTC_GBM_003.h5ad
-spec:
-  selector:
-    dataset: BTC_GBM_003.h5ad
   ports:
     - port: 8080
 ---
