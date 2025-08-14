@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: oncokb-public-data-4-9
   namespace: oncokb
+  labels:
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: oncokb-public-4-9
 spec:
   replicas: 1
   selector:
@@ -19,6 +22,11 @@ spec:
       labels:
         app: oncokb-public-data-4-9
         version: 'v1'
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: oncokb-public-4-9
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       containers:
         - name: oncokb-public
