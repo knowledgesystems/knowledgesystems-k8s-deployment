@@ -98,13 +98,13 @@ spec:
         - name: master.tolerations[0].effect
           value: NoSchedule
         - name: master.resources.limits.memory
-          value: 20Gi
+          value: 10Gi
         - name: master.resources.limits.cpu
-          value: 300m
+          value: 150m
         - name: master.resources.requests.memory
-          value: 16Gi
+          value: 8Gi
         - name: master.resources.requests.cpu
-          value: 200m
+          value: 100m
         - name: replica.replicaCount
           value: "2"
         - name: replica.autoscaling.enabled
@@ -136,13 +136,13 @@ spec:
         - name: replica.disableCommands[1]
           value: SHUTDOWN
         - name: replica.resources.limits.memory
-          value: 12Gi
+          value: 6Gi
         - name: replica.resources.limits.cpu
-          value: 300m
+          value: 150m
         - name: replica.resources.requests.memory
-          value: 8Gi
+          value: 4Gi
         - name: replica.resources.requests.cpu
-          value: 200m
+          value: 100m
   destination:
     namespace: default
     server: https://kubernetes.default.svc
