@@ -42,13 +42,13 @@ spec:
           value: NoSchedule
         # This is a hack to override default params and enable FLUSHDB and FLUSHALL commands
         - name: master.disableCommands[0]
-          value: DEBUG
+          value: CONFIG
         - name: master.disableCommands[1]
-          value: INFO
+          value: SHUTDOWN
         - name: replica.disableCommands[0]
-          value: DEBUG
+          value: CONFIG
         - name: replica.disableCommands[1]
-          value: INFO
+          value: SHUTDOWN
   destination:
     namespace: default
     server: https://kubernetes.default.svc
@@ -128,13 +128,13 @@ spec:
         - name: replica.tolerations[0].effect
           value: NoSchedule
         - name: master.disableCommands[0]
-          value: DEBUG
+          value: CONFIG
         - name: master.disableCommands[1]
-          value: INFO
+          value: SHUTDOWN
         - name: replica.disableCommands[0]
-          value: DEBUG
+          value: CONFIG
         - name: replica.disableCommands[1]
-          value: INFO
+          value: SHUTDOWN
         - name: replica.resources.limits.memory
           value: 12Gi
         - name: replica.resources.limits.cpu
