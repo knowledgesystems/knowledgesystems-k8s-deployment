@@ -9,7 +9,7 @@ metadata:
     run: eks-sclc
     tags.datadoghq.com/env: eks-sclc
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.4
+    tags.datadoghq.com/version: 6.3.5
   name: eks-sclc
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-sclc
 spec:
@@ -28,7 +28,7 @@ spec:
         run: eks-sclc
         tags.datadoghq.com/env: eks-sclc
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.4
+        tags.datadoghq.com/version: 6.3.5
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -57,7 +57,7 @@ spec:
           value: "true"
         - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
           value: "true"
-        image: cbioportal/cbioportal:6.3.4-web-shenandoah
+        image: cbioportal/cbioportal:6.3.5-web-shenandoah
         volumeMounts:
         - name: sclc-eks-configmap-volume
           mountPath: /cbioportal/local.key
