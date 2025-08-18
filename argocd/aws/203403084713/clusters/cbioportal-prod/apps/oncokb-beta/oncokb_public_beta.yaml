@@ -57,6 +57,8 @@ spec:
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
+            - name: JHIPSTER_LOGGING_USE_JSON_FORMAT
+              value: "true"
           envFrom:
             - secretRef:
                 name: oncokb-public-beta
