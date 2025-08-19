@@ -1,0 +1,195 @@
+webserverSecretKeySecretName: airflow-webserver-secret-key
+
+nodeSelector:
+  workload: airflow
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "airflow"
+    effect: "NoSchedule"
+
+executor: KubernetesExecutor
+
+config:
+  api:
+    auth_backends: airflow.api.auth.backend.basic_auth
+    access_control_allow_headers: origin, content-type, accept
+    access_control_allow_methods: POST, GET, OPTIONS, DELETE
+    access_control_allow_origins: http://pipelines3.cbioportal.aws.mskcc.org
+  smtp:
+    smtp_host: smtp.gmail.com
+    smtp_starttls: True
+    smtp_ssl: False
+    smtp_port: 587
+    smtp_mail_from: cbioportalpipelines@gmail.com
+  core:
+    allowed_deserialization_classes_regexp: airflow\..* .*\..*StudyBuilder
+  webserver:
+    base_url: https://airflow.cbioportal.aws.mskcc.org
+  kubernetes_executor:
+    delete_worker_pods: True
+    delete_worker_pods_on_failure: True
+
+images:
+  airflow:
+    repository: apache/airflow
+    tag: "2.9.2"
+    pullPolicy: IfNotPresent
+
+env:
+  - name: "PYTHONPATH"
+    value: "/opt/airflow/dags/repo/nci-crdc-pipeline"
+  - name: AIRFLOW__METRICS__STATSD_ON
+    value: "True"
+  - name: AIRFLOW__METRICS__STATSD_PORT
+    value: "8125"
+  - name: AIRFLOW__METRICS__STATSD_PREFIX
+    value: "airflow"
+
+extraEnv: |-
+  - name: AIRFLOW__METRICS__STATSD_HOST
+    valueFrom:
+      fieldRef:
+        fieldPath: status.hostIP
+
+webserver:
+  startupProbe:
+    timeoutSeconds: 360
+
+scheduler:
+  # To deploy multiple scheduler replicas across nodes, uncomment the below configuration
+  #replicas: <num-scheduler-replicas>
+
+  #labels:
+  #  pod-type: scheduler
+
+  #topologySpreadConstraints:
+  #  - maxSkew: 1
+  #    topologyKey: kubernetes.io/hostname
+  #    whenUnsatisfiable: DoNotSchedule
+  #    labelSelector:
+  #      matchLabels:
+  #        pod-type: scheduler
+
+  extraVolumeMounts:
+    - name: pv
+      mountPath: /opt/airflow/git_repos
+      readOnly: false
+
+  extraVolumes:
+    - name: pv
+      persistentVolumeClaim:
+        claimName: efs-pv-claim
+
+  extraInitContainers:
+    - name: volume-mount-permission
+      image: busybox:1.36
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: pv
+          mountPath: /opt/airflow/git_repos
+      # Modify permissions of mountPath to be group writeable, allowing `airflow` user write permissions
+      command: ["sh", "-c", "chmod -R g+w /opt/airflow/git_repos"]
+
+workers:
+  extraVolumeMounts:
+    - name: pv
+      mountPath: /opt/airflow/git_repos
+      readOnly: false
+    - name: gcp-keyfile
+      mountPath: /opt/airflow/secrets/gcp-keyfile
+      readOnly: true
+    - name: git-secret
+      mountPath: /home/airflow/.ssh
+      readOnly: true
+    - name: hpc2-ssh-keyfile
+      mountPath: /opt/airflow/secrets/hpc2-ssh-keyfile
+      readOnly: true
+    - name: hpc3-ssh-keyfile
+      mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
+      readOnly: true
+    - name: genie-importer-ssh-keyfile
+      mountPath: /opt/airflow/secrets/genie-importer-ssh-keyfile
+      readOnly: true
+    - name: pipelines3-ssh-keyfile
+      mountPath: /opt/airflow/secrets/pipelines3-ssh-keyfile
+      readOnly: true
+    - name: pipelines5-ssh-keyfile
+      mountPath: /opt/airflow/secrets/pipelines5-ssh-keyfile
+      readOnly: true
+
+  extraVolumes:
+    - name: pv
+      persistentVolumeClaim:
+        claimName: efs-pv-claim
+    - name: gcp-keyfile
+      secret:
+        # Assumes that `Secret/airflow-gcp-keyfile` contains a key called `gcp_key.json`
+        secretName: airflow-gcp-keyfile
+    - name: git-secret
+      secret:
+        # Assumes that `Secret/airflow-git-secret` contains an SSH key called `id_ed25519`
+        secretName: airflow-git-secret
+    - name: hpc2-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-hpc2-ssh-keyfile` contains an SSH key called `id_rsa`
+        secretName: airflow-hpc2-ssh-keyfile
+    - name: hpc3-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-hpc3-ssh-keyfile` contains an SSH key called `id_rsa`
+        secretName: airflow-hpc3-ssh-keyfile
+    - name: genie-importer-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-genie-importer-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_operator`
+        secretName: airflow-genie-importer-ssh-keyfile
+    - name: pipelines3-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-pipelines3-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_pipelines3`
+        secretName: airflow-pipelines3-ssh-keyfile
+    - name: pipelines5-ssh-keyfile
+      secret:
+        # Assumes that `Secret/airflow-pipelines5-ssh-keyfile` contains an SSH key called `id_rsa_airflow_ssh_pipelines5`
+        secretName: airflow-pipelines5-ssh-keyfile
+
+logs:
+  persistence:
+    # Enable persistent volume for storing logs
+    enabled: true
+    # Volume size for logs
+    size: 10Gi
+    # If using a custom storageClass, pass name here
+    storageClassName: efs-sc
+
+secret:
+  - envName: "AIRFLOW_CONN_SMTP_DEFAULT"
+    secretName: "airflow-smtp-uri"
+    secretKey: "AIRFLOW_CONN_SMTP_DEFAULT"
+  - envName: "AIRFLOW_CONN_PLLIMSKHPC2_CF_SSH"
+    secretName: "airflow-hpc2-cf-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PLLIMSKHPC2_CF_SSH"
+  - envName: "AIRFLOW_CONN_PLLIMSKHPC3_SSH"
+    secretName: "airflow-hpc3-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PLLIMSKHPC3_SSH"
+  - envName: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
+    secretName: "airflow-impact-pipeline-password"
+    secretKey: "AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD"
+  - envName: "AIRFLOW_CONN_IMPORTER_SSH"
+    secretName: "airflow-genie-importer-ssh-uri"
+    secretKey: "AIRFLOW_CONN_GENIE_IMPORTER_SSH"
+  - envName: "AIRFLOW_CONN_PIPELINES3_SSH"
+    secretName: "airflow-pipelines3-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PIPELINES3_SSH"
+  - envName: "AIRFLOW_CONN_PIPELINES5_SSH"
+    secretName: "airflow-pipelines5-ssh-uri"
+    secretKey: "AIRFLOW_CONN_PIPELINES5_SSH"
+
+dags:
+  gitSync:
+    enabled: true
+    repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git
+    branch: main
+    subPath: ""
+    knownHosts: |
+      github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+    sshKeySecret: airflow-ssh-secret

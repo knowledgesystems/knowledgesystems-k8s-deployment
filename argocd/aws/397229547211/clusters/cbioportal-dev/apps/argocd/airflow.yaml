@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/397229547211/clusters/cbioportal-dev/apps/airflow
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://kubernetes.github.io/ingress-nginx
+      targetRevision: 4.12.1
+      chart: ingress-nginx
+      helm:
+        releaseName: fluffy-kitty
+        valueFiles:
+          - $k8s-repo/argocd/aws/397229547211/clusters/cbioportal-dev/apps/ingress/values.yaml
+  destination:
+    namespace: airflow
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
