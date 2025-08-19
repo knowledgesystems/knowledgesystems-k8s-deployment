@@ -49,11 +49,6 @@ spec:
           value: CONFIG
         - name: replica.disableCommands[1]
           value: SHUTDOWN
-        # Datadog APM and monitoring
-        - name: master.podAnnotations.ad.datadoghq.com/redis.checks
-          value: '{"redisdb":{"init_config":{},"instances":[{"host":"%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]}}'
-        - name: master.podAnnotations.ad.datadoghq.com/redis.logs
-          value: '[{"source":"redis","service":"redis-session","tags":["env:eks-public"]}]'
   destination:
     namespace: default
     server: https://kubernetes.default.svc
