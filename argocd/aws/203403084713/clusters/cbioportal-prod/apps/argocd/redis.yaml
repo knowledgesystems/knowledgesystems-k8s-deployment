@@ -40,6 +40,7 @@ spec:
             # Unified service tagging for APM
             tags.datadoghq.com/service: redis-session
             tags.datadoghq.com/env: eks-public
+            admission.datadoghq.com/enabled: "true"
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
         - name: global.imagePullSecrets[0]
