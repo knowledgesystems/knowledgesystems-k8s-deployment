@@ -12,35 +12,6 @@ spec:
     chart: redis
     helm:
       releaseName: cbioportal-redis-public
-      values: |
-        master:
-          podAnnotations:
-            # Datadog autodiscovery
-            ad.datadoghq.com/redis.checks: |
-              {
-                "redisdb": {
-                  "init_config": {},
-                  "instances": [
-                    {
-                      "host": "%%host%%",
-                      "port":"6379",
-                      "password":"%%env_REDIS_PASSWORD%%"
-                    }
-                  ]
-                }
-              }    
-            ad.datadoghq.com/redis.logs: |
-              [{
-                "source": "redis",
-                "service": "redis-session",
-                "tags": ["env:eks-public"]
-              }]
-
-          podLabels:
-            # Unified service tagging for APM
-            tags.datadoghq.com/service: redis-session
-            tags.datadoghq.com/env: eks-public
-            admission.datadoghq.com/enabled: "true"
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
         - name: global.imagePullSecrets[0]
