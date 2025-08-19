@@ -65,7 +65,9 @@ spec:
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
-            - name: "LOGGING_LEVEL_PATTERN_CONSOLE"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: "LOGGING_PATTERN_CONSOLE"
               value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
           envFrom:
             - secretRef:
