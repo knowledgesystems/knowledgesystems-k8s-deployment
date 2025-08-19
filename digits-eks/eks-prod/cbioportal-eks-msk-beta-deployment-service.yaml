@@ -13,7 +13,7 @@ metadata:
   name: eks-msk-beta
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-msk-beta
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       run: eks-msk-beta
