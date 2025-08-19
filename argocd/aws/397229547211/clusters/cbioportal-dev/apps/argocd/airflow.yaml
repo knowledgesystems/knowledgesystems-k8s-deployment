@@ -12,13 +12,13 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - repoURL: https://kubernetes.github.io/ingress-nginx
-      targetRevision: 4.12.1
-      chart: ingress-nginx
+    - repoURL: https://airflow.apache.org
+      targetRevision: 1.15.0
+      chart: airflow
       helm:
-        releaseName: fluffy-kitty
+        releaseName: airflow
         valueFiles:
-          - $k8s-repo/argocd/aws/397229547211/clusters/cbioportal-dev/apps/ingress/values.yaml
+          - $k8s-repo/argocd/aws/397229547211/clusters/cbioportal-dev/apps/airflow/values.yaml
   destination:
     namespace: airflow
     server: https://kubernetes.default.svc
