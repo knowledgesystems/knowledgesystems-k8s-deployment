@@ -77,7 +77,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-msk
+                name: eks-msk-green
                 port:
                   number: 80
             path: /
@@ -87,7 +87,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-msk
+                name: eks-msk-green
                 port:
                   number: 80
             path: /
@@ -277,22 +277,8 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-msk-rfc80
+                name: eks-msk-green
                 port:
                   number: 80
             path: /
             pathType: Prefix
-    - host: rfc80-msk1.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-msk-rfc80
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-status:
-  loadBalancer:
-    ingress:
-      - hostname: internal-ab65ed103ef98482c845ae69ae512cac-1693183256.us-east-1.elb.amazonaws.com
