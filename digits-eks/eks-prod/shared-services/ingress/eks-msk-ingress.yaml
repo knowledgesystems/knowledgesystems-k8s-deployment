@@ -114,7 +114,7 @@ spec:
       paths:
       - backend:
           service:
-            name: eks-private
+            name: eks-private-green
             port:
               number: 80
         path: /
@@ -124,7 +124,7 @@ spec:
       paths:
       - backend:
           service:
-            name: eks-private
+            name: eks-private-green
             port:
               number: 80
         path: /
@@ -134,7 +134,7 @@ spec:
       paths:
       - backend:
           service:
-            name: eks-sclc
+            name: eks-sclc-green
             port:
               number: 80
         path: /
@@ -144,7 +144,7 @@ spec:
       paths:
       - backend:
           service:
-            name: eks-sclc
+            name: eks-sclc-green
             port:
               number: 80
         path: /

@@ -13,7 +13,7 @@ metadata:
   name: eks-private
   selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/eks-private
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       run: eks-private
