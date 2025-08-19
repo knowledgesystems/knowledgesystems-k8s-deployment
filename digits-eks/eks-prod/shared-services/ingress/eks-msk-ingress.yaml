@@ -6,8 +6,6 @@ metadata:
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
     ingress.kubernetes.io/proxy-send-timeout: "300"
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"ingress.kubernetes.io/proxy-body-size":"512m","ingress.kubernetes.io/proxy-connect-timeout":"300","ingress.kubernetes.io/proxy-read-timeout":"300","ingress.kubernetes.io/proxy-send-timeout":"300","nginx.ingress.kubernetes.io/backend-protocol":"http","nginx.ingress.kubernetes.io/force-ssl-redirect":"false","nginx.ingress.kubernetes.io/proxy-body-size":"512m","nginx.ingress.kubernetes.io/proxy-connect-timeout":"300","nginx.ingress.kubernetes.io/proxy-read-timeout":"300","nginx.ingress.kubernetes.io/proxy-send-timeout":"300","nginx.ingress.kubernetes.io/rewrite-target":"/","nginx.ingress.kubernetes.io/ssl-redirect":"false","service.beta.kubernetes.io/aws-load-balancer-proxy-protocol":"*"},"name":"msk-eks-prod-ingress","namespace":"default"},"spec":{"ingressClassName":"nginx","rules":[{"host":"redcap.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-redcap","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"hgnc.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-hgnc","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"triage-beta.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-triage","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"triage.cbioportal.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-triage","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"triage.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-triage","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"cbioportal.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-msk","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-msk","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"private.cbioportal.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-private","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"private.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-private","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"sclc.cbioportal.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-sclc","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"sclc.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-sclc","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"www.oncotree.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-oncotree","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"www.oncotree.org","http":{"paths":[{"backend":{"service":{"name":"eks-oncotree","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"oncotree.info","http":{"paths":[{"backend":{"service":{"name":"eks-oncotree","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"oncotree.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-oncotree","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"oncotreedev.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-oncotree-reactdev","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"oncotree.org","http":{"paths":[{"backend":{"service":{"name":"eks-oncotree","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"oncotree.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-oncotree","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"cdd.cbioportal.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-cdd-graphite","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"cdd.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-cdd-graphite","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"beta.cbioportal.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-msk-beta","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"beta.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-msk-beta","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"keycloak.cbioportal.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"msk-keycloak-http","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"keycloak.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"msk-keycloak-http","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"keycloak-beta.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"msk-keycloak-http","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"rfc80-msk.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-msk-rfc80","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}},{"host":"rfc80-msk1.cbioportal.aws.mskcc.org","http":{"paths":[{"backend":{"service":{"name":"eks-msk-rfc80","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}}]},"status":{"loadBalancer":{"ingress":[{"hostname":"internal-ab65ed103ef98482c845ae69ae512cac-1693183256.us-east-1.elb.amazonaws.com"}]}}}
     nginx.ingress.kubernetes.io/backend-protocol: http
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-body-size: 512m
@@ -18,267 +16,256 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
   name: msk-eks-prod-ingress
-  namespace: default
 spec:
   ingressClassName: nginx
   rules:
-    - host: triage-beta.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-triage
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: triage.cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-triage
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: triage.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-triage
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: redcap.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-redcap
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: hgnc.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-hgnc
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-msk-green
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-msk-green
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: private.cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-private
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: private.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-private
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: sclc.cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-sclc
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: sclc.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-sclc
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: www.oncotree.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: www.oncotree.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: oncotree.info
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: oncotree.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: oncotreedev.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree-reactdev
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: oncotree.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: oncotree.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: cdd.cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-cdd-graphite
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: cdd.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-cdd-graphite
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: beta.cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-msk-beta
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: beta.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-msk-beta
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: keycloak.cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: msk-keycloak-http
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: keycloak.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: msk-keycloak-http
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: keycloak-beta.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: msk-keycloak-http
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: rfc80-msk.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-msk-green
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
+  - host: triage-beta.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-triage
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: triage.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-triage
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: triage.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-triage
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: redcap.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-redcap
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: hgnc.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-hgnc
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: beta.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-beta-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: beta.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-beta-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: private.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-private
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: private.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-private
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: sclc.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-sclc
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: sclc.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-sclc
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: www.oncotree.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-oncotree
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: www.oncotree.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-oncotree
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: oncotree.info
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-oncotree
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: oncotree.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-oncotree
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: oncotreedev.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-oncotree-reactdev
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: oncotree.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-oncotree
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: oncotree.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-oncotree
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: cdd.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-cdd-graphite
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: cdd.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-cdd-graphite
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: keycloak.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: msk-keycloak-http
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: keycloak.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: msk-keycloak-http
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: keycloak-beta.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: msk-keycloak-http
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
