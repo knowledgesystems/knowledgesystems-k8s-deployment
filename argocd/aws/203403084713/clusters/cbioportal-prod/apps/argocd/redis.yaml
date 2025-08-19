@@ -50,12 +50,8 @@ spec:
         - name: replica.disableCommands[1]
           value: SHUTDOWN
         # Datadog APM and monitoring
-        - name: master.podAnnotations.ad.datadoghq.com/redis.check_names
-          value: '["redisdb"]'
-        - name: master.podAnnotations.ad.datadoghq.com/redis.init_configs
-          value: '[{}]'
-        - name: master.podAnnotations.ad.datadoghq.com/redis.instances
-          value: '[{"host":"%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%","tags":["service:redis-session","env:eks-public"],"slowlog-max-len":128}]'
+        - name: master.podAnnotations.ad.datadoghq.com/redis.checks
+          value: '{"redisdb":{"init_config":{},"instances":[{"host":"%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]}}'
         - name: master.podAnnotations.ad.datadoghq.com/redis.logs
           value: '[{"source":"redis","service":"redis-session","tags":["env:eks-public"]}]'
   destination:
