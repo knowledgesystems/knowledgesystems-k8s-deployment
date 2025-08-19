@@ -1,4 +1,13 @@
 controller:
+  image:
+    tag: 1.12.1
+  nodeSelector:
+    workload: ingress
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "ingress"
+      effect: "NoSchedule"
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
