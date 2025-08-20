@@ -1,6 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: oncokb-public-staging
   name: oncokb-public-staging
   namespace: oncokb
 spec:
@@ -18,6 +21,11 @@ spec:
       labels:
         app: oncokb-public-staging
         version: "v1"
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: oncokb-public-staging
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       containers:
         - name: oncokb-public-staging
@@ -58,6 +66,10 @@ spec:
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: LOGGING_PATTERN_CONSOLE
+              value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
           envFrom:
             - secretRef:
                 name: oncokb-public-staging
