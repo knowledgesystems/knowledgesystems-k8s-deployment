@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   labels:
     run: oncokb-transcript-beta
+    tags.datadoghq.com/env: eks-beta-oncokb
+    tags.datadoghq.com/service: oncokb-transcript
   name: oncokb-transcript-beta
   namespace: oncokb
 spec:
@@ -19,6 +21,11 @@ spec:
     metadata:
       labels:
         run: oncokb-transcript-beta
+        tags.datadoghq.com/env: eks-beta-oncokb
+        tags.datadoghq.com/service: oncokb-transcript
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       containers:
         - env:
@@ -40,6 +47,10 @@ spec:
               value: "$(DB_USERNAME)"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "$(DB_PASSWORD)"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: LOGGING_PATTERN_CONSOLE
+              value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
           envFrom:
             - secretRef:
                 name: oncokb-transcript-beta
