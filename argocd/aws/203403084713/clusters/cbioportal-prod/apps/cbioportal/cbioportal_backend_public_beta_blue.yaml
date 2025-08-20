@@ -47,7 +47,7 @@ spec:
             value: "true"
           - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
             value: "true"
-        image: cbioportal/cbioportal-dev:3fe9d6267c33652e1716c2ced4abe0414b3f9207-web-shenandoah
+        image: cbioportal/cbioportal-dev:4d77fdbbedaec6af918b7802fbc37cbaf1cf341c-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
@@ -199,9 +199,9 @@ spec:
             "--enable_persistent_cache=true",
             "--persistence.cache_type_clickhouse=redis",
             #"--persistence.cache_type_clickhouse=no-cache",
-            "--spring.datasource.mysql.url=$(DB_CONNECTION_STRING)",
-            "--spring.datasource.mysql.username=$(DB_USER)",
-            "--spring.datasource.mysql.password=$(DB_PASSWORD)",
+            "--spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "--spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)",
+            "--spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver",
             "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
             "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
