@@ -9,7 +9,7 @@ metadata:
   name: eks-msk-blue
 spec:
   progressDeadlineSeconds: 600
-  replicas: 0
+  replicas: 2
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -23,7 +23,6 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        kubectl.kubernetes.io/restartedAt: "2025-07-01T16:20:17-04:00"
       creationTimestamp: null
       labels:
         admission.datadoghq.com/enabled: "true"
