@@ -4,6 +4,8 @@ metadata:
   creationTimestamp: null
   labels:
     run: oncokb-transcript
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: oncokb-transcript
   name: oncokb-transcript
   namespace: oncokb
 spec:
@@ -20,25 +22,34 @@ spec:
       creationTimestamp: null
       labels:
         run: oncokb-transcript
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: oncokb-transcript
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       containers:
         - env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs,no-liquibase
             - name: APPLICATION_REDIS_ENABLED
-              value: 'true'
+              value: "true"
             - name: APPLICATION_REDIS_TYPE
-              value: '$(REDIS_TYPE)'
+              value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
-              value: '$(REDIS_ADDRESS)'
+              value: "$(REDIS_ADDRESS)"
             - name: APPLICATION_REDIS_PASSWORD
-              value: '$(REDIS_PASSWROD)'
+              value: "$(REDIS_PASSWROD)"
             - name: SPRING_DATASOURCE_URL
-              value: '$(DB_URL)/oncokb_transcript'
+              value: "$(DB_URL)/oncokb_transcript"
             - name: SPRING_DATASOURCE_USERNAME
-              value: '$(DB_USERNAME)'
+              value: "$(DB_USERNAME)"
             - name: SPRING_DATASOURCE_PASSWORD
-              value: '$(DB_PASSWORD)'
+              value: "$(DB_PASSWORD)"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: LOGGING_PATTERN_CONSOLE
+              value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
           envFrom:
             - secretRef:
                 name: oncokb-transcript
@@ -90,9 +101,9 @@ metadata:
   namespace: oncokb
 spec:
   ports:
-  - port: 9090
-    name: http
-    targetPort: 9090
+    - port: 9090
+      name: http
+      targetPort: 9090
   selector:
     run: oncokb-transcript
   type: ClusterIP
