@@ -33,19 +33,43 @@ spec:
     spec:
       containers:
       - args:
+        # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
         - -Xms100m
         - -Xmx15g
         - -XX:+UnlockExperimentalVMOptions
         - -XX:+UseShenandoahGC
         - -XX:ShenandoahUncommitDelay=1000
         - -XX:ShenandoahGuaranteedGCInterval=10000
+        #- -XX:+AlwaysPreTouch
+        #- -XX:+UseTransparentHugePages
+        #- -XX:+UseNUMA
+        #- -XX:+PrintGCDetails
+        #- -XX:+UseParallelGC
+        #- -XX:+PrintGCDateStamps
+        #- -XX:ParallelGCThreads=4
+        #- -XX:+UseG1GC
+        #- -XX:+AggressiveHeap
+        # non aggressive garbage collection
+        #- -XX:MinHeapFreeRatio=20
+        #- -XX:MaxHeapFreeRatio=40
+        #- -XX:GCTimeRatio=19
+        #- -XX:AdaptiveSizePolicyWeight=90
+        # This issue says to use maxRAMFraction > 1
+        # https://github.com/akka/akka/issues/23499, but haven't found this
+        # to work v well
+        #- -XX:MaxRAMFraction=1
         - -XX:+PrintFlagsFinal
         - -XshowSettings:vm
+        # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
+        # from the limits
+        #- -XX:MaxRAM=6500m
         - -jar
         - /cbioportal-webapp/app.jar
+        # handles legacy swagger urls after upgrade
         - --springdoc.swagger-ui.disable-swagger-default-url=true
         - --springdoc.swagger-ui.path=/api/swagger-ui
         - --springdoc.api-docs.path=/api/v3/api-docs
+        # enable remote debug
         - --com.sun.management.jmxremote.rmi.port=8849
         - --com.sun.management.jmxremote=false
         - --com.sun.management.jmxremote.port=8849
@@ -53,6 +77,7 @@ spec:
         - --com.sun.management.jmxremote.authenticate=false
         - --com.sun.management.jmxremote.local.only=false
         - --java.rmi.server.hostname=localhost
+        # /enable remote debug
         - --frontend.url=https://frontend.cbioportal.org/
         - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
         - --quick_search.enabled=true
@@ -121,16 +146,22 @@ spec:
         - --microsoftlive.consumer.secret=$(MICROSOFT_LIVE_CONSUMER_SECRET)
         - --bitly.url=$(BITLY_URL)
         - --bitly.access.token=$(BITLY_ACCESS_TOKEN)
+        #  Add this when you need to override frontend config
+        - --frontend.config=/cbioportal/frontendConfig.json
         - --sentry.dsn=$(SENTRY_DSN)
+        #- --sentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)
         - --sentry.factory=org.cbioportal.logging.SentryClientFactory
         - --sitemaps=true
+        # internal oncokb instance gives 5x error on FGFR1
         - --oncokb.public_api.url=https://core.oncokb.aws.mskcc.org/api/v1
+        # token is not needed to access MSK OncoKB instance
         - --oncokb.token=fake_token
         - --oncokb.merge_icons_by_default=false
         - --genomenexus.url=https://v1.genomenexus.org
         - --show.genomenexus.annotation_sources=mutation_assessor
         - --matchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555
         - --matchminer.token=$(MATCHMINER_TOKEN)
+        # redis session store settings (different from redis persistence cache)
         - --spring.session.store-type=redis
         - --spring.data.redis.host=$(REDIS_SESSION_HOST)
         - --spring.data.redis.port=$(REDIS_SESSION_PORT)
@@ -138,8 +169,8 @@ spec:
         - --spring.autoconfigure.exclude=dontexcludeanythingplz
         - --redis.database=2
         - --persistence.cache_type=redis
-        - --redis.leader_address=redis://cbioportal-persistence-redis-master:6379
-        - --redis.follower_address=redis://cbioportal-persistence-redis-replicas:6379
+        - --redis.leader_address=redis://eks-msk-cbioportal-persistence-redis-master:6379
+        - --redis.follower_address=redis://eks-msk-cbioportal-persistence-redis-replicas:6379
         - --redis.password=$(REDIS_PASSWORD)
         - --ehcache.cache_type=none
         - --cache.endpoint.api-key=$(CACHE_API_KEY)
