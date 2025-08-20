@@ -174,8 +174,8 @@ spec:
             # To enable redis session store, we need to set
             # spring.autoconfigure.exclude to a random value to override the
             # property in applications.properties.EXAMPLE
-            "--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",
-
+            #"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",
+            "--spring.autoconfigure.exclude=dontexcludeanythingplz",
             # redis cache settings (currently redis)
             #"--cache.statistics_endpoint_enabled=false",
             # "--logging.level.org.cbioportal.persistence=DEBUG",
@@ -186,7 +186,7 @@ spec:
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=13",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
-            "--redis.clear_on_startup=true",
+            "--redis.clear_on_startup=false",
             "--redis.ttl_mins=60",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",
