@@ -4,6 +4,8 @@ metadata:
   creationTimestamp: null
   labels:
     run: oncokb-curation
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: oncokb-curation
   name: oncokb-curation
   namespace: oncokb
 spec:
@@ -20,6 +22,11 @@ spec:
       creationTimestamp: null
       labels:
         run: oncokb-curation
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: oncokb-curation
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       containers:
         - env:
@@ -48,6 +55,10 @@ spec:
               value: "$(REDIS_PORT)"
             - name: SPRING_REDIS_PASSWORD
               value: "$(REDIS_PASSWORD)"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: LOGGING_PATTERN_CONSOLE
+              value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
           envFrom:
             - secretRef:
                 name: oncokb-curation
