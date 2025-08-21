@@ -187,7 +187,7 @@ secret:
 dags:
   gitSync:
     enabled: true
-    repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git
+    repo: git@github.com:callachennault/cdsi-airflow-dags.git
     branch: main
     subPath: ""
     knownHosts: |
