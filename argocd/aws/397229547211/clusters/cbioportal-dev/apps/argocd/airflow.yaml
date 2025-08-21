@@ -13,7 +13,7 @@ spec:
         recurse: true
       ref: k8s-repo
     - repoURL: https://airflow.apache.org
-      targetRevision: 1.15.0
+      targetRevision: 1.16.0
       chart: airflow
       helm:
         releaseName: airflow
