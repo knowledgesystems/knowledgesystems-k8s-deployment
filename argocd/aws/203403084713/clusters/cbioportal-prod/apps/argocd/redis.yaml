@@ -12,6 +12,10 @@ spec:
     chart: redis
     helm:
       releaseName: cbioportal-redis-public
+      values: |
+        commonLabels:
+          tags.datadoghq.com/env: eks-public
+          tags.datadoghq.com/service: redis
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
         - name: global.imagePullSecrets[0]
