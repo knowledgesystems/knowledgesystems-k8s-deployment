@@ -413,7 +413,7 @@ locals {
 }
 
 module "eks_cluster" {
-  source       = "git::ssh://git@github-mskcc/MSK-Staging/cbioportal-terraform.git//src/module/hyc-eks?ref=feature/modularize-base"
+  source       = "git::https://github.com/MSK-Staging/cbioportal-terraform.git//src/module/hyc-eks?ref=feature/modularize-base"
   cluster_name = var.CLUSTER_NAME
 
   # General EKS Config
