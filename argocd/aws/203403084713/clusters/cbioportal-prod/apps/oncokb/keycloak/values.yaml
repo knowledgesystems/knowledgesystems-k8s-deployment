@@ -3,7 +3,7 @@ postgresql:
 
 extraInitContainers: |
   - name: theme-provider
-    image: oncokb/keycloak:1.0.3
+    image: oncokb/keycloak:1.1.0
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
