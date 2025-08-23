@@ -20,7 +20,7 @@ terraform {
 
 provider "aws" {
   region  = var.AWS_REGION
-  profile = var.AWS_PROFILE
+  profile = "calvinlu-msk"
   default_tags {
     tags = var.AWS_DEFAULT_TAGS
   }
