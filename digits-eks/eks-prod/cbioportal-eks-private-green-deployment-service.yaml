@@ -202,8 +202,6 @@ spec:
           value: "true"
         - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
           value: "true"
-        - name: LAST_RESTART
-          value: Sun Aug 17 05:54:09 EDT 2025
         envFrom:
         - configMapRef:
             name: private-eks-green
