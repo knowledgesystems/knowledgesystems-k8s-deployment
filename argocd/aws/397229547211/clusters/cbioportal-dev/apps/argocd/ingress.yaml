@@ -12,6 +12,12 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
+    - repoURL: https://github.com/knowledgesystems/portal-configuration.git
+      path: argocd/aws/397229547211/clusters/cbioportal-dev/secrets/ingress
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: portal-configuration-repo
     - repoURL: https://kubernetes.github.io/ingress-nginx
       targetRevision: 4.12.1
       chart: ingress-nginx
@@ -19,6 +25,7 @@ spec:
         releaseName: fluffy-kitty
         valueFiles:
           - $k8s-repo/argocd/aws/397229547211/clusters/cbioportal-dev/apps/ingress/values.yaml
+          - $portal-configuration-repo/argocd/aws/397229547211/clusters/cbioportal-dev/secrets/ingress/cert.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
