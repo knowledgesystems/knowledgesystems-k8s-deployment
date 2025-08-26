@@ -40,7 +40,7 @@ spec:
                 name: oncokb-core-public
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:4.1.0-no-frontend
+          image: oncokb/oncokb:4.2.0-no-frontend
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
@@ -65,7 +65,7 @@ spec:
               "-XX:MaxRAM=1024m",
               "-Dapp.name=oncokb-core-public",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=$(DB_URL)/oncokb_core_public?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_public_v5_1?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Dgenomenexus.api=https://www.genomenexus.org/",
