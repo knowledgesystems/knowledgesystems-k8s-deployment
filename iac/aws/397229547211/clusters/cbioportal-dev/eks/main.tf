@@ -68,6 +68,26 @@ locals {
         (var.LABEL_KEY) = "redis"
       }
     }
+    cbioportal = {
+      instance_types = ["r7g.xlarge"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 0
+      min_size       = 0
+      max_size       = 1
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbioportal"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbioportal"
+      }
+    }
   }
 }
 
