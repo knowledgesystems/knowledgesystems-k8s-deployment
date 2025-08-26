@@ -9,6 +9,9 @@ controller:
       value: "ingress"
       effect: "NoSchedule"
   service:
+    targetPorts:
+      http: http
+      https: http
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
