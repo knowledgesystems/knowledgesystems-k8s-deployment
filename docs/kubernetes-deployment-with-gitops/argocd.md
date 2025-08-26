@@ -11,10 +11,13 @@ Argo CD dashboard can be accessed in multiple ways.
 ### Public Instance
 For some of our clusters, we have attached the Argo CD dashboard to a public domain. See table below for the list of apps that have Argo CD instances publicly available.
 
-{.compact}
-| App        | Argo CD URL                                            |
-|------------|--------------------------------------------------------|
-| cBioPortal | [argocd.cbioportal.org](https://argocd.cbioportal.org) |
+
+| App                 | Environment | Argo CD URL                                                                        |
+|---------------------|-------------|------------------------------------------------------------------------------------|
+| cBioPortal Public   | Prod        | [argocd.cbioportal.org](https://argocd.cbioportal.org)                             |
+| cBioPortal Internal | Dev         | [argocd.cbioportal.dev.aws.mskcc.org](https://argocd.cbioportal.dev.aws.mskcc.org) |
+| OncoKB Internal     | Prod        | [argocd.oncokb.aws.mskcc.org](https://argocd.oncokb.aws.mskcc.org)                 |
+| OncoKB Internal     | Dev         | [argocd.oncokb.dev.aws.mskcc.org](https://argocd.oncokb.dev.aws.mskcc.org)         |
 
 ### Port-Forwarding
 By default, all ArgoCD installations come with a built-in dashboard that you can access by port-forwarding. You will need `kubectl` and access to the cluster for this method.
