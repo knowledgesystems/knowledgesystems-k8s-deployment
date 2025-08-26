@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/397229547211/clusters/cbioportal-dev/apps/redis
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://github.com/knowledgesystems/portal-configuration.git
+      path: argocd/aws/397229547211/clusters/cbioportal-dev/secrets/redis
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: portal-configuration-repo
+    - repoURL: https://charts.bitnami.com/bitnami
+      targetRevision: 18.5.0
+      chart: redis
+      helm:
+        releaseName: cbioportal-redis-public
+        valueFiles:
+          - $k8s-repo/argocd/aws/397229547211/clusters/cbioportal-dev/apps/redis/values.yaml
+          - $portal-configuration-repo/argocd/aws/397229547211/clusters/cbioportal-dev/secrets/redis/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc

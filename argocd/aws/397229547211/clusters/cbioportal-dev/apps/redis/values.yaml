@@ -1,0 +1,29 @@
+master:
+  count: 2
+  disableCommands: []
+  extraFlags:
+    - --maxmemory 8gb
+    - --maxmemory-policy volatile-ttl
+  nodeSelector:
+    workload: redis
+  persistence:
+    enabled: false
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: redis
+replica:
+  disableCommands: []
+  extraFlags:
+    - --maxmemory 8gb
+    - --maxmemory-policy volatile-ttl
+  nodeSelector:
+    workload: redis
+  persistence:
+    enabled: false
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: redis

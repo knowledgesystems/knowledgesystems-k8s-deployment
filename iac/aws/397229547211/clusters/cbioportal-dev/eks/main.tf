@@ -48,6 +48,26 @@ locals {
         (var.LABEL_KEY) = "airflow"
       }
     }
+    redis = {
+      instance_types = ["r5.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "redis"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "redis"
+      }
+    }
   }
 }
 
