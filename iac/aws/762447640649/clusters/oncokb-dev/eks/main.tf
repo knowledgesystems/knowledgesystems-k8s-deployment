@@ -67,7 +67,7 @@ locals {
 }
 
 module "eks_cluster" {
-  source       = "git::https://github.com/MSK-Staging/terraform-aws-hyc-eks.git"
+  source       = "git::git@github-mskcc:MSK-Staging/terraform-aws-hyc-eks.git"
   cluster_name = var.CLUSTER_NAME
 
   # General EKS Config
@@ -80,6 +80,9 @@ module "eks_cluster" {
   vpc_id                   = var.VPC_ID
   control_plane_subnet_ids = var.CONTROL_PLANE_SUBNET_IDS
   subnet_ids               = var.SUBNET_IDS
+
+  # Disable logging to avoid Cloudwatch costs
+  cluster_enabled_log_types = []
 
   # API Controls
   cluster_endpoint_public_access  = var.API_PUBLIC
