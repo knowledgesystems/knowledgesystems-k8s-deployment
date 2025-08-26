@@ -106,6 +106,9 @@ module "eks_cluster" {
   control_plane_subnet_ids = var.CONTROL_PLANE_SUBNET_IDS
   subnet_ids               = var.SUBNET_IDS
 
+  # Disable logging to avoid Cloudwatch costs
+  cluster_enabled_log_types = []
+
   # API Controls
   cluster_endpoint_public_access  = var.API_PUBLIC
   cluster_endpoint_private_access = var.API_PRIVATE
