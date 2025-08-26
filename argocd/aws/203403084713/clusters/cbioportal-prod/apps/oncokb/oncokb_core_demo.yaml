@@ -40,7 +40,7 @@ spec:
                 name: oncokb-core-demo
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: oncokb/oncokb:4.1.0-no-frontend
+          image: oncokb/oncokb:4.2.0-no-frontend
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
