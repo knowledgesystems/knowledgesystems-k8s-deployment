@@ -5,7 +5,6 @@ persistence:
   enabled: true
   size: 500Gi
   resourcePolicy: keep
-  accessModes: ["ReadWriteMany"]
 tolerations:
   - key: workload
     operator: Equal
