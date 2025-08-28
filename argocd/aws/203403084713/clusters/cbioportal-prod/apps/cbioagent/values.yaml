@@ -2,7 +2,7 @@ replicaCount: 2
 global:
   librechat:
     existingSecretName: "librechat-credentials-env"
-    existingSecretApiKey: ANTRHOPIC_API_KEY
+    existingSecretApiKey: OPENAI_API_KEY
 
 librechat:
   existingSecretName: "librechat-credentials-env"
