@@ -17,13 +17,13 @@ metadata:
   namespace: airflow
 spec:
   rules:
-#    - host: demo.cbioportal.dev.aws.mskcc.org
-#      http:
-#        paths:
-#          - backend:
-#              service:
-#                name: cbioportal-demo
-#                port:
-#                  number: 8080
-#            path: /
-#            pathType: Prefix
+    - host: demo.cbioportal.dev.aws.mskcc.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-demo
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
