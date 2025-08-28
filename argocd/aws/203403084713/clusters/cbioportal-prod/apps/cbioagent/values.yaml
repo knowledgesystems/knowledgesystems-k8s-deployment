@@ -18,6 +18,9 @@ image:
 mongodb:
   enabled: false
 
+librechat-rag-api:
+  enabled: true
+
 nodeSelector:
   workload: cbioagent
 
