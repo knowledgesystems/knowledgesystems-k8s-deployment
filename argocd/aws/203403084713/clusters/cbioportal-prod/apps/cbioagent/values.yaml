@@ -18,11 +18,6 @@ image:
 mongodb:
   enabled: false
 
-librechat-rag-api:
-  enabled: false
-  postgresql:
-    enabled: true
-
 nodeSelector:
   workload: cbioagent
 
