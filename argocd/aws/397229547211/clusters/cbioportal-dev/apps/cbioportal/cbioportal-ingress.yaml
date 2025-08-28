@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+  name: cbioportal-ingress
+  namespace: airflow
+spec:
+  rules:
+#    - host: demo.cbioportal.dev.aws.mskcc.org
+#      http:
+#        paths:
+#          - backend:
+#              service:
+#                name: cbioportal-demo
+#                port:
+#                  number: 8080
+#            path: /
+#            pathType: Prefix
