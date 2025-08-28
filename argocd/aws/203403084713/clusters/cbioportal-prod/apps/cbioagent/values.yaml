@@ -21,6 +21,9 @@ mongodb:
 librechat-rag-api:
   enabled: true
 
+postgresql:
+  enabled: true
+
 nodeSelector:
   workload: cbioagent
 
