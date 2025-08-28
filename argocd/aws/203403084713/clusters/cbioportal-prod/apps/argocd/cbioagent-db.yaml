@@ -11,7 +11,7 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - repoURL: https://charts.bitnami.com/bitnami
+    - repoURL: registry-1.docker.io/bitnamicharts
       targetRevision: 16.5.45
       chart: mongodb
       helm:
