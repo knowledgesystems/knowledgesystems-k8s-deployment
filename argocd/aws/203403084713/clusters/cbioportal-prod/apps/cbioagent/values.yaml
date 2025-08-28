@@ -19,7 +19,7 @@ mongodb:
   enabled: false
 
 librechat-rag-api:
-  enabled: true
+  enabled: false
   postgresql:
     enabled: true
 
