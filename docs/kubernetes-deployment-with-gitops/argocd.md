@@ -11,7 +11,7 @@ Argo CD dashboard can be accessed in multiple ways.
 ### Public Instance
 For some of our clusters, we have attached the Argo CD dashboard to a public domain. See table below for the list of apps that have Argo CD instances publicly available.
 
-
+{.compact}
 | App                 | Environment | Argo CD URL                                                                        |
 |---------------------|-------------|------------------------------------------------------------------------------------|
 | cBioPortal Public   | Prod        | [argocd.cbioportal.org](https://argocd.cbioportal.org)                             |
