@@ -1,0 +1,10 @@
+enabled: true
+image:
+  registry: ghcr.io
+  repository: bat-bs/bitnami-pgvector
+  tag: pg16
+auth:
+  database: librechat-vectordb
+  username: postgres
+  existingSecret: librechat-vectordb
+  existingSecretKey: postgres-password
