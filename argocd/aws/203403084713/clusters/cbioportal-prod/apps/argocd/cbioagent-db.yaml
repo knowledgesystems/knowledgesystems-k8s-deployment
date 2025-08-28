@@ -19,7 +19,7 @@ spec:
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent-db/mongodb-values.yaml
     - repoURL: registry-1.docker.io/bitnamicharts
-      targetRevision: 16.5.45
+      targetRevision: 15.5.38
       chart: postgresql
       helm:
         releaseName: cbioagent-db
