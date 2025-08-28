@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioagent
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent-db
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://charts.bitnami.com/bitnami
+      targetRevision: 16.5.45
+      chart: mongodb
+      helm:
+        releaseName: cbioagent-db
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent-db/mongodb-values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
