@@ -108,6 +108,7 @@ module "eks_cluster" {
 
   # Disable logging to avoid Cloudwatch costs
   cluster_enabled_log_types = []
+  create_cloudwatch_log_group = false
 
   # API Controls
   cluster_endpoint_public_access  = var.API_PUBLIC
