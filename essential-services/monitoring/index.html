@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.809558582061">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.809706993613">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -31,11 +31,11 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=3.11.0.809558582061" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.809706993613" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.809558582061" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.809706993613" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.809558582061" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.809706993613" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -208,12 +208,12 @@
 </tr>
 <tr>
 <td>API Traces/Logs - Public Portal (cbioportal.org)</td>
-<td><a href="https://app.datadoghq.com/apm/traces?query=service%3Acbioportal%20env%3Aeks-public&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=core_service%2Ccore_resource_name%2Clog_duration%2Clog_http.method%2Clog_http.status_code&amp;fromUser=false&amp;historicalData=true&amp;messageDisplay=inline&amp;sort=desc&amp;spanType=all&amp;storage=hot&amp;view=spans&amp;start=1746553544332&amp;end=1747158344332&amp;paused=false">Link</a></td>
+<td><a href="https://app.datadoghq.com/apm/traces?query=service%3Acbioportal%20env%3Aeks-public%20-status%3Aok%20%40http.status_code%3A%5B400%20TO%20600%5D%20-%40http.status_code%3A429%20-%40http.status_code%3A404&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=core_service%2Ccore_resource_name%2Clog_duration%2Clog_http.method%2Clog_http.status_code&amp;fromUser=false&amp;historicalData=true&amp;messageDisplay=inline&amp;sort=desc&amp;spanType=all&amp;storage=hot&amp;view=spans&amp;start=1755786818134&amp;end=1756391618134&amp;paused=false">Link</a></td>
 <td>Traces/logs for the public portal deployed at cbioportal.org</td>
 </tr>
 <tr>
 <td>API Traces/Logs - Genie Public/Private</td>
-<td><a href="https://app.datadoghq.com/apm/traces?query=service%3Acbioportal%20env%3Aeks-genie-public%20OR%20env%3Aeks-genie-private&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=core_service%2Ccore_resource_name%2Clog_duration%2Clog_http.method%2Clog_http.status_code&amp;fromUser=false&amp;historicalData=true&amp;messageDisplay=inline&amp;sort=desc&amp;spanType=all&amp;storage=hot&amp;view=spans&amp;start=1746553595513&amp;end=1747158395513&amp;paused=false">Link</a></td>
+<td><a href="https://app.datadoghq.com/apm/traces?query=service%3Acbioportal%20%28env%3Aeks-genie-public%20OR%20env%3Aeks-genie-private%29%20-status%3Aok%20%40http.status_code%3A%5B401%20TO%20520%5D&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=core_service%2Ccore_resource_name%2Clog_duration%2Clog_http.method%2Clog_http.status_code&amp;fromUser=false&amp;historicalData=true&amp;messageDisplay=inline&amp;sort=desc&amp;spanType=all&amp;storage=hot&amp;view=spans&amp;start=1755786879059&amp;end=1756391679059&amp;paused=false">Link</a></td>
 <td>Traces/logs for the genie public and private portals</td>
 </tr>
 <tr>
