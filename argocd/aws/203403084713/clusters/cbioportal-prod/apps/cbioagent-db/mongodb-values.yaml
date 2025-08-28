@@ -1,6 +1,8 @@
 architecture: standalone
 auth:
   existingSecret: cbioagent-mongodb-creds
+  usernames:
+    - "cbioagent"
   databases:
     - "cBioAgent"
 persistence:
