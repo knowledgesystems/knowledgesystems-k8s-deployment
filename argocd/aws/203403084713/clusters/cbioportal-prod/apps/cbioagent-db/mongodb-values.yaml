@@ -1,10 +1,6 @@
 architecture: standalone
 auth:
   existingSecret: cbioagent-mongodb-creds
-  usernames:
-    - "cbioagent"
-  databases:
-    - "cBioAgent"
 persistence:
   enabled: true
   size: 500Gi
