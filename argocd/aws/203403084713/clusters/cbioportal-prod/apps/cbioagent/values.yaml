@@ -15,6 +15,9 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "librechat-latest"
 
+mongodb:
+  enabled: false
+
 nodeSelector:
   workload: cbioagent
 
