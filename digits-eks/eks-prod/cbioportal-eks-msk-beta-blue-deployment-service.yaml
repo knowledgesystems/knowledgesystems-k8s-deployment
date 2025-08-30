@@ -9,7 +9,7 @@ metadata:
   name: eks-msk-beta-blue
 spec:
   progressDeadlineSeconds: 600
-  replicas: 0
+  replicas: 2
   revisionHistoryLimit: 10
   selector:
     matchLabels:
