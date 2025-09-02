@@ -193,7 +193,7 @@ spec:
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=9",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
-            "--redis.clear_on_startup=false",
+            "--redis.clear_on_startup=true",
             "--redis.ttl_mins=60",
             "--cache.endpoint.enabled=true",
             "--cache.endpoint.api-key=1kmfbftTb2iY",

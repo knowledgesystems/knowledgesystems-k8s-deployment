@@ -184,7 +184,7 @@ spec:
         - --redis.leader_address=redis://cbioportal-genie-persistence-redis-master:6379
         - --redis.follower_address=redis://cbioportal-genie-persistence-redis-replicas:6379
         - --redis.database=4
-        - --redis.clear_on_startup=false
+        - --redis.clear_on_startup=true
         - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
         - --redis.ttl_mins=60
         # misc. frontend settings (this is NOT a persistence layer caching property!)
