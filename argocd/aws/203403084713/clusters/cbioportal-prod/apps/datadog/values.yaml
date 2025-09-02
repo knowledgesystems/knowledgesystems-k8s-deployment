@@ -75,17 +75,17 @@ clusterAgent:
       value: datadog
       effect: NoSchedule
 datadog:
-  logLevel: DEBUG
+  logLevel: INFO
   helmCheck:
-    enabled: true
-    collectEvents: true
+    enabled: false
+    collectEvents: false
   clusterName: cbioportal-prod-a9438edd
   apiKeyExistingSecret: datadog
   clusterChecks:
     enabled: true
   logs:
-    containerCollectAll: true
-    enabled: true
+    containerCollectAll: false
+    enabled: false
   apm:
     instrumentation:
       skipKPITelemetry: true
