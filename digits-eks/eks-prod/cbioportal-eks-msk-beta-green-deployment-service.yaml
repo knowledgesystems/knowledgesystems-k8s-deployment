@@ -259,7 +259,7 @@ spec:
         envFrom:
         - configMapRef:
             name: msk-beta-green-eks
-        image: cbioportal/cbioportal-dev:0a99de2f8fc00bae26bce9e0fa97b967b947923c-web-shenandoah
+        image: cbioportal/cbioportal:6.3.5-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 20
