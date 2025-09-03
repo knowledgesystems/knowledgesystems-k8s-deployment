@@ -5,7 +5,7 @@ metadata:
     run: eks-msk-green
     tags.datadoghq.com/env: eks-msk
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.5
+    tags.datadoghq.com/version: 6.3.6
   name: eks-msk-green
 spec:
   progressDeadlineSeconds: 600
@@ -29,7 +29,7 @@ spec:
         run: eks-msk-green
         tags.datadoghq.com/env: eks-msk
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.5
+        tags.datadoghq.com/version: 6.3.6
     spec:
       containers:
       - args:
@@ -191,7 +191,7 @@ spec:
         - --ehcache.cache_type=none
         - --cache.endpoint.api-key=$(CACHE_API_KEY)
         - --cache.endpoint.enabled=true
-        - --redis.clear_on_startup=false
+        - --redis.clear_on_startup=true
         - --redis.ttl_mins=60
         - --enable_persistent_cache=false
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/saml/descriptor
@@ -245,7 +245,7 @@ spec:
         envFrom:
         - configMapRef:
             name: eks-msk-green
-        image: cbioportal/cbioportal:6.3.5-web-shenandoah
+        image: cbioportal/cbioportal:6.3.6-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 20

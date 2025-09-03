@@ -5,7 +5,7 @@ metadata:
     run: eks-sclc-blue
     tags.datadoghq.com/env: eks-sclc
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.5
+    tags.datadoghq.com/version: 6.3.6
   name: eks-sclc-blue
 spec:
   progressDeadlineSeconds: 600
@@ -29,7 +29,7 @@ spec:
         run: eks-sclc-blue
         tags.datadoghq.com/env: eks-sclc
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.5
+        tags.datadoghq.com/version: 6.3.6
     spec:
       containers:
       - args:
@@ -169,7 +169,7 @@ spec:
         - --ehcache.cache_type=none
         - --cache.endpoint.api-key=$(CACHE_API_KEY)
         - --cache.endpoint.enabled=true
-        - --redis.clear_on_startup=false
+        - --redis.clear_on_startup=true
         - --redis.ttl_mins=60
         - --enable_persistent_cache=false
         - --security.cors.allowed-origins=*
@@ -199,7 +199,7 @@ spec:
         envFrom:
         - configMapRef:
             name: sclc-eks-blue
-        image: cbioportal/cbioportal:6.3.5-web-shenandoah
+        image: cbioportal/cbioportal:6.3.6-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 20
