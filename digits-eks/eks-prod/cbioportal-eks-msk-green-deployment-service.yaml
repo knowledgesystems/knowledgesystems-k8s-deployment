@@ -216,8 +216,8 @@ spec:
         - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
         - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
         - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
-        - --clickhouse_mode=true
-        - --spring.profiles.active=clickhouse
+        - --clickhouse_mode=false
+        - --spring.profiles.active=mysql
         - --enable_request_body_gzip_compression=true
         - --enable_study_tags=false
         - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
