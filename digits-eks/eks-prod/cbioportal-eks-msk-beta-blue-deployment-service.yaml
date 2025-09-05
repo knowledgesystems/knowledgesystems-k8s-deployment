@@ -5,7 +5,7 @@ metadata:
     run: eks-msk-beta-blue
     tags.datadoghq.com/env: eks-msk-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.5
+    tags.datadoghq.com/version: 6.3.6
   name: eks-msk-beta-blue
 spec:
   progressDeadlineSeconds: 600
@@ -29,7 +29,7 @@ spec:
         run: eks-msk-beta-blue
         tags.datadoghq.com/env: eks-msk-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.5
+        tags.datadoghq.com/version: 6.3.6
     spec:
       containers:
       - args:
@@ -187,13 +187,12 @@ spec:
         - --persistence.cache_type=redis
         - --redis.leader_address=redis://eks-msk-cbioportal-persistence-redis-master:6379
         - --redis.follower_address=redis://eks-msk-cbioportal-persistence-redis-replicas:6379
-        - --redis.password=$(REDIS_PASSWORD)
+        - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
         - --ehcache.cache_type=none
         - --cache.endpoint.api-key=$(CACHE_API_KEY)
         - --cache.endpoint.enabled=true
         - --redis.clear_on_startup=false
         - --redis.ttl_mins=60
-        - --enable_persistent_cache=false
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/saml/descriptor
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=cbioportal-msk-beta-v6
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt
