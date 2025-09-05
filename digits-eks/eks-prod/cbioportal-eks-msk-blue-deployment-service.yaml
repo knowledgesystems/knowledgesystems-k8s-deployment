@@ -63,7 +63,7 @@ spec:
         # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
         # from the limits
         #- -XX:MaxRAM=6500m
-        - -Djavax.net.ssl.trustStore=/certs/mskcerts2
+        - -Djavax.net.ssl.trustStore=/certs/mskcerts
         - -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)
         - -jar
         - /cbioportal-webapp/app.jar
@@ -216,8 +216,8 @@ spec:
         - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
         - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
         - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
-        - --clickhouse_mode=false
-        - --spring.profiles.active=mysql
+        - --clickhouse_mode=true
+        - --spring.profiles.active=clickhouse
         - --enable_request_body_gzip_compression=true
         - --enable_study_tags=false
         - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
@@ -301,9 +301,9 @@ spec:
         - mountPath: /cbioportal/frontendConfig.json
           name: cbioportal-frontend-config-volume
           subPath: frontendConfig.json
-        - mountPath: /certs/mskcerts2
-          name: mskcerts2-volume
-          subPath: mskcerts2
+        - mountPath: /certs/mskcerts
+          name: mskcerts-volume
+          subPath: mskcerts
       dnsPolicy: ClusterFirst
       nodeSelector:
         eks.amazonaws.com/nodegroup: msk-portals-general-64g
@@ -336,10 +336,10 @@ spec:
       - configMap:
           defaultMode: 420
           items:
-          - key: mskcerts2
-            path: mskcerts2
-          name: mskcerts2
-        name: mskcerts2-volume
+          - key: mskcerts_2025_09_05.p12
+            path: mskcerts
+          name: mskcerts20250905
+        name: mskcerts-volume
 ---
 apiVersion: v1
 kind: Service

@@ -63,7 +63,7 @@ spec:
         # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
         # from the limits
         #- -XX:MaxRAM=6500m
-        - -Djavax.net.ssl.trustStore=/certs/betacerts2
+        - -Djavax.net.ssl.trustStore=/certs/betacerts
         - -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)
         - -jar
         - /cbioportal-webapp/app.jar
@@ -303,6 +303,9 @@ spec:
         - mountPath: /cbioportal/frontendConfig.json
           name: cbioportal-frontend-config-volume
           subPath: frontendConfig.json
+        - mountPath: /certs/mskcerts
+          name: mskcerts-volume
+          subPath: mskcerts
       dnsPolicy: ClusterFirst
       nodeSelector:
         eks.amazonaws.com/nodegroup: msk-portals-general-64g
@@ -332,6 +335,13 @@ spec:
             path: frontendConfig.json
           name: msk-eks-frontend-config
         name: cbioportal-frontend-config-volume
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: mskcerts_2025_09_05.p12
+            path: mskcerts
+          name: mskcerts20250905
+        name: mskcerts-volume
 ---
 apiVersion: v1
 kind: Service
