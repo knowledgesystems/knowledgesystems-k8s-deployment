@@ -19,6 +19,7 @@ spec:
     metadata:
       labels:
         run: cbioportal-backend-master-blue
+        infrastructure: fargate
     spec:
       volumes:
       - name: cbioportal-frontend-config-volume
@@ -220,14 +221,6 @@ spec:
               memory: 8Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-      # run on eks-public-cbioportal node group
-      nodeSelector:
-        workload: "cbio-dev"
-      tolerations:
-        - key: "workload"
-          operator: "Equal"
-          value: "cbio-dev"
-          effect: "NoSchedule"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
