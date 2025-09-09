@@ -169,3 +169,17 @@ variable "ADDON_CONFIG" {
     }
   }
 }
+
+variable "FARGATE_SELECTOR_NAMESPACE" {
+  description = "Namespace of the pods to match in fargate"
+  type = string
+  default = "default"
+}
+
+variable "FARGATE_SELECTOR_LABELS" {
+  description = "Labels of the pods to run on fargate"
+  type = map(string)
+  default = {
+    "infrastructure" = "fargate"
+  }
+}

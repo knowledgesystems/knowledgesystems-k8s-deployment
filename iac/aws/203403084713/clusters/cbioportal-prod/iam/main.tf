@@ -1,11 +1,14 @@
 locals {
   account_id                     = data.aws_caller_identity.current.account_id
+  account_region = var.aws_region
+  cluster_name = var.cluster_name
   permissions_boundary_policy    = "AutomationOrUserServiceRolePermissions"
   cellxgene_s3_mountpoint_bucket = "cellxgene-data"
 }
 
 data "aws_caller_identity" "current" {}
 
+# S3 mountpoint policy
 resource "aws_iam_policy" "userServicePolicyCellxgeneS3Mountpoint" {
   name        = "userServicePolicyCellxgeneS3Mountpoint"
   path        = "/"
@@ -49,6 +52,7 @@ resource "aws_iam_policy" "userServicePolicyCellxgeneS3Mountpoint" {
   }
 }
 
+# S3 mountpoint role
 resource "aws_iam_role" "userServiceRoleCellxgeneS3Mountpoint" {
   name = "userServiceRoleCellxgeneS3Mountpoint"
 
@@ -81,7 +85,37 @@ resource "aws_iam_role" "userServiceRoleCellxgeneS3Mountpoint" {
   }
 }
 
+# S3 mountpoint policy attachment
 resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentCellxgeneS3Mountpoint" {
   policy_arn = aws_iam_policy.userServicePolicyCellxgeneS3Mountpoint.arn
   role       = aws_iam_role.userServiceRoleCellxgeneS3Mountpoint.name
+}
+
+# Fargate pod execution role
+resource "aws_iam_role" "userServiceRoleFargatePodExecutionCbioportal" {
+  name = "userServiceRoleFargatePodExecutionCbioportal"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = "sts:AssumeRole"
+      Principal = {
+        Service = "eks-fargate-pods.amazonaws.com"
+      }
+      Condition = {
+        ArnLike = {
+          "aws:SourceArn" = "arn:aws:eks:${local.account_region}:${local.account_id}:fargateprofile/${local.cluster_name}/*"
+        }
+      }
+    }]
+  })
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+}
+
+# Attach role with policy
+resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentFargateCbioportal" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+  role = aws_iam_role.userServiceRoleFargatePodExecutionCbioportal.name
 }
