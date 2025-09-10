@@ -17,7 +17,7 @@ metadata:
   namespace: airflow
 spec:
   rules:
-    - host: airflow-demo.cbioportal.dev.aws.mskcc.org
+    - host: airflow.cbioportal.dev.aws.mskcc.org
       http:
         paths:
           - backend:
