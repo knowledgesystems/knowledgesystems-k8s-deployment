@@ -13,6 +13,10 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: cbio-dev
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: cbio-genie
       effect: NoSchedule
     - key: workload
