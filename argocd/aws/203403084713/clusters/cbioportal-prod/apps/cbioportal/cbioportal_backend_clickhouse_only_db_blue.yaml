@@ -48,7 +48,7 @@ spec:
             value: "true"
           - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
             value: "true"
-        image: cbioportal/cbioportal-dev:454c433df21d095c3d7facd50d432652881b0d5b-web-shenandoah
+        image: cbioportal/cbioportal-dev:41e677fd617270bfd2a80952712ee2744fb7d87f-web-shenandoah
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
