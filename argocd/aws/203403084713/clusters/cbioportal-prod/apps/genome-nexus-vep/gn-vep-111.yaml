@@ -1,0 +1,84 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    run: gn-vep-111
+  name: gn-vep-111
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      run: gn-vep-111
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        run: gn-vep-111
+    spec: 
+      containers:
+      - name: gn-vep-111
+        image: genomenexus/gn-vep:111-2.0.0
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-rds-user
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-rds-user
+              key: MYSQL_PORT
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-rds-user
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-rds-user
+              key: MYSQL_PASSWORD
+        readinessProbe:
+          httpGet:
+            path: /vep/human/hgvs/ENST00000375759.3:c.10981A>T
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 180
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /vep/human/hgvs/ENST00000375759.3:c.10981A>T
+            port: 8080
+          initialDelaySeconds: 190
+          timeoutSeconds: 60
+          periodSeconds: 30
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      nodeSelector:
+        workload: "gn-vep"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "gn-vep"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-vep-111
+  name: gn-vep-111
+  namespace: genome-nexus
+spec:
+  ports:
+    - port: 8080
+  selector:
+    run: gn-vep-111
+  type: ClusterIP
