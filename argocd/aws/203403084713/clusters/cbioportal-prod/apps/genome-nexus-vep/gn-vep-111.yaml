@@ -1,9 +1,10 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
+  name: gn-vep-111
+  namespace: genome-nexus
   labels:
     run: gn-vep-111
-  name: gn-vep-111
 spec: 
   replicas: 1
   selector:
