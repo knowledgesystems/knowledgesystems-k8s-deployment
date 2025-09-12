@@ -8,6 +8,23 @@ locals {
       max_size       = 3
       min_size       = 2
     }
+    ingress = {
+      instance_types = ["m5.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "ingress"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "ingress"
+      }
+    }
   }
 }
 
@@ -27,13 +44,14 @@ module "eks_cluster" {
   subnet_ids               = var.SUBNET_IDS
 
   # Disable logging to avoid Cloudwatch costs
-  cluster_enabled_log_types   = []
+  cluster_enabled_log_types = []
   create_cloudwatch_log_group = false
 
   # API Controls
   cluster_endpoint_public_access  = var.API_PUBLIC
   cluster_endpoint_private_access = var.API_PRIVATE
 
+  # HYC addons
   hyc_addon_configs = {
     observability = {
       create = false
@@ -43,6 +61,7 @@ module "eks_cluster" {
   # EKS Managed Node Groups
   eks_managed_node_groups = {
     for name, config in local.node_groups : name => merge(config, {
+      cluster_version = try(config.version, var.NODEGROUP_VER)
       tags = merge(
         try(config.tags, {}),
         {
