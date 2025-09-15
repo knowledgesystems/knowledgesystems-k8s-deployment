@@ -191,7 +191,7 @@ spec:
         - --ehcache.cache_type=none
         - --cache.endpoint.api-key=$(CACHE_API_KEY)
         - --cache.endpoint.enabled=true
-        - --redis.clear_on_startup=false
+        - --redis.clear_on_startup=true
         - --redis.ttl_mins=60
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/saml/descriptor
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=cbioportal-msk-beta-v6
