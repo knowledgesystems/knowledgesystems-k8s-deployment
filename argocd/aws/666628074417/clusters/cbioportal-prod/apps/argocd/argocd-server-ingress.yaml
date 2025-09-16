@@ -8,7 +8,7 @@ metadata:
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
     ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/backend-protocol: http
+    nginx.ingress.kubernetes.io/backend-protocol: https
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-body-size: 512m
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
