@@ -42,6 +42,23 @@ locals {
         (var.LABEL_KEY) = "datadog"
       }
     }
+    redis = {
+      instance_types = ["t3.medium"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 4
+      min_size       = 4
+      max_size       = 4
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "redis"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "redis"
+      }
+    }
   }
 }
 
