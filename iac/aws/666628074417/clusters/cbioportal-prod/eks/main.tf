@@ -25,6 +25,23 @@ locals {
         (var.LABEL_KEY) = "ingress"
       }
     }
+    datadog = {
+      instance_types = ["t3.medium"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 1
+      max_size       = 3
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "datadog"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "datadog"
+      }
+    }
   }
 }
 
