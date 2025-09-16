@@ -15,6 +15,7 @@ For some of our clusters, we have attached the Argo CD dashboard to a public dom
 | App                 | Environment | Argo CD URL                                                                        |
 |---------------------|-------------|------------------------------------------------------------------------------------|
 | cBioPortal Public   | Prod        | [argocd.cbioportal.org](https://argocd.cbioportal.org)                             |
+| cBioPortal Internal | Prod        | [argocd.cbioportal.aws.mskcc.org](https://argocd.cbioportal.aws.mskcc.org)         |
 | cBioPortal Internal | Dev         | [argocd.cbioportal.dev.aws.mskcc.org](https://argocd.cbioportal.dev.aws.mskcc.org) |
 | OncoKB Internal     | Prod        | [argocd.oncokb.aws.mskcc.org](https://argocd.oncokb.aws.mskcc.org)                 |
 | OncoKB Internal     | Dev         | [argocd.oncokb.dev.aws.mskcc.org](https://argocd.oncokb.dev.aws.mskcc.org)         |
