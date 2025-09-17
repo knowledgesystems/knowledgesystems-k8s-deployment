@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: oncokb-patient-report-beta
+  name: oncokb-patient-report-beta
+  namespace: oncokb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-patient-report-beta
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-patient-report-beta
+    spec:
+      containers:
+        - env:
+          envFrom:
+            - secretRef:
+                name: oncokb-patient-report-beta
+          image: oncokb/oncokb-patient-report:0.1.0
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /upload-tsv
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 20
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /upload-tsv
+              port: 8080
+            # wait for the pod is ready
+            initialDelaySeconds: 480
+            timeoutSeconds: 5
+            periodSeconds: 5
+            failureThreshold: 100
+          name: oncokb-patient-report-beta
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "oncokb-beta"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: oncokb-beta
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: oncokb-patient-report-beta
+  name: oncokb-patient-report-beta
+  namespace: oncokb
+spec:
+  ports:
+    - port: 8080
+  selector:
+    run: oncokb-patient-report-beta
+  type: ClusterIP
