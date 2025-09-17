@@ -19,14 +19,14 @@ spec:
       labels:
         run: oncokb-patient-report-beta
     spec:
+      imagePullSecrets:
+        - name: oncokb-dockerhub-creds
       containers:
         - env:
           envFrom:
             - secretRef:
                 name: oncokb-patient-report-beta
           image: oncokb/oncokb-patient-report:0.1.0
-          imagePullSecrets:
-            - name: dockerhub-creds
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
