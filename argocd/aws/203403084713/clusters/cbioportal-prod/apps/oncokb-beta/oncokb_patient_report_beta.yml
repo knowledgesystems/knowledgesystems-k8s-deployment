@@ -25,6 +25,8 @@ spec:
             - secretRef:
                 name: oncokb-patient-report-beta
           image: oncokb/oncokb-patient-report:0.1.0
+          imagePullSecrets:
+            - name: dockerhub-creds
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
