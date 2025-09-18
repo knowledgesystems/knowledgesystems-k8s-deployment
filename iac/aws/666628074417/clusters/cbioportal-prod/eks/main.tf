@@ -43,7 +43,7 @@ locals {
       }
     }
     redis = {
-      instance_types = ["t3.medium"]
+      instance_types = ["r5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 4
       min_size       = 4
