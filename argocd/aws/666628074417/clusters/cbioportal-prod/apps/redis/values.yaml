@@ -1,0 +1,23 @@
+master:
+  disableCommands: ""
+  nodeSelector:
+    workload: redis
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: redis
+  persistence:
+    enabled: false
+replica:
+  disableCommands: ""
+  nodeSelector:
+    workload: redis
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: redis
+  persistence:
+    enabled: false
+  replicaCount: 1
