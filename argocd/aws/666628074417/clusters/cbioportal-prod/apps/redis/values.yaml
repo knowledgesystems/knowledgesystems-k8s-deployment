@@ -21,3 +21,6 @@ replica:
   persistence:
     enabled: false
   replicaCount: 1
+image:
+  registry: docker.io
+  repository: bitnamilegacy/redis
