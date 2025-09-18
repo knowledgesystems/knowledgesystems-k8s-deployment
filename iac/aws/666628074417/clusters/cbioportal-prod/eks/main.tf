@@ -43,11 +43,11 @@ locals {
       }
     }
     redis = {
-      instance_types = ["r5.large"]
+      instance_types = ["t3.medium"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 4
-      min_size       = 4
-      max_size       = 4
+      desired_size   = 5
+      min_size       = 5
+      max_size       = 5
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
