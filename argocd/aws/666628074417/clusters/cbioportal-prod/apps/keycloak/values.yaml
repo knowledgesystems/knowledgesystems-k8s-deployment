@@ -94,10 +94,13 @@ extraVolumes: |
     emptyDir: {}
   - name: keycloak12-sclc-theme
     emptyDir: {}
-image:
-  repository: quay.io/keycloak/keycloak
 nodeSelector:
-  eks.amazonaws.com/nodegroup: essential-services
+  workload: keycloak
+tolerations:
+  - key: workload
+    operator: Equal
+    value: keycloak
+    effect: NoSchedule
 postgresql:
   enabled: false
 imagePullSecrets:
