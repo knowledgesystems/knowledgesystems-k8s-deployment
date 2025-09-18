@@ -24,7 +24,39 @@ spec:
       helm:
         releaseName: cbioportal-persistence-redis
         valueFiles:
-          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/values.yaml
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/cbioportal-persistence-redis-values.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: msk-cbioportal-persistence-redis-values
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://github.com/knowledgesystems/portal-configuration
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/helm
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: portal-configuration-repo
+    - repoURL: https://charts.bitnami.com/bitnami
+      targetRevision: 18.2.0
+      chart: redis
+      helm:
+        releaseName: cbioportal-persistence-redis
+        valueFiles:
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/msk-cbioportal-persistence-redis-values.yaml
           - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
   destination:
     namespace: default
