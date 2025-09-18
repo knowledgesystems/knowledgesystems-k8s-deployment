@@ -4,6 +4,18 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## Docker Image Not Found - Bitnami Legacy Images and Helm Charts
+When installing helm charts that use legacy Bitnami images, you may encounter errors like:
+```
+Back-off pulling image "docker.io/bitnami/redis:7.2.2-debian-11-r0":ErrImagePull: rpc error: code = NotFound desc = failed to pull and unpack image "docker.io/bitnami/redis:7.2.2-debian-11-r0": failed to resolve reference "docker.io/bitnami/redis:7.2.2-debian-11-r0": docker.io/bitnami/redis:7.2.2-debian-11-r0: not found
+```
+This happens because some older Bitnami image versions are now located in the `bitnamilegacy` repository instead of the main `bitnami` repository. To solve the above issue, try providing custom image repository and registry to the helm chart. For example, for redis, you can set helm values like so:
+```
+image:
+    repository: bitnamilegacy/redis
+    registry: docker.io
+```
+
 ## Low Ephemeral Storage Issue
 Our new Terraform modules use a default ephemeral storage which might not be enough for certain workloads. This leads to an error similar to the following on deployments:
 ```
