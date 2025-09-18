@@ -33,7 +33,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: msk-cbioportal-persistence-redis-values
+  name: msk-cbioportal-persistence-redis
   namespace: argocd
 spec:
   project: default
@@ -54,7 +54,7 @@ spec:
       targetRevision: 18.2.0
       chart: redis
       helm:
-        releaseName: cbioportal-persistence-redis
+        releaseName: msk-cbioportal-persistence-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/msk-cbioportal-persistence-redis-values.yaml
           - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
