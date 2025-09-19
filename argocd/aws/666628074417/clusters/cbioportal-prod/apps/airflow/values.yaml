@@ -1,0 +1,161 @@
+config:
+  api:
+    access_control_allow_headers: origin, content-type, accept
+    access_control_allow_methods: POST, GET, OPTIONS, DELETE
+    access_control_allow_origins: http://pipelines3.cbioportal.aws.mskcc.org
+    auth_backends: airflow.api.auth.backend.basic_auth
+  core:
+    allowed_deserialization_classes_regexp: airflow\..* .*\..*StudyBuilder
+  kubernetes_executor:
+    delete_worker_pods: true
+    delete_worker_pods_on_failure: true
+  smtp:
+    smtp_host: smtp.gmail.com
+    smtp_mail_from: cbioportalpipelines@gmail.com
+    smtp_port: 587
+    smtp_ssl: false
+    smtp_starttls: true
+  webserver:
+    base_url: https://airflow.cbioportal.aws.mskcc.org
+dags:
+  gitSync:
+    branch: main
+    enabled: true
+    knownHosts: |
+      github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+    repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git
+    sshKeySecret: airflow-ssh-secret
+    subPath: ""
+env:
+  - name: PYTHONPATH
+    value: /opt/airflow/dags/repo/nci-crdc-pipeline
+  - name: AIRFLOW__METRICS__STATSD_ON
+    value: "True"
+  - name: AIRFLOW__METRICS__STATSD_PORT
+    value: "8125"
+  - name: AIRFLOW__METRICS__STATSD_PREFIX
+    value: airflow
+executor: KubernetesExecutor
+extraEnv: |-
+  - name: AIRFLOW__METRICS__STATSD_HOST
+    valueFrom:
+      fieldRef:
+        fieldPath: status.hostIP
+images:
+  airflow:
+    pullPolicy: IfNotPresent
+    repository: apache/airflow
+    tag: 2.9.2
+logs:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: efs-sc
+nodeSelector:
+  workload: airflow
+tolerations:
+  - key: workload
+    operator: Equal
+    value: datadog
+    effect: NoSchedule
+scheduler:
+  extraInitContainers:
+    - command:
+        - sh
+        - -c
+        - chmod -R g+w /opt/airflow/git_repos
+      image: busybox:1.36
+      name: volume-mount-permission
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - mountPath: /opt/airflow/git_repos
+          name: pv
+  extraVolumeMounts:
+    - mountPath: /opt/airflow/git_repos
+      name: pv
+      readOnly: false
+  extraVolumes:
+    - name: pv
+      persistentVolumeClaim:
+        claimName: efs-pv-claim
+secret:
+  - envName: AIRFLOW_CONN_SMTP_DEFAULT
+    secretKey: AIRFLOW_CONN_SMTP_DEFAULT
+    secretName: airflow-smtp-uri
+  - envName: AIRFLOW_CONN_PLLIMSKHPC2_CF_SSH
+    secretKey: AIRFLOW_CONN_PLLIMSKHPC2_CF_SSH
+    secretName: airflow-hpc2-cf-ssh-uri
+  - envName: AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH
+    secretKey: AIRFLOW_CONN_PLLIMSKHPC3_CF_SSH
+    secretName: airflow-hpc3-cf-ssh-uri
+  - envName: AIRFLOW_CONN_PLLIMSKHPC3_SSH
+    secretKey: AIRFLOW_CONN_PLLIMSKHPC3_SSH
+    secretName: airflow-hpc3-ssh-uri
+  - envName: AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD
+    secretKey: AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD
+    secretName: airflow-impact-pipeline-password
+  - envName: AIRFLOW_CONN_IMPORTER_SSH
+    secretKey: AIRFLOW_CONN_GENIE_IMPORTER_SSH
+    secretName: airflow-genie-importer-ssh-uri
+  - envName: AIRFLOW_CONN_PIPELINES3_SSH
+    secretKey: AIRFLOW_CONN_PIPELINES3_SSH
+    secretName: airflow-pipelines3-ssh-uri
+  - envName: AIRFLOW_CONN_PIPELINES5_SSH
+    secretKey: AIRFLOW_CONN_PIPELINES5_SSH
+    secretName: airflow-pipelines5-ssh-uri
+webserver:
+  startupProbe:
+    timeoutSeconds: 360
+webserverSecretKeySecretName: airflow-webserver-secret-key
+workers:
+  extraVolumeMounts:
+    - mountPath: /opt/airflow/git_repos
+      name: pv
+      readOnly: false
+    - mountPath: /opt/airflow/secrets/gcp-keyfile
+      name: gcp-keyfile
+      readOnly: true
+    - mountPath: /home/airflow/.ssh
+      name: git-secret
+      readOnly: true
+    - mountPath: /opt/airflow/secrets/hpc2-ssh-keyfile
+      name: hpc2-ssh-keyfile
+      readOnly: true
+    - mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
+      name: hpc3-ssh-keyfile
+      readOnly: true
+    - mountPath: /opt/airflow/secrets/genie-importer-ssh-keyfile
+      name: genie-importer-ssh-keyfile
+      readOnly: true
+    - mountPath: /opt/airflow/secrets/pipelines3-ssh-keyfile
+      name: pipelines3-ssh-keyfile
+      readOnly: true
+    - mountPath: /opt/airflow/secrets/pipelines5-ssh-keyfile
+      name: pipelines5-ssh-keyfile
+      readOnly: true
+  extraVolumes:
+    - name: pv
+      persistentVolumeClaim:
+        claimName: efs-pv-claim
+    - name: gcp-keyfile
+      secret:
+        secretName: airflow-gcp-keyfile
+    - name: git-secret
+      secret:
+        secretName: airflow-git-secret
+    - name: hpc2-ssh-keyfile
+      secret:
+        secretName: airflow-hpc2-ssh-keyfile
+    - name: hpc3-ssh-keyfile
+      secret:
+        secretName: airflow-hpc3-ssh-keyfile
+    - name: genie-importer-ssh-keyfile
+      secret:
+        secretName: airflow-genie-importer-ssh-keyfile
+    - name: pipelines3-ssh-keyfile
+      secret:
+        secretName: airflow-pipelines3-ssh-keyfile
+    - name: pipelines5-ssh-keyfile
+      secret:
+        secretName: airflow-pipelines5-ssh-keyfile
