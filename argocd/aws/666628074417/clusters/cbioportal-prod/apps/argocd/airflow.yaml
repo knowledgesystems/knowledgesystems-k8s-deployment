@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/airflow
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://airflow.apache.org
+      targetRevision: 1.15.0
+      chart: airflow
+      helm:
+        releaseName: airflow
+        valueFiles:
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/airflow/values.yaml
+  destination:
+    namespace: airflow
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
