@@ -18,7 +18,7 @@ spec:
       directory:
         recurse: true
       ref: portal-configuration-repo
-    - repoURL: https://charts.bitnami.com/bitnami
+    - repoURL: https://codecentric.github.io/helm-charts
       targetRevision: 11.0.1
       chart: keycloak
       helm:
