@@ -160,7 +160,7 @@ spec:
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=11",
             "--redis.password=$(REDIS_PERSISTENCE_PASSWORD)",
-            "--redis.clear_on_startup=true",
+            "--redis.clear_on_startup=false",
             # NEW PROPERTIES START
             "--enable_persistent_cache=true",
             "--persistence.cache_type_clickhouse=redis",
