@@ -109,7 +109,7 @@ spec:
             # connecting over dbcp
             "--dbconnector=dbcp",
             # Authentication settings
-            "--authenticate=false",
+            "--authenticate=optional_oauth2",
             "--authorization=false",
             "--security.method_authorization_enabled=false",
             "--always_show_study_group=PUBLIC",
