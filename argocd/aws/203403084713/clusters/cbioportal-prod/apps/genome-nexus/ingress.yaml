@@ -91,16 +91,6 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
-#    - host: vep88.genomenexus.org
-#      http:
-#        paths:
-#          - backend:
-#              service:
-#                name: gn-vep88
-#                port:
-#                  number: 80
-#            path: /
-#            pathType: Prefix
     - host: vep112.genomenexus.org
       http:
         paths:
@@ -131,5 +121,5 @@ spec:
         - genie.genomenexus.org
         - annotation.genomenexus.org
         - vep112.genomenexus.org
-#        - vep88.genomenexus.org
+        - vep111.genomenexus.org
       secretName: genome-nexus-cert
