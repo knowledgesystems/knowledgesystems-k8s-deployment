@@ -111,6 +111,16 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+    - host: vep111.genomenexus.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: genome-nexus-vep111
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
   tls:
     - hosts:
         - www.genomenexus.org
