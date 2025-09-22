@@ -96,7 +96,7 @@ kind: Service
 metadata:
   labels:
     run: gn-spring-boot-vep111
-    app: gn-spring-boo-vep111
+    app: gn-spring-boot-vep111
   name: genome-nexus-vep111
   namespace: genome-nexus
 spec:
