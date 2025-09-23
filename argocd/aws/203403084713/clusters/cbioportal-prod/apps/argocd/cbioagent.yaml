@@ -18,6 +18,10 @@ spec:
         releaseName: cbioagent
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent/values.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
   destination:
     namespace: default
     server: https://kubernetes.default.svc
