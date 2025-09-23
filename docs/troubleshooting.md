@@ -4,6 +4,23 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## EFS Mount Failed - Missing Mount Targets in Availability Zone
+When deploying applications that use EFS persistent volumes, you may encounter mount errors like:
+```
+MountVolume.SetUp failed for volume "pvc-295ec7e4-fe8f-4dc6-b5a9-70cdc6fa05ee" : rpc error: code = Internal desc = Could not mount "fs-017997c6e5521be56:/" at "/var/lib/kubelet/pods/74b06dda-6fe3-4195-9f1a-64a0ce6de954/volumes/kubernetes.io~csi/pvc-295ec7e4-fe8f-4dc6-b5a9-70cdc6fa05ee/mount": mount failed: exit status 1
+...
+No matching mount target in the az us-east-1a. Please create one mount target in us-east-1a, or try the mount target in another AZ by passing the availability zone name option. Available mount target(s) are in az ['us-east-1b']
+```
+This happens when your EKS cluster nodes are running in an availability zone that doesn't have an EFS mount target. EFS requires mount targets in each AZ where you want to access the file system.
+
+To resolve this, create mount targets in the missing availability zones. You can do this via the AWS CLI:
+```
+aws efs create-mount-target \
+  --file-system-id fs-xxxxxx \
+  --subnet-id subnet-xxxxxx \
+  --security-groups sg-xxxxxx
+```
+
 ## Docker Image Not Found - Bitnami Legacy Images and Helm Charts
 When installing helm charts that use legacy Bitnami images, you may encounter errors like:
 ```
