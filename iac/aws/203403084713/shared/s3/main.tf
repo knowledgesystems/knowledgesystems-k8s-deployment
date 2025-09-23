@@ -23,5 +23,6 @@ resource "aws_s3_bucket" "cellxgene_data" {
   bucket = "cellxgene-data"
   tags = {
     cdsi-app = "cellxgene"
+    cdsi-owner = "hweej@mskcc.org"
   }
 }
