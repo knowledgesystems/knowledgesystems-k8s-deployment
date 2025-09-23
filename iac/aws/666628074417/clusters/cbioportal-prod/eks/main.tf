@@ -82,6 +82,9 @@ locals {
       desired_size   = 1
       min_size       = 1
       max_size       = 1
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+      }
       taints = {
         dedicated = {
           key    = var.TAINT_KEY

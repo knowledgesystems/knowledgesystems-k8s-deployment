@@ -159,3 +159,13 @@ workers:
     - name: pipelines5-ssh-keyfile
       secret:
         secretName: airflow-pipelines5-ssh-keyfile
+
+# Needed for ArgoCD
+createUserJob:
+  useHelmHooks: false
+  applyCustomEnv: false
+migrateDatabaseJob:
+  useHelmHooks: false
+  applyCustomEnv: false
+  jobAnnotations:
+    "argocd.argoproj.io/hook": Sync
