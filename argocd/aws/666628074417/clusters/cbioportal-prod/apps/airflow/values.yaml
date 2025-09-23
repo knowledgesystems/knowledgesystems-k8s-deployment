@@ -56,7 +56,7 @@ nodeSelector:
 tolerations:
   - key: workload
     operator: Equal
-    value: datadog
+    value: airflow
     effect: NoSchedule
 scheduler:
   extraInitContainers:
