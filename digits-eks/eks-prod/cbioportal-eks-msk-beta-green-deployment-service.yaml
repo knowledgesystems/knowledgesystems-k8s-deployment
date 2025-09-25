@@ -115,6 +115,7 @@ spec:
         - --installation_map_url=https://installationmap.netlify.app/
         - --app.name=mskcc-portal
         - --filter_groups_by_appname=false
+        # connecting over dbcp
         - --dbconnector=dbcp
         - --authenticate=saml_plus_basic
         - --authorization=false
@@ -182,7 +183,12 @@ spec:
         - --spring.data.redis.host=$(REDIS_SESSION_HOST)
         - --spring.data.redis.port=$(REDIS_SESSION_PORT)
         - --spring.data.redis.password=$(REDIS_SESSION_PASSWORD)
+        # To enable redis session store, we need to set
+        # spring.autoconfigure.exclude to a random value to override the
+        # property in applications.properties.EXAMPLE
         - --spring.autoconfigure.exclude=dontexcludeanythingplz
+        # cache settings (currently redis)",
+        #- -Dcache.statistics_endpoint_enabled=false
         - --redis.database=7
         - --persistence.cache_type=redis
         - --redis.leader_address=redis://eks-msk-cbioportal-persistence-redis-master:6379
@@ -193,12 +199,18 @@ spec:
         - --cache.endpoint.enabled=true
         - --redis.clear_on_startup=true
         - --redis.ttl_mins=60
+        # auth
+        #- --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=/cbioportal/msk-beta-cbioportal-saml-idp-metadata.xml
+        #- --spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.binding=POST
+        #- --spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/saml/descriptor
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=cbioportal-msk-beta-v6
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key
         #- --logging.level.org.cbioportal.security=TRACE
         #- --logging.level.org.springframework.security=TRACE
+        #- --logging.level.org.springframework.security=DEBUG
+        # data token setting
         - --dat.method=oauth2
         - --dat.oauth2.clientId=cbioportal-msk-beta-api-v6
         - --dat.oauth2.clientSecret=$(DAT_OAUTH2_CLIENT_SECRET)
@@ -208,6 +220,7 @@ spec:
         - --dat.oauth2.userAuthorizationUri=https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/auth
         - --dat.oauth2.redirectUri=https://beta.cbioportal.mskcc.org/api/data-access-token/oauth2
         - --dat.oauth2.jwtRolesPath=realm_access::roles
+        # misc frontend settings (this is NOT for backend persistence layer caching)
         - --enable_persistent_cache=true
         - --persistence.cache_type_clickhouse=redis
         - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
@@ -220,12 +233,16 @@ spec:
         - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
         - --clickhouse_mode=true
         - --spring.profiles.active=clickhouse
+        # compress on client side
         - --enable_request_body_gzip_compression=true
         - --enable_study_tags=false
         - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
         - --patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID
+        # *** msk specific settings ***
         - --msk_entity_translation_enabled=true
+        # msk whole slide viewer
         - --msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)
+        # darwin
         - --darwin.auth_url=$(DARWIN_AUTH_URL)
         - --darwin.response_url=$(DARWIN_RESPONSE_URL)
         - --darwin.authority=$(DARWIN_AUTHORITY)
@@ -234,9 +251,11 @@ spec:
         - --mpath.token=$(MPATH_TOKEN)
         - --mpath.decryption_url=$(MPATH_DECRYPTION_URL)
         - --darwin.regex=$(DARWIN_REGEX)
+        # basic auth
         - --basic.username=$(BASIC_USERNAME)
         - --basic.password=$(BASIC_PASSWORD)
         - --basic.authorities=$(BASIC_AUTHORITIES)
+        # *** end msk specific settings ***
         - --server.compression.enabled=true
         - --server.tomcat.connection-timeout=20000
         - --server.tomcat.max-http-response-header-size=16384
@@ -307,6 +326,7 @@ spec:
           name: mskcerts-volume
           subPath: mskcerts
       dnsPolicy: ClusterFirst
+      # run on big memory machine
       nodeSelector:
         eks.amazonaws.com/nodegroup: msk-portals-general-64g
       restartPolicy: Always
