@@ -12,6 +12,9 @@ spec:
       directory:
         recurse: true
   destination:
-    namespace: default
+    namespace: cellxgene
     server: https://kubernetes.default.svc
   revisionHistoryLimit: 3
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
