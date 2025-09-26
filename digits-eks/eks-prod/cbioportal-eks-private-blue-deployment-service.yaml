@@ -102,6 +102,7 @@ spec:
         - --filter_groups_by_appname=false
         - --enable_cross_study_expression=(studies)=>studies.filter(s=>/pan_can_atlas/.test(s.studyId)
           === false).length === 0
+        # connecting over dbcp
         - --dbconnector=dbcp
         - --authenticate=saml
         - --authorization=false
@@ -166,7 +167,12 @@ spec:
         - --spring.data.redis.host=$(REDIS_SESSION_HOST)
         - --spring.data.redis.port=$(REDIS_SESSION_PORT)
         - --spring.data.redis.password=$(REDIS_SESSION_PASSWORD)
+        # To enable redis session store, we need to set
+        # spring.autoconfigure.exclude to a random value to override the
+        # property in applications.properties.EXAMPLE
         - --spring.autoconfigure.exclude=dontexcludeanythingplz
+        # cache settings (currently redis)
+        #- --cache.statistics_endpoint_enabled=false
         - --redis.database=2
         - --persistence.cache_type=redis
         - --redis.leader_address=redis://eks-msk-cbioportal-persistence-redis-master:6379
@@ -177,7 +183,13 @@ spec:
         - --cache.endpoint.enabled=true
         - --redis.clear_on_startup=false
         - --redis.ttl_mins=60
+        # Disable study tags fetch
         - --enable_study_tags=false
+        # auth
+        #- --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=/cbioportal/msk-beta-cbioportal-saml-idp-metadata.xml
+        #- --spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.binding=POST
+        #- --spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo
+        #- --logging.level.org.springframework.security=DEBUG
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.mskcc.org/auth/realms/external/protocol/saml/descriptor
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=private-v6
         - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt
@@ -194,6 +206,7 @@ spec:
         - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
         - --clickhouse_mode=true
         - --spring.profiles.active=clickhouse
+        # compress on client side
         - --enable_request_body_gzip_compression=true
         - --server.compression.enabled=true
         - --server.tomcat.connection-timeout=20000
@@ -260,6 +273,7 @@ spec:
           name: private-eks-configmap-volume
           subPath: local.crt
       dnsPolicy: ClusterFirst
+      # run on big memory machine
       nodeSelector:
         eks.amazonaws.com/nodegroup: large-memory-portals
       restartPolicy: Always
