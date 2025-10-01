@@ -1,32 +1,79 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: airflow-ingress
-  namespace: airflow
+  name: cellxgene-ingress
+  namespace: cellxgene
   annotations:
     ingress.kubernetes.io/proxy-body-size: 512m
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
     ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/app-root: /
     nginx.ingress.kubernetes.io/backend-protocol: http
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-body-size: 512m
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
   ingressClassName: nginx
   rules:
-  - host: ""
-    http:
-      paths:
-      - path: "/"
-        pathType: Prefix
-        backend:
-          service:
-            name: cellxgene
-            port:
-              number: 8080
+    - host: cellxgene.cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /pbmc3k(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-1
+                port:
+                  number: 8080
+    - host: cellxgene.cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /msk_spectrum_all(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-2
+                port:
+                  number: 8080
+
+##### STATIC ROUTING - Required #####
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cellxgene-ingress-static-route
+  namespace: cellxgene
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /static/$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    ingress.kubernetes.io/proxy-connect-timeout: "300"
+    ingress.kubernetes.io/proxy-read-timeout: "300"
+    ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    ingress.kubernetes.io/proxy-body-size: 512m
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cellxgene.cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /static(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cellxgene-service-1
+                port:
+                  number: 8080
