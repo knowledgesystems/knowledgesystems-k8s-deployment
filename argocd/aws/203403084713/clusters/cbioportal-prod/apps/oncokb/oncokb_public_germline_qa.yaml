@@ -1,6 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: oncokb-public-germline-qa
   name: oncokb-public-germline-qa
   namespace: oncokb
 spec:
@@ -18,6 +21,11 @@ spec:
       labels:
         app: oncokb-public-germline-qa
         version: "v1"
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: oncokb-public-germline-qa
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       containers:
         - name: oncokb-public-germline-qa
@@ -30,7 +38,7 @@ spec:
             - name: JAVA_OPTS
               value: "-Xmx1024m -Xms512m"
             - name: APPLICATION_APIPROXYURL
-              value: "http://oncokb-core-germline:8888"
+              value: "http://oncokb-core-germline-qa:8888"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
               value: "$(SERVICE_ACCOUNT_USERNAME)"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
