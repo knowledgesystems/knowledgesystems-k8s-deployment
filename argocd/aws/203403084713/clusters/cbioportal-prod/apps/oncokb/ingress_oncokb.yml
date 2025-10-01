@@ -42,10 +42,7 @@ spec:
     - curation.oncokb.org
     - keycloak.oncokb.org
     - airflow.oncokb.org
-    # - data-4-9.oncokb.org
-    # - data-4-5.oncokb.org
-    # - data-4-0.oncokb.org
-    # - data-3-11.oncokb.org
+    - germline.oncokb.org
     - grafana.oncokb.org
     secretName: oncokb-prod-cert
   rules:
@@ -160,43 +157,13 @@ spec:
             name: oncokb-airflow-web
             port:
               number: 8080
-  # - host: data-4-9.oncokb.org
-  #   http:
-  #     paths:
-  #       - path: "/"
-  #         pathType: Prefix
-  #         backend:
-  #           service:
-  #             name: oncokb-public-data-4-9
-  #             port:
-  #               name: http
-  # - host: data-4-5.oncokb.org
-  #   http:
-  #     paths:
-  #       - path: "/"
-  #         pathType: Prefix
-  #         backend:
-  #           service:
-  #             name: oncokb-public-data-4-5
-  #             port:
-  #               name: http
-  # - host: data-4-0.oncokb.org
-  #   http:
-  #     paths:
-  #       - path: "/"
-  #         pathType: Prefix
-  #         backend:
-  #           service:
-  #             name: oncokb-public-data-4-0
-  #             port:
-  #               name: http
-  # - host: data-3-11.oncokb.org
-  #   http:
-  #     paths:
-  #       - path: "/"
-  #         pathType: Prefix
-  #         backend:
-  #           service:
-  #             name: oncokb-public-data-3-11
-  #             port:
-  #               name: http
+  - host: germline.oncokb.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: oncokb-public-germline-qa
+            port:
+              name: http
