@@ -240,7 +240,7 @@ spec:
         envFrom:
         - secretRef:
             name: cbioportal-genie-public-green
-        image: cbioportal/cbioportal:6.3.6-web-shenandoah
+        image: cbioportal/cbioportal-dev:8d70900df9741ae96bf0787c92b12943181e04be-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
