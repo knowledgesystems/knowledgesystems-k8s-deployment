@@ -34,7 +34,7 @@ spec:
         - env:
           envFrom:
             - secretRef:
-                name: oncokb-core-germline
+                name: oncokb-core-germline-qa
             - secretRef:
                 name: oncokb-redis-cluster-ng
             - secretRef:
