@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - env:
-          image: oncokb/oncokb-sop:6.0.1
+          image: mskcc/oncokb-sop:6.1.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
