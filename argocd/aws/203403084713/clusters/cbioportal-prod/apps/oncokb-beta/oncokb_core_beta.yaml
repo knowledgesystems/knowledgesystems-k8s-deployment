@@ -40,7 +40,7 @@ spec:
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
           # The beta current is used to showcase a new search endpoint
-          image: oncokb/oncokb:4.3.0
+          image: mskcc/oncokb:4.4.0
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
