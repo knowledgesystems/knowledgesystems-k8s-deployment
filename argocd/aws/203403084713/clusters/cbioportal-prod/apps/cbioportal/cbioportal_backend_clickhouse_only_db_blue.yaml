@@ -195,16 +195,31 @@ spec:
             #"--persistence.cache_type_clickhouse=redis",
             "--persistence.cache_type_clickhouse=no-cache",
             #"--persistence.cache_type_clickhouse=no-cache",
-            "--spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-            "--spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)",
-            "--spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)",
+
+            #"--spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            #"--spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)",
+            #"--spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)",
+            #"--spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            #"--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            #"--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            #"--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
+            #"--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
+            #"--spring.datasource.clickhouse.maximum-pool-size=16",
+            #"--spring.datasource.clickhouse.minimum-idle=5",
+
+
+            "--spring.datasource.mysql.url=jdbc:ch:https://mecgt250i0.us-east-1.aws.clickhouse.cloud:8443/cgds_public_2025_06_24?zeroDateTimeBehavior=convertToNull",
+            "--spring.datasource.mysql.username=app_user",
+            "--spring.datasource.mysql.password=P@ssword1976",
             "--spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            "--spring.datasource.clickhouse.url=jdbc:ch://mecgt250i0.us-east-1.aws.clickhouse.cloud:8443/cgds_public_2025_06_24?ssl=true&sslmode=STRICT",
+            "--spring.datasource.clickhouse.username=app_user",
+            "--spring.datasource.clickhouse.password=P@ssword1976",
             "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
-            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
-            "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--spring.datasource.clickhouse.maximum-pool-size=16",
             "--spring.datasource.clickhouse.minimum-idle=5",
+
+
             "--clickhouse_mode=true",
             "--spring.profiles.active=clickhouse",
             # NEW PROPERTIES END
