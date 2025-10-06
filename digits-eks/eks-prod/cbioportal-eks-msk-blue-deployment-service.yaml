@@ -5,7 +5,7 @@ metadata:
     run: eks-msk-blue
     tags.datadoghq.com/env: eks-msk
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.6
+    tags.datadoghq.com/version: 6.3.7
   name: eks-msk-blue
 spec:
   progressDeadlineSeconds: 600
@@ -29,7 +29,7 @@ spec:
         run: eks-msk-blue
         tags.datadoghq.com/env: eks-msk
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.6
+        tags.datadoghq.com/version: 6.3.7
     spec:
       containers:
       - args:
@@ -275,7 +275,7 @@ spec:
         envFrom:
         - configMapRef:
             name: eks-msk-blue
-        image: cbioportal/cbioportal-dev:695e3153f81d76b78039d4add373bc4c715f8d46-web-shenandoah
+        image: cbioportal/cbioportal:6.3.7-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 20

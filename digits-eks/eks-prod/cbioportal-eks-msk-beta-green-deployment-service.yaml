@@ -5,7 +5,7 @@ metadata:
     run: eks-msk-beta-green
     tags.datadoghq.com/env: eks-msk-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.6
+    tags.datadoghq.com/version: 6.3.7
   name: eks-msk-beta-green
 spec:
   progressDeadlineSeconds: 600
@@ -29,7 +29,7 @@ spec:
         run: eks-msk-beta-green
         tags.datadoghq.com/env: eks-msk-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.6
+        tags.datadoghq.com/version: 6.3.7
     spec:
       containers:
       - args:
