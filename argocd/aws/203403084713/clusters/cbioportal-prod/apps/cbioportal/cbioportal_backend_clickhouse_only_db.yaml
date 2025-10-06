@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
-    run: cbioportal-backend-clickhouse-only-db-green
+    run: cbioportal-backend-clickhouse-only-db
     tags.datadoghq.com/env: eks-public-clickhouse-only
     tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.0
-  name: cbioportal-backend-clickhouse-only-db-green
+  name: cbioportal-backend-clickhouse-only-db
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
-      run: cbioportal-backend-clickhouse-only-db-green
+      run: cbioportal-backend-clickhouse-only-db
   strategy:
     rollingUpdate:
       maxSurge: 2
@@ -22,7 +22,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: cbioportal-backend-clickhouse-only-db-green
+        run: cbioportal-backend-clickhouse-only-db
         tags.datadoghq.com/env: eks-public-clickhouse-only
         tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.3.0
@@ -38,7 +38,7 @@ spec:
       containers:
       - envFrom:
         - secretRef:
-            name: cbioportal-public-green
+            name: cbioportal-clickhouse-only-db
         env:
           - name: DD_PROFILING_ENABLED
             value: "true"
@@ -195,32 +195,18 @@ spec:
             #"--persistence.cache_type_clickhouse=redis",
             "--persistence.cache_type_clickhouse=no-cache",
             #"--persistence.cache_type_clickhouse=no-cache",
-#            "--spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-#            "--spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)",
-#            "--spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)",
-#            "--spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
-#            "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
-#            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
-#            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
-#            "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
-#            "--spring.datasource.clickhouse.maximum-pool-size=16",
-#            "--spring.datasource.clickhouse.minimum-idle=5",
-
-
-            "--spring.datasource.mysql.url=jdbc:ch:https://mecgt250i0.us-east-1.aws.clickhouse.cloud:8443/cgds_public_2025_06_24?zeroDateTimeBehavior=convertToNull",
-            "--spring.datasource.mysql.username=app_user",
-            "--spring.datasource.mysql.password=P@ssword1976",
+            "--spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "--spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)",
+            "--spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
-            "--spring.datasource.clickhouse.url=jdbc:ch://mecgt250i0.us-east-1.aws.clickhouse.cloud:8443/cgds_public_2025_06_24?ssl=true&sslmode=STRICT",
-            "--spring.datasource.clickhouse.username=app_user",
-            "--spring.datasource.clickhouse.password=P@ssword1976",
             "--spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver",
+            "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
+            "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
+            "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
             "--spring.datasource.clickhouse.maximum-pool-size=16",
             "--spring.datasource.clickhouse.minimum-idle=5",
-
             "--clickhouse_mode=true",
             "--spring.profiles.active=clickhouse",
-
             # NEW PROPERTIES END
             # disable ehcache
 #            ??? Are we still using ehcache?
@@ -273,7 +259,7 @@ spec:
           timeoutSeconds: 1
           periodSeconds: 12
           failureThreshold: 5
-        name: cbioportal-backend-clickhouse-only-db-green
+        name: cbioportal-backend-clickhouse-only-db
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -306,14 +292,14 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
-    run: cbioportal-backend-clickhouse-only-db-green
+    run: cbioportal-backend-clickhouse-only-db
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
-  name: cbioportal-backend-clickhouse-only-db-green
+  name: cbioportal-backend-clickhouse-only-db
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: cbioportal-backend-clickhouse-only-db-green
+    run: cbioportal-backend-clickhouse-only-db
   type: ClusterIP

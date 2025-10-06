@@ -61,7 +61,7 @@ spec:
       paths:
         - backend:
             service:
-              name: cbioportal-backend-clickhouse-only-db-blue
+              name: cbioportal-backend-clickhouse-only-db
               port:
                 number: 80
           path: /
