@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cbioagent
-  namespace: argocd
 spec:
   project: default
   sources:
