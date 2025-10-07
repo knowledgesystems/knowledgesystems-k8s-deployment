@@ -1,0 +1,52 @@
+replicaCount: 2
+global:
+  librechat:
+    existingSecretName: "librechat-credentials-env"
+    existingSecretApiKey: OPENAI_API_KEY
+
+librechat:
+  existingSecretName: "librechat-credentials-env"
+  existingConfigYaml: "librechat-config"
+
+mongodb:
+  enabled: false
+
+librechat-rag-api:
+  enabled: true
+  postgresql:
+    enabled: true
+
+nodeSelector:
+  workload: cbioagent
+
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "cbioagent"
+    effect: "NoSchedule"
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    memory: 2Gi
+  limits:
+    memory: 4Gi
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  timeoutSeconds: 1
+  periodSeconds: 5
+  failureThreshold: 3
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 20
+  timeoutSeconds: 1
+  periodSeconds: 12
+  failureThreshold: 5

@@ -1,0 +1,18 @@
+architecture: standalone
+auth:
+  existingSecret: cbioagent-mongodb-creds
+  usernames:
+    - "cbioagent"
+  databases:
+    - "cBioAgent"
+persistence:
+  enabled: true
+  size: 500Gi
+  resourcePolicy: keep
+tolerations:
+  - key: workload
+    operator: Equal
+    value: cbioagent-db
+    effect: NoSchedule
+nodeSelector:
+  workload: cbioagent-db

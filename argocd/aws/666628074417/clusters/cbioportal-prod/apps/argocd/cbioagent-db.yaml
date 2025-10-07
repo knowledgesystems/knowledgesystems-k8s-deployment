@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioagent-db
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioagent-db
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 16.5.45
+      chart: mongodb
+      helm:
+        # Release name set to cbioagent because argo adds prefix '-mongodb'.
+        releaseName: cbioagent
+        valueFiles:
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioagent-db/mongodb-values.yaml
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 15.5.38
+      chart: postgresql
+      helm:
+        # Release name set to cbioagent because argo adds prefix '-postgresql', and librechat-rag requires service to be deployed at cbioagent-postgresql
+        releaseName: cbioagent
+        valueFiles:
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioagent-db/postgresql-values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
