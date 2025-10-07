@@ -3,6 +3,8 @@ global:
   librechat:
     existingSecretName: "librechat-credentials-env"
     existingSecretApiKey: OPENAI_API_KEY
+  imagePullSecrets:
+    - dockerhub-creds
 
 librechat:
   existingSecretName: "librechat-credentials-env"
