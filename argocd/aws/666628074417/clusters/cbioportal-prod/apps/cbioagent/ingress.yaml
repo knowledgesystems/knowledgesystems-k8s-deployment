@@ -20,6 +20,7 @@ metadata:
   name: cbioagent-ingress
   namespace: default
 spec:
+  ingressClassName: nginx
   rules:
     - host: chat.cbioportal.mskcc.org
       http:
