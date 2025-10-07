@@ -9,6 +9,9 @@ persistence:
   enabled: true
   size: 500Gi
   resourcePolicy: keep
+image:
+  repository: bitnamilegacy/mongodb
+  registry: docker.io
 tolerations:
   - key: workload
     operator: Equal
