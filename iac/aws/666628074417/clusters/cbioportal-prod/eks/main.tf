@@ -121,6 +121,42 @@ locals {
         cdsi-owner = "hweej@mskcc.org"
       }
     }
+    cbioagent = {
+      instance_types = ["m7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbioagent"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbioagent"
+      }
+    }
+    cbioagent-db = {
+      instance_types = ["r7i.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      # Pin to a single subnet. This prevents nodegroup to be created in a availability zone different from the underlying persistent volumes
+      subnet_ids = ["subnet-0917a96517f3dad1d"]
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbioagent-db"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbioagent-db"
+      }
+    }
   }
 }
 

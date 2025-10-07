@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioagent-clickhouse-mcp
+  labels:
+    run: cbioagent-clickhouse-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioagent-clickhouse-mcp
+  template:
+    metadata:
+      labels:
+        run: cbioagent-clickhouse-mcp
+    spec:
+      containers:
+        - name: cbioagent-clickhouse-mcp
+          image: cbioportal/mcp:0.1.0
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: clickhouse-mcp
+      nodeSelector:
+        workload: "cbioagent"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbioagent"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioagent-clickhouse-mcp
+spec:
+  selector:
+    run: cbioagent-clickhouse-mcp
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8000
+  type: ClusterIP
