@@ -22,7 +22,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: chat.cbioportal.mskcc.org
+    - host: chat.cbioportal.aws.mskcc.org
       http:
         paths:
           - backend:
