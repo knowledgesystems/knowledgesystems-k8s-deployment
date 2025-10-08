@@ -11,9 +11,9 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - path: helm/librechat
-      repoURL: https://github.com/danny-avila/LibreChat.git
-      targetRevision: v0.8.0
+    - chart: librechat
+      repoURL: ghcr.io/danny-avila/librechat-chart
+      targetRevision: 1.9.1
       helm:
         releaseName: cbioagent
         valueFiles:
