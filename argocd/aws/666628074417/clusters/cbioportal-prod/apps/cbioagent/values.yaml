@@ -52,3 +52,12 @@ livenessProbe:
   timeoutSeconds: 1
   periodSeconds: 12
   failureThreshold: 5
+
+volumes:
+  - name: aws-creds
+    persistentVolumeClaim:
+      claimName: aws-credentials-pvc
+volumeMounts:
+  - name: aws-creds
+    mountPath: /root/.aws
+    readOnly: true
