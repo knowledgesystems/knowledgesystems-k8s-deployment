@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: cbioagent-clickhouse-mcp
-          image: cbioportal/mcp:main
+          image: cbioportal/mcp:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
