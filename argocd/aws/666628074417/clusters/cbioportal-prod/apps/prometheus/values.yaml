@@ -5,7 +5,7 @@ serverFiles:
         scrape_interval: 60s
         static_configs:
           - targets:
-              - 'localhost:8000'
+              - 'cbioagent-mongodb.default.svc.cluster.local:8000'
 server:
   nodeSelector:
     workload: prometheus
