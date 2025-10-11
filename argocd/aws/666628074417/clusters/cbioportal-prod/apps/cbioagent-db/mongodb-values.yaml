@@ -28,12 +28,10 @@ sidecars:
         containerPort: 8000
     env:
       - name: MONGODB_URI
-        value: "mongodb://root:$(MONGODB_ROOT_PASSWORD)@localhost:27017/cBioAgent"
-      - name: MONGODB_ROOT_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: cbioagent-mongodb-creds
-            key: mongodb-root-password
+            name: librechat-credentials-env
+            key: MONGO_URI
       - name: LOGGING_LEVEL
         value: "info"
 service:
