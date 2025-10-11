@@ -27,6 +27,8 @@ sidecars:
       - name: metrics
         containerPort: 8000
     env:
+      - name: MONGODB_DATABASE
+        value: "cBioAgent"
       - name: MONGODB_URI
         valueFrom:
           secretKeyRef:
