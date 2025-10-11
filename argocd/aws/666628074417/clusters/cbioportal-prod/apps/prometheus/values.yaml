@@ -1,0 +1,16 @@
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      - job_name: 'librechat_metrics'
+        scrape_interval: 60s
+        static_configs:
+          - targets:
+              - 'localhost:8000'
+server:
+  nodeSelector:
+    workload: prometheus
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: prometheus
+      effect: NoSchedule
