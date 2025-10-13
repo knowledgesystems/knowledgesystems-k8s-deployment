@@ -25,9 +25,9 @@ spec:
             protocol: TCP
           resources:
             requests:
-              memory: 256Mi
+              memory: 16Mi
             limits:
-              memory: 2Gi
+              memory: 64Mi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       nodeSelector:
