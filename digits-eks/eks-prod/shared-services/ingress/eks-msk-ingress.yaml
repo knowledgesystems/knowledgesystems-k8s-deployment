@@ -149,6 +149,26 @@ spec:
               number: 80
         path: /
         pathType: Prefix
+  - host: staging.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-staging
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: staging.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-staging
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
   - host: www.oncotree.mskcc.org
     http:
       paths:
