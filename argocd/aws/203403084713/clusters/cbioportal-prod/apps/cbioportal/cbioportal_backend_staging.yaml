@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
-    run: cbioportal-backend-clickhouse-only-db
-    tags.datadoghq.com/env: eks-public-clickhouse-only
+    run: cbioportal-backend-staging
+    tags.datadoghq.com/env: eks-public-staging
     tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.0
-  name: cbioportal-backend-clickhouse-only-db
+  name: cbioportal-backend-staging
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: cbioportal-backend-clickhouse-only-db
+      run: cbioportal-backend-staging
   strategy:
     rollingUpdate:
       maxSurge: 2
@@ -22,8 +22,8 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: cbioportal-backend-clickhouse-only-db
-        tags.datadoghq.com/env: eks-public-clickhouse-only
+        run: cbioportal-backend-staging
+        tags.datadoghq.com/env: eks-public-staging
         tags.datadoghq.com/service: cbioportal
         tags.datadoghq.com/version: 6.3.0
         admission.datadoghq.com/enabled: "true"
@@ -38,7 +38,7 @@ spec:
       containers:
       - envFrom:
         - secretRef:
-            name: cbioportal-clickhouse-only-db
+            name: cbioportal-staging
         env:
           - name: DD_PROFILING_ENABLED
             value: "true"
@@ -259,7 +259,7 @@ spec:
           timeoutSeconds: 1
           periodSeconds: 12
           failureThreshold: 5
-        name: cbioportal-backend-clickhouse-only-db
+        name: cbioportal-backend-staging
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -292,14 +292,14 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
-    run: cbioportal-backend-clickhouse-only-db
+    run: cbioportal-backend-staging
   # WARNING: when making a copy of this config file make sure to change the service name to avoid changing the production service
-  name: cbioportal-backend-clickhouse-only-db
+  name: cbioportal-backend-staging
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    run: cbioportal-backend-clickhouse-only-db
+    run: cbioportal-backend-staging
   type: ClusterIP
