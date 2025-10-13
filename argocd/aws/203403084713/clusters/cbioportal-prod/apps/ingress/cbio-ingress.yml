@@ -41,7 +41,7 @@ spec:
       paths:
       - backend:
           service:
-            name: cbioportal-backend-public-beta-green
+            name: cbioportal-backend-public-beta-offline
             port:
               number: 80
         path: /
