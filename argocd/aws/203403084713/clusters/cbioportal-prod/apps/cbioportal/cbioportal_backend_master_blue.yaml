@@ -28,7 +28,7 @@ spec:
       - envFrom:
         - secretRef:
             name: cbioportal-public-blue
-        image: cbioportal/cbioportal@sha256:5e00af147f08657ed2856d760fae71c8b2f9f7497263aa706d08abe0b0b7931e
+        image: cbioportal/cbioportal@sha256:2394c837246be30ca89c102e4787fd1938e2377f32bdb5f1528032da91bc3960
         volumeMounts:
         - name: cbioportal-frontend-config-volume
           mountPath: /cbioportal/
