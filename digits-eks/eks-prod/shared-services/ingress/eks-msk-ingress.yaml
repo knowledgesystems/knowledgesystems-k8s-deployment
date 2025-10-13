@@ -89,26 +89,6 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  - host: beta.cbioportal.mskcc.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: eks-msk-beta-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: beta.cbioportal.aws.mskcc.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: eks-msk-beta-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
   - host: private.cbioportal.mskcc.org
     http:
       paths:
@@ -145,6 +125,26 @@ spec:
       - backend:
           service:
             name: eks-sclc-green
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: beta.cbioportal.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-beta-offline
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: beta.cbioportal.aws.mskcc.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: eks-msk-beta-offline
             port:
               number: 80
         path: /
