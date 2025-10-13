@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: cbioportal
+    run: eks-msk-beta-offline
+  name: eks-msk-beta-offline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: eks-msk-beta-offline
+  template:
+    metadata:
+      labels:
+        run: eks-msk-beta-offline
+    spec:
+      containers:
+        - name: eks-msk-beta-offline
+          image: cbioportal/cbioportal:mskcc-beta-portal-offline-2025-10-13
+          #imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources:
+            requests:
+              memory: 256Mi
+            limits:
+              memory: 2Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: msk-portals-general-64g
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "msk-portals-general-64g"
+          effect: "NoSchedule"
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: eks-msk-beta-offline
+  name: eks-msk-beta-offline
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
+  selector:
+    run: eks-msk-beta-offline
+  type: ClusterIP
