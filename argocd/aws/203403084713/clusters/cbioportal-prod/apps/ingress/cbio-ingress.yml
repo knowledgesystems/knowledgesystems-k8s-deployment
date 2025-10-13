@@ -36,22 +36,32 @@ spec:
                 number: 80
           path: /
           pathType: Prefix
-  - host: beta.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-public-beta-offline
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
   - host: master.cbioportal.org
     http:
       paths:
         - backend:
             service:
               name: cbioportal-backend-master-green
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  - host: beta.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: cbioportal-backend-public-beta-offline
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  - host: staging.cbioportal.org
+    http:
+      paths:
+        - backend:
+            service:
+              name: cbioportal-backend-clickhouse-only-db
               port:
                 number: 80
           path: /
@@ -91,11 +101,14 @@ spec:
     - www.cbioportal.org
     secretName: www-cbioportal-cert
   - hosts:
+    - master.cbioportal.org
+    secretName: master-cbio-cert
+  - hosts:
     - beta.cbioportal.org
     secretName: cbioportal-beta-cert
   - hosts:
-    - master.cbioportal.org
-    secretName: master-cbio-cert
+    - staging.cbioportal.org
+    secretName: staging-cbioportal-cert
   - hosts:
     - clickhouse-only-db.cbioportal.org
     secretName: clickhouse-only-db-cert
@@ -103,5 +116,5 @@ spec:
     - session-service-argocd.cbioportal.org
     secretName: cbioportal-session-service-argocd-cert
   - hosts:
-      - session-service.cbioportal.org
+    - session-service.cbioportal.org
     secretName: cbioportal-session-service-cert
