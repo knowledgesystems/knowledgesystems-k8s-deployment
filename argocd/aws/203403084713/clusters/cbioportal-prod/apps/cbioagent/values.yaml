@@ -8,13 +8,6 @@ librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
 
-image:
-  repository: cbioportal/cbioagent
-  registry: docker.io
-  pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "librechat-latest"
-
 mongodb:
   enabled: false
 
@@ -57,3 +50,12 @@ livenessProbe:
   timeoutSeconds: 1
   periodSeconds: 12
   failureThreshold: 5
+
+volumes:
+  - name: aws-creds
+    persistentVolumeClaim:
+      claimName: aws-credentials-pvc
+volumeMounts:
+  - name: aws-creds
+    mountPath: /home/node/.aws
+    readOnly: true
