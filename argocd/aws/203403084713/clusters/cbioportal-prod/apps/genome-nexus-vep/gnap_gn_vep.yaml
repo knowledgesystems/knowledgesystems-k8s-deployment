@@ -1,25 +1,17 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "4"
-  creationTimestamp: null
-  generation: 1
   labels:
+    app.kubernetes.io/instance: genome-nexus-vep
     run: gnap-gn-vep
   name: gnap-gn-vep
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gnap-gn-vep
 spec:
-  replicas: 1
+  replicas: 2
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
       run: gnap-gn-vep
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
   template:
     metadata:
       creationTimestamp: null
@@ -32,81 +24,100 @@ spec:
           value: "8888"
         image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
         imagePullPolicy: Always
-        volumeMounts:
-        - name: vep-data
-          subPath: cache
-          mountPath: /opt/vep/.vep
-        readinessProbe:
-          httpGet:
-            path: /vep/human/region/7:140453136-140453136:1/T
-            port: 8888
-          initialDelaySeconds: 10
-          timeoutSeconds: 120
-          periodSeconds: 30
         livenessProbe:
+          failureThreshold: 3
           httpGet:
             path: /vep/human/region/7:140453136-140453136:1/T
             port: 8888
+            scheme: HTTP
           initialDelaySeconds: 10
-          timeoutSeconds: 120
           periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 120
         name: gnap-gn-vep
         ports:
         - containerPort: 8888
           protocol: TCP
-        resources: {}
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /vep/human/region/7:140453136-140453136:1/T
+            port: 8888
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 120
+        resources:
+          requests:
+              memory: 20Gi
+          limits:
+              memory: 30Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-      # run on genome nexus machines
-      nodeSelector:
-        workload: gn-vep
-      tolerations:
-        - key: "workload"
-          operator: "Equal"
-          value: "gn-vep"
-          effect: "NoSchedule"
+        volumeMounts:
+        - mountPath: /opt/vep/.vep
+          name: vep-data
+          subPath: cache
+      dnsPolicy: ClusterFirst
       # download data from s3 bucket (takes ~6m).
       # TODO: It might be better to create a volume from an existing snapshot.
       initContainers:
-      - name: download-vep-cache
+      - args:
+        - |
+          set -euo pipefail
+          cd /vep_data
+          if [ -d cache ] && [ -f cache/homo_sapiens/98_GRCh37/LRG_7/all_vars.gz.csi ]; then
+            exit 0
+          fi
+          mkdir -p cache/tmp
+          chmod a+w cache/tmp
+
+          curl -fL --retry 5 -o file_list.txt https://genome-nexus-vep-data.s3.amazonaws.com/file_list.txt
+
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            mkdir -p "$(dirname "$f")"
+            curl -fL --retry 5 "https://genome-nexus-vep-data.s3.amazonaws.com/$f" -o "$f"
+          done < file_list.txt
+
+          cd cache
+          tar xvf homo_sapiens_vep_98_GRCh37.tar
+        command:
+        - sh
+        - -c
         image: curlimages/curl:8.7.1
+        imagePullPolicy: IfNotPresent
+        name: download-vep-cache
+        resources: {}
         securityContext:
-          runAsUser: 0
           runAsGroup: 0
-        command: ['sh','-c']
-        args:
-          - |
-            set -euo pipefail
-            cd /vep_data
-            if [ -d cache ] && [ -f cache/homo_sapiens/98_GRCh37/LRG_7/all_vars.gz.csi ]; then
-              exit 0
-            fi
-            mkdir -p cache/tmp
-            chmod a+w cache/tmp
-
-            curl -fL --retry 5 -o file_list.txt https://genome-nexus-vep-data.s3.amazonaws.com/file_list.txt
-
-            while IFS= read -r f; do
-              [ -z "$f" ] && continue
-              mkdir -p "$(dirname "$f")"
-              curl -fL --retry 5 "https://genome-nexus-vep-data.s3.amazonaws.com/$f" -o "$f"
-            done < file_list.txt
-
-            cd cache
-            tar xvf homo_sapiens_vep_98_GRCh37.tar
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
         volumeMounts:
-        - name: vep-data
-          mountPath: /vep_data
-      volumes:
-      - name: vep-data
-        persistentVolumeClaim:
-          claimName: gnap-gn-vep-pvc
-      dnsPolicy: ClusterFirst
+        - mountPath: /vep_data
+          name: vep-data
+      nodeSelector:
+        workload: gn-vep
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-status: {}
+      tolerations:
+      - effect: NoSchedule
+        key: workload
+        operator: Equal
+        value: gn-vep
+  volumeClaimTemplates:
+    - metadata:
+        name: vep-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 50Gi
 ---
 apiVersion: v1
 kind: Service
