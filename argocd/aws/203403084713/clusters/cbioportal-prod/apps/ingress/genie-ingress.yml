@@ -26,30 +26,30 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: genie.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-public-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: genie-private.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-genie-private-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
+    - host: genie.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-genie-public-blue
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: genie-private.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-genie-private-blue
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
   tls:
-  - hosts:
-    - genie.cbioportal.org
-    secretName: geniepublic-cbio-cert
-  - hosts:
-    - genie-private.cbioportal.org
-    secretName: genieprivate-cbio-cert
+    - hosts:
+        - genie.cbioportal.org
+      secretName: geniepublic-cbio-cert
+    - hosts:
+        - genie-private.cbioportal.org
+      secretName: genieprivate-cbio-cert
