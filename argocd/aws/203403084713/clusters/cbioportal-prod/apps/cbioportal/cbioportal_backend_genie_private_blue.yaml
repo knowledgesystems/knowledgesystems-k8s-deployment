@@ -317,4 +317,3 @@ spec:
     run: cbioportal-backend-genie-private-blue
   sessionAffinity: None
   type: ClusterIP
-  replicas: 3
