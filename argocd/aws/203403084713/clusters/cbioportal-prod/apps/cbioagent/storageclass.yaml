@@ -1,15 +1,15 @@
-#kind: StorageClass
-#apiVersion: storage.k8s.io/v1
-#metadata:
-#  name: efs-sc
-#provisioner: efs.csi.aws.com
-#parameters:
-#  provisioningMode: efs-ap
-#  fileSystemId: fs-081bd6425f56b5587
-#  directoryPerms: "700"
-#  gidRangeStart: "1000" # optional
-#  gidRangeEnd: "2000" # optional
-#  basePath: "/dynamic_provisioning" # optional
-#  subPathPattern: "${.PVC.namespace}/${.PVC.name}" # optional
-#  ensureUniqueDirectory: "true" # optional
-#  reuseAccessPoint: "false" # optional
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-081bd6425f56b5587
+  directoryPerms: "700"
+  gidRangeStart: "1000" # optional
+  gidRangeEnd: "2000" # optional
+  basePath: "/dynamic_provisioning" # optional
+  subPathPattern: "${.PVC.namespace}/${.PVC.name}" # optional
+  ensureUniqueDirectory: "true" # optional
+  reuseAccessPoint: "false" # optional
