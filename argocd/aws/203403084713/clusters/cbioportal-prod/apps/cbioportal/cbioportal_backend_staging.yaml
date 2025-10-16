@@ -181,7 +181,7 @@ spec:
             # "--logging.level.org.cbioportal.persistence=DEBUG",
             # persistence cache settings (currently redis)
             #"-Dcache.statistics_endpoint_enabled=false",
-            "--persistence.cache_type=no-cache",
+            "--persistence.cache_type=redis",
             "--redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379",
             "--redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379",
             "--redis.database=13",
@@ -203,7 +203,7 @@ spec:
             "--spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)",
             "--spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)",
             "--spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)",
-            "--spring.datasource.clickhouse.maximum-pool-size=16",
+            "--spring.datasource.clickhouse.maximum-pool-size=10",
             "--spring.datasource.clickhouse.minimum-idle=5",
             "--clickhouse_mode=true",
             "--spring.profiles.active=clickhouse",
