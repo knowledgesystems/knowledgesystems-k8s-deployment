@@ -36,11 +36,11 @@ locals {
       }
     }
     cbio-dev = {
-      instance_types = ["r7g.large"]
+      instance_types = ["r7g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 4
-      max_size       = 4
-      min_size       = 4
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
