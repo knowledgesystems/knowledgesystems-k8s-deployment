@@ -26,82 +26,82 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: www.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal-backend-public-blue
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
-  - host: master.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal-backend-master-blue
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
-  - host: beta.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal-backend-public-beta-offline
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
-  - host: staging.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal-backend-staging
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
-  - host: session-service-argocd.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal-session-service
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
-  - host: session-service.cbioportal.org
-    http:
-      paths:
-        - backend:
-            service:
-              name: cbioportal-session-service
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
+    - host: www.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-public-green
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: master.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-master-green
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: beta.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-public-beta-offline
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: staging.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-staging
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: session-service-argocd.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-session-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: session-service.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-session-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
   tls:
-  - hosts:
-    - www.cbioportal.org
-    secretName: www-cbioportal-cert
-  - hosts:
-    - master.cbioportal.org
-    secretName: master-cbio-cert
-  - hosts:
-    - beta.cbioportal.org
-    secretName: cbioportal-beta-cert
-  - hosts:
-    - staging.cbioportal.org
-    secretName: staging-cbioportal-cert
-  - hosts:
-    - session-service-argocd.cbioportal.org
-    secretName: cbioportal-session-service-argocd-cert
-  - hosts:
-    - session-service.cbioportal.org
-    secretName: cbioportal-session-service-cert
+    - hosts:
+        - www.cbioportal.org
+      secretName: www-cbioportal-cert
+    - hosts:
+        - master.cbioportal.org
+      secretName: master-cbio-cert
+    - hosts:
+        - beta.cbioportal.org
+      secretName: cbioportal-beta-cert
+    - hosts:
+        - staging.cbioportal.org
+      secretName: staging-cbioportal-cert
+    - hosts:
+        - session-service-argocd.cbioportal.org
+      secretName: cbioportal-session-service-argocd-cert
+    - hosts:
+        - session-service.cbioportal.org
+      secretName: cbioportal-session-service-cert
