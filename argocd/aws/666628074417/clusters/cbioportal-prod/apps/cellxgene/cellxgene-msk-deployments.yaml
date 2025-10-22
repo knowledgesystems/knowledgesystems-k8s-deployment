@@ -172,7 +172,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/gastric-wholecohort-regularUMAP-annotated-dec13.h5ad"
+            "/mountpoint-s3/gastric-wholecohort-regularUMAP-annotated-dec13.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -196,17 +196,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: cellxgene-s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -247,7 +243,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/atlas_scvi_with_ct_umaps_reduced.h5ad"
+            "/mountpoint-s3/atlas_scvi_with_ct_umaps_reduced.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -271,17 +267,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: cellxgene-s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -322,7 +314,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/AML_2025-03-20_V3.h5ad"
+            "/mountpoint-s3/AML_2025-03-20_V3.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -346,17 +338,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: cellxgene-s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -429,89 +417,5 @@ metadata:
 spec:
   selector:
     dataset: AML_2025-03-20_V3.h5ad
-  ports:
-    - port: 8080
----
-kind: Deployment
-apiVersion: apps/v1
-metadata:
-  namespace: cellxgene
-  name: cellxgene-deploy-6
-  labels:
-    app: cellxgene
-    dataset: pbmc3k-pv.h5ad
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      dataset: pbmc3k-pv.h5ad
-  template:
-    metadata:
-      labels:
-        dataset: pbmc3k-pv.h5ad
-    spec:
-      containers:
-        - name: cellxgene-app
-          image: 'edit01/cellxgene:1.2.0'
-          command: ["cellxgene"]
-          args: [
-            "launch",
-            "-p",
-            "8080",
-            "--host",
-            "0.0.0.0",
-            "--backed",
-            "--disable-annotations",
-            "--disable-gene-sets-save",
-            "/mountpoint-s3/pbmc3k.h5ad"
-          ]
-          ports:
-          - containerPort: 8080
-            protocol: TCP
-          imagePullPolicy: IfNotPresent
-          resources:
-            limits:
-              memory: 500Mi
-              cpu: 250m
-          readinessProbe: # Block traffic to container if not ready
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 60
-            failureThreshold: 10
-          livenessProbe: # Restart container if not healthy
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 600  # 10min
-            periodSeconds: 3600 # 1hr
-            failureThreshold: 2
-          volumeMounts:
-            - name: mountpoint-s3
-              mountPath: /mountpoint-s3
-      volumes:
-        - name: mountpoint-s3
-          persistentVolumeClaim:
-            claimName: cellxgene-s3-claim
-      # run on big memory machine
-      nodeSelector:
-        workload: cellxgene
-      tolerations:
-        - key: "workload"
-          operator: "Equal"
-          value: "cellxgene"
-          effect: "NoSchedule"
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: cellxgene-service-6
-  labels:
-    app: cellxgene
-    dataset: pbmc3k-pv.h5ad
-spec:
-  selector:
-    dataset: pbmc3k-pv.h5ad
   ports:
     - port: 8080
