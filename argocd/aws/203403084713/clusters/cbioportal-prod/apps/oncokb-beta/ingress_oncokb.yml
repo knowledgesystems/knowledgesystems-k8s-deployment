@@ -68,3 +68,13 @@ spec:
               name: oncokb-curation-beta
               port:
                 name: http
+  - host: beta.report.oncokb.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: oncokb-patient-report-beta
+              port:
+                number: 8080
