@@ -67,7 +67,7 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        workload: eks-cellxgene
+        workload: cellxgene
       tolerations:
         - key: "workload"
           operator: "Equal"
@@ -142,7 +142,7 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        workload: eks-cellxgene
+        workload: cellxgene
       tolerations:
         - key: "workload"
           operator: "Equal"
