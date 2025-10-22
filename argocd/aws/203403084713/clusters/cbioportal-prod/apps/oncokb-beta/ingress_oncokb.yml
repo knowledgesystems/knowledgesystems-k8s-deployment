@@ -35,6 +35,7 @@ spec:
     - beta.oncokb.org
     - beta.transcript.oncokb.org
     - beta.curation.oncokb.org
+    - beta.report.oncokb.org
     secretName: oncokb-cert
   rules:
   # we have to keep the oncokb.org entry because of the from-to-www-redirect issue above
