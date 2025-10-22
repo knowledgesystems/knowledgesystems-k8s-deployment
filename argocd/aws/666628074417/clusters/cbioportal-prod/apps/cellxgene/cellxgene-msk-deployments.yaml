@@ -22,15 +22,15 @@ spec:
           image: 'edit01/cellxgene:1.2.0'
           command: ["cellxgene"]
           args: [
-            "launch", 
-            "-p", 
-            "8080", 
-            "--host", 
-            "0.0.0.0", 
-            "--backed", 
-            "--disable-annotations", 
-            "--disable-gene-sets-save", 
-            "s3://jason-test-workspace/pbmc3k.h5ad"
+            "launch",
+            "-p",
+            "8080",
+            "--host",
+            "0.0.0.0",
+            "--backed",
+            "--disable-annotations",
+            "--disable-gene-sets-save",
+            "/mountpoint-s3/pbmc3k.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -54,17 +54,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom: 
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom: 
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: cellxgene-s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
@@ -105,7 +101,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "s3://jason-test-workspace/spectrum_all_cells.h5ad"
+            "/mountpoint-s3/msk-spectrum/spectrum_all_cells.h5ad"
           ]
           ports:
           - containerPort: 8080
@@ -129,17 +125,13 @@ spec:
             initialDelaySeconds: 600  # 10min
             periodSeconds: 3600 # 1hr
             failureThreshold: 2
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: cellxgene-creds
-                key: aws_secret_access_key
+          volumeMounts:
+            - name: mountpoint-s3
+              mountPath: /mountpoint-s3
+      volumes:
+        - name: mountpoint-s3
+          persistentVolumeClaim:
+            claimName: cellxgene-s3-claim
       # run on big memory machine
       nodeSelector:
         workload: cellxgene
