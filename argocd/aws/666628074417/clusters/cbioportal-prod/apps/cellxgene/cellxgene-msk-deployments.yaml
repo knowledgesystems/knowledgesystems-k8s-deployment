@@ -101,7 +101,7 @@ spec:
             "--backed",
             "--disable-annotations",
             "--disable-gene-sets-save",
-            "/mountpoint-s3/msk-spectrum/spectrum_all_cells.h5ad"
+            "/mountpoint-s3/spectrum_all_cells.h5ad"
           ]
           ports:
           - containerPort: 8080
