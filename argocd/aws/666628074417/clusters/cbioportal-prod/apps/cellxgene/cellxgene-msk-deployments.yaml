@@ -67,11 +67,11 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: eks-cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
 ---
 kind: Deployment
@@ -142,13 +142,12 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: eks-cellxgene
+        workload: eks-cellxgene
       tolerations:
-        - key: "dedicated"
+        - key: "workload"
           operator: "Equal"
-          value: "eks-cellxgene"
+          value: "cellxgene"
           effect: "NoSchedule"
-
 # ---
 # kind: Deployment
 # apiVersion: apps/v1
