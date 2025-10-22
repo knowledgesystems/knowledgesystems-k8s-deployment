@@ -67,7 +67,7 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: cellxgene-large-memory-nodes
+        eks.amazonaws.com/nodegroup: eks-cellxgene
       tolerations:
         - key: "dedicated"
           operator: "Equal"
@@ -142,7 +142,7 @@ spec:
                 key: aws_secret_access_key
       # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: cellxgene-large-memory-nodes
+        eks.amazonaws.com/nodegroup: eks-cellxgene
       tolerations:
         - key: "dedicated"
           operator: "Equal"
@@ -217,7 +217,7 @@ spec:
 #                 key: aws_secret_access_key
 #       # run on big memory machine
 #       nodeSelector:
-#         eks.amazonaws.com/nodegroup: cellxgene-large-memory-nodes
+#         eks.amazonaws.com/nodegroup: eks-cellxgene
 #       tolerations:
 #         - key: "dedicated"
 #           operator: "Equal"
@@ -291,7 +291,7 @@ spec:
 #                 key: aws_secret_access_key
 #       # run on big memory machine
 #       nodeSelector:
-#         eks.amazonaws.com/nodegroup: cellxgene-large-memory-nodes
+#         eks.amazonaws.com/nodegroup: eks-cellxgene
 #       tolerations:
 #         - key: "dedicated"
 #           operator: "Equal"
@@ -365,7 +365,7 @@ spec:
 #                 key: aws_secret_access_key
 #       # run on big memory machine
 #       nodeSelector:
-#         eks.amazonaws.com/nodegroup: cellxgene-large-memory-nodes
+#         eks.amazonaws.com/nodegroup: eks-cellxgene
 #       tolerations:
 #         - key: "dedicated"
 #           operator: "Equal"
