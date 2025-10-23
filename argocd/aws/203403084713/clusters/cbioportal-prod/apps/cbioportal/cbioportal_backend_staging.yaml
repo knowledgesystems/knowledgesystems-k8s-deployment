@@ -170,7 +170,7 @@ spec:
             #- --logging.level.org.cbioportal.persistence=DEBUG
             # persistence cache settings (currently redis)
             #- -Dcache.statistics_endpoint_enabled=false
-            - --persistence.cache_type=no-cache
+            - --persistence.cache_type=redis
             - --redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379
             - --redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379
             - --redis.database=13
@@ -182,7 +182,7 @@ spec:
             # NEW PROPERTIES START
             - --enable_persistent_cache=true
             #- --persistence.cache_type_clickhouse=redis
-            - --persistence.cache_type_clickhouse=no-cache
+            - --persistence.cache_type_clickhouse=redis
             - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
