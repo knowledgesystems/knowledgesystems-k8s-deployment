@@ -74,9 +74,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 3Gi
+              memory: 6Gi
           limits:
-              memory: 7Gi
+              memory: 10Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
