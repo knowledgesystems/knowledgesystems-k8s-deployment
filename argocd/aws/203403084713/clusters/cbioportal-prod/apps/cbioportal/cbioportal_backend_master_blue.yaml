@@ -75,7 +75,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://deploy-preview-5213--cbioportalfrontend.netlify.app/
+            - --frontend.url=https://frontend.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
             - --skin.footer=
@@ -158,7 +158,7 @@ spec:
             - --spring.autoconfigure.exclude=dontexcludeanythingplz
             # cache settings (currently redis)
             #- -Dcache.statistics_endpoint_enabled=false
-            - --persistence.cache_type=no-cache
+            - --persistence.cache_type=redis
             - --redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379
             - --redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379
             - --redis.database=10
@@ -167,7 +167,7 @@ spec:
             # NEW PROPERTIES START
             # misc frontend settings (this is NOT for backend persistence layer caching)
             - --enable_persistent_cache=true
-            - --persistence.cache_type_clickhouse=no-cache
+            - --persistence.cache_type_clickhouse=redis
             - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
             - --spring.datasource.mysql.username=$(DB_USER)
             - --spring.datasource.mysql.password=$(DB_PASSWORD)
