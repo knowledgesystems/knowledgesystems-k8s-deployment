@@ -9,7 +9,7 @@ metadata:
   name: eks-sclc-green
 spec:
   progressDeadlineSeconds: 600
-  replicas: 0
+  replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
