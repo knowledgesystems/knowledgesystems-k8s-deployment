@@ -227,6 +227,7 @@ spec:
             #- --server.tomcat.port=8888
             - --server.max-http-request-header-size=16384
             - --show.civic=true
+            - --springdoc.api-docs.version=openapi_3_0
           command:
             - java
           env:
