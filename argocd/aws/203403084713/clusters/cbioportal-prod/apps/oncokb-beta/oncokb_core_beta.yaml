@@ -45,8 +45,7 @@ spec:
             - mountPath: /config/
               name: log4j-properties
           command: ["java"]
-          args:
-            [
+          args: [
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
               "-Djdbc.url=$(DB_URL)/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
@@ -56,11 +55,11 @@ spec:
               "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
               "-Doncokb_transcript.url=https://beta.transcript.oncokb.org",
               "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-              "-Dredis.enable=true",
-              "-Dredis.type=$(REDIS_TYPE)",
-              "-Dredis.address=$(REDIS_ADDRESS)",
-              "-Dredis.password=$(REDIS_PASSWROD)",
-              "-Dredis.expiration=$(REDIS_EXPIRATION)",
+              "-Dredis.enable=false",
+              #"-Dredis.type=$(REDIS_TYPE)",
+              #"-Dredis.address=$(REDIS_ADDRESS)",
+              #"-Dredis.password=$(REDIS_PASSWROD)",
+              #"-Dredis.expiration=$(REDIS_EXPIRATION)",
               "-Dswagger_url=https://beta.oncokb.org",
               "-Dshow_sitemaps=false",
               "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb",
