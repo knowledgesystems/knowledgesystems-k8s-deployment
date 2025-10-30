@@ -20,7 +20,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: "airflow-demo.cbioportal.aws.mskcc.org"
+  - host: "airflow.cbioportal.aws.mskcc.org"
     http:
       paths:
       - path: "/"
