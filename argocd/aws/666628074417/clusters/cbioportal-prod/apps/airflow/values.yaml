@@ -17,6 +17,7 @@ config:
     smtp_starttls: true
   webserver:
     base_url: https://airflow.cbioportal.aws.mskcc.org
+
 dags:
   gitSync:
     branch: main
@@ -26,6 +27,7 @@ dags:
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git
     sshKeySecret: airflow-ssh-secret
     subPath: ""
+
 env:
   - name: PYTHONPATH
     value: /opt/airflow/dags/repo/nci-crdc-pipeline
@@ -35,29 +37,38 @@ env:
     value: "8125"
   - name: AIRFLOW__METRICS__STATSD_PREFIX
     value: airflow
+  - name: "DEPLOYMENT"
+    value: "PROD"
+
 executor: KubernetesExecutor
+
 extraEnv: |-
   - name: AIRFLOW__METRICS__STATSD_HOST
     valueFrom:
       fieldRef:
         fieldPath: status.hostIP
+
 images:
   airflow:
     pullPolicy: IfNotPresent
     repository: apache/airflow
     tag: 2.9.2
+
 logs:
   persistence:
     enabled: true
     size: 10Gi
     storageClassName: efs-sc
+
 nodeSelector:
   workload: airflow
+
 tolerations:
   - key: workload
     operator: Equal
     value: airflow
     effect: NoSchedule
+
 scheduler:
   extraInitContainers:
     - command:
@@ -79,6 +90,7 @@ scheduler:
     - name: pv
       persistentVolumeClaim:
         claimName: efs-pv-claim
+
 secret:
   - envName: AIRFLOW_CONN_SMTP_DEFAULT
     secretKey: AIRFLOW_CONN_SMTP_DEFAULT
@@ -104,10 +116,13 @@ secret:
   - envName: AIRFLOW_CONN_PIPELINES5_SSH
     secretKey: AIRFLOW_CONN_PIPELINES5_SSH
     secretName: airflow-pipelines5-ssh-uri
+
 webserver:
   startupProbe:
     timeoutSeconds: 360
+
 webserverSecretKeySecretName: airflow-webserver-secret-key
+
 workers:
   extraVolumeMounts:
     - mountPath: /opt/airflow/git_repos
