@@ -45,6 +45,8 @@ env:
     value: "8125"
   - name: AIRFLOW__METRICS__STATSD_PREFIX
     value: "airflow"
+  - name: "DEPLOYMENT"
+    value: "PROD"
 
 extraEnv: |-
   - name: AIRFLOW__METRICS__STATSD_HOST
