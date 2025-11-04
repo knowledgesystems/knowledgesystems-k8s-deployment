@@ -174,6 +174,23 @@ locals {
         (var.LABEL_KEY) = "prometheus"
       }
     }
+    oncotree = {
+      instance_types = ["t4g.medium"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "oncotree"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "oncotree"
+      }
+    }
   }
 }
 

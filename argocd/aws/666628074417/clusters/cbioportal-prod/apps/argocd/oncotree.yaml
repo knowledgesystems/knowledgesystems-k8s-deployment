@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oncotree
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/oncotree
+      targetRevision: HEAD
+      directory:
+        recurse: true
+  destination:
+    namespace: oncotree
+    server: https://kubernetes.default.svc
+  revisionHistoryLimit: 3
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
