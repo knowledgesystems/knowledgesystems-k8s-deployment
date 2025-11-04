@@ -33,7 +33,7 @@ locals {
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 0
       min_size       = 0
-      max_size       = 0
+      max_size       = 1
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
       }
