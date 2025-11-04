@@ -1,14 +1,14 @@
- kind: PersistentVolumeClaim
- apiVersion: v1
- metadata:
-   name: oncotree-pvc
- spec:
-   storageClassName: "ebs-sc"
-   accessModes:
-     - ReadWriteOnce
-   resources:
-     requests:
-       storage: 30Mi 
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oncotree-pvc
+spec:
+  storageClassName: "ebs-sc"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Mi
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
