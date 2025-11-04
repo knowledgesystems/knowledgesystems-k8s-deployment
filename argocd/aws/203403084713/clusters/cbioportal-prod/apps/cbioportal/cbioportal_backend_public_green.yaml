@@ -190,11 +190,6 @@ spec:
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
 
-#            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
-#            - --spring.datasource.mysql.username=$(DB_USER)
-#            - --spring.datasource.mysql.password=$(DB_PASSWORD)
-#            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
-
             - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
