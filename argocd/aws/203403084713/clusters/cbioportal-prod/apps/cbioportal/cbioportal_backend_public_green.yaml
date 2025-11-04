@@ -75,7 +75,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            - --frontend.url=https://deploy-preview-5275.preview.cbioportal.org/
             - --enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -181,7 +181,7 @@ spec:
             - --redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379
             - --redis.database=9
             - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
-            - --redis.clear_on_startup=false
+            - --redis.clear_on_startup=true
             - --redis.ttl_mins=60
             - --cache.endpoint.enabled=true
             - --cache.endpoint.api-key=1kmfbftTb2iY
@@ -190,10 +190,10 @@ spec:
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
             #- --persistence.cache_type_clickhouse=no-cache
-            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.mysql.username=$(DB_USER)
-            - --spring.datasource.mysql.password=$(DB_PASSWORD)
-            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
+            - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
+            - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
@@ -242,7 +242,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-green
-          image: cbioportal/cbioportal:6.4.0-web-shenandoah
+          image: cbioportal/cbioportal:demo-clickhouse-only-db-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
