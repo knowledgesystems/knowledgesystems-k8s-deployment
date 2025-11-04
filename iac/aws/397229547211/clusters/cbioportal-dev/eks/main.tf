@@ -31,9 +31,9 @@ locals {
     airflow = {
       instance_types = ["r5.xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
+      desired_size   = 0
+      min_size       = 0
+      max_size       = 0
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
       }
