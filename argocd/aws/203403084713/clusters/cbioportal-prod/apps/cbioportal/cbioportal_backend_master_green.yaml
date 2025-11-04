@@ -75,7 +75,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://deploy-preview-5275.preview.cbioportal.org/
+            - --frontend.url=https://frontend.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
             - --skin.footer=
@@ -168,10 +168,10 @@ spec:
             # misc frontend settings (this is NOT for backend persistence layer caching)
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
-            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
-            - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
-            - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
-            - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
+            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
+            - --spring.datasource.mysql.username=$(DB_USER)
+            - --spring.datasource.mysql.password=$(DB_PASSWORD)
+            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
             - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
@@ -195,7 +195,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-green
-          image: cbioportal/cbioportal:demo-clickhouse-only-db-web-shenandoah
+          image: cbioportal/cbioportal@sha256:08564991f17a1cb29faa01a719499bf254c2fb2da6de2a2fe56f8fac7d92460a
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
