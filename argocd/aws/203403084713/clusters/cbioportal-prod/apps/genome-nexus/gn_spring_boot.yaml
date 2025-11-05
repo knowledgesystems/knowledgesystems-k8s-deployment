@@ -26,13 +26,13 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot32-useast1b-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-v1dot0-mongodb:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:2.0.3
+        image: genomenexus/gn-spring-boot:2.1.0
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
