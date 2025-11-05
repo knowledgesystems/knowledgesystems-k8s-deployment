@@ -209,27 +209,7 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
-    - host: oncotreedev.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree-reactdev
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
     - host: oncotree.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-oncotree
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: oncotree.cbioportal.aws.mskcc.org
       http:
         paths:
           - backend:
