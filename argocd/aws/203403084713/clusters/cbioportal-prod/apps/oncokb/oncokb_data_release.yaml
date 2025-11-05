@@ -35,6 +35,8 @@ spec:
           env:
             - name: FIREBASE_SERVICE_ACCOUNT_PATH
               value: "/oncokb-firebase-credentials.json"
+            - name: GIN_MODE
+              value: "debug"
           volumeMounts:
             - name: firebase-credentials
               mountPath: /oncokb-firebase-credentials.json
@@ -85,5 +87,5 @@ spec:
   ports:
     - name: http
       port: 8085
-      targetPort: http 
+      targetPort: http
       protocol: TCP
