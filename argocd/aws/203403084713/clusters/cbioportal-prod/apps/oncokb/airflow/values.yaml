@@ -14,6 +14,11 @@ postgresql:
   # to use the external db, the embedded one must be disabled
   enabled: false
 
+redis:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/redis
+
 externalDatabase:
   # WARNING: Must complete this step to use MySQL: https://airflow.apache.org/docs/apache-airflow/stable/howto/set-up-database.html#setting-up-a-mysql-database
   # Note that there is nothing to do if using MySQL 8 because "explicit_defaults_for_timestamp" is on by default.
