@@ -62,7 +62,7 @@ spec:
               "-XshowSettings:vm",
               # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
               # from the limits
-              "-XX:MaxRAM=2g",
+              "-XX:MaxRAM=4g",
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
               "-Djdbc.url=$(DB_URL)/oncokb_core_curation_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
@@ -93,21 +93,21 @@ spec:
           # use actionable variants endpoint to cache everything
           readinessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             initialDelaySeconds: 15
             timeoutSeconds: 10
             periodSeconds: 20
             failureThreshold: 60
-          livenessProbe:
-            httpGet:
-              path: /api/v1/utils/allActionableVariants
-              port: 8888
-            # wait for the pod is ready
-            initialDelaySeconds: 300
-            timeoutSeconds: 5
-            periodSeconds: 20
-            failureThreshold: 60
+          # livenessProbe:
+          #   httpGet:
+          #     path: /v1/health
+          #     port: 8888
+          #   # wait for the pod is ready
+          #   initialDelaySeconds: 300
+          #   timeoutSeconds: 5
+          #   periodSeconds: 20
+          #   failureThreshold: 60
           name: oncokb-core-curation-beta
           ports:
             - containerPort: 8888
