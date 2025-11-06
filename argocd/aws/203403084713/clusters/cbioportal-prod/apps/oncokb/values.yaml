@@ -1,6 +1,9 @@
 cluster:
   nodes: 20
   replicas: 1
+image:
+  repository: bitnamilegacy/redis-cluster
+  registry: docker.io
 existingSecret: oncokb-redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
 redis:
