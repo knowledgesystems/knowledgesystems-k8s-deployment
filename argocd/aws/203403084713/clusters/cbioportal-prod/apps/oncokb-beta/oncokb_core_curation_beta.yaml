@@ -114,11 +114,11 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: 500m
-              memory: 2Gi
+              cpu: 4000m
+              memory: 6Gi
             limits:
               cpu: 4000m
-              memory: 4Gi
+              memory: 6Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
