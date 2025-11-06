@@ -20,7 +20,7 @@ spec:
         run: new-eks-oncotree
     spec:
       containers:
-      - image: mskcc/oncotree:2.0.0
+      - image: mskcc/oncotree:2.0.0-beta
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
