@@ -97,15 +97,16 @@ spec:
             timeoutSeconds: 30
             periodSeconds: 20
             failureThreshold: 60
-          livenessProbe:
-            httpGet:
-              path: /v1/health
-              port: 8888
-            # wait for the pod is ready
-            initialDelaySeconds: 300
-            timeoutSeconds: 5
-            periodSeconds: 20
-            failureThreshold: 60
+          # Remove liveness probe because saving all data will trigger an in memory cache reset
+          # livenessProbe:
+          #   httpGet:
+          #     path: /v1/health
+          #     port: 8888
+          #   # wait for the pod is ready
+          #   initialDelaySeconds: 300
+          #   timeoutSeconds: 5
+          #   periodSeconds: 20
+          #   failureThreshold: 60
           name: oncokb-core-curation
           ports:
             - containerPort: 8888
