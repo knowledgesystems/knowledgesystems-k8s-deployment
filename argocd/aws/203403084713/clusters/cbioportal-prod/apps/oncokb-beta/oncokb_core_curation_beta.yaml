@@ -72,7 +72,7 @@ spec:
               "-Doncokb_transcript.url=https://transcript.oncokb.org",
               "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
               "-Dpublic_oncokb.token=$(PUBLIC_ONCOKB_TOKEN)",
-              "-Dredis.enable=true",
+              "-Dredis.enable=false",
               "-Dredis.type=$(REDIS_TYPE)",
               "-Dredis.address=$(REDIS_ADDRESS)",
               "-Dredis.password=$(REDIS_PASSWORD)",
