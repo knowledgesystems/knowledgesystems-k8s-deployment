@@ -88,8 +88,9 @@ datadog:
   clusterChecks:
     enabled: true
   logs:
-    containerCollectAll: false
-    enabled: false
+    # Experimental: Set to True and see if cloudwatch costs go up.
+    containerCollectAll: true
+    enabled: true
   apm:
     instrumentation:
       skipKPITelemetry: true
