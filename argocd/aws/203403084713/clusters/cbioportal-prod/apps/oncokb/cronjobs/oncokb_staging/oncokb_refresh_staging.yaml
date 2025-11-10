@@ -14,7 +14,8 @@ spec:
           restartPolicy: Never
           containers:
             - name: save-gene-and-restart-staging
-              image: curlimages/curl:8.8.0 # small image for curl (swap out if use case expands)
+              image: "mskcc/k8s-with-tools:1.0.0"
+              imagePullPolicy: IfNotPresent
               command:
                 - sh
                 - -c
@@ -28,3 +29,10 @@ spec:
 
                   echo "Restarting staging core environment"
                   kubectl rollout restart deployment/oncokb-core-curation-beta -n oncokb
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "oncokb-beta"
+              effect: "NoSchedule"
+          nodeSelector:
+            workload: oncokb-beta
