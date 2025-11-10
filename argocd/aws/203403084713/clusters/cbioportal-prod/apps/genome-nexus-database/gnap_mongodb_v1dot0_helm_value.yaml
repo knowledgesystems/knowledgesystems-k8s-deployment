@@ -1,0 +1,28 @@
+image:
+  repository: genomenexus/gn-mongo
+  tag: 1.0_mutationassessor
+  pullPolicy: Always
+persistence:
+  enabled: true
+  size: 100Gi
+
+# If want to deploy the MongoDB pods on a specific node, uncomment the following lines
+# affinity:
+# nodeAffinity:
+#   requiredDuringSchedulingIgnoredDuringExecution:
+#     nodeSelectorTerms:
+#       - matchExpressions:
+#           - key: kubernetes.io/hostname
+#             operator: In
+#             values:
+#               -  # Replace with the exact node name
+
+tolerations:
+  - key: workload
+    operator: Equal
+    value: gn-database
+    effect: NoSchedule
+
+nodeSelector:
+  workload: gn-database
+  # kubernetes.io/hostname: # Replace with the exact node name
