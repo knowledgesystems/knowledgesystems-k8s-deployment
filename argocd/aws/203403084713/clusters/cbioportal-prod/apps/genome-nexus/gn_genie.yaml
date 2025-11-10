@@ -32,14 +32,16 @@ spec:
           value: "8888"
         - name: MONGODB_URI
           value: mongodb://genie-gn-mongo-mongodb:27017/annotator?connectTimeoutMS=120000
-        image: genomenexus/gn-spring-boot:demo-update-gene-symbol
+        image: genomenexus/gn-spring-boot:2.1.0
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
             # this is to use VEP running inside K8s. Remove to use
             # grch37.rest.ensembl.org instead
-            "-Dgn_vep.region.url=http://genie-gn-vep/vep/human/region/VARIANT",
+            "-Dvep.url=http://genie-gn-vep/vep/human/region/VARIANT",
+            "-Dgenomenexus.server.version=2.1.0",
+            "-Dspring.mongodb.embedded.version=sha-6ce3181e7924f45971005d6aba1c4483a75b5f59-grch37_ensembl92-ma_true",
             "-Dreplace_old_hgnc_gene_symbol=false",
             "-Dvep.max_page_size=5000",
             "-Dgn_vep.timeout.seconds=300",
