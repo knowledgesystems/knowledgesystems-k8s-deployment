@@ -39,7 +39,7 @@ spec:
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
             # this is to use VEP running inside K8s. Remove to use
             # grch37.rest.ensembl.org instead
-            "-Dgn_vep.region.url=http://gnap-gn-vep/vep/human/region/VARIANT",
+            "-Dvep.url=http://gnap-gn-vep/vep/human/region/VARIANT",
             "-Dcache.enabled=true",
             "-Dreplace_old_hgnc_gene_symbol=true",
             "-Dgenomenexus.server.version=2.1.0",
