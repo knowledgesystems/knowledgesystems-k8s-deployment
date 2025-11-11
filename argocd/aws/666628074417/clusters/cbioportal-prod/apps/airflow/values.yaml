@@ -104,6 +104,9 @@ secret:
   - envName: AIRFLOW_CONN_PLLIMSKHPC3_SSH
     secretKey: AIRFLOW_CONN_PLLIMSKHPC3_SSH
     secretName: airflow-hpc3-ssh-uri
+  - envName: AIRFLOW_CONN_TLLIHPCGPU3_SSH
+    secretKey: AIRFLOW_CONN_TLLIHPCGPU3_SSH
+    secretName: airflow-gpu3-ssh-uri
   - envName: AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD
     secretKey: AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD
     secretName: airflow-impact-pipeline-password
@@ -140,6 +143,9 @@ workers:
     - mountPath: /opt/airflow/secrets/hpc3-ssh-keyfile
       name: hpc3-ssh-keyfile
       readOnly: true
+    - mountPath: /opt/airflow/secrets/gpu3-ssh-keyfile
+      name: gpu3-ssh-keyfile
+      readOnly: true
     - mountPath: /opt/airflow/secrets/genie-importer-ssh-keyfile
       name: genie-importer-ssh-keyfile
       readOnly: true
@@ -165,6 +171,9 @@ workers:
     - name: hpc3-ssh-keyfile
       secret:
         secretName: airflow-hpc3-ssh-keyfile
+    - name: gpu3-ssh-keyfile
+      secret:
+        secretName: airflow-gpu3-ssh-keyfile
     - name: genie-importer-ssh-keyfile
       secret:
         secretName: airflow-genie-importer-ssh-keyfile
