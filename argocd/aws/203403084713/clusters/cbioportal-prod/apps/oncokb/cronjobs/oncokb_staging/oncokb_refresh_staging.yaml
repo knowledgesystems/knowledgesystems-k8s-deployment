@@ -23,18 +23,38 @@ spec:
                 - -c
                 - |
                   set -e
-                  echo "Triggering a MySQL refresh using oncokb-data-release server"
-                  curl -X POST "http://oncokb-data-release:8085/api/v1/gene-data/save" \
-                       -H "Content-Type: application/json" \
-                       --fail \
-                       --data '{"entrezGeneIds":[4005]}'  
+
+                  GENE_ID=4005
+                  API_URL="http://oncokb-data-release:8085/api/v1/gene-data"
+                  echo "Triggering MySQL refresh using oncokb-data-release server"
+
+                  curl -X POST "${API_URL}/save" \
+                    -H "Content-Type: application/json" \
+                    --fail \
+                    --data "{\"entrezGeneIds\":[${GENE_ID}]}"
+
+                  echo "Polling job status until completion..."
+                  while true; do
+                    STATUS_JSON=$(curl -s "${API_URL}/status/${GENE_ID}" || echo "")
+                    STATUS=$(echo "$STATUS_JSON" | jq -r '.status // empty')
+                    ERROR_MSG=$(echo "$STATUS_JSON" | jq -r '.error // empty')
+
+                    if [ "$STATUS" = "succeeded" ]; then
+                      echo "Job succeeded"
+                      break
+                    elif [ "$STATUS" = "failed" ]; then
+                      echo "Job failed: ${ERROR_MSG}"
+                      exit 1
+                    fi
+                    sleep 5
+                  done
 
                   echo "Restarting staging core environment"
-                  kubectl rollout restart deployment/oncokb-core-curation-beta -n oncokb
+                  kubectl rollout restart deployment/oncokb-core-curation -n oncokb
           tolerations:
             - key: "workload"
               operator: "Equal"
-              value: "oncokb-beta"
+              value: "oncokb"
               effect: "NoSchedule"
           nodeSelector:
-            workload: oncokb-beta
+            workload: oncokb
