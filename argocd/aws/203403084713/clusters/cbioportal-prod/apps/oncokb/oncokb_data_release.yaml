@@ -30,7 +30,7 @@ spec:
         - name: oncokb-dockerhub-creds
       containers:
         - name: oncokb-data-release
-          image: mskcc/oncokb-data-release:v0.0.3
+          image: mskcc/oncokb-data-release:v0.0.4
           imagePullPolicy: Always
           ports:
             - name: http
@@ -45,7 +45,7 @@ spec:
             - name: GIN_MODE
               value: "debug"
             - name: HTTP_CLIENT_TIMEOUT_SECONDS
-              value: "900"
+              value: "60"
           volumeMounts:
             - name: firebase-credentials
               mountPath: /oncokb-firebase-credentials.json
