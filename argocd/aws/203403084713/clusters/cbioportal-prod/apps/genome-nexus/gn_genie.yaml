@@ -39,7 +39,7 @@ spec:
             "-Dspring.data.mongodb.uri=$(MONGODB_URI)",
             # this is to use VEP running inside K8s. Remove to use
             # grch37.rest.ensembl.org instead
-            "-Dvep.url=http://genie-gn-vep/vep/human/region/VARIANT",
+            "-Dvep.url=http://gn-vep-111.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Dgenomenexus.server.version=2.1.0",
             "-Dspring.mongodb.embedded.version=sha-6ce3181e7924f45971005d6aba1c4483a75b5f59-grch37_ensembl92-ma_true",
             "-Dreplace_old_hgnc_gene_symbol=false",
