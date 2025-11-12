@@ -5,12 +5,12 @@ metadata:
   namespace: oncokb
 spec:
   timeZone: "America/New_York"
-  schedule: "0 8-20 * * *" # hourly between 8AM–8PM ET
+  schedule: "0 20 * * *"  # runs once daily at 8:00 PM
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: oncokb-restart-sa
+          serviceAccountName: oncokb-staging-restart-sa
           restartPolicy: Never
           containers:
             - name: save-gene-and-restart-staging
