@@ -5,11 +5,13 @@ metadata:
   namespace: oncokb
 spec:
   timeZone: "America/New_York"
-  schedule: "0 20 * * *"  # runs once daily at 8:00 PM
+  schedule: "0 20 * * *" # runs once daily at 8:00 PM
   jobTemplate:
     spec:
       template:
         spec:
+          imagePullSecrets:
+            - name: oncokb-dockerhub-creds
           serviceAccountName: oncokb-staging-restart-sa
           restartPolicy: Never
           containers:
