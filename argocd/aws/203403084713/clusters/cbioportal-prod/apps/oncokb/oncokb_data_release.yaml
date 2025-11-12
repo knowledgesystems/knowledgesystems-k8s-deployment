@@ -80,7 +80,7 @@ spec:
       volumes:
         - name: firebase-credentials
           secret:
-            secretName: oncokb-firebase-prod-credentials
+            secretName: oncokb-firebase-dev-credentials # Replace with prod once finish testing
 ---
 apiVersion: v1
 kind: Service
