@@ -16,7 +16,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: save-gene-and-restart-staging
-              image: "mskcc/k8s-with-tools:1.0.0"
+              image: "mskcc/oncokb-k8s-with-tools:1.0.0"
               imagePullPolicy: IfNotPresent
               command:
                 - sh
