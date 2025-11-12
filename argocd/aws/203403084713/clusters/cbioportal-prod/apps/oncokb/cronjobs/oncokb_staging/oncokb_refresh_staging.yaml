@@ -7,7 +7,6 @@ spec:
   timeZone: "America/New_York"
   schedule: "0 20 * * *" # runs once daily at 8:00 PM
   jobTemplate:
-    backoffLimit: 0
     spec:
       template:
         spec:
