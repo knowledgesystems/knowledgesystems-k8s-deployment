@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: oncokb-data-save-and-restart
+  namespace: oncokb
+spec:
+  timeZone: "America/New_York"
+  schedule: "0 8-20 * * *" # hourly between 8AM–8PM ET
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: oncokb-restart-sa
+          restartPolicy: Never
+          containers:
+            - name: save-gene-and-restart-staging
+              image: "mskcc/k8s-with-tools:1.0.0"
+              imagePullPolicy: IfNotPresent
+              command:
+                - sh
+                - -c
+                - |
+                  set -e
+                  echo "Triggering a MySQL refresh using oncokb-data-release server"
+                  curl -X POST "http://oncokb-data-release:8085/api/v1/gene-data/save" \
+                       -H "Content-Type: application/json" \
+                       --fail \
+                       --data '{"entrezGeneIds":[4005]}'  
+
+                  echo "Restarting staging core environment"
+                  kubectl rollout restart deployment/oncokb-core-curation-beta -n oncokb
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "oncokb-beta"
+              effect: "NoSchedule"
+          nodeSelector:
+            workload: oncokb-beta
