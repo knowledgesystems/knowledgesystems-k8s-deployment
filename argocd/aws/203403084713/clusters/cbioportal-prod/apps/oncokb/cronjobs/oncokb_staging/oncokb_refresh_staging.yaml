@@ -55,7 +55,7 @@ spec:
           tolerations:
             - key: "workload"
               operator: "Equal"
-              value: "oncokb-beta"
+              value: "oncokb"
               effect: "NoSchedule"
           nodeSelector:
-            workload: oncokb-beta
+            workload: oncokb
