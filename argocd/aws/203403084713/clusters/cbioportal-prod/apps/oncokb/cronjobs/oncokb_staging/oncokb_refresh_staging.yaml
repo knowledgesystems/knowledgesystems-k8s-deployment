@@ -35,6 +35,9 @@ spec:
 
                   echo "Polling job status until completion..."
                   while true; do
+                    # Wait a short grace period to see if a new job queues
+                    # The server should return a job id
+                    sleep 5
                     STATUS_JSON=$(curl -s "${API_URL}/status/${GENE_ID}" || echo "")
                     STATUS=$(echo "$STATUS_JSON" | jq -r '.status // empty')
                     ERROR_MSG=$(echo "$STATUS_JSON" | jq -r '.error // empty')
