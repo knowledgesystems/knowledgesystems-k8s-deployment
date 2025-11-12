@@ -59,6 +59,8 @@ spec:
               value: "INFO"
             - name: LOGGING_PATTERN_CONSOLE
               value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
+            - name: APPLICATION_ONCOKBDATARELEASE_URL
+              value: "http://oncokb-data-release:8085"
           envFrom:
             - secretRef:
                 name: oncokb-curation
@@ -66,7 +68,7 @@ spec:
                 name: oncokb-db-public-rds-oncokb-transcript
             - secretRef:
                 name: oncokb-curation-redis
-          image: mskcc/oncokb-curation:2.2.13
+          image: mskcc/oncokb-curation:2.2.15-beta.0
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
