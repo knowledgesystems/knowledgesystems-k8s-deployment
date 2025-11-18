@@ -242,7 +242,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-blue
-          image: cbioportal/cbioportal:rc-7.0-clickhouse-only-web-shenandoah
+          image: cbioportal/cbioportal:clickhouse-only-7.0.0-alpha-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
