@@ -6,8 +6,9 @@ metadata:
 spec:
   timeZone: "America/New_York"
   schedule: "0 20 * * *" # runs once daily at 8:00 PM
-  successfulJobsHistoryLimit: 5
-  failedJobsHistoryLimit: 5
+  backoffLimit: 1
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
@@ -20,6 +21,15 @@ spec:
             - name: save-gene-and-restart-staging
               image: "mskcc/oncokb-k8s-with-tools:1.0.0"
               imagePullPolicy: IfNotPresent
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                  ephemeral-storage: 200Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+                  ephemeral-storage: 500Mi
               command:
                 - sh
                 - -c
@@ -30,7 +40,7 @@ spec:
                   API_URL="http://oncokb-data-release:8085/api/v1/gene-data"
                   echo "Triggering MySQL refresh using oncokb-data-release server"
 
-                  curl -X POST "${API_URL}/save" \
+                  curl -sS -X POST "${API_URL}/save" \
                     -H "Content-Type: application/json" \
                     --fail \
                     --data "{\"entrezGeneIds\":[${GENE_ID}]}"
