@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cbioportal-navigator.yaml
+  name: cbioportal-navigator
   labels:
-    run: cbioportal-navigator.yaml
+    run: cbioportal-navigator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: cbioportal-navigator.yaml
+      run: cbioportal-navigator
   template:
     metadata:
       labels:
-        run: cbioportal-navigator.yaml
+        run: cbioportal-navigator
     spec:
       containers:
-        - name: cbioportal-navigator.yaml
+        - name: cbioportal-navigator
           image: ghcr.io/fuzhaoyuan/cbioportal-navigator:latest
           imagePullPolicy: Always
           ports:
@@ -36,10 +36,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cbioportal-navigator.yaml
+  name: cbioportal-navigator
 spec:
   selector:
-    run: cbioportal-navigator.yaml
+    run: cbioportal-navigator
   ports:
     - port: 80
       name: http
