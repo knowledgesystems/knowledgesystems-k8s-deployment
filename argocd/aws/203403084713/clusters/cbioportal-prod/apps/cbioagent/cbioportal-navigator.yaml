@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-navigator.yaml
+  labels:
+    run: cbioportal-navigator.yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioportal-navigator.yaml
+  template:
+    metadata:
+      labels:
+        run: cbioportal-navigator.yaml
+    spec:
+      containers:
+        - name: cbioportal-navigator.yaml
+          image: ghcr.io/fuzhaoyuan/cbioportal-navigator:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8002
+          env:
+            - name: CBIOPORTAL_BASE_URL
+              value: https://www.cbioportal.org
+            - name: NODE_ENV
+              value: production
+      nodeSelector:
+        workload: "cbioagent"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbioagent"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-navigator.yaml
+spec:
+  selector:
+    run: cbioportal-navigator.yaml
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8002
+  type: ClusterIP
