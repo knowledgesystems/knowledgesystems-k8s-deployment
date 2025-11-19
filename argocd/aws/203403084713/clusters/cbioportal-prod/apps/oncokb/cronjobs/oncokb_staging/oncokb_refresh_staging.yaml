@@ -6,7 +6,6 @@ metadata:
 spec:
   timeZone: "America/New_York"
   schedule: "0 20 * * *" # runs once daily at 8:00 PM
-  backoffLimit: 1
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
