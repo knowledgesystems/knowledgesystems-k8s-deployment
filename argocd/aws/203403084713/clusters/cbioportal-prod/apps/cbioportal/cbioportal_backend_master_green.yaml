@@ -117,6 +117,9 @@ spec:
             # db settings for when clickhouse_mode is set to false
             - --spring.datasource.driver-class-name=com.mysql.jdbc.Driver
             - --spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
+            - --spring.datasource.url=$(DB_CONNECTION_STRING)
+            - --spring.datasource.username=$(DB_USER)
+            - --spring.datasource.password=$(DB_PASSWORD)
             - --tomcat.catalina.scope=runtime
             - --show.transcript_dropdown=true
             - --skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)
@@ -187,28 +190,12 @@ spec:
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
             - --server.port=8888
-            # NEW PROPERTIES START
-            # misc frontend settings (this is NOT for backend persistence layer caching)
-            - --enable_persistent_cache=true
-            - --persistence.cache_type_clickhouse=redis
-            #- --persistence.cache_type_clickhouse=no-cache
-            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
-            - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
-            - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
-            - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
-            - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
-            - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
-            - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
-            - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
-            - --clickhouse_mode=true
-            - --spring.profiles.active=clickhouse
-            # NEW PROPERTIES END
           command:
             - java
           envFrom:
             - secretRef:
                 name: cbioportal-public-green
-          image: cbioportal/cbioportal@sha256:2f5999552387a1a7202039d1cdacb4c7ed632d7eb4c150961981e38c20b07907
+          image: cbioportal/cbioportal@sha256:8eea9b402506b888f9cae11be313cfe7162a19b223e8b87c5812ce8d9656d621
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
