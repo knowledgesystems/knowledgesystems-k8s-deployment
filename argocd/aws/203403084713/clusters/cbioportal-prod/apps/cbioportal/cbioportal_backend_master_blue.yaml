@@ -117,9 +117,6 @@ spec:
             # db settings for when clickhouse_mode is set to false
             - --spring.datasource.driver-class-name=com.mysql.jdbc.Driver
             - --spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
-            - --spring.datasource.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.username=$(DB_USER)
-            - --spring.datasource.password=$(DB_PASSWORD)
             - --tomcat.catalina.scope=runtime
             - --show.transcript_dropdown=true
             - --skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)
