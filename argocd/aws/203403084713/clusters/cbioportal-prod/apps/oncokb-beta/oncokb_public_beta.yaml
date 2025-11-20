@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: mskcc/oncokb-public:4.7.0-beta.1
+          image: mskcc/oncokb-public:4.7.0-beta.2
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
