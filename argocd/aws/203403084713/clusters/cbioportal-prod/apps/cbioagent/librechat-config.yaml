@@ -1,0 +1,250 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: librechat-config
+  namespace: default
+data:
+  librechat.yaml: |
+    # For more information, see the Configuration Guide:
+    # https://www.librechat.ai/docs/configuration/librechat_yaml/example
+
+    # Configuration version (required)
+    version: 1.2.1
+
+    # Cache settings: Set to true to enable caching
+    cache: true
+
+    # File strategy s3/firebase
+    # fileStrategy: "s3"
+
+    # Custom interface configuration
+    interface:
+      customWelcome: "Hey {{user.name}}! Welcome to cBioAgent (WIP ⚠️)."
+      # MCP Servers UI configuration
+      mcpServers:
+        placeholder: 'MCP Servers'
+      # Privacy policy settings
+      privacyPolicy:
+        externalUrl: 'https://librechat.ai/privacy-policy'
+        openNewTab: true
+
+      # Terms of service
+      termsOfService:
+        externalUrl: 'https://librechat.ai/tos'
+        openNewTab: true
+        modalAcceptance: true
+        modalTitle: "Terms of Service for LibreChat"
+        modalContent: |
+          # Terms and Conditions for LibreChat
+
+          *Effective Date: February 18, 2024*
+
+          Welcome to LibreChat, the informational website for the open-source AI chat platform, available at https://librechat.ai. These Terms of Service ("Terms") govern your use of our website and the services we offer. By accessing or using the Website, you agree to be bound by these Terms and our Privacy Policy, accessible at https://librechat.ai//privacy.
+
+          ## 1. Ownership
+
+          Upon purchasing a package from LibreChat, you are granted the right to download and use the code for accessing an admin panel for LibreChat. While you own the downloaded code, you are expressly prohibited from reselling, redistributing, or otherwise transferring the code to third parties without explicit permission from LibreChat.
+
+          ## 2. User Data
+
+          We collect personal data, such as your name, email address, and payment information, as described in our Privacy Policy. This information is collected to provide and improve our services, process transactions, and communicate with you.
+
+          ## 3. Non-Personal Data Collection
+
+          The Website uses cookies to enhance user experience, analyze site usage, and facilitate certain functionalities. By using the Website, you consent to the use of cookies in accordance with our Privacy Policy.
+
+          ## 4. Use of the Website
+
+          You agree to use the Website only for lawful purposes and in a manner that does not infringe the rights of, restrict, or inhibit anyone else's use and enjoyment of the Website. Prohibited behavior includes harassing or causing distress or inconvenience to any person, transmitting obscene or offensive content, or disrupting the normal flow of dialogue within the Website.
+
+          ## 5. Governing Law
+
+          These Terms shall be governed by and construed in accordance with the laws of the United States, without giving effect to any principles of conflicts of law.
+
+          ## 6. Changes to the Terms
+
+          We reserve the right to modify these Terms at any time. We will notify users of any changes by email. Your continued use of the Website after such changes have been notified will constitute your consent to such changes.
+
+          ## 7. Contact Information
+
+          If you have any questions about these Terms, please contact us at contact@librechat.ai.
+
+          By using the Website, you acknowledge that you have read these Terms of Service and agree to be bound by them.
+
+      endpointsMenu: true
+      modelSelect: false
+      parameters: false
+      sidePanel: false
+      presets: false
+      prompts: false
+      bookmarks: false
+      multiConvo: false
+      agents: true
+      runCode: false
+      webSearch: false
+
+    # Example Registration Object Structure (optional)
+    registration:
+      socialLogins: ['github', 'google', 'discord', 'openid', 'facebook', 'apple', 'saml']
+      # allowedDomains:
+      # - "gmail.com"
+
+    # Example Actions Object Structure
+    actions:
+      allowedDomains:
+        - "swapi.dev"
+        - "librechat.ai"
+        - "google.com"
+
+    # MCP Servers Object Structure
+    mcpServers:
+      cbioportal-database:
+        type: streamable-http
+        url: http://cbioagent-clickhouse-mcp:80/mcp
+      cbioportal-navigator:
+        type: streamable-http
+        url: http://cbioportal-navigator:80/mcp
+        chatMenu: false
+
+    # Definition of endpoints
+    endpoints:
+      agents:
+        recursionLimit: 50
+        maxRecursionLimit: 100
+        disableBuilder: true
+      assistants:
+        disableBuilder: true
+
+    # File uploading configuration
+    fileConfig:
+      endpoints:
+        anthropic:
+          disabled: true
+
+    # Token limits
+    balance:
+      enabled: true
+      startBalance: 20000000
+      autoRefillEnabled: true
+      refillIntervalValue: 7
+      refillIntervalUnit: "days"
+      refillAmount: 20000000
+
+    # Model spec
+    modelSpecs:
+      enforce: false
+      prioritize: true
+      list:
+        - name: "cBioDBAgent"
+          label: "cBioDBAgent - Talk to cBioPortal Database"
+          default: true
+          description: "An AI assistant for querying and exploring cBioPortal database."
+          iconURL: "https://raw.githubusercontent.com/cBioPortal/cbioportal/refs/heads/master/src/main/resources/webapp/images/cbioportal_icon.png"
+          showIconInHeader: true
+          showIconInMenu: true
+          preset:
+            endpoint: "agents"
+            agent_id: "agent_4QP14nOYaCTkqK8E3Nopg"
+            maxTokens: 4096
+            thinking: false
+            modelLabel: "cBioDBAgent"
+            greeting: |
+              Ask questions below to explore the cBioPortal database, including studies, genes, mutations, and clinical attributes. NOTE: Limit of 20 messages per 30 minutes, and 20M tokens per week. <br /><br /><a href="https://cbioportal-ai-docs.surge.sh/ai-integrations/chat-interface/" target="_blank" style="display: inline-block; background-color: #4b5563; color: #f9fafb; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#374151'" onmouseout="this.style.backgroundColor='#4b5563'">Learn more</a>
+            promptPrefix: |
+              You are a helpful assistant with access to cBioPortal data through MCP integration.
+              
+              KEY TABLES (use these directly without exploration):
+              - cgds_public_2025_06_24.cancer_study: cancer_study_id (numeric foreign key), cancer_study_identifier (study name), name, description
+              - cgds_public_2025_06_24.patient: internal_id, cancer_study_id (links to cancer_study)
+              - cgds_public_2025_06_24.clinical_patient: patient_id (links to patient.internal_id)
+              - cgds_public_2025_06_24.sample: internal_id, patient_id (links to patient) (NOTE: ignore sample_type if present)
+              - cgds_public_2025_06_24.clinical_sample: internal_id (links to sample.internal_id), patient_id, attr_id, attr_value (key-value clinical attributes)
+              - cgds_public_2025_06_24.clinical_event: patient_id, event_type, start_date
+              - cgds_public_2025_06_24.mutation: sample_id, entrez_gene_id, hugo_gene_symbol, mutation_status
+              - cgds_public_2025_06_24.cna: sample_id, entrez_gene_id, hugo_gene_symbol, alteration
+              - cgds_public_2025_06_24.genetic_profile: genetic_profile_id, cancer_study_id, genetic_alteration_type
+              - cgds_public_2025_06_24.genomic_event_derived: pre-joined mutation + sample + gene data (USE THIS for mutations)
+              - cgds_public_2025_06_24.clinical_data_derived: pre-joined clinical data (USE THIS for clinical attributes)
+              - cgds_public_2025_06_24.clinical_attribute_meta: metadata about clinical attributes (attr_id, description, patient_attribute, cancer_study_id)
+              
+              GENOMIC DATA GUIDANCE:
+              ### Key Tables & Relationships:
+              **mutation** → **mutation_event** → **gene** (via entrez_gene_id)
+              **mutation** → **sample** → **patient** (via internal_id fields)
+              
+              ### CRITICAL: Use Derived Tables
+              **Don't join raw tables manually.** Use these pre-computed views:
+              
+              **genomic_event_derived**: Pre-joined mutation + sample + gene data
+              - Contains: sample_unique_id, hugo_gene_symbol, mutation_type, mutation_status, variant_type
+              - Filter: `variant_type = 'mutation'` for mutations
+              - Filter: `cancer_study_identifier = 'msk_chord_2024'`
+              
+              **clinical_data_derived**: Pre-joined clinical data  
+              - Contains: sample_unique_id, patient_unique_id, attribute_name, attribute_value
+              - Use attribute_name like 'MUTATION_COUNT', 'TMB_NONSYNONYMOUS', 'CANCER_TYPE', 'CANCER_TYPE_DETAILED'
+              
+              ### Cancer Type Selection:
+              **CANCER_TYPE vs CANCER_TYPE_DETAILED**: Choose based on question specificity
+              - **CANCER_TYPE**: broader categories like 'Non-Small Cell Lung Cancer', 'Breast Cancer'
+              - **CANCER_TYPE_DETAILED**: specific subtypes like 'Spindle Cell Carcinoma of the Lung', 'Invasive Ductal Carcinoma'
+              - **Decision**: Match the attribute to the level of detail requested in the question
+              - **When unsure**: start with CANCER_TYPE for broader matching
+              
+              ### Clinical Attribute Discovery:
+              **clinical_attribute_meta**: Use for discovering available clinical attributes
+              - **attr_id**: matches attr_id in clinical_sample/clinical_patient tables
+              - **description**: provides human-readable description of the attribute
+              - **patient_attribute**: true = patient attribute, false = sample attribute
+              - **cancer_study_id**: links to cancer_study table (filter by study)
+              - **Usage**: SELECT attr_id, description, patient_attribute FROM clinical_attribute_meta WHERE cancer_study_id = (SELECT cancer_study_id FROM cancer_study WHERE cancer_study_identifier = 'msk_chord_2024')
+              
+              ### Common Mistake:
+              DON'T filter `mutation_status = 'SOMATIC'` - include ALL statuses ('SOMATIC', 'UNKNOWN', etc.)
+              
+              SCHEMA RELATIONSHIPS:
+              - cancer_study.cancer_study_identifier = 'msk_chord_2024' (identifies the study)
+              - cancer_study.cancer_study_id → patient.cancer_study_id → clinical_patient (via patient.internal_id)
+              - cancer_study.cancer_study_id → patient.cancer_study_id → sample.patient_id → clinical_sample (via sample.internal_id)
+              
+              IMPORTANT: 
+              - ALL queries must filter to msk_chord_2024 study: JOIN with cgds_public_2025_06_24.cancer_study WHERE cancer_study_identifier = 'msk_chord_2024'
+              - For patient data: JOIN patient → clinical_patient via patient.internal_id
+              - For sample data: JOIN cancer_study → patient → sample → clinical_sample (3-hop relationship)
+              - For sample_type: use clinical_data_derived WHERE attribute_name = 'SAMPLE_TYPE' OR clinical_sample WHERE attr_id = 'SAMPLE_TYPE'
+              - For gene mutations (like TP53): use genomic_event_derived WHERE hugo_gene_symbol = 'TP53' AND variant_type = 'mutation'
+              - For clinical attributes (like TMB): use clinical_data_derived WHERE attribute_name = 'TMB_NONSYNONYMOUS'
+              - For cancer types: use CANCER_TYPE for broad categories, CANCER_TYPE_DETAILED for specific subtypes
+              - For clinical attribute discovery: use clinical_attribute_meta to find available attributes and their descriptions
+              - Clinical attributes are key-value pairs: attr_id identifies the attribute, attr_value contains the data
+              - Clinical data comes from clinical_* tables, structural data from base tables
+              - ALWAYS use DESCRIBE TABLE to discover actual column structure
+              - ALWAYS use fully qualified table names with cgds_public_2025_06_24 prefix
+              - Use table names directly, don't explore database structure
+              - Be efficient - minimize database calls
+              - Column names are lowercase with underscores
+              - NEVER use default database - always specify cgds_public_2025_06_24
+              
+              Always aim to use the clickhouse MCP server unless specifically prompted to do something else.
+        - name: "cBioDocsAgent"
+          label: "cBioDocsAgent - Get help using and deploying cBioPortal"
+          default: false
+          description: "An AI assistant trained on cBioPortal documentation to help with using and deploying cBioPortal."
+          iconURL: "https://raw.githubusercontent.com/cBioPortal/cbioportal/refs/heads/master/src/main/resources/webapp/images/cbioportal_icon.png"
+          showIconInHeader: true
+          showIconInMenu: true
+          preset:
+            endpoint: "agents"
+            agent_id: "agent_CLE13kqkOVJd0NR7kBi2L"
+            modelLabel: "cBioDocsAgent"
+        - name: "cBioNavigator"
+          label: "cBioNavigator - Get help navigating cBioPortal"
+          default: false
+          description: "An AI assistant trained on cBioPortal application to help you navigate the cbioportal.org web interface."
+          iconURL: "https://raw.githubusercontent.com/cBioPortal/cbioportal/refs/heads/master/src/main/resources/webapp/images/cbioportal_icon.png"
+          showIconInHeader: true
+          showIconInMenu: true
+          preset:
+            endpoint: "agents"
+            agent_id: "agent_YKwPI8r-L0P3mqbqFdesd"
+            modelLabel: "cBioNavigator"
