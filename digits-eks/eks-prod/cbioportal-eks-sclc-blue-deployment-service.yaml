@@ -78,7 +78,8 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=0.0.0.0
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+#            - --frontend.url=https://frontend.cbioportal.org/
+            - --frontend.url=https://deploy-preview-5296.preview.cbioportal.org/
             - --quick_search.enabled=true
             - --skin.footer=
             - --skin.right_nav.whats_new_blurb=
@@ -177,10 +178,14 @@ spec:
             - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
-            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.mysql.username=$(DB_USER)
-            - --spring.datasource.mysql.password=$(DB_PASSWORD)
-            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+            #            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
+            #            - --spring.datasource.mysql.username=$(DB_USER)
+            #            - --spring.datasource.mysql.password=$(DB_PASSWORD)
+            #            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
+            - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
+            - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
@@ -212,7 +217,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: sclc-eks-blue
-          image: cbioportal/cbioportal:6.4.0-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.1-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
