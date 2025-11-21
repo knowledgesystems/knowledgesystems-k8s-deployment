@@ -9,7 +9,7 @@ metadata:
   name: eks-msk-blue
 spec:
   progressDeadlineSeconds: 600
-  replicas: 2
+  replicas: 0
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -80,7 +80,8 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-#            - --frontend.url=https://frontend.cbioportal.org/
+
+            #            - --frontend.url=https://frontend.cbioportal.org/
             - --frontend.url=https://deploy-preview-5296.preview.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -202,10 +203,10 @@ spec:
             # misc frontend setting (this is NOT for backend persistence layer caching)
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
-#            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
-#            - --spring.datasource.mysql.username=$(DB_USER)
-#            - --spring.datasource.mysql.password=$(DB_PASSWORD)
-#            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+            #            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
+            #            - --spring.datasource.mysql.username=$(DB_USER)
+            #            - --spring.datasource.mysql.password=$(DB_PASSWORD)
+            #            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
             - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
