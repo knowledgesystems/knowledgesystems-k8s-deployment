@@ -46,7 +46,7 @@ spec:
                 name: oncokb-redis-cluster-ng
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
-          image: mskcc/oncokb:4.4.3
+          image: mskcc/oncokb:4.5.0
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
@@ -71,7 +71,7 @@ spec:
               "-XX:MaxRAM=2g",
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=$(DB_URL)/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_v5_4?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Dgenomenexus.api=https://www.genomenexus.org/",
