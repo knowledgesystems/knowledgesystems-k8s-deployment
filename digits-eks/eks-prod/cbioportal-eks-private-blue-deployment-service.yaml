@@ -9,7 +9,7 @@ metadata:
   name: eks-private-blue
 spec:
   progressDeadlineSeconds: 600
-  replicas: 0
+  replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -183,7 +183,6 @@ spec:
             - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
-            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
             #            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
             #            - --spring.datasource.mysql.username=$(DB_USER)
             #            - --spring.datasource.mysql.password=$(DB_PASSWORD)
