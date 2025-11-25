@@ -11,7 +11,7 @@ metadata:
   name: cbioportal-backend-public-green
 spec:
   progressDeadlineSeconds: 600
-  replicas: 4
+  replicas: 0
   revisionHistoryLimit: 10
   selector:
     matchLabels:
