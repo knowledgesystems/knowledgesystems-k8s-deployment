@@ -9,7 +9,7 @@ metadata:
   name: eks-sclc-green
 spec:
   progressDeadlineSeconds: 600
-  replicas: 0
+  replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -78,7 +78,8 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=0.0.0.0
             # /enable remote debug
-#            - --frontend.url=https://frontend.cbioportal.org/
+
+            #            - --frontend.url=https://frontend.cbioportal.org/
             - --frontend.url=https://deploy-preview-5296.preview.cbioportal.org/
             - --quick_search.enabled=true
             - --skin.footer=
