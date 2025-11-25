@@ -9,7 +9,7 @@ metadata:
   name: eks-private-blue
 spec:
   progressDeadlineSeconds: 600
-  replicas: 1
+  replicas: 0
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -78,7 +78,8 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-#            - --frontend.url=https://frontend.cbioportal.org/
+
+            #            - --frontend.url=https://frontend.cbioportal.org/
             - --frontend.url=https://deploy-preview-5296.preview.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
