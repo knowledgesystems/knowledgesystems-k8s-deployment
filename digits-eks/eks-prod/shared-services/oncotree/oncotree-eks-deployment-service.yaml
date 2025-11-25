@@ -40,7 +40,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: oncotree-eks
-        image: cbioportal/oncotree:20251032_5193902de37
+        image: cbioportal/oncotree:20251125_98effc57ae032
         command: ["/bin/sh", "-c"]
         args: ["autossh -i /oncotree-ssl/graphite-ssl-key -M 0 -N -L 127.0.0.1:8443:msk-priv.synaptica.net:443 -L 127.0.0.1:7200:msk-priv.synaptica.net:7200 res_msk_cbioportal@msk-jump.synaptica.net & java -Dspringfox.documentation.swagger.v2.path=/api-docs -Dserver.port=8080 -Dgraphite.url=http://localhost:7200/repositories/graphite -Dgraphite.username=$(GRAPHITE_USERNAME) -Dgraphite.password=$(GRAPHITE_PASSWORD) -Dgraphite.oncotree_namespace_prefix=http://data.mskcc.org/ontologies/oncotree# -Dgraphite.oncotree_version_namespace_prefix=http://data.mskcc.org/ontologies/oncotree-version# -Dgraphite.oncotree_version_list_graph_id=https://preprod3.msk.synaptica.net/concept_scheme/3bb2d189-54c5-7cf7-e44b-e44a727611e6 -Dslack.url=$(SLACK_URL) -Dslack.channel=msk-pipeline-logs -Drequired.oncotree.version=oncotree_latest_stable -jar oncotree.jar"]
         imagePullPolicy: Always
