@@ -261,7 +261,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: eks-msk-blue
-          image: cbioportal/cbioportal:7.0.0-rc.1-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.2-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
