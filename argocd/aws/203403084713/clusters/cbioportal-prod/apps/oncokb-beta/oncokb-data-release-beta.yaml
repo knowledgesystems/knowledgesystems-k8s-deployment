@@ -30,7 +30,7 @@ spec:
         - name: oncokb-dockerhub-creds
       containers:
         - name: oncokb-data-release-beta
-          image: mskcc/oncokb-data-release:v0.0.5
+          image: mskcc/oncokb-data-release@sha256:5f1e6f1ff437db77ee7cb769352531687839e693c7d076d0f5fdd002b70c3ec3
           imagePullPolicy: Always
           ports:
             - name: http
