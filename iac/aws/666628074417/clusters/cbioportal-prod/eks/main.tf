@@ -191,6 +191,23 @@ locals {
         (var.LABEL_KEY) = "oncotree"
       }
     }
+    cbioportal = {
+      instance_types = ["m7g.4xlarge"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 3
+      max_size       = 4
+      min_size       = 3
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbioportal"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbioportal"
+      }
+    }
   }
 }
 
