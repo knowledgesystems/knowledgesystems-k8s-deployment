@@ -170,8 +170,8 @@ spec:
             #- -Dcache.statistics_endpoint_enabled=false
             - --redis.database=7
             - --persistence.cache_type=redis
-            - --redis.leader_address=redis://eks-msk-cbioportal-persistence-redis-master:6379
-            - --redis.follower_address=redis://eks-msk-cbioportal-persistence-redis-replicas:6379
+            - --redis.leader_address=redis://msk-cbioportal-persistence-redis-master:6379
+            - --redis.follower_address=redis://msk-cbioportal-persistence-redis-replicas:6379
             - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
             - --ehcache.cache_type=none
             - --cache.endpoint.api-key=$(CACHE_API_KEY)
