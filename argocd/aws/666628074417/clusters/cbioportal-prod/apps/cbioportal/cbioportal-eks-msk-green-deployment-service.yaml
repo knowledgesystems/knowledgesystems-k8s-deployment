@@ -321,14 +321,14 @@ spec:
           operator: Equal
           value: cbioportal
       volumes:
-        - configMap:
+        - secret:
             defaultMode: 420
             items:
               - key: local.key
                 path: local.key
               - key: local.crt
                 path: local.crt
-            name: eks-v6-shared-kc-dec-2029
+            secretName: eks-v6-shared-kc-dec-2029
           name: msk-eks-configmap-volume
         - configMap:
             defaultMode: 420
