@@ -309,18 +309,17 @@ spec:
               name: mskcerts-volume
               subPath: mskcerts
       dnsPolicy: ClusterFirst
-      # run on big memory machine
       nodeSelector:
-        eks.amazonaws.com/nodegroup: msk-portals-general-64g
+        workload: cbioportal
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
       tolerations:
         - effect: NoSchedule
-          key: dedicated
+          key: workload
           operator: Equal
-          value: msk-portals-general-64g
+          value: cbioportal
       volumes:
         - configMap:
             defaultMode: 420
