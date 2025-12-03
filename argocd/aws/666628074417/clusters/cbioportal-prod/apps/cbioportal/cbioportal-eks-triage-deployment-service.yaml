@@ -273,7 +273,6 @@ metadata:
   labels:
     run: eks-triage
   name: eks-triage
-  selfLink: /api/v1/namespaces/default/services/eks-triage
 spec:
   ports:
   - port: 80

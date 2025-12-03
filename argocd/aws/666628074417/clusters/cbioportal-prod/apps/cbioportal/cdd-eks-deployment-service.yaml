@@ -92,7 +92,6 @@ metadata:
   labels:
     run: eks-cdd-graphite
   name: eks-cdd-graphite
-  selfLink: /api/v1/namespaces/default/services/eks-cdd-graphite
 spec:
   ports:
   - port: 80
