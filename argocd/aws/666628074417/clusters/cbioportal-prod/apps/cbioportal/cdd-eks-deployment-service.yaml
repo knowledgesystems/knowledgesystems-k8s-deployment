@@ -74,11 +74,11 @@ spec:
         terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        workload: cbioportal
+        workload: cdd
       tolerations:
         - key: workload
           operator: Equal
-          value: cbioportal
+          value: cdd
           effect: NoSchedule
       dnsPolicy: ClusterFirst
       restartPolicy: Always

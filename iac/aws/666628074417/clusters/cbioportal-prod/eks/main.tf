@@ -208,6 +208,23 @@ locals {
         (var.LABEL_KEY) = "cbioportal"
       }
     }
+    cdd = {
+      instance_types = ["m5.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cdd"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cdd"
+      }
+    }
   }
 }
 
@@ -227,7 +244,7 @@ module "eks_cluster" {
   subnet_ids               = var.SUBNET_IDS
 
   # Disable logging to avoid Cloudwatch costs
-  cluster_enabled_log_types = []
+  cluster_enabled_log_types   = []
   create_cloudwatch_log_group = false
 
   # API Controls
@@ -258,7 +275,7 @@ module "eks_cluster" {
 module "iam" {
   source                    = "../iam"
   cluster_oidc_provider_arn = module.eks_cluster.oidc_provider
-  cluster_name = basename(module.eks_cluster.cluster_arn)
+  cluster_name              = basename(module.eks_cluster.cluster_arn)
 }
 
 resource "aws_eks_addon" "s3_mountpoint_addon" {
