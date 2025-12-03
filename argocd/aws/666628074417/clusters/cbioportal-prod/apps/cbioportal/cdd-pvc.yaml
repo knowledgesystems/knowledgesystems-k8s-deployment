@@ -1,0 +1,11 @@
+ kind: PersistentVolumeClaim
+ apiVersion: v1
+ metadata:
+   name: cdd-graphite-pvc
+ spec:
+   storageClassName: "ebs-sc"
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 20Mi
