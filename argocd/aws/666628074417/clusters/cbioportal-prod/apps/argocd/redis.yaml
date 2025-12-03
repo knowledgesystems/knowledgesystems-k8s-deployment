@@ -33,7 +33,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: msk-cbioportal-persistence-redis
+  name: eks-msk-cbioportal-persistence-redis
   namespace: argocd
 spec:
   project: default
