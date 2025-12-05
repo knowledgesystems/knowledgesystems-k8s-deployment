@@ -81,7 +81,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            - --frontend.url=https://deploy-preview-5296.preview.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=false
             - --skin.footer= | <a href="https://www.aacr.org/professionals/research/aacr-project-genie">AACR Project GENIE</a>
@@ -169,10 +169,10 @@ spec:
             # NEW PROPERTIES START
             - --persistence.cache_type_clickhouse=redis
             #- --persistence.cache_type_clickhouse=no-cache
-            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.mysql.username=$(DB_USER)
-            - --spring.datasource.mysql.password=$(DB_PASSWORD)
-            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
+            - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
+            - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
@@ -230,7 +230,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-genie-private-blue
-          image: cbioportal/cbioportal:6.4.0-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.3-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
