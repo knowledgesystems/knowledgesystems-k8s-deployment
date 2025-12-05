@@ -89,7 +89,7 @@ spec:
         releaseName: msk-beta-cbioportal-session-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/msk-beta-cbioportal-session-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-session-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
@@ -121,7 +121,7 @@ spec:
         releaseName: msk-cbioportal-session-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/msk-cbioportal-session-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-session-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
@@ -153,7 +153,7 @@ spec:
         releaseName: private-cbioportal-session-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/private-cbioportal-session-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-session-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
@@ -185,7 +185,7 @@ spec:
         releaseName: sclc-cbioportal-session-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/sclc-cbioportal-session-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-session-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
@@ -249,7 +249,7 @@ spec:
         releaseName: triage-cbioportal-session-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/triage-cbioportal-session-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-session-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
