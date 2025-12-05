@@ -25,7 +25,7 @@ spec:
         releaseName: cbioportal-persistence-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/cbioportal-persistence-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-persistence-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
@@ -57,7 +57,7 @@ spec:
         releaseName: eks-msk-cbioportal-persistence-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/msk-cbioportal-persistence-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-persistence-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
@@ -217,7 +217,7 @@ spec:
         releaseName: triage-cbioportal-persistence-redis
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/redis/triage-cbioportal-persistence-redis-values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-creds.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/redis-persistence-creds.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
