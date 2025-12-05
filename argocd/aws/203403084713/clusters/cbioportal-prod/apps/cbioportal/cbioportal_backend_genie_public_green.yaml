@@ -176,10 +176,10 @@ spec:
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
             #- --persistence.cache_type_clickhouse=no-cache
-            - --spring.datasource.mysql.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.mysql.username=$(DB_USER)
-            - --spring.datasource.mysql.password=$(DB_PASSWORD)
-            - --spring.datasource.mysql.driver-class-name=com.mysql.jdbc.Driver
+            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
+            - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
+            - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
@@ -216,7 +216,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-genie-public-green
-          image: cbioportal/cbioportal:6.4.0-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.2-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
