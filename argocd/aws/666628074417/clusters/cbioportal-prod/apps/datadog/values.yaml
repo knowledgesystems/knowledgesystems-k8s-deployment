@@ -11,6 +11,14 @@ agents:
       operator: Equal
       value: datadog
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cbioportal
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: redis
+      effect: NoSchedule
 clusterAgent:
   admissionController:
     enabled: true
@@ -43,8 +51,8 @@ datadog:
   clusterChecks:
     enabled: true
   logs:
-    containerCollectAll: false
-    enabled: false
+    containerCollectAll: true
+    enabled: true
   apm:
     instrumentation:
       skipKPITelemetry: true
