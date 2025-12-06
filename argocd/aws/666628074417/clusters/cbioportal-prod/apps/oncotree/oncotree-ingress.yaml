@@ -70,3 +70,33 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+    - host: www.oncotree.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: eks-oncotree
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: oncotree.info
+      http:
+        paths:
+          - backend:
+              service:
+                name: eks-oncotree
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: oncotree.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: eks-oncotree
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
