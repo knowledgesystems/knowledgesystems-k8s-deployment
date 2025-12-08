@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: cbioportal:apps/Deployment:default/eks-msk-green
   labels:
     run: eks-msk-green
     tags.datadoghq.com/env: eks-msk
@@ -348,6 +350,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: cbioportal:/Service:default/eks-msk-green
   labels:
     run: eks-msk-green
   name: eks-msk-green

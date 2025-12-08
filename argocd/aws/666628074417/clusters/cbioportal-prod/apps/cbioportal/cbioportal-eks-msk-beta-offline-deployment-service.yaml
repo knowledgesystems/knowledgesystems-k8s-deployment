@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: cbioportal:apps/Deployment:default/eks-msk-beta-offline
   labels:
     app.kubernetes.io/instance: cbioportal
     run: eks-msk-beta-offline
@@ -50,6 +52,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: cbioportal:/Service:default/eks-msk-beta-offline
   labels:
     run: eks-msk-beta-offline
   name: eks-msk-beta-offline
