@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    argocd.argoproj.io/tracking-id: cbioportal:networking.k8s.io/Ingress:default/msk-eks-prod-ingress
     ingress.kubernetes.io/proxy-body-size: 512m
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
