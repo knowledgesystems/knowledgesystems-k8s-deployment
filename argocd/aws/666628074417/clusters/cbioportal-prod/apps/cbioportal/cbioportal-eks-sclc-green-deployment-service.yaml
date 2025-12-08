@@ -219,7 +219,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-sclc-green
-          image: cbioportal/cbioportal:7.0.0-rc.2-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.3-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
