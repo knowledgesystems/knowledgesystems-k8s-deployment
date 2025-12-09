@@ -280,11 +280,6 @@ spec:
           key: workload
           operator: Equal
           value: cbio-dev
-      volumes:
-        - configMap:
-            defaultMode: 420
-            name: single-cell-frontend-config
-          name: cbioportal-frontend-config-volume
 ---
 apiVersion: v1
 kind: Service
