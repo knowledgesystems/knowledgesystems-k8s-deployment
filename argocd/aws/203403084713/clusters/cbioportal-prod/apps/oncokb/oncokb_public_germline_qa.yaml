@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-germline-qa
-          image: mskcc/oncokb-public:4.5.0-germline-beta.4
+          image: mskcc/oncokb-public:4.5.0-germline-beta.5
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
