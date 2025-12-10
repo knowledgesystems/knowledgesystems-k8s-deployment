@@ -329,9 +329,9 @@ locals {
     oncokb-redis = {
       instance_types = ["r7i.2xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
       # Pin to a single subnet. This prevents nodegroup to be created in a availability zone different from the underlying persistent volumes
       subnet_ids = ["subnet-0b42183b1df0e9061"]
       taints = {
@@ -368,6 +368,28 @@ locals {
       }
       labels = {
         (var.LABEL_KEY) = "oncokb-af"
+      }
+      tags = {
+        cdsi-app   = "oncokb"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
+    oncokb-cron = {
+      instance_types = ["t4g.micro"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "oncokb-cron"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "oncokb-cron"
       }
       tags = {
         cdsi-app   = "oncokb"
