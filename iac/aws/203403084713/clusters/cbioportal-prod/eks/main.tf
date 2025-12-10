@@ -376,11 +376,11 @@ locals {
       }
     }
     oncokb-cron = {
-      instance_types = ["t4g.micro"]
+      instance_types = ["t4g.small"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -476,7 +476,7 @@ module "eks_cluster" {
   hyc_addon_configs = var.ADDON_CONFIG
 
   # Disable cloudwatch logging
-  cluster_enabled_log_types = []
+  cluster_enabled_log_types   = []
   create_cloudwatch_log_group = false
 
   # EKS Managed Node Groups
@@ -496,7 +496,7 @@ module "eks_cluster" {
 module "iam" {
   source                    = "../iam"
   cluster_oidc_provider_arn = module.eks_cluster.cluster_oidc_provider
-  cluster_name = basename(module.eks_cluster.cluster_arn)
+  cluster_name              = basename(module.eks_cluster.cluster_arn)
 }
 
 resource "aws_eks_addon" "s3_mountpoint_addon" {
