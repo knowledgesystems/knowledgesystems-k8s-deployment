@@ -68,7 +68,7 @@ spec:
           tolerations:
             - key: "workload"
               operator: "Equal"
-              value: "oncokb"
+              value: "oncokb-cron"
               effect: "NoSchedule"
           nodeSelector:
-            workload: oncokb
+            workload: oncokb-cron
