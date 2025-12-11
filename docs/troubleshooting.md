@@ -146,3 +146,22 @@ This leads to Datadog being permanently out-of-sync when deployed with Helm and 
         instrumentation:
           skipKPITelemetry: true
     ```
+
+## EKS addon update stuck/timeout
+Terraform apply can time out updating kube-proxy (or other addons) with errors like:
+```
+Error: waiting for EKS Add-On (cbioportal-prod-a9438edd:kube-proxy) update (...): timeout while waiting for state to become 'Successful' (last state: 'InProgress')
+```
+and describing the kube-proxy pod shows:
+```
+FailedScheduling: 0/46 nodes are available: 1 Too many pods, 45 node(s) didn't satisfy plugin(s) [NodeAffinity]
+```
+During an addon upgrade each addon pod is pinned to its target node. If that node is at its max pod capacity (e.g., small instance type with max 4 pods), the new pod cannot schedule and the add-on never completes.
+
+Choose an instance type that support at least 10 pods so that addons (aws-node, ebs-csi, efs-csi, eks-identity, kube-proxy, ...) can all run without hitting max pods.
+
+Fix:
+1. Identify the blocked node from `kubectl -n kube-system describe pod <pod-name>`. The pod will also be in pending state.
+2. Check the new node's max pod capacity: `kubectl get node <node> -o jsonpath='{.status.capacity.pods}'`.
+3. Raise the nodegroup instance size in terraform configuration
+4. Rerun `terraform apply` to let the kube-proxy or other addon finish.
