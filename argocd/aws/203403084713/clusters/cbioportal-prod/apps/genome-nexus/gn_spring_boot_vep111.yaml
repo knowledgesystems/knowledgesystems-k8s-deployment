@@ -39,6 +39,7 @@ spec:
             # include shenandoah)
             "-Dvep.url=http://gn-vep-111.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Dcache.enabled=true",
+            "-Dgenomenexus.server.version=2.0.3",
             "-Xms100m",
             "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
