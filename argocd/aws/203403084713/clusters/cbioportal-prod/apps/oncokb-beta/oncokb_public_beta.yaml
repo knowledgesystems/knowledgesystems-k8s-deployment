@@ -35,7 +35,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
             - name: APPLICATION_API_PROXY_GERMLINE_URL
-              value: "http://oncokb-core-germline:8888"
+              value: "http://oncokb-core-beta:8888"
             - name: APPLICATION_REDIS_TYPE
               value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
