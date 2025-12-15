@@ -262,7 +262,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-green
-          image: cbioportal/cbioportal:demo-enable-studies-cache-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.3-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
