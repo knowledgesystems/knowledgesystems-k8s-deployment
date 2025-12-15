@@ -34,8 +34,8 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
-            # - name: APPLICATION_API_PROXY_GERMLINE_URL
-            #   value: "http://oncokb-core-beta:8888"
+            - name: APPLICATION_API_PROXY_GERMLINE_URL
+              value: "http://oncokb-core-beta:8888"
             - name: APPLICATION_APIPROXYURL
               value: "http://oncokb-core-beta:8888"
             - name: APPLICATION_REDIS_ENABLED
