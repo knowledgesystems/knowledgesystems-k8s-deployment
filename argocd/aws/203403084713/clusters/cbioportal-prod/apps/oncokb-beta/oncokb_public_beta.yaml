@@ -34,18 +34,10 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
-            - name: APPLICATION_API_PROXY_GERMLINE_URL
+            - name: JAVA_OPTS
+              value: "-Xmx1024m -Xms512m"
+            - name: APPLICATION_APIPROXYURL
               value: "http://oncokb-core-beta:8888"
-            - name: APPLICATION_REDIS_TYPE
-              value: "$(REDIS_TYPE)"
-            - name: APPLICATION_REDIS_ADDRESS
-              value: "$(REDIS_ADDRESS)"
-            - name: APPLICATION_REDIS_PASSWORD
-              value: "$(REDIS_PASSWROD)"
-            - name: APPLICATION_REDIS_EXPIRATION
-              value: "$(REDIS_EXPIRATION)"
-            - name: APPLICATION_DB_READ_ONLY
-              value: "false"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
               value: "$(SERVICE_ACCOUNT_USERNAME)"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
@@ -54,8 +46,8 @@ spec:
               value: "$(PRINCIPAL_ARN)"
             - name: APPLICATION_SAMLAWS_ROLEARN
               value: "$(ROLE_ARN)"
-            - name: JAVA_OPTS
-              value: "-Xmx1024m -Xms512m"
+            - name: APPLICATION_DB_READ_ONLY
+              value: "false"
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
               value: "-2147483647"
             - name: SENTRY_TRACES_SAMPLE_RATE
@@ -66,10 +58,6 @@ spec:
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
-            - name: LOGGING_LEVEL_ROOT
-              value: "INFO"
-            - name: LOGGING_PATTERN_CONSOLE
-              value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
           envFrom:
             - secretRef:
                 name: oncokb-public-beta
