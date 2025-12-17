@@ -81,7 +81,7 @@ spec:
             # /enable remote debug
 
             #            - --frontend.url=https://frontend.cbioportal.org/
-            - --frontend.url=https://deploy-preview-5296.preview.cbioportal.org/
+            - --frontend.url=https://frontend.cbioportal.org/
             - --quick_search.enabled=true
             - --skin.footer=
             - --skin.right_nav.whats_new_blurb=
