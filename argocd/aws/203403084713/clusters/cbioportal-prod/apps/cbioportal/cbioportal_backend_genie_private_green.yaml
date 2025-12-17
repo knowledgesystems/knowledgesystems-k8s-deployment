@@ -81,7 +81,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://deploy-preview-5296.preview.cbioportal.org/
+            - --frontend.url=https://frontend.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=false
             - --skin.footer= | <a href="https://www.aacr.org/professionals/research/aacr-project-genie">AACR Project GENIE</a>
