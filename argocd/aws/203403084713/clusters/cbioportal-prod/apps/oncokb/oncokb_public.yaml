@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: mskcc/oncokb-public:4.8.0
+          image: mskcc/oncokb-public:5.0.0
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -39,8 +39,9 @@ spec:
               value: prod,no-liquibase
             - name: JAVA_OPTS
               value: "-Xmx1024m -Xms512m"
+            # Todo: Get rid of since we merged germline into master branch
             - name: APPLICATION_API_PROXY_GERMLINE_URL
-              value: "http://oncokb-core-germline:8888"
+              value: "http://oncokb-core:8888"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
               value: "$(SERVICE_ACCOUNT_USERNAME)"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
