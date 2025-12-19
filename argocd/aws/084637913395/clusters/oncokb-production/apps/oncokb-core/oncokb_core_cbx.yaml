@@ -76,7 +76,7 @@ spec:
               path: /v1/health
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 300
+            initialDelaySeconds: 600
             timeoutSeconds: 5
             periodSeconds: 20
             failureThreshold: 60
