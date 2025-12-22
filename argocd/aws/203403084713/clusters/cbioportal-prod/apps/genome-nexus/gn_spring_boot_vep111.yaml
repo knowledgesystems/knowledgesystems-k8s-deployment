@@ -12,7 +12,7 @@ spec:
       run: gn-spring-boot-vep111
   strategy:
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 2
       maxUnavailable: 0
     type: RollingUpdate
   template:
@@ -73,9 +73,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 6Gi
+              memory: 3Gi
           limits:
-              memory: 12Gi
+              memory: 6Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
