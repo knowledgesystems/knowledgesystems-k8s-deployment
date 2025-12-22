@@ -41,7 +41,7 @@ spec:
             "-Dvep.url=http://grch37.rest.ensembl.org/vep/human/hgvs/VARIANT?content-type=application/json&xref_refseq=1&ccds=1&canonical=1&domains=1&hgvs=1&numbers=1&protein=1&AlphaMissense=1",
             "-Dcache.enabled=true",
             "-Dreplace_old_hgnc_gene_symbol=true",
-            "-Dgenomenexus.server.version=2.1.0",
+            "-Dgenomenexus.server.version=2.1.1",
             "-Dspring.mongodb.embedded.version=1.0",
             "-Xms100m",
             "-Xmx8g",
