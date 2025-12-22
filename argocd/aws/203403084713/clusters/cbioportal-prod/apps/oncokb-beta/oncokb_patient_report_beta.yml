@@ -26,7 +26,7 @@ spec:
           envFrom:
             - secretRef:
                 name: oncokb-patient-report-beta
-          image: oncokb/oncokb-patient-report:0.2.0
+          image: oncokb/oncokb-patient-report:0.3.0
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
