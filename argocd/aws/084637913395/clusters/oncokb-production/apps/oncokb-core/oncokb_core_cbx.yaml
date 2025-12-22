@@ -68,8 +68,8 @@ spec:
               path: /v1/health
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 10
-            periodSeconds: 20
+            timeoutSeconds: 30
+            periodSeconds: 30
             failureThreshold: 60
           livenessProbe:
             httpGet:
@@ -77,8 +77,8 @@ spec:
               port: 8888
             # wait for the pod is ready
             initialDelaySeconds: 600
-            timeoutSeconds: 5
-            periodSeconds: 20
+            timeoutSeconds: 30
+            periodSeconds: 30
             failureThreshold: 60
           name: oncokb-core-cbx
           ports:
