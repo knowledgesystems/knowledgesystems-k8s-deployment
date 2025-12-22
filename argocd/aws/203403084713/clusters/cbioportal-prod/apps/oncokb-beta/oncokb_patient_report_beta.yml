@@ -26,11 +26,11 @@ spec:
           envFrom:
             - secretRef:
                 name: oncokb-patient-report-beta
-          image: oncokb/oncokb-patient-report:0.3.0
+          image: oncokb/oncokb-patient-report:0.4.0
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
-              path: /upload-tsv
+              path: /api/health
               port: 8080
             initialDelaySeconds: 15
             timeoutSeconds: 10
@@ -38,7 +38,7 @@ spec:
             failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /upload-tsv
+              path: /api/health
               port: 8080
             # wait for the pod is ready
             initialDelaySeconds: 480
