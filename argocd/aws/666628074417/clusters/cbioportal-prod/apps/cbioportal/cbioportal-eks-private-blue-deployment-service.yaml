@@ -222,7 +222,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-private-blue
-          image: cbioportal/cbioportal:7.0.0-rc.3-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.4-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
