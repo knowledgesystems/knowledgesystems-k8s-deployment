@@ -13,7 +13,7 @@ image:
   registry: docker.io
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.8.0rc-cbioportal-custom"
+  tag: "v0.8.2-rc1-cbioportal-custom-sidebar"
 
 mongodb:
   enabled: false
