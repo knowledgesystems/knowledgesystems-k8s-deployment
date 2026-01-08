@@ -31,7 +31,7 @@ spec:
         paths:
           - backend:
               service:
-                name: cbioportal-backend-public-blue
+                name: cbioportal-backend-public-green
                 port:
                   number: 80
             path: /
@@ -41,7 +41,7 @@ spec:
         paths:
           - backend:
               service:
-                name: cbioportal-backend-master-blue
+                name: cbioportal-backend-master-green
                 port:
                   number: 80
             path: /
@@ -89,13 +89,13 @@ spec:
     - host: review.cbioportal.aws.mskcc.org
       http:
         paths:
-        - backend:
-            service:
-              name: cbioportal-backend-review
-              port:
-                number: 80
-          path: /
-          pathType: Prefix
+          - backend:
+              service:
+                name: cbioportal-backend-review
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
   tls:
     - hosts:
         - www.cbioportal.org
@@ -116,25 +116,5 @@ spec:
         - session-service.cbioportal.org
       secretName: cbioportal-session-service-cert
     - hosts:
-      - review.cbioportal.aws.mskcc.org
+        - review.cbioportal.aws.mskcc.org
       secretName: cbioportal-review-mskcc-cert
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
