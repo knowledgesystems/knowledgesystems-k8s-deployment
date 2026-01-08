@@ -19,6 +19,13 @@ spec:
       directory:
         recurse: true
       ref: cbioportal-session-service
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 18.1.20
+      chart: mongodb
+      helm:
+        releaseName: cbioportal-session-service-mongodb-dev
+        valueFiles:
+          - $cbioportal-session-service/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-session-service/dev/mongodb-dev-helm-values.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc

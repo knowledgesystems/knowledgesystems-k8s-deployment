@@ -1,0 +1,14 @@
+image:
+  tag: "8.2.3"
+nodeSelector:
+  workload: cbio-session
+persistence:
+  size: 200Gi
+  existingClaim: cbioportal-session-service-mongodb-dev
+tolerations:
+  - effect: NoSchedule
+    key: workload
+    operator: Equal
+    value: cbio-session
+auth:
+  existingSecret: cbioportal-session-service-mongodb-creds
