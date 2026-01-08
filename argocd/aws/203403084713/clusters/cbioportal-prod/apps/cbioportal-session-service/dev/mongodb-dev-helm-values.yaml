@@ -1,5 +1,3 @@
-image:
-  tag: "8.2.3"
 nodeSelector:
   workload: cbio-session
 persistence:
