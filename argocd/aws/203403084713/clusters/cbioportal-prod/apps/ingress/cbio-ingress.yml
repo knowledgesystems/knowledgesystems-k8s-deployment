@@ -66,12 +66,12 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
-    - host: session-service-argocd.cbioportal.org
+    - host: session-service-dev.cbioportal.org
       http:
         paths:
           - backend:
               service:
-                name: cbioportal-session-service
+                name: cbioportal-session-service-dev
                 port:
                   number: 80
             path: /
@@ -110,8 +110,8 @@ spec:
         - staging.cbioportal.org
       secretName: staging-cbioportal-cert
     - hosts:
-        - session-service-argocd.cbioportal.org
-      secretName: cbioportal-session-service-argocd-cert
+        - session-service-dev.cbioportal.org
+      secretName: cbioportal-session-service-dev-cert
     - hosts:
         - session-service.cbioportal.org
       secretName: cbioportal-session-service-cert
