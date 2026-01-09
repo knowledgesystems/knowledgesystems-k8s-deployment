@@ -1,3 +1,7 @@
+image:
+  tag: "8.2.3"
+  registry: "public.ecr.aws"
+  repository: "bitnami/mongodb"
 nodeSelector:
   workload: cbio-session
 persistence:
