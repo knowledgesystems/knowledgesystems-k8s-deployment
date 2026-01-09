@@ -66,6 +66,16 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+    - host: session-service-dev.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-session-service-dev
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
     - host: session-service.cbioportal.org
       http:
         paths:
@@ -99,6 +109,9 @@ spec:
     - hosts:
         - staging.cbioportal.org
       secretName: staging-cbioportal-cert
+    - hosts:
+        - session-service-dev.cbioportal.org
+      secretName: cbioportal-session-service-dev-cert
     - hosts:
         - session-service.cbioportal.org
       secretName: cbioportal-session-service-cert
