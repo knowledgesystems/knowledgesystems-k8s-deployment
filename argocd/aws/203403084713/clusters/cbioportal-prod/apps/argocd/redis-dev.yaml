@@ -35,7 +35,7 @@ spec:
         - name: master.tolerations[0].key
           value: workload
         - name: master.tolerations[0].value
-          value: cbioportal-redis
+          value: cbio-dev
         - name: master.tolerations[0].operator
           value: Equal
         - name: master.tolerations[0].effect
@@ -92,7 +92,7 @@ spec:
         - name: master.tolerations[0].key
           value: workload
         - name: master.tolerations[0].value
-          value: cbioportal-redis
+          value: cbio-dev
         - name: master.tolerations[0].operator
           value: Equal
         - name: master.tolerations[0].effect
@@ -122,7 +122,7 @@ spec:
         - name: replica.tolerations[0].key
           value: workload
         - name: replica.tolerations[0].value
-          value: cbioportal-redis
+          value: cbio-dev
         - name: replica.tolerations[0].operator
           value: Equal
         - name: replica.tolerations[0].effect
