@@ -100,7 +100,7 @@ spec:
         - name: master.extraFlags[1]
           value: --maxmemory-policy volatile-ttl
         - name: master.nodeSelector.workload
-          value: redis
+          value: cbio-dev
         - name: master.tolerations[0].key
           value: workload
         - name: master.tolerations[0].value
