@@ -28,5 +28,5 @@ spec:
                 number: 6379
   tls:
     - hosts:
-        - redis-dev-master.cbioportal.org
-      secretName: redis-dev-master-cbioportal-cert
+        - redis-dev.cbioportal.org
+      secretName: redis-dev-cbioportal-cert
