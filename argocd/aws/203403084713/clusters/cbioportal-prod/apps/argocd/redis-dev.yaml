@@ -14,10 +14,12 @@ spec:
       releaseName: cbioportal-redis-public-dev
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
+        - name: global.security.allowInsecureImages
+          value: "true"
         - name: image.registry
-          value: public.ecr.aws
+          value: docker.io
         - name: image.repository
-          value: bitnami/redis
+          value: bitnamilegacy/redis
         - name: global.imagePullSecrets[0]
           value: dockerhub-creds
         - name: architecture
@@ -73,10 +75,12 @@ spec:
       releaseName: cbioportal-public-persistence-redis-dev
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
+        - name: global.security.allowInsecureImages
+          value: "true"
         - name: image.registry
-          value: public.ecr.aws
+          value: docker.io
         - name: image.repository
-          value: bitnami/redis
+          value: bitnamilegacy/redis
         - name: global.imagePullSecrets[0]
           value: dockerhub-creds
         - name: architecture
