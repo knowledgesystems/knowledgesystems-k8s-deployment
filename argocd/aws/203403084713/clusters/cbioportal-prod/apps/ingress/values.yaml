@@ -3,7 +3,6 @@ controller:
   allowSnippetAnnotations: true
   extraArgs:
     maxmind-edition-ids: GeoLite2-Country
-    tcp-services-configmap: default/tcp-services
   config:
     use-geoip: "false"
     use-geoip2: "true"
