@@ -1,6 +1,7 @@
 image:
+  registry: docker.io
   repository: genomenexus/gn-mongo
-  tag: sha-6ce3181e7924f45971005d6aba1c4483a75b5f59-grch37_ensembl92-ma_true
+  tag: sha-dfbd696723bb4522a69203190e6f6814d40dbd53-grch37_ensembl92-ma_false
   pullPolicy: Always
 persistence:
   enabled: true
