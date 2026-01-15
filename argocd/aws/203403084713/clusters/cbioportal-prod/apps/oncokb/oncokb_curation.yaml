@@ -68,7 +68,7 @@ spec:
                 name: oncokb-db-public-rds-oncokb-transcript
             - secretRef:
                 name: oncokb-curation-redis
-          image: mskcc/oncokb-curation:2.2.20
+          image: mskcc/oncokb-curation:2.2.21
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
