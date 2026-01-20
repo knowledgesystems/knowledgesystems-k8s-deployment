@@ -6,6 +6,7 @@ nodeSelector:
   workload: cbio-session
 persistence:
   size: 200Gi
+  existingClaim: cbioportal-session-service-mongodb-green
 tolerations:
   - effect: NoSchedule
     key: workload
