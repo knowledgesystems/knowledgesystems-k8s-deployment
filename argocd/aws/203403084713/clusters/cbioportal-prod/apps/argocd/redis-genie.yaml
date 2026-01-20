@@ -12,6 +12,12 @@ spec:
       releaseName: cbioportal-redis-genie
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
+        - name: global.security.allowInsecureImages
+          value: "true"
+        - name: image.registry
+          value: docker.io
+        - name: image.repository
+          value: bitnamilegacy/redis
         - name: global.imagePullSecrets[0]
           value: dockerhub-creds
         - name: architecture
@@ -65,6 +71,12 @@ spec:
       releaseName: cbioportal-genie-persistence-redis
       # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
       parameters:
+        - name: global.security.allowInsecureImages
+          value: "true"
+        - name: image.registry
+          value: docker.io
+        - name: image.repository
+          value: bitnamilegacy/redis
         - name: global.imagePullSecrets[0]
           value: dockerhub-creds
         - name: architecture
