@@ -62,9 +62,9 @@ locals {
     redis = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 6
+      desired_size   = 4
       max_size       = 6
-      min_size       = 6
+      min_size       = 4
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
         data_vol = var.DATA_VOL_CONFIG
