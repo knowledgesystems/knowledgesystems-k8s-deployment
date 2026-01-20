@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     run: cbioportal-session-service-green
-  name: cbioportal-session-service-gree
+  name: cbioportal-session-service-green
 spec:
   replicas: 2
   selector:
