@@ -71,7 +71,7 @@ spec:
         paths:
           - backend:
               service:
-                name: cbioportal-session-service-dev
+                name: cbioportal-session-service-green
                 port:
                   number: 80
             path: /
