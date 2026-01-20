@@ -1,0 +1,15 @@
+image:
+  tag: "4.2"
+  registry: "public.ecr.aws"
+  repository: "bitnami/mongodb"
+nodeSelector:
+  workload: cbio-session
+persistence:
+  size: 200Gi
+tolerations:
+  - effect: NoSchedule
+    key: workload
+    operator: Equal
+    value: cbio-session
+auth:
+  existingSecret: cbioportal-session-service-mongodb-creds
