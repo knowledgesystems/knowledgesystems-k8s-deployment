@@ -25,7 +25,7 @@ spec:
       helm:
         releaseName: cbioportal-session-service-mongodb-green
         valueFiles:
-          - $cbioportal-session-service/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-session-service/dev/mongodb-helm-values-green.yaml
+          - $cbioportal-session-service/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-session-service/mongodb-helm-values-green.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
