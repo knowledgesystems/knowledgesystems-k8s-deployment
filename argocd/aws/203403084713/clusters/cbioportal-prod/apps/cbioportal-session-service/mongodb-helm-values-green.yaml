@@ -1,5 +1,5 @@
 image:
-  tag: "4.2"
+  tag: "8.2"
   registry: "public.ecr.aws"
   repository: "bitnami/mongodb"
 nodeSelector:
