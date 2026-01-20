@@ -26,6 +26,13 @@ spec:
         releaseName: cbioportal-session-service-mongodb-dev
         valueFiles:
           - $cbioportal-session-service/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-session-service/dev/mongodb-dev-helm-values.yaml
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 13.15.0
+      chart: mongodb
+      helm:
+        releaseName: cbioportal-session-service-mongodb-green
+        valueFiles:
+          - $cbioportal-session-service/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-session-service/dev/mongodb-dev-helm-values.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
