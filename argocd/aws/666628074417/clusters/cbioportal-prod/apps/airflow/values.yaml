@@ -124,7 +124,7 @@ secret:
     secretName: airflow-pipelines5-ssh-uri
   - envName: AIRFLOW_CONN_SLACK_DEFAULT
     secretKey: AIRFLOW_CONN_SLACK_DEFAULT
-    secretName: airflow-slack-uri
+    secretName: airflow-slack-default-uri
 
 webserver:
   startupProbe:
