@@ -66,16 +66,6 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
-    - host: session-service-dev.cbioportal.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: cbioportal-session-service-green
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
     - host: session-service.cbioportal.org
       http:
         paths:
