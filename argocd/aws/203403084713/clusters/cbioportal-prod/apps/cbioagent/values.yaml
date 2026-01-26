@@ -7,6 +7,9 @@ global:
 librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
+  imageVolume:
+    accessModes: ReadWriteMany
+    storageClassName: efs-sc
 
 image:
   repository: cbioportal/librechat
