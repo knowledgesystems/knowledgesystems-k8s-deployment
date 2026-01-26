@@ -63,24 +63,23 @@ spec:
               "/app.war",
             ]
           imagePullPolicy: Always
-          # use actionable variants endpoint to cache everything
           readinessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
+            timeoutSeconds: 30
+            periodSeconds: 30
+            failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             # wait for the pod is ready
-            initialDelaySeconds: 1800
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 20
+            initialDelaySeconds: 600
+            timeoutSeconds: 30
+            periodSeconds: 30
+            failureThreshold: 60
           name: oncokb-core
           ports:
             - containerPort: 8888
