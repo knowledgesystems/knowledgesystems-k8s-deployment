@@ -74,7 +74,7 @@ data:
       endpointsMenu: true
       modelSelect: false
       parameters: false
-      sidePanel: false
+      sidePanel: true
       presets: false
       prompts: false
       bookmarks: false
@@ -111,7 +111,7 @@ data:
       agents:
         recursionLimit: 50
         maxRecursionLimit: 100
-        disableBuilder: true
+        disableBuilder: false
       assistants:
         disableBuilder: true
 
