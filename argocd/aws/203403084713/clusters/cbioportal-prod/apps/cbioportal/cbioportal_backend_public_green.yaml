@@ -37,7 +37,7 @@ spec:
         - args:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             - -Xms100m
-            - -Xmx25g
+            - -Xmx12g
             - -XX:+UnlockExperimentalVMOptions
             - -XX:+UseShenandoahGC
             - -XX:ShenandoahUncommitDelay=1000
@@ -271,10 +271,10 @@ spec:
             timeoutSeconds: 1
           resources:
             limits:
-              memory: 26Gi
+              memory: 12Gi
             requests:
-              cpu: 1500m
-              memory: 15Gi
+              cpu: 500m
+              memory: 6Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
