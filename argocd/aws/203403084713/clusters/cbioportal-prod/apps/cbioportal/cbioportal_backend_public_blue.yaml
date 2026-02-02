@@ -18,7 +18,7 @@ spec:
       run: cbioportal-backend-public-blue
   strategy:
     rollingUpdate:
-      maxSurge: 4
+      maxSurge: 2
       maxUnavailable: 1
     type: RollingUpdate
   template:
