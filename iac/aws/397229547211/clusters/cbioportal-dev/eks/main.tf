@@ -51,8 +51,8 @@ locals {
     redis = {
       instance_types = ["r5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
-      min_size       = 2
+      desired_size   = 0
+      min_size       = 0
       max_size       = 2
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
