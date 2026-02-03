@@ -42,6 +42,7 @@ spec:
             - -XX:+UseShenandoahGC
             - -XX:ShenandoahUncommitDelay=1000
             - -XX:ShenandoahGuaranteedGCInterval=10000
+            - -XX:NativeMemoryTracking=summary
             #- -XX:+AlwaysPreTouch
             #- -XX:+UseTransparentHugePages
             #- -XX:+UseNUMA
