@@ -74,6 +74,10 @@ spec:
               value: "INFO"
             - name: LOGGING_PATTERN_CONSOLE
               value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
+            - name: APPLICATION_RATE_LIMIT_CAPACITY
+              value: "20"
+            - name: APPLICATION_RATE_LIMIT_REFILL_PERIOD
+              value: "5s"
           envFrom:
             - secretRef:
                 name: oncokb-public-beta
