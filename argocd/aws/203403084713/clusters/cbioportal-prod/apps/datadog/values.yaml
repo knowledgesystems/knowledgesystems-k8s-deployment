@@ -33,6 +33,10 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: oncokb-redis
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: cbioportal-redis
       effect: NoSchedule
     - key: workload
