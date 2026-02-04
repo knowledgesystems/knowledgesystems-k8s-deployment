@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: mskcc/oncokb-public:5.2.0
+          image: mskcc/oncokb-public:5.3.0
           env:
             # Database schema update takes a lot of especially when changing a table with a lot of table
             # We should disable the liveness prob to avoid the pod to be terminated before the liquibase finish all the work
@@ -78,6 +78,10 @@ spec:
               value: "INFO"
             - name: LOGGING_PATTERN_CONSOLE
               value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
+            - name: APPLICATION_RATE_LIMIT_CAPACITY
+              value: "7"
+            - name: APPLICATION_RATE_LIMIT_REFILL_PERIOD
+              value: "1s"
           envFrom:
             - secretRef:
                 name: oncokb-public
