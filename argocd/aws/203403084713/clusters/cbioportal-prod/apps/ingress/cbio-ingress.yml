@@ -21,7 +21,7 @@ metadata:
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
     nginx.ingress.kubernetes.io/server-snippet: |
-      if ($http_user_agent !~* "mozilla") {
+      if ($http_user_agent ~* "python-requests|curl|wget|go-http-client|axios|fetch|postman|rest-client|scrapy|spider") {
         return 429;
       }
   labels:
