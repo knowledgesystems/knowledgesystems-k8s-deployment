@@ -16,3 +16,6 @@ tolerations:
     effect: NoSchedule
 nodeSelector:
   workload: cbioagent-db
+image:
+  repository: bitnamilegacy/mongodb
+  registry: docker.io

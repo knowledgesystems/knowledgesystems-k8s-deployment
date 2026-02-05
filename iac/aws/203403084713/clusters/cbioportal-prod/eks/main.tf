@@ -413,6 +413,11 @@ locals {
       labels = {
         (var.LABEL_KEY) = "cbioagent"
       }
+      tags = {
+        cdsi-app   = "cbioagent"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "nasirz1@mskcc.org"
+      }
     }
     cbioagent-db = {
       instance_types = ["r7i.large"]
@@ -432,6 +437,11 @@ locals {
       labels = {
         (var.LABEL_KEY) = "cbioagent-db"
       }
+      tags = {
+        cdsi-app   = "cbioagent"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "nasirz1@mskcc.org"
+      }
     }
     prometheus = {
       instance_types = ["t3.large"]
@@ -448,6 +458,11 @@ locals {
       }
       labels = {
         (var.LABEL_KEY) = "prometheus"
+      }
+      tags = {
+        cdsi-app   = "cbioagent"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "nasirz1@mskcc.org"
       }
     }
   }
