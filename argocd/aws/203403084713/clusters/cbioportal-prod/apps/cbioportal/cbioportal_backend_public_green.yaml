@@ -239,6 +239,8 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
+            - name: DD_PROFILING_ENDPOINT_COLLECTION_ENABLED
+              value: "true"
           envFrom:
             - secretRef:
                 name: cbioportal-public-green
