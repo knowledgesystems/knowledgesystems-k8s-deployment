@@ -241,7 +241,7 @@ spec:
               value: "true"
           envFrom:
             - secretRef:
-                name: cbioportal-public-blue
+                name: cbioportal-public-blue-clickhouse-backup
           image: cbioportal/cbioportal-dev:63ae271fc14d0e5762eb11a48d345d9050f38555-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
