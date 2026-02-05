@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.818783994061">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.823631527681">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -12,7 +12,7 @@
     <!-- Primary Meta Tags -->
     <title>Resource Tagging | CDSI K8s Documentation</title>
     <meta name="title" content="Resource Tagging | CDSI K8s Documentation">
-    <meta name="description" content="Tagging resources is very important for tracking our AWS costs.">
+    <meta name="description" content="Tagging resources is critical for tracking and analyzing our AWS costs. All required tag keys listed below are now configured as ">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/resource-tagging/">
@@ -21,22 +21,22 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/resource-tagging/">
     <meta property="og:title" content="Resource Tagging | CDSI K8s Documentation">
-    <meta property="og:description" content="Tagging resources is very important for tracking our AWS costs.">
+    <meta property="og:description" content="Tagging resources is critical for tracking and analyzing our AWS costs. All required tag keys listed below are now configured as ">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/resource-tagging/">
     <meta property="twitter:title" content="Resource Tagging | CDSI K8s Documentation">
-    <meta property="twitter:description" content="Tagging resources is very important for tracking our AWS costs.">
+    <meta property="twitter:description" content="Tagging resources is critical for tracking and analyzing our AWS costs. All required tag keys listed below are now configured as ">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=3.11.0.818783994061" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.823631527681" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.818783994061" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.823631527681" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.818783994061" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.818783994061" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.823631527681" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.823631527681" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -185,14 +185,14 @@
         <span>Resource Tagging</span>
     </h1>
 </doc-anchor-target>
-<p>Tagging resources is very important for tracking our AWS costs. Proper tagging can be achieved through multiple ways, including manually adding tags through AWS console. For resources managed through Terraform, we use automated methods to inject tags into all resources.</p>
+<p>Tagging resources is critical for tracking and analyzing our AWS costs. All required tag keys listed below are now configured as <strong>cost allocation tags</strong> in AWS, which means they directly enable cost reporting and analysis in AWS Cost Explorer. Proper tagging allows us to break down spending by application, team, owner, and specific resource, making it possible to identify cost trends, optimize spending, and allocate costs accurately across teams. For resources managed through Terraform, automated methods should be used to inject tags into all resources.</p>
 <doc-anchor-target id="required-tags">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#required-tags">#</doc-anchor-trigger>
         <span>Required Tags</span>
     </h2>
 </doc-anchor-target>
-<p>As part of our cost analysis, we have a set of required tags that need to be added to new and existing resources.</p>
+<p>As part of our cost analysis, we have a set of required tags that need to be added to new and existing resources. These tags are configured as cost allocation tags in AWS.</p>
 <div class="table-wrapper scrollbar overflow-hidden">
 <table class="compact">
 <thead>
@@ -205,29 +205,80 @@
 <tbody>
 <tr>
 <td>cdsi-app</td>
-<td>Name of the app</td>
+<td>Name of the application. Helps us track total spending per application and identify which apps are driving costs.</td>
 <td>cbioportal</td>
 </tr>
 <tr>
 <td>cdsi-team</td>
-<td>Team name within CDSI</td>
+<td>Team name within CDSI. Allows us to allocate costs to specific teams and understand spending patterns across the organization.</td>
 <td>data-visualization</td>
 </tr>
 <tr>
 <td>cdsi-owner</td>
-<td>Email of the resource owner</td>
+<td>Email of the resource owner. Provides accountability and a point of contact for cost-related questions or optimization opportunities.</td>
 <td><a href="mailto:nasirz1@mskcc.org">nasirz1@mskcc.org</a></td>
+</tr>
+<tr>
+<td>resource-name</td>
+<td>Name of the specific resource. Enables granular cost tracking at the individual resource level (e.g., database name, bucket name, nodegroup name).</td>
+<td>cbioportal-prod-db</td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>For example, the following set of tags have been added to AWS resources related to cBioPortal.</p>
+<p>For example, the following set of tags have been added to the cbioportal redis nodegroup in AWS EKS.</p>
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre translate="no" class="language-yaml"><code v-pre class="language-yaml">tags:
   cdsi-app: cbioportal
   cdsi-team: data-visualization
-  cdsi-owner: nasirz1@mskcc.org</code></pre>
+  cdsi-owner: nasirz1@mskcc.org
+  resource-name: cbioportal-redis # This matches the nodegroup name in AWS EKS</code></pre>
 </doc-codeblock></div>
+<doc-anchor-target id="resource-name-tag-guidelines">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#resource-name-tag-guidelines">#</doc-anchor-trigger>
+        <span>Resource-Name Tag Guidelines</span>
+    </h3>
+</doc-anchor-target>
+<p>The <code v-pre>resource-name</code> tag value should match the actual name of the resource in AWS:</p>
+<div class="table-wrapper scrollbar overflow-hidden">
+<table class="compact">
+<thead>
+<tr>
+<th>AWS Service</th>
+<th>Resource Type</th>
+<th>resource-name Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RDS</td>
+<td>Database</td>
+<td>cbioportal-prod-db</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>Bucket</td>
+<td>cbioportal-datahub</td>
+</tr>
+<tr>
+<td>EKS</td>
+<td>Nodegroup</td>
+<td>cbioportal-redis</td>
+</tr>
+<tr>
+<td>EKS</td>
+<td>Cluster</td>
+<td>cbioportal-prod</td>
+</tr>
+<tr>
+<td>EC2</td>
+<td>Instance</td>
+<td>knowledgesystems-importer</td>
+</tr>
+</tbody>
+</table>
+</div>
 <doc-anchor-target id="resource-scope">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#resource-scope">#</doc-anchor-trigger>
@@ -306,7 +357,7 @@
                                     <ul class="flex flex-wrap items-center text-sm">
                                     </ul>
                                 </div>
-                                <div id="retype-copyright" class="print:justify-center py-2 text-footer-text font-footer-link-weight text-sm leading-relaxed"><p>© Copyright 2025. All rights reserved.</p></div>
+                                <div id="retype-copyright" class="print:justify-center py-2 text-footer-text font-footer-link-weight text-sm leading-relaxed"><p>© Copyright 2026. All rights reserved.</p></div>
                             </footer>
                         </div>
                     </div>
