@@ -349,7 +349,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    }
+    } # DONE
     oncokb-af = {
       instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -374,7 +374,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    }
+    } # DONE
     oncokb-cron = {
       instance_types = ["t4g.small"]
       ami_type       = "BOTTLEROCKET_ARM_64"

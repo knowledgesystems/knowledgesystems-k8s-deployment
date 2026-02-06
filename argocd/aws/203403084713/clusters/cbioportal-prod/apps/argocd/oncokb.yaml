@@ -48,6 +48,8 @@ spec:
         releaseName: oncokb-curation-redis
         # Parameters list: https://artifacthub.io/packages/helm/bitnami/redis#parameters
         parameters:
+          - name: image.repository
+            value: bitnamilegacy/redis
           - name: global.imagePullSecrets[0]
             value: dockerhub-creds
           - name: architecture
