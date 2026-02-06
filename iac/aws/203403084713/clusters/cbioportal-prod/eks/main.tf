@@ -51,7 +51,7 @@ locals {
       labels = {
         (var.LABEL_KEY) = "cbio-dev"
       }
-    }
+    } # DONE
     argocd = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -135,7 +135,7 @@ locals {
         cdsi-team  = "data-engineering"
         cdsi-owner = "moored2@mskcc.org"
       }
-    }
+    } # DONE
     cbio-session = {
       instance_types = ["r7i.xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -396,7 +396,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    }
+    } # DONE
     cbioagent = {
       instance_types = ["m7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -418,7 +418,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    }
+    } # DONE
     cbioagent-db = {
       instance_types = ["r7i.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -442,7 +442,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    }
+    } # DONE
     prometheus = {
       instance_types = ["t3.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -464,7 +464,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    }
+    } # DONE
   }
 }
 
@@ -499,9 +499,10 @@ module "eks_cluster" {
     for name, config in local.node_groups : name => merge(config, {
       cluster_version = try(config.version, var.NODEGROUP_VER)
       tags = merge(
-        try(config.tags, {}),
+        try(config.tags, var.AWS_DEFAULT_TAGS),
         {
           "nodegroup-name" = name
+          "resource-name" = name
         }
       )
     })
