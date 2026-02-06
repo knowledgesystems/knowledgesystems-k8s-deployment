@@ -38,7 +38,7 @@ spec:
             # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
             # include shenandoah)
             "-Xms100m",
-            "-Xmx8g",
+            "-Xmx10g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -61,7 +61,7 @@ spec:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
             port: 8888
           initialDelaySeconds: 240
-          timeoutSeconds: 30
+          timeoutSeconds: 60
           periodSeconds: 60
         # TODO: create a better liveness probe (this is just readiness with
         # more lenience)
@@ -70,7 +70,7 @@ spec:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
             port: 8888
           initialDelaySeconds: 240
-          timeoutSeconds: 120
+          timeoutSeconds: 180
           periodSeconds: 240
         name: gn-spring-boot-grch38
         ports:
@@ -78,9 +78,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-              memory: 3Gi
+            memory: 6Gi
           limits:
-              memory: 11Gi
+            memory: 14Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
