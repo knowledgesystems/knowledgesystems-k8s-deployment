@@ -3,6 +3,10 @@ kind: Deployment
 metadata:
   labels:
     run: gn-spring-boot-grch38
+    # Datadog Unified Service Tagging
+    tags.datadoghq.com/env: gn-grch38
+    tags.datadoghq.com/service: genome-nexus
+    tags.datadoghq.com/version: 1.4.1
   name: gn-spring-boot-grch38
   namespace: genome-nexus
 spec:
@@ -17,20 +21,19 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        # Enable Datadog Java library injection
+        admission.datadoghq.com/java-lib.version: v1.59.0
       labels:
         run: gn-spring-boot-grch38
+        # Datadog Labels
+        admission.datadoghq.com/enabled: "true"
+        tags.datadoghq.com/env: gn-grch38
+        tags.datadoghq.com/service: genome-nexus
+        tags.datadoghq.com/version: 1.4.1
     spec:
       containers:
-      - env:
-        - name: SERVER_PORT
-          value: "8888"
-        - name: MONGODB_URI
-          value: mongodb://gn-mongo-v0dot32-grch38-ensembl95-mongodb:27017/annotator?connectTimeoutMS=120000
-        - name: SENTRY_DSN
-          valueFrom: 
-            secretKeyRef:
-              name: genome-nexus-sentry-dsn
-              key: dsn
+      - name: gn-spring-boot-grch38
         image: genomenexus/gn-spring-boot:1.4.1
         imagePullPolicy: Always
         command: [ "java" ]
@@ -55,7 +58,27 @@ spec:
             "-jar",
             "/app.war"
         ]
-        # TODO: create a better readiness probe
+        env:
+        - name: SERVER_PORT
+          value: "8888"
+        - name: MONGODB_URI
+          value: mongodb://gn-mongo-v0dot32-grch38-ensembl95-mongodb:27017/annotator?connectTimeoutMS=120000
+        - name: SENTRY_DSN
+          valueFrom: 
+            secretKeyRef:
+              name: genome-nexus-sentry-dsn
+              key: dsn
+        # Datadog Environment Variables
+        - name: DD_PROFILING_ENABLED
+          value: "true"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+          value: "true"
+        - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
+          value: "true"
+        - name: DD_PROFILING_ENDPOINT_COLLECTION_ENABLED
+          value: "true"
         readinessProbe:
           httpGet:
             path: /ensembl/canonical-transcript/hgnc/tp53?isoformOverrideSource=uniprot
@@ -72,7 +95,6 @@ spec:
           initialDelaySeconds: 240
           timeoutSeconds: 180
           periodSeconds: 240
-        name: gn-spring-boot-grch38
         ports:
         - containerPort: 8888
           protocol: TCP
