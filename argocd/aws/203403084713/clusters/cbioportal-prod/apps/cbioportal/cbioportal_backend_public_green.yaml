@@ -228,6 +228,11 @@ spec:
             - --server.max-http-request-header-size=16384
             - --show.civic=true
             - --springdoc.api-docs.version=openapi_3_0
+            # DATADOG SETTINGS
+            - -Ddd.profiling.allocation.enabled=true
+            - -Ddd.profiling.heap.enabled=true
+            - -Ddd.jmxfetch.enabled=true
+            - -Ddd.jmxfetch.statsd.port=8125
           command:
             - java
           env:
@@ -241,6 +246,22 @@ spec:
               value: "true"
             - name: DD_PROFILING_ENDPOINT_COLLECTION_ENABLED
               value: "true"
+            - name: DD_PROFILING_ALLOCATION_ENABLED
+              value: "true"
+            - name: DD_PROFILING_HEAP_ENABLED
+              value: "true"
+            - name: DD_TRACE_ENABLED
+              value: "true"
+            - name: DD_APM_ENABLED
+              value: "true"
+            - name: DD_TRACE_ANALYTICS_ENABLED
+              value: "true"
+            - name: DD_ENV
+              value: "eks-public"
+            - name: DD_SERVICE
+              value: "cbioportal"
+            - name: DD_VERSION
+              value: "6.4.0"
           envFrom:
             - secretRef:
                 name: cbioportal-public-green
