@@ -4,6 +4,7 @@ metadata:
   name: oncotree-ingress
   namespace: oncotree
   annotations:
+    argocd.argoproj.io/tracking-id: oncotree:networking.k8s.io/Ingress:oncotree/oncotree-ingress
     ingress.kubernetes.io/proxy-body-size: 512m
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
@@ -43,6 +44,13 @@ spec:
     - host: oncotree.mskcc.org
       http:
         paths:
+          - backend:
+              service:
+                name: new-eks-oncotree
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
           - backend:
               service:
                 name: new-eks-oncotree
