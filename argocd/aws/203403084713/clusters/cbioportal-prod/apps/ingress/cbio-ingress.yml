@@ -80,16 +80,6 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
-    - host: review.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: cbioportal-backend-review
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
   tls:
     - hosts:
         - www.cbioportal.org
@@ -109,6 +99,3 @@ spec:
     - hosts:
         - session-service.cbioportal.org
       secretName: cbioportal-session-service-cert
-    - hosts:
-        - review.cbioportal.aws.mskcc.org
-      secretName: cbioportal-review-mskcc-cert
