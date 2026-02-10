@@ -22,7 +22,6 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
     nginx.ingress.kubernetes.io/server-snippet: |
       if ($http_user_agent !~* "mozilla") {
-        add_header Content-Type text/plain always;
         return 404 "API access denied: For automated/programmatic api access, use api.cbioportal.org";
       }
   labels:
