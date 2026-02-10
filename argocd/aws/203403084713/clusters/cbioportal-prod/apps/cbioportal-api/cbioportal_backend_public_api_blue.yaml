@@ -12,7 +12,6 @@ metadata:
 spec:
   progressDeadlineSeconds: 600
   replicas: 2
-  revisionHistoryLimit: 10
   selector:
     matchLabels:
       run: cbioportal-backend-public-api-blue
@@ -37,7 +36,7 @@ spec:
         - args:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             - -Xms100m
-            - -Xmx25g
+            - -Xmx12g
             - -XX:+UnlockExperimentalVMOptions
             - -XX:+UseShenandoahGC
             - -XX:ShenandoahUncommitDelay=1000
@@ -295,10 +294,9 @@ spec:
             timeoutSeconds: 1
           resources:
             limits:
-              memory: 26Gi
+              memory: 12Gi
             requests:
-              cpu: 1500m
-              memory: 15Gi
+              memory: 8Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
@@ -306,7 +304,7 @@ spec:
               name: cbioportal-frontend-config-volume
       dnsPolicy: ClusterFirst
       nodeSelector:
-        workload: cbioportal
+        workload: cbio-api
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
@@ -315,7 +313,7 @@ spec:
         - effect: NoSchedule
           key: workload
           operator: Equal
-          value: cbioportal
+          value: cbio-api
       volumes:
         - configMap:
             defaultMode: 420
