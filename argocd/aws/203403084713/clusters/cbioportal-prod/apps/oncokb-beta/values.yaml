@@ -3,8 +3,6 @@ cluster:
   replicas: 0
 existingSecret: oncokb-redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
-persistence:
-  enabled: false
 redis:
   configmap: |-
     maxmemory 1Gb
