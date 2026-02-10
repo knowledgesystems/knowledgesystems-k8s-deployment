@@ -18,6 +18,23 @@ locals {
         (var.LABEL_KEY) = "cbioportal"
       }
     } # DONE
+    cbio-api = {
+      instance_types = ["r7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 3
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbio-api"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbio-api"
+      }
+    } # DONE
     cbio-genie = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
