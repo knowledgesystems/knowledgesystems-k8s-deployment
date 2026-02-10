@@ -21,7 +21,16 @@ metadata:
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
     nginx.ingress.kubernetes.io/server-snippet: |
+      # Block browsers except for Let's Encrypt validation
       if ($http_user_agent ~* "mozilla") {
+        set $is_browser "yes";
+      }
+
+      if ($request_uri ~* "^/.well-known/acme-challenge/") {
+        set $is_browser "no";
+      }
+
+      if ($is_browser = "yes") {
         return 404 "Browser access denied: This API is for automated/programmatic access only. For browser access, visit www.cbioportal.org";
       }
   labels:
