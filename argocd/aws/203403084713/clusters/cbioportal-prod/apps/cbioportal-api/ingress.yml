@@ -21,66 +21,27 @@ metadata:
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
     nginx.ingress.kubernetes.io/server-snippet: |
-      if ($http_user_agent !~* "mozilla") {
+      if ($http_user_agent ~* "mozilla") {
         add_header Content-Type text/plain always;
-        return 404 "API access denied: For automated/programmatic api access, use api.cbioportal.org";
+        return 404 "Browser access denied: This API is for automated/programmatic access only. For browser access, visit www.cbioportal.org";
       }
   labels:
     app.kubernetes.io/instance: ingress
-  name: cbioportal-ingress
+  name: cbioportal-api-ingress
   namespace: default
 spec:
   rules:
-    - host: www.cbioportal.org
+    - host: api.cbioportal.org
       http:
         paths:
           - backend:
               service:
-                name: cbioportal-backend-public-green
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: master.cbioportal.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: cbioportal-backend-master-green
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: beta.cbioportal.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: cbioportal-backend-public-beta-offline
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: staging.cbioportal.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: cbioportal-backend-staging
+                name: cbioportal-backend-public-api-blue
                 port:
                   number: 80
             path: /
             pathType: Prefix
   tls:
     - hosts:
-        - www.cbioportal.org
-      secretName: www-cbioportal-cert
-    - hosts:
-        - master.cbioportal.org
-      secretName: master-cbio-cert
-    - hosts:
-        - beta.cbioportal.org
-      secretName: cbioportal-beta-cert
-    - hosts:
-        - staging.cbioportal.org
-      secretName: staging-cbioportal-cert
+        - api.cbioportal.org
+      secretName: api-cbioportal-cert
