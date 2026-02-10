@@ -19,6 +19,13 @@ redis:
   readinessProbe:
     failureThreshold: 10
     timeoutSeconds: 5
+  resources:
+    requests:
+      cpu: 100m
+      memory: 2Gi # We store 1Gb of cache data + 1 Gb for internal Redis overhead
+    limits:
+      cpu: 1
+      memory: 3Gi # Can lower again once we verify that redis is stable
   tolerations:
     - effect: NoSchedule
       key: workload
