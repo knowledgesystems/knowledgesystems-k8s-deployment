@@ -3,6 +3,8 @@ cluster:
   replicas: 0
 existingSecret: oncokb-redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
+persistence:
+  enabled: false
 redis:
   configmap: |-
     maxmemory 1Gb
@@ -16,6 +18,13 @@ redis:
   readinessProbe:
     failureThreshold: 10
     timeoutSeconds: 5
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+    limits:
+      cpu: 100m
+      memory: 200Mi
   tolerations:
     - effect: NoSchedule
       key: workload
