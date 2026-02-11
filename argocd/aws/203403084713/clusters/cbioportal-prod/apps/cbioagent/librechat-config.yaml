@@ -237,6 +237,7 @@ data:
           preset:
             endpoint: "agents"
             agent_id: "agent_YKwPI8r-L0P3mqbqFdesd"
+            temperature: 0
             modelLabel: "cBioNavigator"
             promptPrefix: |
               # cBioPortal Navigator System Prompt
