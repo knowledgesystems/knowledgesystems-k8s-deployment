@@ -147,6 +147,7 @@ data:
             agent_id: "agent_4QP14nOYaCTkqK8E3Nopg"
             maxTokens: 4096
             thinking: false
+            temperature: 0
             modelLabel: "cBioDBAgent"
             greeting: |
               Ask questions below to explore the cBioPortal database, including studies, genes, mutations, and clinical attributes. NOTE: Limit of 20 messages per 30 minutes, and 20M tokens per week. <br /><br /><a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank" style="display: inline-block; background-color: #4b5563; color: #f9fafb; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#374151'" onmouseout="this.style.backgroundColor='#4b5563'">Learn more</a>
