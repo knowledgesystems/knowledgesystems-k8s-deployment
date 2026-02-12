@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: k8s-cost-dashboard-aws-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Cronjob refreshing aws creds
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: k8s-cost-dashboard-aws-refresher
+spec:
+  schedule: "0 */6 * * *"  # Every 3 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: saml2aws
+              image: public.ecr.aws/ubuntu/ubuntu:22.04_stable
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  
+                  export HOME=/root
+                  mkdir -p $HOME/.aws
+                  
+                  # Install dependencies
+                  apt-get update
+                  apt-get install -y wget
+                  
+                  # Install saml2aws
+                  wget -O saml2aws.tar.gz https://github.com/Versent/saml2aws/releases/download/v2.36.18/saml2aws_2.36.18_linux_arm64.tar.gz
+                  tar -xzvf saml2aws.tar.gz
+                  mv saml2aws /usr/local/bin/
+                  chmod +x /usr/local/bin/saml2aws
+                  saml2aws --version
+                  
+                  # Accounts list
+                  ACCOUNTS="0846 2034 3972 6666 7624"
+                  
+                  # Loop for login
+                  for account in $ACCOUNTS; do
+                    PROFILE_VAR=${account}_PROFILE
+                    PROFILE="${!PROFILE_VAR}"
+                  
+                    export SAML2AWS_USERNAME="${!account}_USERNAME"
+                    export SAML2AWS_PASSWORD="${!account}_PASSWORD"
+                  
+                    echo "========================================="
+                    echo "Configuring account: $account"
+                    echo "Profile: $PROFILE"
+                    echo "========================================="
+                  
+                    # Configure saml2aws
+                    saml2aws configure \
+                      --idp-provider=Ping \
+                      --mfa=Auto \
+                      --url=$SAML2AWS_URL \
+                      --username=$SAML2AWS_USERNAME \
+                      --aws-urn=urn:amazon:webservices \
+                      --session-duration=28800 \
+                      --skip-prompt \
+                      --profile=$PROFILE
+                  
+                    # Login
+                    saml2aws login --force --skip-prompt --profile=$PROFILE
+
+              envFrom:
+                - secretRef:
+                    name: aws-saml-creds
+              volumeMounts:
+                - name: aws-creds
+                  mountPath: /root/.aws
+          volumes:
+            - name: aws-creds
+              persistentVolumeClaim:
+                claimName: k8s-cost-dashboard-aws-pvc
+          nodeSelector:
+            workload: cbioagent
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbioagent"
+              effect: "NoSchedule"
+          restartPolicy: OnFailure
