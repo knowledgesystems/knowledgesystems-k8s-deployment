@@ -51,6 +51,10 @@ agents:
       operator: Equal
       value: genome-nexus
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: ingress
+      effect: NoSchedule
 clusterAgent:
 #  confd:
 #    nginx_ingress_controller.yaml: |-
