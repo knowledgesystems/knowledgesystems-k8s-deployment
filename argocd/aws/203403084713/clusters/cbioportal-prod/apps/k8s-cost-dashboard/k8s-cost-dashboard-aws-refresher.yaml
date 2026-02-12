@@ -48,7 +48,7 @@ spec:
                   ACCOUNTS=("0846" "2034" "3972" "6666" "7624")
                   
                   # Loop for login
-                  for ACCOUNT in $ACCOUNTS; do
+                  for ACCOUNT in "${ACCOUNTS[@]}"; do
                     PROFILE_VAR=PROFILE_${ACCOUNT}
                     USERNAME_VAR=USERNAME_${ACCOUNT}
                     PASSWORD_VAR=PASSWORD_${ACCOUNT}
@@ -81,10 +81,11 @@ spec:
                   
                     # Login
                     saml2aws login --force --skip-prompt --profile=$PROFILE
-
+                  
+                  done
               envFrom:
                 - secretRef:
-                    name: aws-saml-creds
+                    name: k8s-cost-dashboard-saml
               volumeMounts:
                 - name: aws-creds
                   mountPath: /root/.aws
