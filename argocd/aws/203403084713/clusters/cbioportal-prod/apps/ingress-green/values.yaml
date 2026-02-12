@@ -53,6 +53,7 @@ controller:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
   stats:
     enabled: true
 rbac:
