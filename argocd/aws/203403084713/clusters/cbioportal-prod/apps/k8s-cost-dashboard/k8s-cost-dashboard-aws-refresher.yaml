@@ -85,10 +85,10 @@ spec:
               persistentVolumeClaim:
                 claimName: k8s-cost-dashboard-aws-pvc
           nodeSelector:
-            workload: cbioagent
+            workload: k8s-cost
           tolerations:
             - key: "workload"
               operator: "Equal"
-              value: "cbioagent"
+              value: "k8s-cost"
               effect: "NoSchedule"
           restartPolicy: OnFailure
