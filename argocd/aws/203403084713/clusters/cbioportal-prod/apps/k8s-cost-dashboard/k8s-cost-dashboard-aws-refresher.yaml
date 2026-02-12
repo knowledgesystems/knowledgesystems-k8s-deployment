@@ -45,18 +45,26 @@ spec:
                   saml2aws --version
                   
                   # Accounts list
-                  ACCOUNTS="0846 2034 3972 6666 7624"
+                  ACCOUNTS=("0846" "2034" "3972" "6666" "7624")
                   
                   # Loop for login
-                  for account in $ACCOUNTS; do
-                    PROFILE_VAR=${account}_PROFILE
-                    PROFILE="${!PROFILE_VAR}"
-                  
-                    export SAML2AWS_USERNAME="${!account}_USERNAME"
-                    export SAML2AWS_PASSWORD="${!account}_PASSWORD"
+                  for ACCOUNT in $ACCOUNTS; do
+                    PROFILE_VAR=PROFILE_${ACCOUNT}
+                    USERNAME_VAR=USERNAME_${ACCOUNT}
+                    PASSWORD_VAR=PASSWORD_${ACCOUNT}
+                    ROLE_VAR=ROLE_${ACCOUNT}
+
+                    PROFILE="${!PROFILE_VAR:-}"
+                    USERNAME="${!USERNAME_VAR:-}"
+                    PASSWORD="${!PASSWORD_VAR:-}"
+                    ROLE="${!ROLE_VAR:-}"
+
+                    export SAML2AWS_USERNAME=$USERNAME
+                    export SAML2AWS_PASSWORD=$PASSWORD
+                    export SAML2AWS_ROLE=$ROLE
                   
                     echo "========================================="
-                    echo "Configuring account: $account"
+                    echo "Configuring account: $ACCOUNT"
                     echo "Profile: $PROFILE"
                     echo "========================================="
                   
