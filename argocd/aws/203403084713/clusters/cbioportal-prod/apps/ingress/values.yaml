@@ -1,4 +1,11 @@
 controller:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+          topologyKey: kubernetes.io/hostname
   enableAnnotationValidations: false
   allowSnippetAnnotations: true
   extraArgs:
