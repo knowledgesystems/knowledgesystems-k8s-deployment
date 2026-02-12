@@ -63,6 +63,8 @@ spec:
           volumeMounts:
             - name: cache
               mountPath: /app/.cache
+            - name: aws-creds
+              mountPath: /root/.aws
       nodeSelector:
         workload: "k8s-cost"
       restartPolicy: Always
@@ -78,6 +80,9 @@ spec:
         - name: cache
           persistentVolumeClaim:
             claimName: k8s-cost-dashboard-cache
+        - name: aws-creds
+          persistentVolumeClaim:
+            claimName: k8s-cost-dashboard-aws-pvc
 ---
 apiVersion: v1
 kind: Service
