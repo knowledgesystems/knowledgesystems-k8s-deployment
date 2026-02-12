@@ -69,7 +69,7 @@ spec:
   tls:
     - hosts:
         - www.cbioportal.org
-      secretName: www-cbioportal-cert
+      secretName: www-cbioportal-certificate
     - hosts:
         - master.cbioportal.org
       secretName: master-cbio-cert
