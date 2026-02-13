@@ -9,7 +9,7 @@ spec:
   resources:
     requests:
       storage: 150Gi
-  storageClassName: gp3
+  storageClassName: gp2
 ---
 apiVersion: apps/v1
 kind: StatefulSet
