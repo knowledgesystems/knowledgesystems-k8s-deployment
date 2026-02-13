@@ -31,13 +31,6 @@ spec:
       targetRevision: 7.3.1
       chart: mongodb
       helm:
-       releaseName: gn-mongo-v0dot32-beta
-       valueFiles:
-         - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/gn_mongodb_beta_helm_value.yaml
-    - repoURL: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-      targetRevision: 7.3.1
-      chart: mongodb
-      helm:
         releaseName: gnap-gn-mongo-v1dot0
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/gnap_mongodb_v1dot0_helm_value.yaml
@@ -60,6 +53,10 @@ spec:
       targetRevision: HEAD
       directory:
         recurse: true
+        include: '*.yaml'
+        exclude: '*_helm_value.yaml'
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      targetRevision: HEAD
       ref: k8s-repo
   destination:
     namespace: genome-nexus
