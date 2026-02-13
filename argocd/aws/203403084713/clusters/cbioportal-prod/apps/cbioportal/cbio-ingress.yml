@@ -21,7 +21,7 @@ metadata:
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
   labels:
-    app.kubernetes.io/instance: ingress
+    app.kubernetes.io/instance: cbioportal
   name: cbioportal-ingress
   namespace: default
 spec:
