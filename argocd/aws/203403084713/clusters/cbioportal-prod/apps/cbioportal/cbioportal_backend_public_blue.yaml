@@ -236,7 +236,7 @@ spec:
             # DATADOG RUM SETTINGS
             - --datadog_rum_application_id=$(DATADOG_RUM_APPLICATION_ID)
             - --datadog_rum_client_token=$(DATADOG_RUM_CLIENT_TOKEN)
-            - --datadog_rum_site=cbioportal
+            - --datadog_rum_site=datadoghq.com
             - --datadog_rum_env=public
           command:
             - java
