@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/traefik
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s
+    - repoURL: git@github.com:knowledgesystems/portal-configuration.git
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/helm
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: portal-configuration
+    - repoURL: https://traefik.github.io/charts
+      targetRevision: 39.0.0
+      chart: traefik
+      helm:
+        releaseName: traefik
+        valueFiles:
+          - $k8s/argocd/aws/203403084713/clusters/cbioportal-prod/apps/traefik/values.yaml
+          - $portal-configuration/argocd/aws/203403084713/clusters/cbioportal-prod/helm/traefik/values.yaml
+  destination:
+    namespace: traefik
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
