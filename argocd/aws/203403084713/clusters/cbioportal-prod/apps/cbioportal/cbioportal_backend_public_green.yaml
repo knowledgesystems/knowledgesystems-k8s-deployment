@@ -233,6 +233,11 @@ spec:
             - -Ddd.profiling.heap.enabled=true
             - -Ddd.jmxfetch.enabled=true
             - -Ddd.jmxfetch.statsd.port=8125
+            # DATADOG RUM SETTINGS
+            - --datadog_rum_application_id=$(DATADOG_RUM_APPLICATION_ID)
+            - --datadog_rum_client_token=$(DATADOG_RUM_CLIENT_TOKEN)
+            - --datadog_rum_site=cbioportal
+            - --datadog_rum_env=public
           command:
             - java
           env:
