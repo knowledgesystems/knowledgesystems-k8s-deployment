@@ -12,4 +12,5 @@
 * [Tutorials](tutorials)
   * [IP Blocking](tutorials/ip-blocking.md)
 * [Troubleshooting](troubleshooting.md)
-* [Incidents Log](incidents-log.md)
+* [Incidents Log](incidents-log)
+  * [Mongodb Session Service Crash](incidents-log/mongodb-session-service-crash.md)

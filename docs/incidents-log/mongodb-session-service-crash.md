@@ -1,22 +1,20 @@
----
-icon: alert
----
-# Incidents Log
+# Mongodb Session Service Crash
 
-## 2023/05/24 Mongodb session service crash
+**Incident Date: 2023/05/24**
+
 - Issue with session-service reported at 3.30PM
 - We identified that the mongo session service was down and had used up all disk space (20Gi) shortly. That same day we created a new session service with 100Gi storage but weren't able to recover all old sessions
 - On 2023/05/26 we were able to restore old sessions. We did lose two days of saved sessions (5/24-5/25)
 
-### Remediation
+## Remediation
 
-#### Bring mongodb back
+### Bring mongodb back
 - Take snapshot of existing EBS volume using AWS (no auto snapshots were set up)
 - Set up new mongo database with helm:
     `helm install cbioportal-session-service-mongo-20230524 --version 7.3.1 --set image.tag=4.2,persistence.size=100Gi bitnami/mongodb`
 - Connect the session service to use that one (see [commit](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/commit/0042f9f1f0be26692032160fed82744d8f2a94dc))
 
-#### Bring session data back
+### Bring session data back
 The mongo data was stored in an AWS snapshot in mongo's binary format, so not immediately accessible for re-import into another database. First we had to bring that back.
 
 What didn't work:
