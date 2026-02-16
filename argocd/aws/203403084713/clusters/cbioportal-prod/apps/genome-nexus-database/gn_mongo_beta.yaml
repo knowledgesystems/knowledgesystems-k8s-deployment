@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: genomenexus/gn-mongo:0.32_slim_mongodb_7.0.28_rc1
+          image: genomenexus/gn-mongo:sha-b70eba5c0cf86fb41ea805ec1d475f694cb0b5f7-grch37_ensembl92-ma_false
           imagePullPolicy: Always
           ports:
             - containerPort: 27017
