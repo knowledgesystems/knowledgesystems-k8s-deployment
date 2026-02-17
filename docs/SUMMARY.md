@@ -14,3 +14,4 @@
 * [Troubleshooting](troubleshooting.md)
 * [Incidents Log](incidents-log)
   * [Mongodb Session Service Crash](incidents-log/mongodb-session-service-crash.md)
+  * [Nginx Ingress Timeout Failure](incidents-log/nginx-ingress-timeout-failure.md)
