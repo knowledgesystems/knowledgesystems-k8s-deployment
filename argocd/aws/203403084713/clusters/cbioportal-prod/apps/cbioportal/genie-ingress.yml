@@ -20,7 +20,7 @@ metadata:
       }
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-geoblock-middleware@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-genie-geoblock@kubernetescrd
   labels:
     app.kubernetes.io/instance: cbioportal
   name: genie-ingress

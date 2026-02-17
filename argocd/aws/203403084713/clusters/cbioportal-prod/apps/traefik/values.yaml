@@ -20,31 +20,11 @@ logs:
     enabled: true
     format: json
 
-# Geoblocking for Genie
+# GeoBlocking Genie
+experimental:
+  plugins:
+    geoblock: "github.com/PascalMinder/geoblock"
+    version: "v0.2.7"
 additionalArguments:
-  - "--experimental.plugins.geoblock.modulename=github.com/PascalMinder/geoblock"
-  - "--experimental.plugins.geoblock.version=v0.2.8"
-  - "--experimental.localPlugins.geoblock.moduleName=github.com/PascalMinder/geoblock"
-volumes:
-  - name: geoip-db
-    emptyDir: {}
-volumeMounts:
-  - name: geoip-db
-    mountpath: /geoip
-initContainers:
-  - name: geoip-downloader
-    image: busybox:latest
-    command:
-      - sh
-      - -c
-      - |
-        wget -O /geoip/GeoLite2-Country.tar.gz --content-disposition --user=$MAXMIND_USER_ID --password=$MAXMIND_LICENSE_KEY 'https://download.maxmind.com/geoip/databases/GeoLite2-Country/download?suffix=tar.gz'
-        tar -xzf /geoip/GeoLite2-Country.tar.gz -C /geoip --strip-components=1 "*.mmdb"
-        rm /geoip/GeoLite2-Country.tar.gz
-        ls -lh /geoip/
-    envFrom:
-      - secretRef:
-          name: maxmind-license
-    volumeMounts:
-      - name: geoip-db
-        mountPath: /geoip
+  - "--experimental.plugins.geoblock.moduleName=github.com/PascalMinder/geoblock"
+  - "--experimental.plugins.geoblock.version=v0.2.7"
