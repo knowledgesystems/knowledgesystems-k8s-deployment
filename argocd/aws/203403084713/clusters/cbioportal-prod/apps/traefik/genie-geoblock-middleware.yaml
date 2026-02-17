@@ -1,8 +1,8 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: geoblock-middleware
-  namespace: traefik
+  name: genie-geoblock
+  namespace: default
 spec:
   plugin:
     geoblock:
@@ -10,8 +10,13 @@ spec:
       allowLocalRequests: true
       logLocalRequests: false
       logAllowedRequests: false
-      logApiRequests: true
-      databaseFilePath: /geoip/GeoLite2-Country.mmdb
+      logApiRequests: false
+      api: ""
+      apiTimeoutSeconds: 5
+      cacheSize: 25
+      forceMonthlyUpdate: true
+      allowUnknownCountries: false
+      unknownCountryApiResponse: 451
       blackListMode: true
       countries:
         - IR  # Iran
@@ -20,6 +25,3 @@ spec:
         - CN  # China
         - RU  # Russia
         - VE  # Venezuela
-      apiResponse: 451
-      allowUnknownCountries: false
-      unknownCountryApiResponse: 451
