@@ -4,7 +4,7 @@ image:
   pullPolicy: Always
 persistence:
   enabled: true
-  size: 200Gi
+  size: 500Gi
 
 # If want to deploy the MongoDB pods on a specific node, uncomment the following lines
 # affinity:
