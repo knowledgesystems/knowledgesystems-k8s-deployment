@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/instance: genome-nexus
     run: genome-nexus-gnap
   name: genome-nexus-gnap
   namespace: genome-nexus

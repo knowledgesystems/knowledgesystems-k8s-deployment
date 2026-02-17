@@ -110,7 +110,6 @@ metadata:
     app: genie-gn-vep
   name: genie-gn-vep
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/genie-gn-vep
 spec:
   ports:
   - port: 80
