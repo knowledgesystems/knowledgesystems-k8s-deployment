@@ -107,7 +107,6 @@ metadata:
     app: gn-spring-boot
   name: genome-nexus
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/genome-nexus
 spec:
   ports:
   - port: 80

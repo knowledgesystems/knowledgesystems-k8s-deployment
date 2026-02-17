@@ -9,7 +9,6 @@ metadata:
     run: gn-vep112
   name: gn-vep112
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/gn-vep112
 spec:
   replicas: 2
   selector:
@@ -102,7 +101,6 @@ metadata:
     app: gn-vep112
   name: gn-vep112
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/gn-vep112
 spec:
   ports:
   - port: 80

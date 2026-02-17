@@ -9,7 +9,6 @@ metadata:
     run: genome-nexus-genie
   name: genome-nexus-genie
   namespace: genome-nexus
-  selfLink: /apis/extensions/v1beta1/namespaces/genome-nexus/deployments/genome-nexus-genie
 spec:
   replicas: 2
   selector:
@@ -104,7 +103,6 @@ metadata:
     app: genome-nexus-genie
   name: genome-nexus-genie
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/genome-nexus-genie
 spec:
   ports:
   - port: 80
