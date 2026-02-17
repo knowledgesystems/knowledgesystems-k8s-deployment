@@ -1,0 +1,25 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: geoblock-middleware
+  namespace: traefik
+spec:
+  plugin:
+    geoblock:
+      silentStartUp: false
+      allowLocalRequests: true
+      logLocalRequests: false
+      logAllowedRequests: false
+      logApiRequests: true
+      databaseFilePath: /geoip/GeoLite2-Country.mmdb
+      blackListMode: true
+      countries:
+        - IR  # Iran
+        - KP  # North Korea
+        - CU  # Cuba
+        - CN  # China
+        - RU  # Russia
+        - VE  # Venezuela
+      apiResponse: 451
+      allowUnknownCountries: false
+      unknownCountryApiResponse: 451
