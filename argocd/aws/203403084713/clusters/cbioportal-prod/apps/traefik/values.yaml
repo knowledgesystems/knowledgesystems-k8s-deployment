@@ -3,6 +3,9 @@ image:
 providers:
   kubernetesIngressNginx:
     enabled: true
+    publishService:
+      enabled: true
+      pathOverride: "traefik/traefik"
 deployment:
   replicas: 2
 podDisruptionBudget:
@@ -19,3 +22,4 @@ logs:
   access:
     enabled: true
     format: json
+providers:
