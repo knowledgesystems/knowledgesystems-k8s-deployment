@@ -21,10 +21,3 @@ logs:
     format: json
 
 # GeoBlocking Genie
-experimental:
-  plugins:
-    geoblock: "github.com/PascalMinder/geoblock"
-    version: "v0.2.7"
-additionalArguments:
-  - "--experimental.plugins.geoblock.moduleName=github.com/PascalMinder/geoblock"
-  - "--experimental.plugins.geoblock.version=v0.2.7"
