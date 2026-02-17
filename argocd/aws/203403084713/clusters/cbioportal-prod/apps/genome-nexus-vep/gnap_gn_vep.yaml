@@ -127,7 +127,6 @@ metadata:
     app: gnap-gn-vep
   name: gnap-gn-vep
   namespace: genome-nexus
-  selfLink: /api/v1/namespaces/genome-nexus/services/gnap-gn-vep
 spec:
   ports:
   - port: 80
