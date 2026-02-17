@@ -12,7 +12,7 @@ spec:
       run: gn-spring-boot-vep111
   strategy:
     rollingUpdate:
-      maxSurge: 2
+      maxSurge: 1
       maxUnavailable: 0
     type: RollingUpdate
   template:
