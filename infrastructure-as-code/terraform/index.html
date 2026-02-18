@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.12.0.824659437027">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.12.0.824766796201">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.12.0">
@@ -31,12 +31,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=3.12.0.824659437027" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.12.0.824766796201" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.12.0.824659437027" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.12.0.824766796201" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.12.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.12.0.824659437027" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.12.0.824659437027" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.12.0.824766796201" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.12.0.824766796201" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -233,12 +233,13 @@
 </doc-anchor-target>
 <p>If you want to migrate from your current setup to Terraform-based resource management, follow the steps below to create a new submodule in the repo.</p>
 <ol>
-<li><p>Create a submodule directory under the appropriate nesting structure.</p>
+<li><p>Create a submodule directory under the appropriate nesting structure. The nesting structure would depend on the service and whether that service is specific to each cluster or shared between them.</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash">mkdir -p iac/aws/&lt;account-number&gt;/clusters/&lt;cluster-name&gt;/&lt;submodule-name&gt;
+<pre translate="no" class="language-bash"><code v-pre class="language-bash"># For a cluster-specific service, such as IAM roles attached to a cluster. 
+mkdir -p iac/aws/&lt;account-number&gt;/clusters/&lt;cluster-name&gt;/iam
 
-# E.g. For a s3 submodule under 123456789abc aws account, you would do this
-# mkdir -p iac/aws/123456789abc/clusters/cbioportal-prod/s3</code></pre>
+# For a service shared between clusters, such as S3.
+mkdir -p iac/aws/&lt;account-number&gt;/shared/s3</code></pre>
 </doc-codeblock></div>
 </li>
 <li><p>Move into the new module.</p>
