@@ -44,12 +44,13 @@ The `iac` directory contains multiple submodules where each submodule resides un
 
 ## Creating New Submodules
 If you want to migrate from your current setup to Terraform-based resource management, follow the steps below to create a new submodule in the repo.
-1. Create a submodule directory under the appropriate nesting structure.
+1. Create a submodule directory under the appropriate nesting structure. The nesting structure would depend on the service and whether that service is specific to each cluster or shared between them.
    ```shell
-   mkdir -p iac/aws/<account-number>/clusters/<cluster-name>/<submodule-name>
+   # For a cluster-specific service, such as IAM roles attached to a cluster. 
+   mkdir -p iac/aws/<account-number>/clusters/<cluster-name>/iam
    
-   # E.g. For a s3 submodule under 123456789abc aws account, you would do this
-   # mkdir -p iac/aws/123456789abc/clusters/cbioportal-prod/s3
+   # For a service shared between clusters, such as S3.
+   mkdir -p iac/aws/<account-number>/shared/s3
    ```
 2. Move into the new module.
    ```shell
