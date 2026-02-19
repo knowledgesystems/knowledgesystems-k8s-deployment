@@ -28,12 +28,11 @@ logs:
       general:
         defaultmode: keep
       headers:
-        defaultmode: keep
+        defaultmode: redact
         names:
           User-Agent: keep
           Referer: keep
           X-Forwarded-For: keep
-          Authorization: redact
 additionalArguments:
   - "--serversTransport.forwardingTimeouts.dialTimeout=300s"
   - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=300s"
