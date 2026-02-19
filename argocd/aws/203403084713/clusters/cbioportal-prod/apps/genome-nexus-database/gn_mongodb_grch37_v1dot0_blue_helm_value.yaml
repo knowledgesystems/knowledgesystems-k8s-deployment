@@ -5,7 +5,7 @@ image:
 persistence:
   enabled: true
   size: 300Gi
-  existingClaim: gn_mongodb_grch37_v1dot0_pvc
+  existingClaim: gn-mongodb-grch37-v1dot0-pvc
 
 # If want to deploy the MongoDB pods on a specific node, uncomment the following lines
 # affinity:

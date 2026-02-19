@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: gn_mongodb_grch37_v1dot0_pv
+  name: gn-mongodb-grch37-v1dot0-pv
   namespace: genome-nexus
 spec:
   capacity:
@@ -17,7 +17,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gn_mongodb_grch37_v1dot0_pvc
+  name: gn-mongodb-grch37-v1dot0-pvc
   namespace: genome-nexus
 spec:
   accessModes:
@@ -26,4 +26,4 @@ spec:
   resources:
     requests:
       storage: 300Gi
-  volumeName: gn_mongodb_grch37_v1dot0_pv
+  volumeName: gn-mongodb-grch37-v1dot0-pv
