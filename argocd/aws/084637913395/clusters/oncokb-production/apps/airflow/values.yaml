@@ -1,3 +1,7 @@
+redis:
+  image: 
+    repository: bitnamilegacy/redis
+
 dags:
   gitSync:
     enabled: true
