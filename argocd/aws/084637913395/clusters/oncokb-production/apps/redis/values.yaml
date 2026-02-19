@@ -21,3 +21,8 @@ cluster:
   replicas: 1
 persistence:
   storageClass: "gp2"
+global:
+  imagePullSecrets:
+    - name: oncokb-dockerhub-creds
+image:
+  repository: bitnamilegacy/redis-cluster
