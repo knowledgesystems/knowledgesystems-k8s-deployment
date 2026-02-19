@@ -27,9 +27,3 @@ tolerations:
 nodeSelector:
   workload: gn-database
   topology.kubernetes.io/zone: us-east-1b # This should match the availability zone of the underlying volumes created in terraform
-
-livenessProbe:
-  enabled: false
-
-readinessProbe:
-  enabled: false
