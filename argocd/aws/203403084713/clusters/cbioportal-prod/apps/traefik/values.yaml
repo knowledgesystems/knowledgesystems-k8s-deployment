@@ -6,6 +6,8 @@ providers:
     publishService:
       enabled: true
       pathOverride: "traefik/traefik"
+  kubernetesCRD:
+    enabled: true
 deployment:
   replicas: 2
 podDisruptionBudget:
@@ -22,3 +24,12 @@ logs:
   access:
     enabled: true
     format: json
+    fields:
+      general:
+        defaultmode: keep
+      headers:
+        defaultmode: keep
+        names:
+          User-Agent: keep
+          Referer: keep
+          X-Forwarded-For: keep
