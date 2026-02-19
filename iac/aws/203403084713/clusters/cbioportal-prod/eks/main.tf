@@ -524,7 +524,7 @@ module "eks_cluster" {
         try(config.tags, var.AWS_DEFAULT_TAGS),
         {
           "nodegroup-name" = name
-          "resource-name" = name
+          "resource-name"  = name
         }
       )
     })
@@ -556,4 +556,8 @@ resource "aws_eks_addon" "s3_mountpoint_addon" {
       ]
     }
   })
+}
+
+module "ec2" {
+  source = "../ec2"
 }
