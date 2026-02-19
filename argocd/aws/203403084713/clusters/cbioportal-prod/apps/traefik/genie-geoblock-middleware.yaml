@@ -24,3 +24,5 @@ spec:
         - RU
         - VE
       blackListMode: true
+      httpStatusCodeDeniedRequest: 451
+      XForwardedForReverseProxy: true
