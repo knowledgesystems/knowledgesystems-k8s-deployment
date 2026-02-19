@@ -1,0 +1,26 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: genie-geoblock
+  namespace: default
+spec:
+  plugin:
+    geoblock:
+      silentStartUp: false
+      allowLocalRequests: true
+      logLocalRequests: false
+      logAllowedRequests: false
+      logApiRequests: true
+      api: "https://get.geojs.io/v1/ip/country/{ip}"
+      apiTimeoutMs: 750
+      cacheSize: 25
+      forceMonthlyUpdate: true
+      unknownCountryApiResponse: "nil"
+      countries:
+        - IR
+        - KP
+        - CU
+        - CN
+        - RU
+        - VE
+      blackListMode: true
