@@ -58,3 +58,7 @@ ports:
     proxyProtocol:
       trustedIPs:
         - "10.0.0.0/20" # This should match the IPv4 CIDR from the cluster vpc
+service:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
