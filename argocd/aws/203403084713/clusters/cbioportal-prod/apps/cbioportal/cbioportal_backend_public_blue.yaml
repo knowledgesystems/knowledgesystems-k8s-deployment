@@ -267,6 +267,17 @@ spec:
               value: "cbioportal"
             - name: DD_VERSION
               value: "6.4.0"
+            # 1. Ensure collection is explicitly enabled
+            - name: DD_TRACE_CLIENT_IP_ENABLED
+              value: "true"
+            # 2. Tell the tracer to check the 'X-Forwarded-For' header (set by Traefik)
+            - name: DD_TRACE_CLIENT_IP_HEADER
+              value: "X-Forwarded-For"
+            - name: DD_HTTP_CLIENT_IP_HEADER
+              value: "X-Forwarded-For"
+            # 3. Map both common proxy headers to the Datadog tag
+            - name: DD_TRACE_HEADER_TAGS
+              value: "X-Forwarded-For:http.client_ip,X-Real-IP:http.client_ip"
           envFrom:
             - secretRef:
                 name: cbioportal-public-blue
