@@ -29,13 +29,7 @@ nodeSelector:
   topology.kubernetes.io/zone: us-east-1b # This should match the availability zone of the underlying volumes created in terraform
 
 livenessProbe:
-  initialDelaySeconds: 180
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  enabled: false
 
 readinessProbe:
-  initialDelaySeconds: 180
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  enabled: false
