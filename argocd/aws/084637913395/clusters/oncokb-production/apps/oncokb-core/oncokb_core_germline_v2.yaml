@@ -18,8 +18,6 @@ spec:
       labels:
         run: oncokb-core-germline-v2
     spec:
-      imagePullSecrets:
-        - name: oncokb-dockerhub-creds
       volumes:
         - name: log4j-properties
           configMap:
