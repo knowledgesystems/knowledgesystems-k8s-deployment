@@ -18,6 +18,9 @@ spec:
         releaseName: oncokb-redis-cluster
         valueFiles:
           - $k8s-repo/argocd/aws/084637913395/clusters/oncokb-production/apps/redis/values.yaml
+        parameters:
+          - name: global.imagePullSecrets[0]
+            value: dockerhub-creds
   destination:
     namespace: default
     server: https://kubernetes.default.svc
