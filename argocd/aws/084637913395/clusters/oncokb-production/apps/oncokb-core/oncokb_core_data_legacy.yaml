@@ -18,6 +18,8 @@ spec:
       labels:
         run: oncokb-core-data-legacy
     spec:
+      imagePullSecrets:
+        - name: oncokb-dockerhub-creds
       containers:
         - env:
           envFrom:
