@@ -37,3 +37,24 @@ additionalArguments:
   - "--serversTransport.forwardingTimeouts.dialTimeout=300s"
   - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=300s"
   - "--serversTransport.forwardingTimeouts.idleConnTimeout=300s"
+ports:
+  web:
+    transport:
+      respondingTimeouts:
+        idleTimeout: 300s
+    forwardedHeaders:
+      trustedIPs:
+        - "10.0.0.0/20" # This should match the IPv4 CIDR from the cluster vpc
+    proxyProtocol:
+      trustedIPs:
+        - "10.0.0.0/20" # This should match the IPv4 CIDR from the cluster vpc
+  websecure:
+    transport:
+      respondingTimeouts:
+        idleTimeout: 300s
+    forwardedHeaders:
+      trustedIPs:
+        - "10.0.0.0/20" # This should match the IPv4 CIDR from the cluster vpc
+    proxyProtocol:
+      trustedIPs:
+        - "10.0.0.0/20" # This should match the IPv4 CIDR from the cluster vpc
