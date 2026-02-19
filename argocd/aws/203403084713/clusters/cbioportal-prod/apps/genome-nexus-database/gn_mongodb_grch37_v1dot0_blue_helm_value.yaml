@@ -1,7 +1,5 @@
 image:
-  tag: "4.0.12"
-  registry: "public.ecr.aws"
-  repository: "bitnami/mongodb"
+  repository: "bitnamilegacy/mongodb"
   pullPolicy: IfNotPresent
 persistence:
   enabled: true
