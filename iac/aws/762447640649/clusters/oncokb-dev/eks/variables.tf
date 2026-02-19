@@ -30,7 +30,7 @@ variable "CLUSTER_NAME" {
 variable "CLUSTER_VER" {
   description = "Kubernetes version of the cluster"
   type        = string
-  default     = "1.34"
+  default     = "1.35"
 }
 
 variable "CLUSTER_ENV" {
