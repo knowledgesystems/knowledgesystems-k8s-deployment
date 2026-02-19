@@ -1,0 +1,29 @@
+image:
+  registry: "public.ecr.aws"
+  repository: "bitnami/mongodb"
+  pullPolicy: IfNotPresent
+persistence:
+  enabled: true
+  size: 300Gi
+  existingClaim: gn_mongodb_grch37_v1dot0_pvc
+
+# If want to deploy the MongoDB pods on a specific node, uncomment the following lines
+# affinity:
+# nodeAffinity:
+#   requiredDuringSchedulingIgnoredDuringExecution:
+#     nodeSelectorTerms:
+#       - matchExpressions:
+#           - key: kubernetes.io/hostname
+#             operator: In
+#             values:
+#               -  # Replace with the exact node name
+
+tolerations:
+  - key: workload
+    operator: Equal
+    value: gn-database
+    effect: NoSchedule
+
+nodeSelector:
+  workload: gn-database
+  topology.kubernetes.io/zone: us-east-1b # This should match the availability zone of the underlying volumes created in terraform
