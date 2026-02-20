@@ -1,6 +1,8 @@
 image:
   tag: v3.6.7
 providers:
+  kubernetesGateway:
+    enabled: true
   kubernetesIngressNginx:
     enabled: true
     publishService:
@@ -63,3 +65,22 @@ service:
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.cbioportal.org`)
+    entryPoints:
+      - web
+      - websecure
+    middlewares:
+      - name: traefik-dashboard-auth
+gateway:
+  listeners:
+    web:
+      namespacePolicy:
+        from: All
+experimental:
+  plugins:
+    geoblock:
+      moduleName: "github.com/CangioUni/traefik-geoblock-plugin"
+      version: "v0.2.0"
