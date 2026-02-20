@@ -2,7 +2,7 @@
 resource "aws_ebs_volume" "gn-mongo-v1dot0-mongodb" {
   availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
   snapshot_id       = "snap-05b889983c9ab347a"
-  type              = "gp2"
+  type              = "gp3"
 
   tags = {
     Name          = "gn-mongo-v1dot0-mongodb"
