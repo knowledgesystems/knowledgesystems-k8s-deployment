@@ -8,7 +8,7 @@ providers:
       pathOverride: "traefik/traefik"
   kubernetesCRD:
     enabled: true
-    allowCrossNamespace: false
+    allowCrossNamespace: true
 deployment:
   replicas: 2
 podDisruptionBudget:
