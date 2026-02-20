@@ -1,28 +1,21 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: genie-geoblock
+  name: geoblock-genie
   namespace: default
 spec:
   plugin:
     geoblock:
-      silentStartUp: false
-      allowLocalRequests: true
-      logLocalRequests: false
-      logAllowedRequests: false
-      logApiRequests: true
-      api: "https://get.geojs.io/v1/ip/country/{ip}"
-      apiTimeoutMs: 750
-      cacheSize: 25
-      forceMonthlyUpdate: true
-      unknownCountryApiResponse: "nil"
-      countries:
+      blockedCountries:
         - IR
         - KP
         - CU
         - CN
         - RU
         - VE
-      blackListMode: true
-      httpStatusCodeDeniedRequest: 451
-      XForwardedForReverseProxy: true
+      defaultAction: allow
+      blockMessage: "Error 451: Unavailable For Legal Reasons"
+      cacheDuration: 60
+      trustedProxies:
+        - "10.0.0.0/20"
+      logBlocked: true
