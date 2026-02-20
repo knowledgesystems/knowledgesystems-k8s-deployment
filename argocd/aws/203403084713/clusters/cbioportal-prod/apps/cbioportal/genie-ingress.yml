@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    ingress.kubernetes.io/proxy-body-size: 512m
     kubernetes.io/ingress.class: traefik
     kubernetes.io/tls-acme: "true"
     traefik.ingress.kubernetes.io/router.middlewares: default-geoblock-genie@kubernetescrd
