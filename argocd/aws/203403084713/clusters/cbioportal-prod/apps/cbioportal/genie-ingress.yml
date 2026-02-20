@@ -6,7 +6,7 @@ metadata:
     ingress.kubernetes.io/proxy-body-size: 512m
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
-    traefik.ingress.kubernetes.io/router.middlewares: default-genie-geoblock@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-geoblock-genie@kubernetescrd
   labels:
     app.kubernetes.io/instance: cbioportal
   name: genie-ingress
