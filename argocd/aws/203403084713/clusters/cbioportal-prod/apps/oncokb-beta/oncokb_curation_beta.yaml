@@ -59,8 +59,8 @@ spec:
               value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
             - name: APPLICATION_ONCOKBDATARELEASE_URL
               value: "http://oncokb-data-release-beta:8085"
-            - name: JHIPSTER_CORS_ALLOWED_ORIGIN_PATTERNS
-              value: "https://*.oncokb.org"
+            - name: JHIPSTER_CORS_ALLOWED_ORIGINS
+              value: "https://curation.oncokb.org,https://beta.curation.oncokb.org"
           envFrom:
             - secretRef:
                 name: oncokb-curation-beta
