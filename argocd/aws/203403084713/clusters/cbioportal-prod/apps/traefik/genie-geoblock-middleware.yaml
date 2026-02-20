@@ -6,16 +6,23 @@ metadata:
 spec:
   plugin:
     geoblock:
-      blockedCountries:
+      silentStartUp: false
+      allowLocalRequests: false
+      logLocalRequests: true
+      logAllowedRequests: true
+      logApiRequests: true
+      api: "https://get.geojs.io/v1/ip/country/{ip}"
+      cacheSize: 15
+      forceMonthlyUpdate: true
+      allowUnknownCountries: false
+      unknownCountryApiResponse: "Unavailable For Legal Reasons"
+      blackListMode: true
+      addCountryHeader: true
+      countries:
         - IR
         - KP
         - CU
         - CN
         - RU
         - VE
-      defaultAction: allow
-      blockMessage: "Error 451: Unavailable For Legal Reasons"
-      cacheDuration: 60
-      trustedProxies:
-        - "10.0.0.0/20"
-      logBlocked: true
+      httpStatusCodeDeniedRequest: 451
