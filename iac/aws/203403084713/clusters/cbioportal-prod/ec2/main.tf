@@ -1,7 +1,7 @@
 # Genome Nexus Mongodb Volumes
 resource "aws_ebs_volume" "gn-mongo-v1dot0-mongodb" {
   availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
-  snapshot_id       = "snap-05b889983c9ab347a"
+  size              = 300
   type              = "gp3"
 
   tags = {

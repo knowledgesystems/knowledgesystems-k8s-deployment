@@ -11,6 +11,7 @@
   * [Monitoring](essential-services/monitoring.md)
 * [Tutorials](tutorials)
   * [IP Blocking](tutorials/ip-blocking.md)
+* [Apps](apps/)
 * [Troubleshooting](troubleshooting.md)
 * [Incidents Log](incidents-log)
   * [Nginx Ingress Timeout Failure](incidents-log/nginx-ingress-timeout-failure.md)
