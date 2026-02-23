@@ -11,7 +11,7 @@ metadata:
     ingress.kubernetes.io/proxy-connect-timeout: "300"
     ingress.kubernetes.io/proxy-read-timeout: "300"
     ingress.kubernetes.io/proxy-send-timeout: "300"
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: traefik
     kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: 512m
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
@@ -20,6 +20,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd
   labels:
     app.kubernetes.io/instance: cbioportal
   name: cbioportal-ingress
