@@ -61,3 +61,9 @@ readinessProbe:
 ```
 
 Once the pod is running, monitor the logs and wait for a message indicating MongoDB is ready to accept connections. After that, re-enable the probes by removing the `livenessProbe` and `readinessProbe` overrides from the Helm values and resyncing.
+
+#### Step 4: Cleanup
+Once the snapshot is no longer needed:
+
+1. Remove the `snapshot_id` field from the Terraform resource block. No need to apply.
+2. Delete the snapshot from the AWS console.
