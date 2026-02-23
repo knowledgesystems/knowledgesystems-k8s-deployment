@@ -5,6 +5,30 @@ The `iac` directory in the repo contains all Terraform configurations for managi
 1. **terrafrom**: Install the terraform CLI tool. The recommended way is to use [tfenv](https://github.com/tfutils/tfenv) to install and manage multiple versions of terraform as each cluster runs on a different version.
 2. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
 
+## Module Structure
+Before you start working with Terraform, make sure you understand the [repo structure](../README.md) and the module structure. There are two types of terraform modules in this repo, shared modules and cluster specific modules. Shared modules contains services that are shared between clusters (such as s3), and cluster-specific modules contains services that handle resources within a cluster, such as IAM for cluster security groups and roles.
+
+### Shared Modules
+Shared modules, such as the S3 module [here](../../iac/aws/203403084713/shared/s3), are self-sufficient standalone modules that can be applied independently.
+
+### Cluster-Specific Modules
+Cluster specific modules contain multiple submodules, one of which is the EKS module. The EKS module acts as the root module and is the only one that should be applied directly. The remaining modules are child modules that are imported and managed by the root EKS module - they are not standalone and should never ben applied independently.
+
+The root module will always be the EKS module. Child modules handle supporting concerns like IAM roles or EC2 volumes, and are wired in via module blocks in the root module's main.tf.
+
+#### Example
+The cbioportal-prod cluster under AWS account # 203403084713 is configured like this:
+```
+   iac/aws/203403084713/clusters/cbioportal-prod/
+   ├── eks/    # Root module — apply from here
+   ├── ec2/    # Sub-module (imported by eks)
+   └── iam/    # Sub-module (imported by eks)
+```
+
+!!!danger Warning
+Only run terraform commands from the root module directory. Running them from a child module directory is unsupported and may produce incomplete or incorrect infrastructure state.
+!!!
+
 ## AWS CLI Setup
 By default, submodules inside `iac` directory use the `default` aws cli profile when running commands. To use a custom profile, set the `TF_VAR_AWS_PROFILE` environment variable.
 ```shell
