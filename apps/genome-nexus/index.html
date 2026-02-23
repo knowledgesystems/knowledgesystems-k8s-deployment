@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.12.0.825198981759">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.12.0.825199226053">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.12.0">
@@ -31,12 +31,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=3.12.0.825198981759" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.12.0.825199226053" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.12.0.825198981759" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.12.0.825199226053" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.12.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.12.0.825198981759" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.12.0.825198981759" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.12.0.825199226053" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.12.0.825199226053" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -247,6 +247,17 @@ readinessProbe:
   enabled: false</code></pre>
 </doc-codeblock></div>
 <p>Once the pod is running, monitor the logs and wait for a message indicating MongoDB is ready to accept connections. After that, re-enable the probes by removing the <code translate="no" v-pre>livenessProbe</code> and <code translate="no" v-pre>readinessProbe</code> overrides from the Helm values and resyncing.</p>
+<doc-anchor-target id="step-4-cleanup">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-4-cleanup">#</doc-anchor-trigger>
+        <span>Step 4: Cleanup</span>
+    </h4>
+</doc-anchor-target>
+<p>Once the snapshot is no longer needed:</p>
+<ol>
+<li>Remove the <code translate="no" v-pre>snapshot_id</code> field from the Terraform resource block. No need to apply.</li>
+<li>Delete the snapshot from the AWS console.</li>
+</ol>
 
                                 
                                 <!-- Required only on API pages -->
