@@ -107,7 +107,7 @@ module "eks_cluster" {
   subnet_ids               = var.SUBNET_IDS
 
   # Disable logging to avoid Cloudwatch costs
-  cluster_enabled_log_types = []
+  cluster_enabled_log_types   = []
   create_cloudwatch_log_group = false
 
   # API Controls
