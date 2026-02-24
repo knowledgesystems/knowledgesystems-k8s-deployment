@@ -11,9 +11,9 @@ locals {
     ingress = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 2
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 3
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
