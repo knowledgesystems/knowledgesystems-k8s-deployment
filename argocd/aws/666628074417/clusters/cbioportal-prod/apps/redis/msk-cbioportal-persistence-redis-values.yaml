@@ -24,3 +24,6 @@ replica:
 image:
   registry: docker.io
   repository: bitnamilegacy/redis
+global:
+  imagePullSecrets:
+    - "dockerhub-creds"
