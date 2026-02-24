@@ -1,3 +1,7 @@
+postgresql:
+  image:
+    repository: bitnamilegacy/postgresql
+
 config:
   api:
     access_control_allow_headers: origin, content-type, accept
