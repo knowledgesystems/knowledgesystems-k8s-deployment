@@ -7,4 +7,4 @@ spec:
   plugin:
     ipblock:
       ipDenyList:
-        - 14.139.32.2/32
+        - 14.139.32.2
