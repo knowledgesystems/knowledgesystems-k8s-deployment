@@ -65,15 +65,6 @@ service:
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-ingressRoute:
-  dashboard:
-    enabled: true
-    matchRule: Host(`traefik.cbioportal.org`)
-    entryPoints:
-      - web
-      - websecure
-    middlewares:
-      - name: traefik-dashboard-auth
 api:
   dashboard: true
   insecure: true
