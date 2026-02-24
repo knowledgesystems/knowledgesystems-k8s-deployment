@@ -1,6 +1,14 @@
 postgresql:
   image:
     repository: bitnamilegacy/postgresql
+    pullSecrets:
+      - "dockerhub-creds"
+  global:
+    imagePullSecrets:
+      - "dockerhub-creds"
+
+registry:
+  secretName: "dockerhub-creds"
 
 config:
   api:
