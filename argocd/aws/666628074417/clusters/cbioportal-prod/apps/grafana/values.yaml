@@ -1,7 +1,0 @@
-nodeSelector:
-  workload: prometheus
-tolerations:
-  - key: workload
-    operator: Equal
-    value: prometheus
-    effect: NoSchedule

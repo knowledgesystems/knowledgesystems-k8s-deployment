@@ -157,23 +157,6 @@ locals {
         (var.LABEL_KEY) = "cbioagent-db"
       }
     }
-    prometheus = {
-      instance_types = ["t3.large"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      max_size       = 1
-      min_size       = 1
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "prometheus"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "prometheus"
-      }
-    }
     oncotree = {
       instance_types = ["t3.medium"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -189,6 +172,11 @@ locals {
       }
       labels = {
         (var.LABEL_KEY) = "oncotree"
+      }
+      tags = {
+        cdsi-app   = "oncotree"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
       }
     }
     cbioportal = {
@@ -263,9 +251,10 @@ module "eks_cluster" {
     for name, config in local.node_groups : name => merge(config, {
       cluster_version = try(config.version, var.NODEGROUP_VER)
       tags = merge(
-        try(config.tags, {}),
+        try(config.tags, var.AWS_DEFAULT_TAGS),
         {
           "nodegroup-name" = name
+          "resource-name"  = name
         }
       )
     })
