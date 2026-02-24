@@ -126,9 +126,10 @@ module "eks_cluster" {
     for name, config in local.node_groups : name => merge(config, {
       cluster_version = try(config.version, var.NODEGROUP_VER)
       tags = merge(
-        try(config.tags, {}),
+        try(config.tags, var.AWS_DEFAULT_TAGS),
         {
           "nodegroup-name" = name
+          "resource-name"  = name
         }
       )
     })
