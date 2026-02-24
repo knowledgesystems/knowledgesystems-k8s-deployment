@@ -74,6 +74,9 @@ ingressRoute:
       - websecure
     middlewares:
       - name: traefik-dashboard-auth
+api:
+  dashboard: true
+  insecure: true
 gateway:
   listeners:
     web:
