@@ -137,7 +137,6 @@ data:
       list:
         - name: "cBioDBAgent"
           label: "cBioDBAgent - Talk to cBioPortal Database"
-          default: true
           description: "An AI assistant for querying and exploring cBioPortal database."
           iconURL: "https://raw.githubusercontent.com/cBioPortal/cbioportal/refs/heads/master/src/main/resources/webapp/images/cbioportal_icon.png"
           showIconInHeader: true
