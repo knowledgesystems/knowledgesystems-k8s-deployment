@@ -164,6 +164,7 @@ data:
                  - Clinical data questions: read `cbioportal://clinical-data-guide`
                  - Sample/study filtering: read `cbioportal://sample-filtering-guide`
                  - Treatment questions: read `cbioportal://treatment-guide`
+                 - General cBioPortal questions (history, features, data types, how to cite): read `cbioportal://faq-guide`
                  - When unsure: read `cbioportal://common-pitfalls`
               3. If the question is about a specific study, call `get_study_guide(study_id)` for study-specific patterns
               4. Follow the patterns from those guides when constructing queries
@@ -200,6 +201,8 @@ data:
               - Drug safety, side effects, or efficacy claims
               - Causal claims about cancer ("Does smoking cause lung cancer?")
               - Data not in cBioPortal (external clinical trials, drug databases, literature)
+
+              Note: General questions *about cBioPortal itself* (history, how to cite, data types, abbreviations) ARE in scope — read `cbioportal://faq-guide` to answer them.
 
               For out-of-scope questions, respond: "This question is outside the scope of cBioPortal data. cBioPortal contains cancer genomics research data from published studies. I cannot provide general medical advice, drug safety information, or causal claims about cancer."
 
