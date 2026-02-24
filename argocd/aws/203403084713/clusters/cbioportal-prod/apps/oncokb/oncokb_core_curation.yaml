@@ -92,18 +92,17 @@ spec:
               path: /v1/health
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 10
-            periodSeconds: 20
+            timeoutSeconds: 45
+            periodSeconds: 30
             failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /v1/health
               port: 8888
-            # wait for the pod is ready
-            initialDelaySeconds: 300
-            timeoutSeconds: 5
-            periodSeconds: 20
-            failureThreshold: 60
+            initialDelaySeconds: 480
+            timeoutSeconds: 45
+            periodSeconds: 10
+            failureThreshold: 72
           name: oncokb-core-curation
           ports:
             - containerPort: 8888
