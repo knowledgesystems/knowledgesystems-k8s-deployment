@@ -13,7 +13,7 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - repoURL: registry-1.docker.io/bitnamicharts
+    - repoURL: https://charts.bitnami.com/bitnami
       targetRevision: 8.4.0
       chart: redis-cluster
       helm:

@@ -39,7 +39,8 @@ spec:
             - name: APPLICATION_APIPROXYURL
               value: "http://oncokb-core-beta:8888"
             - name: APPLICATION_REDIS_ENABLED
-              value: "true"
+              # we need the bitnomi legacy redis image
+              value: "false"
             - name: APPLICATION_REDIS_TYPE
               value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
