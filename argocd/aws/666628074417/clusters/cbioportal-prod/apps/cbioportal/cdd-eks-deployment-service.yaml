@@ -34,9 +34,9 @@ spec:
       - envFrom:
         - secretRef:
             name: cdd-eks-graphite
-        image: cbioportal/cdd:cdd-graphite-02082024 
+        image: cbioportal/cdd:json-workaround-20260225
         command: ["/bin/sh", "-c"]
-        args: ["autossh -i /cdd-ssl-graphite/graphite-ssl-key -M 0 -N -L 127.0.0.1:8443:msk-priv.synaptica.net:443 -L 127.0.0.1:7200:msk-priv.synaptica.net:7200 res_msk_cbioportal@msk-jump.synaptica.net & java -XX:+StartAttachListener -Dgraphite.url=http://localhost:7200/repositories/graphite -Dgraphite.username=$(GRAPHITE_USERNAME) -Dgraphite.password=$(GRAPHITE_PASSWORD) -Dgraphite.cddNamespacePrefix=http://data.mskcc.org/ontologies/ClinicalDataDictionary# -Dgraphite.cddGraphId=https://preprod3.msk.synaptica.net/concept_scheme/1528568e-da86-71e6-5cad-3c3eb9b692ed -Dslack.url=$(SLACK_URL) -jar cdd.jar"]
+        args: ["java -XX:+StartAttachListener -Xmx700m -Dslack.url=$(SLACK_URL) -jar cdd.jar"]
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
@@ -52,8 +52,8 @@ spec:
             port: 8080
           initialDelaySeconds: 10
           timeoutSeconds: 10
-          periodSeconds: 1
-          failureThreshold: 5
+          periodSeconds: 5
+          failureThreshold: 10
         name: cdd
         ports:
         - containerPort: 8080
