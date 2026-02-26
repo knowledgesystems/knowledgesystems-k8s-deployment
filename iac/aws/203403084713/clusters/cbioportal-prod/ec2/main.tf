@@ -17,9 +17,12 @@ resource "aws_ebs_volume" "gn-mongo-v1dot0-mongodb" {
   }
 }
 
+output "gn_mongo_v1dot0_volume_id" {
+  value = aws_ebs_volume.gn-mongo-v1dot0-mongodb.id
+}
+
 resource "aws_ebs_volume" "gn-mongo-v0dot32-grch38-ensembl95-mongodb" {
   availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
-  snapshot_id       = "snap-09872413811317dc9"
   size              = 500
   type              = "gp3"
 
@@ -34,4 +37,8 @@ resource "aws_ebs_volume" "gn-mongo-v0dot32-grch38-ensembl95-mongodb" {
   lifecycle {
     prevent_destroy = true
   }
+}
+
+output "gn_mongo_v0dot32_grch38_volume_id" {
+  value = aws_ebs_volume.gn-mongo-v0dot32-grch38-ensembl95-mongodb.id
 }
