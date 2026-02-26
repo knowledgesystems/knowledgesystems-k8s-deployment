@@ -92,15 +92,15 @@ spec:
               path: /v1/health
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 45
+            timeoutSeconds: 60
             periodSeconds: 30
             failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /v1/health
               port: 8888
-            initialDelaySeconds: 480
-            timeoutSeconds: 45
+            initialDelaySeconds: 540
+            timeoutSeconds: 60
             periodSeconds: 10
             failureThreshold: 72
           name: oncokb-core-curation
