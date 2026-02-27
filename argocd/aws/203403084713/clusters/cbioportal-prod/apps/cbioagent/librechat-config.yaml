@@ -17,6 +17,12 @@ data:
     # File strategy s3/firebase
     # fileStrategy: "s3"
 
+    # Allow internal k8s MCP server domains
+    mcpSettings:
+      allowedDomains:
+        - 'cbioagent-clickhouse-mcp'
+        - 'cbioportal-navigator'
+
     # Custom interface configuration
     interface:
       customWelcome: "Hey {{user.name}}! Welcome to cBioAgent (WIP ⚠️)."
