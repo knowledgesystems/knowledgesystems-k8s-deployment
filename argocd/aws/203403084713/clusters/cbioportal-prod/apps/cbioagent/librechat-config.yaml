@@ -20,6 +20,8 @@ data:
     # Custom interface configuration
     interface:
       customWelcome: "Hey {{user.name}}! Welcome to cBioAgent (WIP ⚠️)."
+      remoteAgents:
+        use: true
       # MCP Servers UI configuration
       mcpServers:
         placeholder: 'MCP Servers'
