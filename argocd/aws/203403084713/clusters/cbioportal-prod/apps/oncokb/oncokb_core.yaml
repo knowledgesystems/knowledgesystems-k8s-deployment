@@ -71,7 +71,7 @@ spec:
               "-XX:MaxRAM=2g",
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=$(DB_URL)/oncokb_core_v6_1?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=$(DB_URL)/oncokb_core_v6_2?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Dgenomenexus.api=https://www.genomenexus.org/",
@@ -103,15 +103,15 @@ spec:
               path: /v1/health
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 45
+            timeoutSeconds: 60
             periodSeconds: 30
             failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /v1/health
               port: 8888
-            initialDelaySeconds: 480
-            timeoutSeconds: 45
+            initialDelaySeconds: 600
+            timeoutSeconds: 60
             periodSeconds: 10
             failureThreshold: 72
           name: oncokb-core

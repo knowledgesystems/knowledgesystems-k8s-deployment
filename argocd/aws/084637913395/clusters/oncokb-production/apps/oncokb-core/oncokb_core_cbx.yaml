@@ -41,7 +41,7 @@ spec:
             [
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v6_1?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v6_2?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
@@ -68,18 +68,17 @@ spec:
               path: /v1/health
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 30
+            timeoutSeconds: 60
             periodSeconds: 30
             failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /v1/health
               port: 8888
-            # wait for the pod is ready
             initialDelaySeconds: 600
-            timeoutSeconds: 30
-            periodSeconds: 30
-            failureThreshold: 60
+            timeoutSeconds: 60
+            periodSeconds: 10
+            failureThreshold: 72
           name: oncokb-core-cbx
           ports:
             - containerPort: 8888
