@@ -20,12 +20,17 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: mongo:7.0
+          image: genomenexus/gn-mongo:1.2_grch38_ensembl95_mongodb_7.0.28_rc1
           imagePullPolicy: Always
           ports:
             - containerPort: 27017
               name: mongodb
               protocol: TCP
+          env:
+            - name: COLLECTION_UPDATE_LIST
+              value: "hotspot.mutation,signal.mutation"
+            - name: MONGO_DB
+              value: "annotator"
           volumeMounts:
             - name: data
               mountPath: /data/db
