@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: gn-mongo-grch38-ensembl95
+  name: gn-mongo-grch38-ensembl95-blue
   namespace: genome-nexus
   labels:
-    app: gn-mongo-grch38-ensembl95
+    app: gn-mongo-grch38-ensembl95-blue
 spec:
-  serviceName: gn-mongo-grch38-ensembl95
+  serviceName: gn-mongo-grch38-ensembl95-blue
   replicas: 1
   selector:
     matchLabels:
-      app: gn-mongo-grch38-ensembl95
+      app: gn-mongo-grch38-ensembl95-blue
   updateStrategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: gn-mongo-grch38-ensembl95
+        app: gn-mongo-grch38-ensembl95-blue
     spec:
       containers:
         - name: mongodb
@@ -51,10 +51,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gn-mongo-grch38-ensembl95
+  name: gn-mongo-grch38-ensembl95-blue
   namespace: genome-nexus
   labels:
-    app: gn-mongo-grch38-ensembl95
+    app: gn-mongo-grch38-ensembl95-blue
 spec:
   type: ClusterIP
   ports:
@@ -63,4 +63,4 @@ spec:
       protocol: TCP
       name: mongodb
   selector:
-    app: gn-mongo-grch38-ensembl95
+    app: gn-mongo-grch38-ensembl95-blue
