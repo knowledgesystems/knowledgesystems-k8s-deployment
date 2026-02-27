@@ -45,7 +45,6 @@ output "gn_mongo_v0dot32_grch38_volume_id" {
 
 resource "aws_ebs_volume" "gn-mongo-v1dot2-grch37-ensembl111-mongodb" {
   availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
-  snapshot_id       = "snap-071a48a83cc7e76b5"
   size              = 300
   type              = "gp3"
 
