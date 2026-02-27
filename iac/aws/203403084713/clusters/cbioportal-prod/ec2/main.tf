@@ -61,3 +61,7 @@ resource "aws_ebs_volume" "gn-mongo-v1dot2-grch37-ensembl111-mongodb" {
     prevent_destroy = true
   }
 }
+
+output "gn-mongo-v1dot2-grch37-ensembl111_volume_id" {
+  value = aws_ebs_volume.gn-mongo-v1dot2-grch37-ensembl111-mongodb.id
+}
