@@ -28,7 +28,7 @@ spec:
               protocol: TCP
           env:
             - name: COLLECTION_UPDATE_LIST
-              value: "hotspot.mutation,signal.mutation"
+              value: "hotspot.mutation,mutation_assessor.annotation"
             - name: MONGO_DB
               value: "annotator"
           volumeMounts:
