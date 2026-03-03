@@ -28,6 +28,7 @@ metadata:
     # add proxy protocol to header
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
 spec:
+  ingressClassName: nginx  # ADDED THIS LINE
   tls:
   # we need to keep the oncokb.org in the tls list so the SSL cert includes the domain so after forwarding, it would not have SSL cert error
   - hosts:
