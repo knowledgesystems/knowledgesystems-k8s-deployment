@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gn-mongo-genie-blue
+  namespace: genome-nexus
+  labels:
+    app: gn-mongo-genie-blue
+spec:
+  serviceName: gn-mongo-genie-blue
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gn-mongo-genie-blue
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: gn-mongo-genie-blue
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:4.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 27017
+              name: mongodb
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+              subPath: data/db      # Need this for Bitnami snapshot data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gn-mongodb-genie-pvc
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: gn-database
+          effect: NoSchedule
+      nodeSelector:
+        workload: gn-database
+        topology.kubernetes.io/zone: us-east-1b
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gn-mongo-genie-blue
+  namespace: genome-nexus
+  labels:
+    app: gn-mongo-genie-blue
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+      protocol: TCP
+      name: mongodb
+  selector:
+    app: gn-mongo-genie-blue
