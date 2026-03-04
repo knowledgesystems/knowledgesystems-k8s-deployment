@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gn-mongodb-gnap-pv
+  namespace: genome-nexus
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  csi:
+    driver: ebs.csi.aws.com
+    volumeHandle: vol-07c3fe86351fa06f6
+    fsType: ext4
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: topology.kubernetes.io/zone
+              operator: In
+              values:
+                - us-east-1b
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gn-mongodb-gnap-pvc
+  namespace: genome-nexus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: gn-mongodb-gnap-pv
