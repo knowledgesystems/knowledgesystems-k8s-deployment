@@ -7,6 +7,7 @@
 * [Kubernetes Deployment with GitOps](kubernetes-deployment-with-gitops/README.md)
   * [Argo CD](kubernetes-deployment-with-gitops/argocd.md)
 * [Essential Services](essential-services/README.md)
+  * [Traefik](essential-services/traefik.md) 
   * [Keycloak](essential-services/keycloak.md)
   * [Monitoring](essential-services/monitoring.md)
 * [Tutorials](tutorials)
