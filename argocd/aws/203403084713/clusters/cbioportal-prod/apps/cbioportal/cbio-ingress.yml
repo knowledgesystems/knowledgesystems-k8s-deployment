@@ -5,7 +5,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: traefik
     kubernetes.io/tls-acme: "true"
-    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-uablock-non-browser@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd
     acme.cert-manager.io/http01-ingress-class: traefik
   labels:
     app.kubernetes.io/instance: cbioportal
