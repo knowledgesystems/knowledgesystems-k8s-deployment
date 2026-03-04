@@ -1,0 +1,21 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: uablock-non-browser
+  namespace: default
+spec:
+  plugin:
+    uablock:
+      regex:
+        - ".*python-requests.*"
+        - ".*curl.*"
+        - ".*wget.*"
+        - ".*go-http-client.*"
+        - ".*axios.*"
+        - ".*fetch.*"
+        - ".*postman.*"
+        - ".*rest-client.*"
+        - ".*scrapy.*"
+        - ".*spider.*"
+        - ".*python.*"
+        - ".*fluxbio.*"
