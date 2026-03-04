@@ -69,7 +69,6 @@ resource "aws_ebs_volume" "gn-mongo-vep111-mongodb" {
   availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
   size              = 150
   type              = "gp3"
-  snapshot_id       = "snap-007ecb59d110c39ec"
 
   tags = {
     Name          = "gn-mongo-vep111-mongodb"
@@ -92,7 +91,6 @@ resource "aws_ebs_volume" "gn-mongo-gnap-mongodb" {
   availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
   size              = 100
   type              = "gp3"
-  snapshot_id       = "snap-080b041320a36270d"
 
   tags = {
     Name          = "gn-mongo-gnap-mongodb"
@@ -115,7 +113,6 @@ resource "aws_ebs_volume" "gn-mongo-genie-mongodb" {
   availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
   size              = 100
   type              = "gp3"
-  snapshot_id       = "snap-0617b81fca0195df7"
 
   tags = {
     Name          = "gn-mongo-genie-mongodb"
