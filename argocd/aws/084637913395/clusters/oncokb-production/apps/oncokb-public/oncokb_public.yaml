@@ -31,6 +31,8 @@ spec:
               value: "-Xmx1024m -Xms512m"
             - name: APPLICATION_FRONTEND_ENABLE_AUTH
               value: "FALSE"
+            - name: APPLICATION_REDIS_ENABLED
+              value: "false"
             - name: APPLICATION_REDIS_TYPE
               value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
