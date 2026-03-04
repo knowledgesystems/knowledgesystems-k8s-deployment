@@ -17,7 +17,7 @@ locals {
       labels = {
         (var.LABEL_KEY) = "cbioportal"
       }
-    } # DONE
+    }
     cbio-genie = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -34,7 +34,7 @@ locals {
       labels = {
         (var.LABEL_KEY) = "cbio-genie"
       }
-    } # DONE
+    }
     cbio-dev = {
       instance_types = ["r7g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -51,14 +51,14 @@ locals {
       labels = {
         (var.LABEL_KEY) = "cbio-dev"
       }
-    } # DONE
+    }
     argocd = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 2
       max_size       = 3
       min_size       = 2
-    } # DONE
+    }
     redis = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -79,7 +79,7 @@ locals {
       labels = {
         (var.LABEL_KEY) = "redis"
       }
-    } # DONE
+    }
     datadog = {
       instance_types = ["t3.medium"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -96,7 +96,7 @@ locals {
       labels = {
         (var.LABEL_KEY) = "datadog"
       }
-    } # DONE
+    }
     ingress = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -113,7 +113,7 @@ locals {
       labels = {
         (var.LABEL_KEY) = "ingress"
       }
-    } # DONE
+    }
     paladin = {
       instance_types = ["t3.xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -135,7 +135,7 @@ locals {
         cdsi-team  = "data-engineering"
         cdsi-owner = "moored2@mskcc.org"
       }
-    } # DONE
+    }
     cbio-session = {
       instance_types = ["r7i.xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -159,7 +159,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    } # DONE
+    }
     gn-database = {
       instance_types = ["r7i.2xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -260,7 +260,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "hweej@mskcc.org"
       }
-    } # DONE
+    }
     keycloak = {
       instance_types = ["t3.medium"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -277,7 +277,7 @@ locals {
       labels = {
         (var.LABEL_KEY) = "keycloak"
       }
-    } # DONE
+    }
     oncokb-beta = {
       instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -303,7 +303,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    } # DONE
+    }
     oncokb = {
       instance_types = ["r7g.2xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -325,7 +325,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    } # DONE
+    }
     oncokb-redis = {
       instance_types = ["r7i.2xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -349,7 +349,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    } # DONE
+    }
     oncokb-af = {
       instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -374,7 +374,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    } # DONE
+    }
     oncokb-cron = {
       instance_types = ["t4g.small"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -396,7 +396,7 @@ locals {
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
-    } # DONE
+    }
     cbioagent = {
       instance_types = ["m7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -418,7 +418,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    } # DONE
+    }
     cbioagent-db = {
       instance_types = ["r7i.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -442,7 +442,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    } # DONE
+    }
     prometheus = {
       instance_types = ["t3.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -464,7 +464,7 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    } # DONE
+    }
     k8s-cost = {
       instance_types = ["t3.small"]
       ami_type       = "BOTTLEROCKET_x86_64"
@@ -486,7 +486,24 @@ locals {
         cdsi-team  = "data-visualization"
         cdsi-owner = "nasirz1@mskcc.org"
       }
-    } # DONE
+    }
+    cbio-api = {
+      instance_types = ["r7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbio-api"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbio-api"
+      }
+    }
   }
 }
 
