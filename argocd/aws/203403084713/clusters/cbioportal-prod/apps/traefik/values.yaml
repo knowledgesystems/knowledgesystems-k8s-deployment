@@ -81,3 +81,6 @@ experimental:
     ipblock:
       moduleName: "github.com/kvncrw/denyip"
       version: "v1.1.0"
+    uablock:
+      moduleName: "github.com/agence-gaya/traefik-plugin-blockuseragent"
+      version: "v0.1.7"
