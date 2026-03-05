@@ -195,7 +195,7 @@ Fix:
       ```
       Add or update this in the application's `values.yaml` in this repo, then use ArgoCD to sync the change.
 
-   2. Option B: Raw Kubernetes deployment
+   2. Raw Kubernetes deployment
 
       In the deployment manifest in this repo, add `imagePullSecrets` under `spec.template.spec`:
       ```yaml
@@ -207,7 +207,7 @@ Fix:
       ```
       Commit the change and use ArgoCD to sync.
 
-   3. Option C: Service account used by the deployment
+   3. Service account used by the deployment
 
       If the pods use a dedicated service account, add `imagePullSecrets` to the service account manifest in this repo so all pods using that account automatically get the pull secret:
       ```yaml
@@ -219,5 +219,8 @@ Fix:
       kubectl -n <namespace> get pod <pod-name> -o jsonpath='{.spec.serviceAccountName}{"\n"}'
       ```
       Commit the service account change and use ArgoCD to sync.
-
+   4. In cases where there's no ArgoCD, kubectl can be used to directly patch deployments/pods/service accounts. For example, use the command below to add the secret to a service account:
+      ```shell
+      kubectl -n <namespace> patch serviceaccount <sa-name> -p '{"imagePullSecrets":[{"name":"<secret-name>"}]}'
+      ```
 3. Once ArgoCD syncs, new pods will pick up the pull secret automatically.
