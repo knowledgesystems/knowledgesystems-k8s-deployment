@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.1.0.825967318387">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.1.0.826046565269">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.1.0">
@@ -28,12 +28,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../resources/css/retype.css?v=4.1.0.825967318387" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=4.1.0.826046565269" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=4.1.0.825967318387" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=4.1.0.826046565269" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=4.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=4.1.0.825967318387" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=4.1.0.825967318387" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=4.1.0.826046565269" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=4.1.0.826046565269" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -373,6 +373,73 @@ stringData:
 <li>Check the new node&#x27;s max pod capacity: <code translate="no" v-pre>kubectl get node &lt;node&gt; -o jsonpath='{.status.capacity.pods}'</code>.</li>
 <li>Raise the nodegroup instance size in terraform configuration</li>
 <li>Rerun <code translate="no" v-pre>terraform apply</code> to let the kube-proxy or other addon finish.</li>
+</ol>
+<doc-anchor-target id="docker-hub-rate-limit---429-too-many-requests">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#docker-hub-rate-limit---429-too-many-requests">#</doc-anchor-trigger>
+        <span>Docker Hub Rate Limit - 429 Too Many Requests</span>
+    </h2>
+</doc-anchor-target>
+<p>You may see image pull errors like:</p>
+<div id="docker-hub-rate-limit---429-too-many-requests-code-1" class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">failed to pull and unpack image &quot;docker.io/library/redis:7.2.7-alpine&quot;: ... 429 Too Many Requests
+toomanyrequests: You have reached your unauthenticated pull rate limit</code></pre>
+</doc-codeblock></div>
+<p>This means the node is pulling from Docker Hub anonymously and has hit the rate limit. The fix is to provide a Docker Hub pull secret and make sure pods actually use it.</p>
+<p>Fix:</p>
+<ol>
+<li><p>Create the Docker Hub secret in the same namespace as the failing pod.</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">kubectl -n &lt;namespace&gt; create secret docker-registry &lt;secret-name&gt; \
+  --docker-server=&quot;https://index.docker.io/v1/&quot; \
+  --docker-username=&lt;user&gt; \
+  --docker-password=&lt;token-or-password&gt; \
+  --docker-email=&lt;email&gt;</code></pre>
+</doc-codeblock></div>
+<p>Note: Image pull secrets are namespace scoped, so the secret must exist in each namespace that needs it.</p>
+</li>
+<li><p>Reference the secret from the workload — choose the option that matches how the pod was deployed:</p>
+<ol>
+<li><p>Helm chart deployment</p>
+<p>Consult the Helm chart&#x27;s documentation for the appropriate value to set image pull secrets. It is commonly something like:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">imagePullSecrets:
+  - name: &lt;secret-name&gt;</code></pre>
+</doc-codeblock></div>
+<p>Add or update this in the application&#x27;s <code translate="no" v-pre>values.yaml</code> in this repo, then use ArgoCD to sync the change.</p>
+</li>
+<li><p>Raw Kubernetes deployment</p>
+<p>In the deployment manifest in this repo, add <code translate="no" v-pre>imagePullSecrets</code> under <code translate="no" v-pre>spec.template.spec</code>:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">spec:
+  template:
+    spec:
+      imagePullSecrets:
+        - name: &lt;secret-name&gt;</code></pre>
+</doc-codeblock></div>
+<p>Commit the change and use ArgoCD to sync.</p>
+</li>
+<li><p>Service account used by the deployment</p>
+<p>If the pods use a dedicated service account, add <code translate="no" v-pre>imagePullSecrets</code> to the service account manifest in this repo so all pods using that account automatically get the pull secret:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">imagePullSecrets:
+  - name: &lt;secret-name&gt;</code></pre>
+</doc-codeblock></div>
+<p>To find which service account a pod uses:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">kubectl -n &lt;namespace&gt; get pod &lt;pod-name&gt; -o jsonpath='{.spec.serviceAccountName}{&quot;\n&quot;}'</code></pre>
+</doc-codeblock></div>
+<p>Commit the service account change and use ArgoCD to sync.</p>
+</li>
+<li><p>In cases where there&#x27;s no ArgoCD, kubectl can be used to directly patch deployments/pods/service accounts. For example, use the command below to add the secret to a service account:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">kubectl -n &lt;namespace&gt; patch serviceaccount &lt;sa-name&gt; -p '{&quot;imagePullSecrets&quot;:[{&quot;name&quot;:&quot;&lt;secret-name&gt;&quot;}]}'</code></pre>
+</doc-codeblock></div>
+</li>
+</ol>
+</li>
+<li><p>Once ArgoCD syncs, new pods will pick up the pull secret automatically.</p>
+</li>
 </ol>
 
                 
