@@ -26,8 +26,8 @@ spec:
         - name: SERVER_PORT
           value: "8888"
         - name: MONGODB_URI
-          value: mongodb://gnap-gn-mongo-v1dot0-mongodb:27017/annotator?connectTimeoutMS=120000
-        image: genomenexus/gn-spring-boot:2.1.0
+          value: mongodb://gn-mongo-gnap-blue:27017/annotator?connectTimeoutMS=120000
+        image: genomenexus/gn-spring-boot:2.1.2
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -37,8 +37,8 @@ spec:
             "-Dvep.url=http://gn-vep-111.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Dcache.enabled=true",
             "-Dreplace_old_hgnc_gene_symbol=true",
-            "-Dgenomenexus.server.version=2.1.0",
-            "-Dspring.mongodb.embedded.version=1.0",
+            "-Dgenomenexus.server.version=2.1.2",
+            "-Dspring.mongodb.embedded.version=1.2",
             "-Dvep.max_page_size=5000",
             "-Dgn_vep.timeout.seconds=300",
             "-jar",

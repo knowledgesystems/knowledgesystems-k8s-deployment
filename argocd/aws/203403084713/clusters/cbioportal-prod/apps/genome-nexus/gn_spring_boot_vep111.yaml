@@ -25,13 +25,13 @@ spec:
         - name: SERVER_PORT
           value: "8080"
         - name: MONGODB_URI
-          value: mongodb://gn-vep111-mongodb:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-vep111-blue:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:2.0.3
+        image: genomenexus/gn-spring-boot:2.1.2
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -39,7 +39,8 @@ spec:
             # include shenandoah)
             "-Dvep.url=http://gn-vep-111.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Dcache.enabled=true",
-            "-Dgenomenexus.server.version=2.0.3",
+            "-Dgenomenexus.server.version=2.1.2",
+            "-Dspring.mongodb.embedded.version=1.2",
             "-Xms100m",
             "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
