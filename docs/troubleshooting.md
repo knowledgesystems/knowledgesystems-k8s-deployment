@@ -165,3 +165,32 @@ Fix:
 2. Check the new node's max pod capacity: `kubectl get node <node> -o jsonpath='{.status.capacity.pods}'`.
 3. Raise the nodegroup instance size in terraform configuration
 4. Rerun `terraform apply` to let the kube-proxy or other addon finish.
+
+## Docker Hub Rate Limit - 429 Too Many Requests
+You may see image pull errors like:
+```
+failed to pull and unpack image "docker.io/library/redis:7.2.7-alpine": ... 429 Too Many Requests
+toomanyrequests: You have reached your unauthenticated pull rate limit
+```
+This means the node is pulling from Docker Hub anonymously and has hit the rate limit. The fix is to provide a Docker Hub pull secret and make sure pods actually use it.
+
+Fix:
+1. Create the Docker Hub secret in the same namespace as the failing pod.
+   ```shell
+   kubectl -n <namespace> create secret docker-registry <secret-name> \
+     --docker-server="https://index.docker.io/v1/" \
+     --docker-username=<user> \
+     --docker-password=<token-or-password> \
+     --docker-email=<email>
+   ```
+   Note: Image pull secrets are namespace scoped, so the secret must exist in each namespace that needs it.
+2. Identify which ServiceAccount the pod uses. You will need to patch these service accounts with a image pull secret.
+   ```shell
+   kubectl -n <namespace> get pod <pod-name> -o jsonpath='{.spec.serviceAccountName}{"\n"}{.spec.imagePullSecrets}{"\n"}'
+   ```
+3. Attach the secret to the ServiceAccount used by the pod (or the pod spec).
+   ```shell
+   kubectl -n <namespace> patch serviceaccount <sa-name> \
+     -p '{"imagePullSecrets":[{"name":"secret-name"}]}'
+   ```
+4. Restart the workload so new pods pick up the secret.
