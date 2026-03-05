@@ -184,13 +184,40 @@ Fix:
      --docker-email=<email>
    ```
    Note: Image pull secrets are namespace scoped, so the secret must exist in each namespace that needs it.
-2. Identify which ServiceAccount the pod uses. You will need to patch these service accounts with a image pull secret.
-   ```shell
-   kubectl -n <namespace> get pod <pod-name> -o jsonpath='{.spec.serviceAccountName}{"\n"}{.spec.imagePullSecrets}{"\n"}'
-   ```
-3. Attach the secret to the ServiceAccount used by the pod (or the pod spec).
-   ```shell
-   kubectl -n <namespace> patch serviceaccount <sa-name> \
-     -p '{"imagePullSecrets":[{"name":"secret-name"}]}'
-   ```
-4. Restart the workload so new pods pick up the secret.
+
+2. Reference the secret from the workload — choose the option that matches how the pod was deployed:
+   1. Helm chart deployment
+
+      Consult the Helm chart's documentation for the appropriate value to set image pull secrets. It is commonly something like:
+      ```yaml
+      imagePullSecrets:
+        - name: <secret-name>
+      ```
+      Add or update this in the application's `values.yaml` in this repo, then use ArgoCD to sync the change.
+
+   2. Option B: Raw Kubernetes deployment
+
+      In the deployment manifest in this repo, add `imagePullSecrets` under `spec.template.spec`:
+      ```yaml
+      spec:
+        template:
+          spec:
+            imagePullSecrets:
+              - name: <secret-name>
+      ```
+      Commit the change and use ArgoCD to sync.
+
+   3. Option C: Service account used by the deployment
+
+      If the pods use a dedicated service account, add `imagePullSecrets` to the service account manifest in this repo so all pods using that account automatically get the pull secret:
+      ```yaml
+      imagePullSecrets:
+        - name: <secret-name>
+      ```
+      To find which service account a pod uses:
+      ```shell
+      kubectl -n <namespace> get pod <pod-name> -o jsonpath='{.spec.serviceAccountName}{"\n"}'
+      ```
+      Commit the service account change and use ArgoCD to sync.
+
+3. Once ArgoCD syncs, new pods will pick up the pull secret automatically.
