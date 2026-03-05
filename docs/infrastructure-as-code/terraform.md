@@ -33,6 +33,7 @@ Only run terraform commands from the root module directory. Running them from a 
 By default, submodules inside `iac` directory use the `default` aws cli profile when running commands. To use a custom profile, set the `TF_VAR_AWS_PROFILE` environment variable.
 ```shell
 export TF_VAR_AWS_PROFILE=<profile-name>
+export AWS_PROFILE=<profile-name>
 ```
 
 ## Usage
