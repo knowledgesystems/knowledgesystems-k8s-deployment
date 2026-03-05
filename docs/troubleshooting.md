@@ -165,3 +165,62 @@ Fix:
 2. Check the new node's max pod capacity: `kubectl get node <node> -o jsonpath='{.status.capacity.pods}'`.
 3. Raise the nodegroup instance size in terraform configuration
 4. Rerun `terraform apply` to let the kube-proxy or other addon finish.
+
+## Docker Hub Rate Limit - 429 Too Many Requests
+You may see image pull errors like:
+```
+failed to pull and unpack image "docker.io/library/redis:7.2.7-alpine": ... 429 Too Many Requests
+toomanyrequests: You have reached your unauthenticated pull rate limit
+```
+This means the node is pulling from Docker Hub anonymously and has hit the rate limit. The fix is to provide a Docker Hub pull secret and make sure pods actually use it.
+
+Fix:
+1. Create the Docker Hub secret in the same namespace as the failing pod.
+   ```shell
+   kubectl -n <namespace> create secret docker-registry <secret-name> \
+     --docker-server="https://index.docker.io/v1/" \
+     --docker-username=<user> \
+     --docker-password=<token-or-password> \
+     --docker-email=<email>
+   ```
+   Note: Image pull secrets are namespace scoped, so the secret must exist in each namespace that needs it.
+
+2. Reference the secret from the workload — choose the option that matches how the pod was deployed:
+   1. Helm chart deployment
+
+      Consult the Helm chart's documentation for the appropriate value to set image pull secrets. It is commonly something like:
+      ```yaml
+      imagePullSecrets:
+        - name: <secret-name>
+      ```
+      Add or update this in the application's `values.yaml` in this repo, then use ArgoCD to sync the change.
+
+   2. Raw Kubernetes deployment
+
+      In the deployment manifest in this repo, add `imagePullSecrets` under `spec.template.spec`:
+      ```yaml
+      spec:
+        template:
+          spec:
+            imagePullSecrets:
+              - name: <secret-name>
+      ```
+      Commit the change and use ArgoCD to sync.
+
+   3. Service account used by the deployment
+
+      If the pods use a dedicated service account, add `imagePullSecrets` to the service account manifest in this repo so all pods using that account automatically get the pull secret:
+      ```yaml
+      imagePullSecrets:
+        - name: <secret-name>
+      ```
+      To find which service account a pod uses:
+      ```shell
+      kubectl -n <namespace> get pod <pod-name> -o jsonpath='{.spec.serviceAccountName}{"\n"}'
+      ```
+      Commit the service account change and use ArgoCD to sync.
+   4. In cases where there's no ArgoCD, kubectl can be used to directly patch deployments/pods/service accounts. For example, use the command below to add the secret to a service account:
+      ```shell
+      kubectl -n <namespace> patch serviceaccount <sa-name> -p '{"imagePullSecrets":[{"name":"<secret-name>"}]}'
+      ```
+3. Once ArgoCD syncs, new pods will pick up the pull secret automatically.
