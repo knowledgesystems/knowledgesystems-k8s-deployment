@@ -10,6 +10,13 @@ librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
 
+image:
+  repository: cbioportal/librechat
+  registry: docker.io
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v0.8.3-rc1-custom-v5"
+
 mongodb:
   enabled: false
 
