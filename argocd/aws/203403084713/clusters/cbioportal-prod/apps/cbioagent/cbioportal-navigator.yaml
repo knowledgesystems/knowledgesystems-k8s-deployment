@@ -20,6 +20,10 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8002
+          envFrom:
+            - secretRef:
+                name: cbioportal-navigator-env
+                optional: true
           env:
             - name: CBIOPORTAL_BASE_URL
               value: https://www.cbioportal.org
