@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal-api
     run: cbioportal-backend-public-api-blue
     tags.datadoghq.com/env: eks-public-api
     tags.datadoghq.com/service: cbioportal
@@ -276,7 +277,7 @@ spec:
               value: "X-Forwarded-For:http.client_ip,X-Real-IP:http.client_ip"
           envFrom:
             - secretRef:
-                name: cbioportal-backend-public-api-blue
+                name: cbioportal-public-blue
           image: cbioportal/cbioportal:7.0.0-rc.7-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
@@ -337,6 +338,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal-api
     run: cbioportal-backend-public-api-blue
   name: cbioportal-backend-public-api-blue
 spec:
