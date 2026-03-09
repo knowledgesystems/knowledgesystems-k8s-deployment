@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal-api
     run: cbioportal-backend-public-api-green
     tags.datadoghq.com/env: eks-public-api
     tags.datadoghq.com/service: cbioportal
@@ -337,6 +338,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/instance: cbioportal-api
     run: cbioportal-backend-public-api-green
   name: cbioportal-backend-public-api-green
 spec:
