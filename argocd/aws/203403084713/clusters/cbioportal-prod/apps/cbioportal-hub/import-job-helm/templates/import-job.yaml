@@ -38,14 +38,19 @@ spec:
 
               echo "Changed studies: $CHANGED_STUDIES"
 
-              # Sparse checkout only the changed study directories
+              # Sparse checkout only the changed study directories (skip LFS during clone)
               mkdir /datahub && cd /datahub
               git init
               git remote add origin https://github.com/cBioPortal/datahub.git
               git sparse-checkout init
               git sparse-checkout set $CHANGED_STUDIES
-              git fetch origin "$PR_BRANCH" --depth=1
-              git checkout FETCH_HEAD
+              GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1
+              GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD
+
+              # Pull LFS objects only for the study directories we need
+              for study_dir in $CHANGED_STUDIES; do
+                git lfs pull --include="$study_dir/**" || true
+              done
 
               for study_dir in $CHANGED_STUDIES; do
                 if [ -f "$study_dir/meta_study.txt" ]; then
