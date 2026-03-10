@@ -76,10 +76,10 @@ spec:
           resources:
             requests:
               memory: 2Gi
-              ephemeral-storage: 2Gi
+              ephemeral-storage: 5Gi
             limits:
               memory: 4Gi
-              ephemeral-storage: 5Gi
+              ephemeral-storage: 20Gi
           volumeMounts:
             - name: properties
               mountPath: /cbioportal/application.properties
