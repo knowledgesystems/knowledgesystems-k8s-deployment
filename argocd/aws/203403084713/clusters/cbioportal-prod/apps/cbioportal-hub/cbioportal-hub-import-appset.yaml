@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: datahub-pr-import-set
+  namespace: argocd
+spec:
+  generators:
+    - pullRequest:
+        github:
+          owner: cBioPortal
+          repo: datahub
+        requeueAfterSeconds: 120
+  template:
+    metadata:
+      name: 'datahub-import-{{number}}'
+    spec:
+      destination:
+        namespace: default
+        server: 'https://kubernetes.default.svc'
+      project: default
+      source:
+        repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+        path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-hub/import-job-helm
+        targetRevision: HEAD
+        helm:
+          parameters:
+            - name: prNumber
+              value: '{{number}}'
+            - name: prBranch
+              value: '{{branch}}'
+            - name: headSha
+              value: '{{head_sha}}'
+      syncPolicy:
+        automated:
+          selfHeal: true
