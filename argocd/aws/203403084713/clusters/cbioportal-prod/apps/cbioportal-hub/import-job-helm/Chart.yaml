@@ -1,0 +1,6 @@
+apiVersion: v2
+name: datahub-import-job
+description: Import job for datahub PR studies into cbioportal-hub
+type: application
+version: 1.0.0
+appVersion: "1.0"
