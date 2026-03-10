@@ -36,6 +36,7 @@ spec:
             - "--persistence.cache_type=no-cache"
             - "--db.suppress_schema_version_mismatch_errors=true"
             - "--server.port=8080"
+            - "--skin.blurb=This is a development instance for previewing studies from <a href=\"https://github.com/cBioPortal/datahub\">cBioPortal/datahub</a> pull requests. Data here may be incomplete or incorrect. For production use, visit <a href=\"https://www.cbioportal.org\">www.cbioportal.org</a>."
           ports:
             - containerPort: 8080
               protocol: TCP
