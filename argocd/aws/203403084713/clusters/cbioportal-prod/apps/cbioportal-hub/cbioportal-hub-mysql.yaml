@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cbioportal-hub-mysql-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: gp2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-hub-mysql
+  namespace: default
+  labels:
+    app: cbioportal-hub-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cbioportal-hub-mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cbioportal-hub-mysql
+    spec:
+      initContainers:
+        - name: init-cgds-sql
+          image: cbioportal/cbioportal:6.4.4
+          command: ["sh", "-c", "cp /cbioportal/db-scripts/cgds.sql /docker-entrypoint-initdb.d/01-cgds.sql"]
+          volumeMounts:
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+        - name: init-seed-sql
+          image: curlimages/curl:8.5.0
+          command:
+            - sh
+            - -c
+            - |
+              curl -sL https://github.com/cBioPortal/datahub/raw/master/seedDB/seed-cbioportal_hg19_hg38_v2.14.5.sql.gz \
+                -o /docker-entrypoint-initdb.d/02-seed.sql.gz
+          volumeMounts:
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          args:
+            - --local-infile=1
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root_password
+            - name: MYSQL_DATABASE
+              value: cbioportal
+            - name: MYSQL_USER
+              value: cbio_user
+            - name: MYSQL_PASSWORD
+              value: somepassword
+          ports:
+            - containerPort: 3306
+          resources:
+            requests:
+              memory: 1Gi
+            limits:
+              memory: 2Gi
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: cbioportal-hub-mysql-pvc
+        - name: initdb
+          emptyDir: {}
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-hub-mysql
+  namespace: default
+  labels:
+    app: cbioportal-hub-mysql
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: cbioportal-hub-mysql
+  type: ClusterIP

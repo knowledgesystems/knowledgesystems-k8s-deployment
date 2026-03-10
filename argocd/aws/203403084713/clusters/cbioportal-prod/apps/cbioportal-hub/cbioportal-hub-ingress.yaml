@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    acme.cert-manager.io/http01-ingress-class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/tls-acme: "true"
+  labels:
+    app.kubernetes.io/instance: cbioportal-hub
+  name: cbioportal-hub-ingress
+  namespace: default
+spec:
+  rules:
+    - host: hub.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-hub
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - hub.cbioportal.org
+      secretName: hub-cbioportal-cert
