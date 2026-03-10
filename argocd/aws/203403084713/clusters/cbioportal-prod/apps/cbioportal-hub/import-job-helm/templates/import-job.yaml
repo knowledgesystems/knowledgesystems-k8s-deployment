@@ -1,0 +1,92 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: datahub-import-{{ .Values.prNumber }}-{{ .Values.headSha | trunc 7 }}
+spec:
+  ttlSecondsAfterFinished: 86400
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: importer
+          image: cbioportal/cbioportal:6.4.4
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -e
+
+              # Install dependencies
+              apt-get update && apt-get install -y git git-lfs curl jq > /dev/null 2>&1
+              git lfs install
+
+              PR_NUMBER={{ .Values.prNumber }}
+              PR_BRANCH={{ .Values.prBranch }}
+
+              # Use GitHub API to detect changed study directories
+              echo "Fetching changed files for PR #$PR_NUMBER..."
+              CHANGED_STUDIES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/pulls/$PR_NUMBER/files?per_page=300" \
+                | jq -r '.[].filename' \
+                | grep '^public/' \
+                | cut -d'/' -f1-2 \
+                | sort -u)
+
+              if [ -z "$CHANGED_STUDIES" ]; then
+                echo "No changed studies detected in public/."
+                exit 0
+              fi
+
+              echo "Changed studies: $CHANGED_STUDIES"
+
+              # Sparse checkout only the changed study directories
+              mkdir /datahub && cd /datahub
+              git init
+              git remote add origin https://github.com/cBioPortal/datahub.git
+              git sparse-checkout init
+              git sparse-checkout set $CHANGED_STUDIES
+              git fetch origin "$PR_BRANCH" --depth=1
+              git checkout FETCH_HEAD
+
+              for study_dir in $CHANGED_STUDIES; do
+                if [ -f "$study_dir/meta_study.txt" ]; then
+                  echo "Importing $study_dir..."
+
+                  # Import gene panels if present
+                  for panel in $study_dir/data_gene_panel_*.txt; do
+                    [ -f "$panel" ] && /core/scripts/importGenePanel.pl --data "$panel" || true
+                  done
+
+                  # Import study (overwrite existing)
+                  metaImport.py -u http://cbioportal-hub:80 \
+                    -s /datahub/$study_dir -o
+                else
+                  echo "Skipping $study_dir (no meta_study.txt)"
+                fi
+              done
+
+              echo "All imports complete."
+          env:
+            - name: PORTAL_HOME
+              value: /cbioportal
+          resources:
+            requests:
+              memory: 2Gi
+              ephemeral-storage: 2Gi
+            limits:
+              memory: 4Gi
+              ephemeral-storage: 5Gi
+          volumeMounts:
+            - name: properties
+              mountPath: /cbioportal/application.properties
+              subPath: application.properties
+      volumes:
+        - name: properties
+          configMap:
+            name: cbioportal-hub-import-config
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"

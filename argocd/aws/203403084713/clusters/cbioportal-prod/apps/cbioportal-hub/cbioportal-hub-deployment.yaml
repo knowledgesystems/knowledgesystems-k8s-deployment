@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-hub
+  namespace: default
+  labels:
+    run: cbioportal-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioportal-hub
+  template:
+    metadata:
+      labels:
+        run: cbioportal-hub
+    spec:
+      containers:
+        - name: cbioportal-hub
+          image: cbioportal/cbioportal:6.4.4
+          workingDir: /cbioportal-webapp
+          command: ["java"]
+          args:
+            - "-Xms512m"
+            - "-Xmx4g"
+            - "-cp"
+            - "/cbioportal-webapp:/cbioportal-webapp/lib/*"
+            - "org.cbioportal.PortalApplication"
+            - "--authenticate=false"
+            - "--sitemaps=false"
+            - "--spring.datasource.url=jdbc:mysql://cbioportal-hub-mysql:3306/cbioportal?useSSL=false&allowPublicKeyRetrieval=true"
+            - "--spring.datasource.username=cbio_user"
+            - "--spring.datasource.password=somepassword"
+            - "--spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver"
+            - "--spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect"
+            - "--persistence.cache_type=no-cache"
+            - "--db.suppress_schema_version_mismatch_errors=true"
+            - "--server.port=8080"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              memory: 2Gi
+            limits:
+              memory: 4Gi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 45
+            timeoutSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 180
+            timeoutSeconds: 5
+            periodSeconds: 15
+            failureThreshold: 5
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-hub
+  namespace: default
+  labels:
+    run: cbioportal-hub
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  selector:
+    run: cbioportal-hub
+  type: ClusterIP
