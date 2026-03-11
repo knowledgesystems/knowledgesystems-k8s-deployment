@@ -51,8 +51,13 @@ spec:
       containers:
         - name: mysql
           image: mysql:8.0
+          lifecycle:
+            postStart:
+              exec:
+                command: ["sh", "-c", "mkdir -p /var/lib/mysql/tmp"]
           args:
             - --local-infile=1
+            - --tmpdir=/var/lib/mysql/tmp
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: root_password
