@@ -9,6 +9,8 @@ spec:
         github:
           owner: cBioPortal
           repo: datahub
+          labels:
+            - preview
         requeueAfterSeconds: 120
   template:
     metadata:
