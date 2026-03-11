@@ -93,9 +93,16 @@ spec:
                   continue
                 fi
 
-                # Import gene panels if present
+                # Import gene panels if present (call Java directly, Perl wrapper is broken)
                 for panel in $study_dir/data_gene_panel_*.txt; do
-                  [ -f "$panel" ] && /core/scripts/importGenePanel.pl --data "$panel" || true
+                  if [ -f "$panel" ]; then
+                    echo "Importing gene panel: $panel"
+                    java -Xmx512M -Dspring.profiles.active=dbcp \
+                      -cp /core/core-1.0.16.jar \
+                      -DPORTAL_HOME=/cbioportal \
+                      org.mskcc.cbio.portal.scripts.ImportGenePanel \
+                      --data "$panel" --noprogress 2>&1 || true
+                  fi
                 done
 
                 # Try validated import first, fall back to direct import on validation errors
