@@ -20,16 +20,17 @@ spec:
 
               echo "Downloading reference gene panels from datahub..."
               mkdir -p /panels
-              FILES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/contents/reference_data/gene_panels" \
-                | jq -r '.[].download_url')
+              # Get filenames via API, then download via media URL (bypasses LFS pointer issue)
+              FILENAMES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/contents/reference_data/gene_panels" \
+                | jq -r '.[].name')
 
-              TOTAL=$(echo "$FILES" | wc -l)
+              TOTAL=$(echo "$FILENAMES" | wc -l)
               INDEX=0
               FAILURES=0
 
-              for url in $FILES; do
+              for filename in $FILENAMES; do
                 INDEX=$((INDEX + 1))
-                filename=$(basename "$url")
+                url="https://media.githubusercontent.com/media/cBioPortal/datahub/master/reference_data/gene_panels/${filename}"
                 echo "[$INDEX/$TOTAL] Importing $filename..."
                 curl -sfL "$url" -o "/panels/$filename"
                 if [ $? -ne 0 ]; then
