@@ -24,10 +24,31 @@ spec:
               PR_BRANCH={{ .Values.prBranch }}
               IMPORT_FAILURES=0
 
-              # Use GitHub API to detect changed study directories
+              # Use GitHub API to detect changed files
               echo "Fetching changed files for PR #$PR_NUMBER..."
-              CHANGED_STUDIES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/pulls/$PR_NUMBER/files?per_page=300" \
-                | jq -r '.[].filename' \
+              ALL_CHANGED_FILES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/pulls/$PR_NUMBER/files?per_page=300" \
+                | jq -r '.[].filename')
+
+              # Import any changed reference gene panels first
+              CHANGED_PANELS=$(echo "$ALL_CHANGED_FILES" | grep '^reference_data/gene_panels/data_gene_panel_' || true)
+              if [ -n "$CHANGED_PANELS" ]; then
+                echo "Importing changed reference gene panels..."
+                mkdir -p /panels
+                for panel_path in $CHANGED_PANELS; do
+                  filename=$(basename "$panel_path")
+                  url="https://media.githubusercontent.com/media/cBioPortal/datahub/${PR_BRANCH}/${panel_path}"
+                  echo "  Downloading $filename..."
+                  curl -sfL "$url" -o "/panels/$filename" || continue
+                  java -Xmx512M -Dspring.profiles.active=dbcp \
+                    -cp /core/core-1.0.16.jar \
+                    -DPORTAL_HOME=/cbioportal \
+                    org.mskcc.cbio.portal.scripts.ImportGenePanel \
+                    --data "/panels/$filename" --noprogress 2>&1 || true
+                done
+                rm -rf /panels
+              fi
+
+              CHANGED_STUDIES=$(echo "$ALL_CHANGED_FILES" \
                 | grep '^public/' \
                 | cut -d'/' -f1-2 \
                 | sort -u)

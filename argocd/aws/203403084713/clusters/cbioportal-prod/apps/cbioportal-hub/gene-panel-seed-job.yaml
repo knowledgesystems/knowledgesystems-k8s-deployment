@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gene-panel-seed
+spec:
+  ttlSecondsAfterFinished: 86400
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: importer
+          image: cbioportal/cbioportal:6.4.4
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -e
+              apt-get update && apt-get install -y curl jq > /dev/null 2>&1
+              set +e
+
+              echo "Downloading reference gene panels from datahub..."
+              mkdir -p /panels
+              FILES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/contents/reference_data/gene_panels" \
+                | jq -r '.[].download_url')
+
+              TOTAL=$(echo "$FILES" | wc -l)
+              INDEX=0
+              FAILURES=0
+
+              for url in $FILES; do
+                INDEX=$((INDEX + 1))
+                filename=$(basename "$url")
+                echo "[$INDEX/$TOTAL] Importing $filename..."
+                curl -sfL "$url" -o "/panels/$filename"
+                if [ $? -ne 0 ]; then
+                  echo "  WARNING: Failed to download $filename"
+                  FAILURES=$((FAILURES + 1))
+                  continue
+                fi
+
+                java -Xmx512M -Dspring.profiles.active=dbcp \
+                  -cp /core/core-1.0.16.jar \
+                  -DPORTAL_HOME=/cbioportal \
+                  org.mskcc.cbio.portal.scripts.ImportGenePanel \
+                  --data "/panels/$filename" --noprogress 2>&1
+                if [ $? -ne 0 ]; then
+                  echo "  WARNING: Failed to import $filename"
+                  FAILURES=$((FAILURES + 1))
+                fi
+              done
+
+              echo "========================================="
+              echo "Gene panel seed complete. Failures: $FAILURES / $TOTAL"
+              echo "========================================="
+          env:
+            - name: PORTAL_HOME
+              value: /cbioportal
+          resources:
+            requests:
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: properties
+              mountPath: /cbioportal/application.properties
+              subPath: application.properties
+      volumes:
+        - name: properties
+          configMap:
+            name: cbioportal-hub-import-config
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
