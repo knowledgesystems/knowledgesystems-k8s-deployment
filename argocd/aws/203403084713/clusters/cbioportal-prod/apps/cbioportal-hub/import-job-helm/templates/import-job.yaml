@@ -14,14 +14,15 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
+              # Install dependencies (fail fast here)
               set -e
-
-              # Install dependencies
               apt-get update && apt-get install -y git git-lfs curl jq > /dev/null 2>&1
               git lfs install
+              set +e
 
               PR_NUMBER={{ .Values.prNumber }}
               PR_BRANCH={{ .Values.prBranch }}
+              IMPORT_FAILURES=0
 
               # Use GitHub API to detect changed study directories
               echo "Fetching changed files for PR #$PR_NUMBER..."
@@ -45,31 +46,46 @@ spec:
               git sparse-checkout init
               git sparse-checkout set $CHANGED_STUDIES
               GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1
+              if [ $? -ne 0 ]; then
+                echo "ERROR: Failed to fetch branch $PR_BRANCH"
+                exit 1
+              fi
               GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD
 
               # Pull LFS objects only for the study directories we need
               for study_dir in $CHANGED_STUDIES; do
-                git lfs pull --include="$study_dir/**" || true
+                echo "Pulling LFS objects for $study_dir..."
+                git lfs pull --include="$study_dir/**" || echo "WARNING: LFS pull failed for $study_dir"
               done
 
               for study_dir in $CHANGED_STUDIES; do
                 if [ -f "$study_dir/meta_study.txt" ]; then
+                  echo "========================================="
                   echo "Importing $study_dir..."
+                  echo "========================================="
 
                   # Import gene panels if present
                   for panel in $study_dir/data_gene_panel_*.txt; do
                     [ -f "$panel" ] && /core/scripts/importGenePanel.pl --data "$panel" || true
                   done
 
-                  # Import study (overwrite existing)
+                  # Import study (overwrite existing, continue on failure)
                   metaImport.py -u http://cbioportal-hub:80 \
                     -s /datahub/$study_dir -o
+                  if [ $? -ne 0 ]; then
+                    echo "WARNING: Import failed for $study_dir (likely validation errors). Continuing..."
+                    IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                  else
+                    echo "Successfully imported $study_dir"
+                  fi
                 else
                   echo "Skipping $study_dir (no meta_study.txt)"
                 fi
               done
 
-              echo "All imports complete."
+              echo "========================================="
+              echo "All imports attempted. Failures: $IMPORT_FAILURES"
+              echo "========================================="
           env:
             - name: PORTAL_HOME
               value: /cbioportal
