@@ -342,9 +342,9 @@ spec:
         - configMap:
             defaultMode: 420
             items:
-              - key: mskcerts_2025_09_05.p12
+              - key: mskcerts_2026_03_11.p12
                 path: mskcerts
-            name: mskcerts20250905
+            name: mskcerts20260311
           name: mskcerts-volume
 ---
 apiVersion: v1
