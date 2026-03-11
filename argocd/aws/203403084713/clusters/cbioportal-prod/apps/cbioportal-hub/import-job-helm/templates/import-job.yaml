@@ -39,19 +39,6 @@ spec:
 
               echo "Changed studies: $CHANGED_STUDIES"
 
-              # Sparse checkout only the changed study directories (skip LFS during clone)
-              mkdir /datahub && cd /datahub
-              git init
-              git remote add origin https://github.com/cBioPortal/datahub.git
-              git sparse-checkout init
-              git sparse-checkout set $CHANGED_STUDIES
-              GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1
-              if [ $? -ne 0 ]; then
-                echo "ERROR: Failed to fetch branch $PR_BRANCH"
-                exit 1
-              fi
-              GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD
-
               # Resolve LFS pointers by downloading actual content via GitHub media URLs
               # (workaround for datahub repo LFS bandwidth quota limits)
               resolve_lfs_files() {
@@ -73,40 +60,62 @@ spec:
                 done
               }
 
+              # Process studies one at a time to limit disk usage
+              STUDY_COUNT=$(echo "$CHANGED_STUDIES" | wc -l)
+              STUDY_INDEX=0
+
               for study_dir in $CHANGED_STUDIES; do
-                echo "Resolving LFS files for $study_dir..."
+                STUDY_INDEX=$((STUDY_INDEX + 1))
+                echo "========================================="
+                echo "[$STUDY_INDEX/$STUDY_COUNT] Processing $study_dir..."
+                echo "========================================="
+
+                # Sparse checkout just this study
+                rm -rf /datahub
+                mkdir /datahub && cd /datahub
+                git init -q
+                git remote add origin https://github.com/cBioPortal/datahub.git
+                git sparse-checkout init
+                git sparse-checkout set "$study_dir"
+                GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1 -q
+                if [ $? -ne 0 ]; then
+                  echo "ERROR: Failed to fetch branch $PR_BRANCH"
+                  IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                  continue
+                fi
+                GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
+
+                # Resolve LFS files for this study
                 resolve_lfs_files "/datahub/$study_dir" "$PR_BRANCH"
-              done
 
-              for study_dir in $CHANGED_STUDIES; do
-                if [ -f "$study_dir/meta_study.txt" ]; then
-                  echo "========================================="
-                  echo "Importing $study_dir..."
-                  echo "========================================="
+                if [ ! -f "$study_dir/meta_study.txt" ]; then
+                  echo "Skipping $study_dir (no meta_study.txt)"
+                  continue
+                fi
 
-                  # Import gene panels if present
-                  for panel in $study_dir/data_gene_panel_*.txt; do
-                    [ -f "$panel" ] && /core/scripts/importGenePanel.pl --data "$panel" || true
-                  done
+                # Import gene panels if present
+                for panel in $study_dir/data_gene_panel_*.txt; do
+                  [ -f "$panel" ] && /core/scripts/importGenePanel.pl --data "$panel" || true
+                done
 
-                  # Try validated import first, fall back to direct import on validation errors
-                  metaImport.py -u http://cbioportal-hub:80 \
-                    -s /datahub/$study_dir -o 2>&1
+                # Try validated import first, fall back to direct import on validation errors
+                metaImport.py -u http://cbioportal-hub:80 \
+                  -s /datahub/$study_dir -o 2>&1
+                if [ $? -ne 0 ]; then
+                  echo "Validation errors found. Attempting direct import (skipping validation)..."
+                  cbioportalImporter.py import-study -s /datahub/$study_dir 2>&1
                   if [ $? -ne 0 ]; then
-                    echo "Validation errors found. Attempting direct import (skipping validation)..."
-                    cbioportalImporter.py import-study -s /datahub/$study_dir 2>&1
-                    if [ $? -ne 0 ]; then
-                      echo "WARNING: Direct import also failed for $study_dir. Continuing..."
-                      IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
-                    else
-                      echo "Successfully imported $study_dir (via direct import, skipped validation)"
-                    fi
+                    echo "WARNING: Direct import also failed for $study_dir. Continuing..."
+                    IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
                   else
-                    echo "Successfully imported $study_dir"
+                    echo "Successfully imported $study_dir (via direct import, skipped validation)"
                   fi
                 else
-                  echo "Skipping $study_dir (no meta_study.txt)"
+                  echo "Successfully imported $study_dir"
                 fi
+
+                # Clean up to free disk before next study
+                rm -rf /datahub
               done
 
               echo "========================================="
