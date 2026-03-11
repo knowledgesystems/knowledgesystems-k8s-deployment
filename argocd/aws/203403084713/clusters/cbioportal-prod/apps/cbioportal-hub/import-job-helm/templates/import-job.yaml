@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: datahub-import-{{ .Values.prNumber }}-{{ .Values.headSha | trunc 7 }}
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=true
 spec:
   ttlSecondsAfterFinished: 86400
   backoffLimit: 1
