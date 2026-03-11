@@ -52,10 +52,30 @@ spec:
               fi
               GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD
 
-              # Pull LFS objects only for the study directories we need
+              # Resolve LFS pointers by downloading actual content via GitHub media URLs
+              # (workaround for datahub repo LFS bandwidth quota limits)
+              resolve_lfs_files() {
+                local dir="$1"
+                local branch="$2"
+                find "$dir" -type f | while read -r filepath; do
+                  if head -1 "$filepath" 2>/dev/null | grep -q 'version https://git-lfs.github.com/spec/v1'; then
+                    local rel_path="${filepath#/datahub/}"
+                    local url="https://media.githubusercontent.com/media/cBioPortal/datahub/${branch}/${rel_path}"
+                    echo "  Downloading LFS file: $rel_path"
+                    local tmp="${filepath}.tmp"
+                    if curl -sfL "$url" -o "$tmp"; then
+                      mv "$tmp" "$filepath"
+                    else
+                      echo "  WARNING: Failed to download $rel_path from media URL"
+                      rm -f "$tmp"
+                    fi
+                  fi
+                done
+              }
+
               for study_dir in $CHANGED_STUDIES; do
-                echo "Pulling LFS objects for $study_dir..."
-                git lfs pull --include="$study_dir/**" || echo "WARNING: LFS pull failed for $study_dir"
+                echo "Resolving LFS files for $study_dir..."
+                resolve_lfs_files "/datahub/$study_dir" "$PR_BRANCH"
               done
 
               for study_dir in $CHANGED_STUDIES; do
