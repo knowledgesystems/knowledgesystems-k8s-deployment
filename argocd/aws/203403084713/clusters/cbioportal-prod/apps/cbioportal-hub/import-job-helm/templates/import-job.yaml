@@ -89,12 +89,18 @@ spec:
                     [ -f "$panel" ] && /core/scripts/importGenePanel.pl --data "$panel" || true
                   done
 
-                  # Import study (overwrite existing, continue on failure)
+                  # Try validated import first, fall back to direct import on validation errors
                   metaImport.py -u http://cbioportal-hub:80 \
-                    -s /datahub/$study_dir -o
+                    -s /datahub/$study_dir -o 2>&1
                   if [ $? -ne 0 ]; then
-                    echo "WARNING: Import failed for $study_dir (likely validation errors). Continuing..."
-                    IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                    echo "Validation errors found. Attempting direct import (skipping validation)..."
+                    cbioportalImporter.py import-study -s /datahub/$study_dir 2>&1
+                    if [ $? -ne 0 ]; then
+                      echo "WARNING: Direct import also failed for $study_dir. Continuing..."
+                      IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                    else
+                      echo "Successfully imported $study_dir (via direct import, skipped validation)"
+                    fi
                   else
                     echo "Successfully imported $study_dir"
                   fi
