@@ -105,4 +105,4 @@ experimental:
       version: "v1.1.0"
   localPlugins:
     uablock:
-      moduleName: "github.com/agence-gaya/traefik-plugin-blockuseragent"
+      moduleName: "github.com/knowledgesystems/useragent-block-traefik.git"
