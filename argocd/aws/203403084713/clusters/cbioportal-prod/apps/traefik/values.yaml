@@ -31,9 +31,7 @@ deployment:
   additionalVolumes:
     - name: plugins-local
       emptyDir: {}
-  additionalVolumeMounts:
-    - name: plugins-local
-      mountPath: /plugins-local
+
 
 podDisruptionBudget:
   enabled: true
@@ -105,5 +103,7 @@ experimental:
       version: "v1.1.0"
   localPlugins:
     uablock:
+      type: localPath
       moduleName: "github.com/knowledgesystems/useragent-block-traefik"
-      hostPath: "/plugins-local/src/github.com/knowledgesystems/useragent-block-traefik"
+      mountPath: "/plugins-local"
+      volumeName: "plugins-local"
