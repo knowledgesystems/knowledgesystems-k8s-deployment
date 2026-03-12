@@ -8,3 +8,5 @@ spec:
     uablock:
       regex:
         - ".*Mozilla.*"
+      statusCode: 403
+      responseMessage: "For browser usage, visit cbioportal.org"
