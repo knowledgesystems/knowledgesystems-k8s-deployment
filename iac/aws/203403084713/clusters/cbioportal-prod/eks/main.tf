@@ -8,6 +8,7 @@ locals {
       max_size       = 3
       min_size       = 2
       version        = 1.33
+      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -26,6 +27,7 @@ locals {
       max_size       = 4
       min_size       = 3
       version        = 1.33
+      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -126,6 +128,7 @@ locals {
       min_size       = 2
       max_size       = 2
       version        = 1.33
+      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-066aca23688737c91", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -195,12 +198,40 @@ locals {
         cdsi-owner = "lix2@mskcc.org"
       }
     }
+    gn-db-sm = {
+      instance_types = ["r8i.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      version        = 1.33
+      subnet_ids     = ["subnet-01e2143c0b3d4f8a6"]
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+        data_vol = var.DATA_VOL_CONFIG
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "gn-db-sm"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "gn-db-sm"
+      }
+      tags = {
+        cdsi-app   = "genome-nexus"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "lix2@mskcc.org"
+      }
+    }
     gn-database = {
       instance_types = ["r7i.2xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 4
-      min_size       = 4
-      max_size       = 4
+      desired_size   = 3
+      min_size       = 3
+      max_size       = 3
       subnet_ids     = ["subnet-01e2143c0b3d4f8a6"]
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
