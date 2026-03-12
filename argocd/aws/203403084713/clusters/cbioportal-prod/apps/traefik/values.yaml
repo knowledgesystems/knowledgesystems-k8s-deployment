@@ -105,4 +105,5 @@ experimental:
       version: "v1.1.0"
   localPlugins:
     uablock:
-      moduleName: "github.com/knowledgesystems/useragent-block-traefik.git"
+      moduleName: "github.com/knowledgesystems/useragent-block-traefik"
+      hostPath: "/plugins-local/src/github.com/knowledgesystems/useragent-block-traefik"
