@@ -11,8 +11,30 @@ providers:
   kubernetesCRD:
     enabled: true
     allowCrossNamespace: true
+
 deployment:
   replicas: 2
+
+  # Use custom fork for the user agent block plugin
+  initContainers:
+    - name: install-plugins
+      image: alpine/git
+      command:
+        - sh
+        - -c
+        - |
+          git clone --branch main --depth 1 \
+          https://github.com/knowledgesystems/useragent-block-traefik.git /plugins-local/src/github.com/knowledgesystems/useragent-block-traefik
+      volumeMounts:
+        - name: plugins-local
+          mountPath: /plugins-local
+  additionalVolumes:
+    - name: plugins-local
+      emptyDir: {}
+  additionalVolumeMounts:
+    - name: plugins-local
+      mountPath: /plugins-local
+
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
@@ -81,6 +103,6 @@ experimental:
     ipblock:
       moduleName: "github.com/kvncrw/denyip"
       version: "v1.1.0"
+  localPlugins:
     uablock:
       moduleName: "github.com/agence-gaya/traefik-plugin-blockuseragent"
-      version: "v0.1.7"
