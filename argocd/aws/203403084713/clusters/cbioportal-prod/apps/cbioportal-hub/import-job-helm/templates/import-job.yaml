@@ -50,13 +50,21 @@ spec:
                 rm -rf /panels
               fi
 
-              CHANGED_STUDIES=$(echo "$ALL_CHANGED_FILES" \
+              PUBLIC_STUDIES=$(echo "$ALL_CHANGED_FILES" \
                 | grep '^public/' \
                 | cut -d'/' -f1-2 \
                 | sort -u)
 
+              GDC_STUDIES=$(echo "$ALL_CHANGED_FILES" \
+                | grep '^crdc/gdc/' \
+                | cut -d'/' -f1-3 \
+                | sort -u)
+
+              CHANGED_STUDIES=$(printf '%s\n%s' "$PUBLIC_STUDIES" "$GDC_STUDIES" \
+                | sed '/^$/d' | sort -u)
+
               if [ -z "$CHANGED_STUDIES" ]; then
-                echo "No changed studies detected in public/."
+                echo "No changed studies detected."
                 exit 0
               fi
 
