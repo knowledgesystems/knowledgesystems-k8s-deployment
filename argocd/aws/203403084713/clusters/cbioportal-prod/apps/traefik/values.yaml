@@ -23,7 +23,7 @@ deployment:
         - sh
         - -c
         - |
-          git clone --branch main --depth 1 \
+          git clone --branch status-code-support --depth 1 \
           https://github.com/knowledgesystems/useragent-block-traefik.git /plugins-local/src/github.com/knowledgesystems/useragent-block-traefik
       volumeMounts:
         - name: plugins-local
