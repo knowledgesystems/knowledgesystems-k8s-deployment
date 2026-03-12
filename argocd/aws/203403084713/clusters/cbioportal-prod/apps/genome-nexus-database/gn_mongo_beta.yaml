@@ -54,10 +54,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: gn-database
+          value: gn-db-sm
           effect: NoSchedule
       nodeSelector:
-        workload: gn-database
+        workload: gn-db-sm
 ---
 apiVersion: v1
 kind: Service
