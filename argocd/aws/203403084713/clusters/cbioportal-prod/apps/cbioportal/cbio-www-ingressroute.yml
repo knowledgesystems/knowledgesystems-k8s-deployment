@@ -10,7 +10,7 @@ spec:
     - websecure
   routes:
     # Browser traffic: User-Agent contains Mozilla
-    - match: Host(`www.cbioportal.org`) && HeadersRegexp(`User-Agent`, `.*Mozilla.*`)
+    - match: Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `.*Mozilla.*`)
       kind: Rule
       middlewares:
         - name: ipblock
