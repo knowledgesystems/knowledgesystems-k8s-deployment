@@ -34,7 +34,6 @@ resource "aws_servicecatalog_provisioned_product" "cbioportal-datahub" {
     value = "datahub.assets.cbioportal.org"
   }
 
-
   provisioning_parameters {
     key   = "Block"
     value = "false"
@@ -53,4 +52,31 @@ resource "aws_s3_bucket" "cellxgene_data" {
     cdsi-app   = "cellxgene"
     cdsi-owner = "hweej@mskcc.org"
   }
+}
+
+resource "aws_servicecatalog_provisioned_product" "g2s-dump" {
+  name                       = "g2s-dump"
+  product_id                 = "prod-5ghnhr2n5wnx4"
+  provisioning_artifact_name = "1.3.5"
+
+  provisioning_parameters {
+    key   = "ACMCertificateArn"
+    value = var.S3_CDN_CERT_ARN
+  }
+
+  provisioning_parameters {
+    key   = "DomainName"
+    value = "g2s.assets.cbioportal.org"
+  }
+
+  provisioning_parameters {
+    key   = "Block"
+    value = "false"
+  }
+
+  provisioning_parameters {
+    key   = "Environment"
+    value = "prod"
+  }
+
 }
