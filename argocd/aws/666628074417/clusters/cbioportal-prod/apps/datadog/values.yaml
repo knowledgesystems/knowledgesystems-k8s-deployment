@@ -17,6 +17,10 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: cbio-api
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: redis
       effect: NoSchedule
 clusterAgent:
