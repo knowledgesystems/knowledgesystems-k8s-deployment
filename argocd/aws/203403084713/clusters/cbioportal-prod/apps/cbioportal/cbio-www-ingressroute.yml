@@ -1,0 +1,50 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: cbioportal-www-ingressroute
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: cbioportal
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Browser traffic: User-Agent contains Mozilla
+    - match: Host(`www.cbioportal.org`) && HeadersRegexp(`User-Agent`, `.*Mozilla.*`)
+      kind: Rule
+      middlewares:
+        - name: ipblock
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-green
+          port: 80
+    # Non-browser traffic (catch-all)
+    - match: Host(`www.cbioportal.org`)
+      kind: Rule
+      middlewares:
+        - name: ipblock
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-api-green
+          port: 80
+  tls:
+    secretName: www-cbioportal-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: www-cbioportal-cert
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: cbioportal
+spec:
+  secretName: www-cbioportal-cert
+  dnsNames:
+    - www.cbioportal.org
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+  usages:
+    - digital signature
+    - key encipherment
