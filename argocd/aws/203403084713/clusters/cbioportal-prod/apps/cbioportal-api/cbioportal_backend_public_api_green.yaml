@@ -259,7 +259,7 @@ spec:
             - name: DD_TRACE_ANALYTICS_ENABLED
               value: "true"
             - name: DD_ENV
-              value: "eks-public"
+              value: "eks-public-api"
             - name: DD_SERVICE
               value: "cbioportal"
             - name: DD_VERSION
