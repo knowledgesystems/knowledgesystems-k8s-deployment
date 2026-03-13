@@ -42,10 +42,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: gn-database
+          value: gn-db-md
           effect: NoSchedule
       nodeSelector:
-        workload: gn-database
+        workload: gn-db-md
         topology.kubernetes.io/zone: us-east-1b
 ---
 apiVersion: v1
