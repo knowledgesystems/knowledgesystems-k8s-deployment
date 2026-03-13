@@ -227,13 +227,14 @@ locals {
         cdsi-owner = "lix2@mskcc.org"
       }
     }
-    gn-database = {
-      instance_types = ["r7i.2xlarge"]
+    gn-db-lg = {
+      instance_types = ["r8i.2xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 3
-      min_size       = 3
-      max_size       = 3
-      subnet_ids     = ["subnet-01e2143c0b3d4f8a6"]
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      version = 1.33
+      subnet_ids     = ["subnet-01e2143c0b3d4f8a6", "subnet-066aca23688737c91"]
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
         data_vol = var.DATA_VOL_CONFIG
@@ -241,12 +242,12 @@ locals {
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
-          value  = "gn-database"
+          value  = "gn-db-lg"
           effect = var.TAINT_EFFECT
         }
       }
       labels = {
-        (var.LABEL_KEY) = "gn-database"
+        (var.LABEL_KEY) = "gn-db-lg"
       }
       tags = {
         cdsi-app   = "genome-nexus"

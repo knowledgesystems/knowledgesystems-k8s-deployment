@@ -42,10 +42,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: gn-database
+          value: gn-db-lg
           effect: NoSchedule
       nodeSelector:
-        workload: gn-database
+        workload: gn-db-lg
         topology.kubernetes.io/zone: us-east-1b # This should match the availability zone of the underlying volumes created in terraform
 ---
 apiVersion: v1
