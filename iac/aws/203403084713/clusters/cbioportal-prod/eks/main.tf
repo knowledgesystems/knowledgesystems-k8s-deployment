@@ -8,7 +8,7 @@ locals {
       max_size       = 3
       min_size       = 2
       version        = 1.33
-      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
+      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -27,7 +27,7 @@ locals {
       max_size       = 4
       min_size       = 3
       version        = 1.33
-      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
+      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -46,7 +46,7 @@ locals {
       max_size       = 2
       min_size       = 2
       version        = 1.33
-      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
+      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -129,7 +129,7 @@ locals {
       min_size       = 2
       max_size       = 2
       version        = 1.33
-      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
+      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -233,7 +233,7 @@ locals {
       desired_size   = 2
       min_size       = 2
       max_size       = 2
-      version = 1.33
+      version        = 1.33
       subnet_ids     = ["subnet-01e2143c0b3d4f8a6", "subnet-066aca23688737c91"]
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
@@ -568,7 +568,7 @@ locals {
       max_size       = 2
       min_size       = 2
       version        = 1.33
-      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
+      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
           key    = var.TAINT_KEY

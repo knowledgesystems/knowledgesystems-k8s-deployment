@@ -41,7 +41,15 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
-      value: gn-database
+      value: gn-db-sm
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: gn-db-md
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: gn-db-lg
       effect: NoSchedule
     - key: workload
       operator: Equal
@@ -54,6 +62,10 @@ agents:
     - key: workload
       operator: Equal
       value: ingress
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cbio-api
       effect: NoSchedule
 clusterAgent:
 #  confd:
