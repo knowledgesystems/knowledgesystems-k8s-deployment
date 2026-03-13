@@ -174,9 +174,9 @@ locals {
     gn-db-sm = {
       instance_types = ["r8i.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
       version        = 1.33
       subnet_ids     = ["subnet-01e2143c0b3d4f8a6", "subnet-066aca23688737c91"]
       block_device_mappings = {
