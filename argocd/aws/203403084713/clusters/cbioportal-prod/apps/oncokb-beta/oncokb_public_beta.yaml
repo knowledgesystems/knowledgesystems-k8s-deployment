@@ -106,11 +106,11 @@ spec:
             failureThreshold: 5
           resources:
             requests:
-              memory: 1Gi
-              cpu: 500m
+              memory: 0.5Gi
+              cpu: 100m
             limits:
-              memory: 2Gi
-              cpu: 750m
+              memory: 1.5Gi
+              cpu: 500m
           ports:
             - name: http
               containerPort: 9095
