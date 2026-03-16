@@ -33,7 +33,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs,no-liquibase
             - name: APPLICATION_REDIS_ENABLED
-              value: "true"
+              value: "false"
             - name: APPLICATION_REDIS_TYPE
               value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS

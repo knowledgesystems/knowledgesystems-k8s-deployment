@@ -80,7 +80,7 @@ spec:
               "-Daws.s3.region=$(AWS_REGION)",
               "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
               "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-              "-Dredis.enable=true",
+              "-Dredis.enable=false",
               "-Dredis.type=$(REDIS_TYPE)",
               "-Dredis.address=$(REDIS_ADDRESS)",
               "-Dredis.password=$(REDIS_PASSWROD)",
