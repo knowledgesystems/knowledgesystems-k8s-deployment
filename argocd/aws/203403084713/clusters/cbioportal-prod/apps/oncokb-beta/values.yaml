@@ -28,3 +28,5 @@ redis:
       key: workload
       operator: Equal
       value: oncokb-beta
+image:
+  repository: bitnamilegacy/redis-cluster
