@@ -48,11 +48,6 @@ spec:
           periodSeconds: 30
           successThreshold: 1
           timeoutSeconds: 120
-        resources:
-          requests:
-              memory: 20Gi
-          limits:
-              memory: 30Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
