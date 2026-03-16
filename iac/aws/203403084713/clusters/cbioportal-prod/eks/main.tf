@@ -398,7 +398,7 @@ locals {
     }
     oncokb-redis = {
       instance_types = ["r7g.xlarge"]
-      ami_type       = "BOTTLEROCKET_x86_64"
+      ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       min_size       = 2
       max_size       = 2
