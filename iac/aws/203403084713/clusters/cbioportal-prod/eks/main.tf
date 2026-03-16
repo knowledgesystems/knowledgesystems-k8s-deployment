@@ -40,11 +40,11 @@ locals {
       }
     }
     cbio-dev = {
-      instance_types = ["r7g.xlarge"]
+      instance_types = ["r8g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      max_size       = 2
-      min_size       = 2
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
       version        = 1.33
       subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
