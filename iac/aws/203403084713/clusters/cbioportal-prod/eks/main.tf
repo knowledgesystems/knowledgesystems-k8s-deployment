@@ -88,11 +88,11 @@ locals {
       }
     }
     datadog = {
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.small"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
+      desired_size   = 1
       min_size       = 1
-      max_size       = 3
+      max_size       = 1
       version        = 1.33
       taints = {
         dedicated = {

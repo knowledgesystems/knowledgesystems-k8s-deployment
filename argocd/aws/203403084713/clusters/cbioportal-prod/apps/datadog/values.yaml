@@ -90,7 +90,7 @@ clusterAgent:
   image:
     name: cluster-agent
     tag: 7.52.0
-  replicas: 2
+  replicas: 1
   nodeSelector:
     workload: datadog
   tolerations:
