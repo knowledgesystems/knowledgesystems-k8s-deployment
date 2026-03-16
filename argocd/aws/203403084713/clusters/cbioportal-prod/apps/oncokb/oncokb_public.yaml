@@ -65,7 +65,7 @@ spec:
             - name: APPLICATION_REDIS_EXPIRATION
               value: "$(REDIS_EXPIRATION)"
             - name: APPLICATION_REDIS_ENABLED
-              value: "true"
+              value: "false"
             - name: SENTRY_EXCEPTION_RESOLVER_ORDER
               value: "-2147483647"
             - name: SENTRY_TRACES_SAMPLE_RATE
