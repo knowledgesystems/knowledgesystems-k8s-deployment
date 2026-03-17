@@ -16,7 +16,7 @@ spec:
         - name: ipblock
           namespace: default
       services:
-        - name: cbioportal-backend-public-green
+        - name: cbioportal-backend-public-blue
           port: 80
     # Non-browser traffic (catch-all)
     - match: Host(`www.cbioportal.org`)
@@ -25,7 +25,7 @@ spec:
         - name: ipblock
           namespace: default
       services:
-        - name: cbioportal-backend-public-api-green
+        - name: cbioportal-backend-public-api-blue
           port: 80
   tls:
     secretName: www-cbioportal-cert
@@ -48,3 +48,4 @@ spec:
   usages:
     - digital signature
     - key encipherment
+  routes: []
