@@ -48,4 +48,3 @@ spec:
   usages:
     - digital signature
     - key encipherment
-  routes: []
