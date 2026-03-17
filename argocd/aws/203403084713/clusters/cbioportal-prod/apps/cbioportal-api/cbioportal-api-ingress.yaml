@@ -13,17 +13,17 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: api.cbioportal.org
-    http:
-      paths:
-      - backend:
-          service:
-            name: cbioportal-backend-public-api-green
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
+    - host: api.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-public-api-blue
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
   tls:
-  - hosts:
-    - api.cbioportal.org
-    secretName: api-cbio-cert
+    - hosts:
+        - api.cbioportal.org
+      secretName: api-cbio-cert
