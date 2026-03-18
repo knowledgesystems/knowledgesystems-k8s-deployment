@@ -42,9 +42,9 @@ locals {
     cbio-dev = {
       instance_types = ["r8g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 1
-      max_size       = 1
-      min_size       = 1
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
       version        = 1.33
       subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
@@ -358,8 +358,8 @@ locals {
         root_vol = var.ROOT_VOL_CONFIG
         data_vol = var.DATA_VOL_CONFIG
       }
-      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
-      version        = 1.33
+      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
+      version    = 1.33
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -405,8 +405,8 @@ locals {
       min_size       = 2
       max_size       = 2
       # Pin to subnets. This prevents nodegroup to be created in a availability zone different from the underlying persistent volumes
-      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
-      version        = 1.33
+      subnet_ids = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
+      version    = 1.33
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
