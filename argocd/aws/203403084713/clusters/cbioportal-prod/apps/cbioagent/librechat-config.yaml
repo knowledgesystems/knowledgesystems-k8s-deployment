@@ -147,7 +147,7 @@ data:
       prioritize: true
       list:
         - name: "cBioDBAgent"
-          label: "cBioDBAgent - Talk to cBioPortal Database"
+          label: "cBioDBAgent - Talk to the cBioPortal database"
           description: "An AI assistant for querying and exploring cBioPortal database."
           iconURL: "https://raw.githubusercontent.com/cBioPortal/cbioportal/refs/heads/master/src/main/resources/webapp/images/cbioportal_icon.png"
           showIconInHeader: true
@@ -162,7 +162,7 @@ data:
             greeting: |
               Ask questions below to explore the cBioPortal database, including studies, genes, mutations, and clinical attributes. NOTE: Limit of 20 messages per 30 minutes, and 20M tokens per week. <br /><br /><a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank" style="display: inline-block; background-color: #4b5563; color: #f9fafb; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#374151'" onmouseout="this.style.backgroundColor='#4b5563'">Learn more</a>
         - name: "cBioNavigator"
-          label: "cBioNavigator"
+          label: "cBioNavigator - Get help navigating cBioPortal"
           default: false
           description: "An AI assistant trained on cBioPortal application to help you navigate the cbioportal.org web interface."
           iconURL: "https://raw.githubusercontent.com/cBioPortal/cbioportal/refs/heads/master/src/main/resources/webapp/images/cbioportal_icon.png"
