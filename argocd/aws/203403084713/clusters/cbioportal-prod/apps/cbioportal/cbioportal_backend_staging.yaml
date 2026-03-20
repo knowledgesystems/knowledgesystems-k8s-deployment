@@ -216,11 +216,6 @@ spec:
             #- --session-store redis
             #- --session-store-operation-timeout 10000
             # Fix long URL https://github.com/cBioPortal/cbioportal/issues/5836
-            - --session.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/
-            - --session.service.origin=*
-            - --session.service.user=session_service_user
-            - --session.service.password=d4b3stS3ssi4ns3rvicePASSW000rdz1337
-
             - --server.compression.enabled=true
             - --server.tomcat.connection-timeout=20000
             - --server.tomcat.max-http-response-header-size=16384
