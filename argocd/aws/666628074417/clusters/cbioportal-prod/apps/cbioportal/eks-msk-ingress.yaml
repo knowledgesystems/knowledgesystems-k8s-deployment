@@ -20,36 +20,6 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: triage-beta.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-triage
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: triage.cbioportal.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-triage
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-    - host: triage.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: eks-triage
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
     - host: redcap.cbioportal.aws.mskcc.org
       http:
         paths:
