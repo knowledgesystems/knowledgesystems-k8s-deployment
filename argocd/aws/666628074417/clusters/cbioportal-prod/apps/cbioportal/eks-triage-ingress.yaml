@@ -35,7 +35,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-triage-blue
+                name: eks-triage-green
                 port:
                   number: 80
             path: /
