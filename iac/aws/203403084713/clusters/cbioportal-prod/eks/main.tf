@@ -382,6 +382,7 @@ locals {
       desired_size   = 3
       min_size       = 3
       max_size       = 3
+      version        = 1.33
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -429,6 +430,7 @@ locals {
       desired_size   = 2
       min_size       = 2
       max_size       = 2
+      version        = 1.33
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
       }
@@ -454,6 +456,7 @@ locals {
       desired_size   = 2
       min_size       = 2
       max_size       = 2
+      version        = 1.33
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
