@@ -51,7 +51,7 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
-          image: cbioportal/cbioportal:7.0.0-rc.7-web-shenandoah
+          image: cbioportal/cbioportal:7.0.0-rc.8-web-shenandoah
           volumeMounts:
             - name: triage-eks-configmap-volume
               mountPath: /cbioportal/local.key
