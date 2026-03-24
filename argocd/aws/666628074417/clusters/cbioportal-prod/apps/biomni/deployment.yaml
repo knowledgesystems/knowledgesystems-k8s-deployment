@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: biomni
+  labels:
+    app: biomni
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: biomni
+  template:
+    metadata:
+      labels:
+        app: biomni
+    spec:
+      containers:
+        - name: biomni
+          image: cbioportal/biomni:latest
+          imagePullPolicy: Always
+          ports:
+            - name: gradio
+              containerPort: 7860
+            - name: mcp
+              containerPort: 8000
+          env:
+            - name: BIOMNI_MODE
+              value: "both"
+            - name: BIOMNI_SKIP_DATA_LAKE
+              value: "true"
+            - name: BIOMNI_SOURCE
+              value: "Bedrock"
+            - name: BIOMNI_LLM
+              value: "anthropic.claude-sonnet-4-20250514-v1:0"
+            - name: AWS_REGION
+              value: "us-east-1"
+          volumeMounts:
+            - name: aws-creds
+              mountPath: /root/.aws
+              readOnly: true
+          resources:
+            requests:
+              memory: "2Gi"
+            limits:
+              memory: "4Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 7860
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 7860
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
+      nodeSelector:
+        workload: "biomni"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "biomni"
+          effect: "NoSchedule"
+      volumes:
+        - name: aws-creds
+          persistentVolumeClaim:
+            claimName: aws-credentials-pvc
+      imagePullSecrets:
+        - name: dockerhub-creds
