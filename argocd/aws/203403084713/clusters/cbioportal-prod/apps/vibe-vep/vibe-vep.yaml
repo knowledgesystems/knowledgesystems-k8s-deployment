@@ -29,8 +29,6 @@ spec:
         - containerPort: 8080
           protocol: TCP
         env:
-        - name: HOME
-          value: /data
         - name: VIBE_VEP_ANNOTATIONS_SIFT
           value: "true"
         - name: VIBE_VEP_ANNOTATIONS_POLYPHEN
