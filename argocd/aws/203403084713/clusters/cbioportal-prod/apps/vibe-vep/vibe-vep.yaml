@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vibe-vep
+  namespace: genome-nexus
+  labels:
+    run: vibe-vep
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: vibe-vep
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        run: vibe-vep
+    spec:
+      containers:
+      - name: vibe-vep
+        image: inodb/vibe-vep:latest
+        imagePullPolicy: Always
+        args: ["serve", "--assembly=GRCh37,GRCh38", "--port=8080"]
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        env:
+        - name: HOME
+          value: /data
+        - name: VIBE_VEP_ANNOTATIONS_SIFT
+          value: "true"
+        - name: VIBE_VEP_ANNOTATIONS_POLYPHEN
+          value: "true"
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 30
+          timeoutSeconds: 10
+        resources:
+          requests:
+            memory: 2Gi
+          limits:
+            memory: 4Gi
+      nodeSelector:
+        workload: "cbio-dev"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: vibe-vep
+  name: vibe-vep
+  namespace: genome-nexus
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    run: vibe-vep
+  type: ClusterIP
