@@ -33,6 +33,10 @@ spec:
           value: "true"
         - name: VIBE_VEP_ANNOTATIONS_POLYPHEN
           value: "true"
+        - name: VIBE_VEP_ANNOTATIONS_ALPHAMISSENSE
+          value: "true"
+        - name: VIBE_VEP_ANNOTATIONS_CLINVAR
+          value: "true"
         startupProbe:
           httpGet:
             path: /health
