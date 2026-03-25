@@ -258,7 +258,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-beta-green
-          image: cbioportal/cbioportal:demo-clickhouse-only-db-web-shenandoah
+          image: cbioportal/cbioportal:v7.0.0-rc.8-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
