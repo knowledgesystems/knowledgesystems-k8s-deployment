@@ -36,7 +36,7 @@ variable "CLUSTER_VER" {
 variable "NODEGROUP_VER" {
   description = "Kubernetes version of the nodegroups"
   type        = string
-  default     = "1.32"
+  default     = "1.33"
 }
 
 variable "CLUSTER_ENV" {
