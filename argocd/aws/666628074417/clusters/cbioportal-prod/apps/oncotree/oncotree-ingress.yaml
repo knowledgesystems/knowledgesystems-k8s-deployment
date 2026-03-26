@@ -26,7 +26,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-oncotree
+                name: new-eks-oncotree
                 port:
                   number: 80
             path: /
