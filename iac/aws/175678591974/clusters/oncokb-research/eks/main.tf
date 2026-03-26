@@ -5,7 +5,7 @@ locals {
 }
 
 module "eks_cluster" {
-  source       = "git::https://github.com/MSK-Staging/terraform-aws-hyc-eks.git"
+  source       = "git::https://github.com/MSK-Staging/terraform-aws-hyc-eks.git?ref=4.0.0"
   cluster_name = var.CLUSTER_NAME
 
   # General EKS Config
@@ -27,11 +27,8 @@ module "eks_cluster" {
   cluster_endpoint_public_access  = var.API_PUBLIC
   cluster_endpoint_private_access = var.API_PRIVATE
 
-  hyc_addon_configs = {
-    observability = {
-      create = false
-    }
-  }
+  # Addon config
+  hyc_addon_configs = var.ADDON_CONFIG
 
   # EKS Managed Node Groups
   eks_managed_node_groups = {
