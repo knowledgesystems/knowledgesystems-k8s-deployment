@@ -1,3 +1,6 @@
+global:
+  imagePullSecrets:
+    - dockerhub-creds
 architecture: standalone
 auth:
   existingSecret: cbioagent-mongodb-creds
