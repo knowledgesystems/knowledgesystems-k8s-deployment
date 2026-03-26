@@ -214,6 +214,23 @@ locals {
         (var.LABEL_KEY) = "cdd"
       }
     }
+    biomni = {
+      instance_types = ["m6i.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "biomni"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "biomni"
+      }
+    }
   }
 }
 

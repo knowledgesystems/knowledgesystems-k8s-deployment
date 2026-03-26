@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: biomni
+spec:
+  selector:
+    app: biomni
+  ports:
+    - name: gradio
+      port: 7860
+      targetPort: 7860
+    - name: mcp
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
