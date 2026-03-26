@@ -51,6 +51,10 @@ agents:
       operator: Equal
       value: cdd
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: biomni
+      effect: NoSchedule
 clusterAgent:
   admissionController:
     enabled: true
