@@ -19,6 +19,38 @@ agents:
       operator: Equal
       value: redis
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: ingress
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: keycloak
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: airflow
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cellxgene
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cbioagent
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cbioagent-db
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: oncotree
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cdd
+      effect: NoSchedule
 clusterAgent:
   admissionController:
     enabled: true
