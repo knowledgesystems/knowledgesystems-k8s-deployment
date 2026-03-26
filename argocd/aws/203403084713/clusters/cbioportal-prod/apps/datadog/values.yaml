@@ -99,13 +99,6 @@ clusterAgent:
     name: cluster-agent
     tag: 7.52.0
   replicas: 1
-  nodeSelector:
-    workload: datadog
-  tolerations:
-    - key: workload
-      operator: Equal
-      value: datadog
-      effect: NoSchedule
 datadog:
   logLevel: INFO
   helmCheck:
