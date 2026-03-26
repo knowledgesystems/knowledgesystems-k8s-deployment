@@ -198,7 +198,7 @@ locals {
       }
     }
     cdd = {
-      instance_types = ["m5.large"]
+      instance_types = ["t3.small"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 1
       max_size       = 1
