@@ -63,6 +63,8 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+        - name: dockerhub-creds
 ---
 apiVersion: v1
 kind: Service
