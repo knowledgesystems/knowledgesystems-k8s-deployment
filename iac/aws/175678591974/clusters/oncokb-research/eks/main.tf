@@ -1,6 +1,13 @@
 locals {
   # Use locals for node groups to enforce required tags
   node_groups = {
+    addons = {
+      instance_types = ["t3.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+    }
   }
 }
 
