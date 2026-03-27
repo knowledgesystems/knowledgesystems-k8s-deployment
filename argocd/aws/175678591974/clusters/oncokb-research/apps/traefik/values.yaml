@@ -37,9 +37,6 @@ additionalArguments:
   - "--serversTransport.forwardingTimeouts.dialTimeout=300s"
   - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=300s"
   - "--serversTransport.forwardingTimeouts.idleConnTimeout=300s"
-  - "--certificatesresolvers.le.acme.email=cbioportal@cbioporal.org"
-  - "--certificatesresolvers.le.acme.storage=/data/acme.json"
-  - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
 ports:
   web:
     transport:
