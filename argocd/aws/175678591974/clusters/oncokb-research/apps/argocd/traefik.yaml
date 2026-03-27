@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/175678591974/clusters/oncokb-research/apps/traefik
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s
+    - repoURL: https://traefik.github.io/charts
+      targetRevision: 39.0.0
+      chart: traefik
+      helm:
+        releaseName: traefik
+        valueFiles:
+          - $k8s/argocd/aws/175678591974/clusters/oncokb-research/apps/traefik/values.yaml
+  destination:
+    namespace: traefik
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

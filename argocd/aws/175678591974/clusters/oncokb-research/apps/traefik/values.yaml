@@ -1,0 +1,75 @@
+image:
+  tag: v3.6.7
+providers:
+  kubernetesGateway:
+    enabled: true
+  kubernetesCRD:
+    enabled: true
+    allowCrossNamespace: true
+
+deployment:
+  replicas: 2
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+nodeSelector:
+  workload: ingress
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "ingress"
+    effect: "NoSchedule"
+logs:
+  access:
+    enabled: true
+    format: json
+    fields:
+      general:
+        defaultmode: keep
+      headers:
+        defaultmode: keep
+        names:
+          Authorization: redact
+          Cookie: redact
+          Set-Cookie: redact
+additionalArguments:
+  - "--serversTransport.forwardingTimeouts.dialTimeout=300s"
+  - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=300s"
+  - "--serversTransport.forwardingTimeouts.idleConnTimeout=300s"
+  - "--certificatesresolvers.le.acme.email=cbioportal@cbioporal.org"
+  - "--certificatesresolvers.le.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+ports:
+  web:
+    transport:
+      respondingTimeouts:
+        idleTimeout: 300s
+    forwardedHeaders:
+      trustedIPs:
+        - "10.0.16.0/20" # This should match the IPv4 CIDR from the cluster vpc
+    proxyProtocol:
+      trustedIPs:
+        - "10.0.16.0/20" # This should match the IPv4 CIDR from the cluster vpc
+  websecure:
+    transport:
+      respondingTimeouts:
+        idleTimeout: 300s
+    forwardedHeaders:
+      trustedIPs:
+        - "10.0.16.0/20" # This should match the IPv4 CIDR from the cluster vpc
+    proxyProtocol:
+      trustedIPs:
+        - "10.0.16.0/20" # This should match the IPv4 CIDR from the cluster vpc
+service:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+api:
+  dashboard: true
+  insecure: true
+gateway:
+  listeners:
+    web:
+      namespacePolicy:
+        from: All
