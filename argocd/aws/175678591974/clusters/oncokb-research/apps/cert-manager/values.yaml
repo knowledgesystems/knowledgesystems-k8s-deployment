@@ -1,0 +1,35 @@
+ingressShim:
+  defaultIssuerKind: Issuer
+  defaultIssuerName: letsencrypt
+installCRDs: true
+nodeSelector:
+  workload: ingress
+tolerations:
+  - effect: NoSchedule
+    key: workload
+    operator: Equal
+    value: ingress
+cainjector:
+  nodeSelector:
+    workload: ingress
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
+startupapicheck:
+  nodeSelector:
+    workload: ingress
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
+webhook:
+  nodeSelector:
+    workload: ingress
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: ingress
