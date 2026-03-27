@@ -1,8 +1,8 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: traefik-cert
-  namespace: traefik
+  name: argocd-cert
+  namespace: argocd
 spec:
   secretName: tls-http-echo
   dnsNames:
