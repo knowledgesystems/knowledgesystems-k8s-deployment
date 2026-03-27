@@ -4,7 +4,7 @@ metadata:
   name: argocd-cert
   namespace: argocd
 spec:
-  secretName: tls-http-echo
+  secretName: argocd-cert-secret
   dnsNames:
     - "argocd.oncokb.org"
   issuerRef:
