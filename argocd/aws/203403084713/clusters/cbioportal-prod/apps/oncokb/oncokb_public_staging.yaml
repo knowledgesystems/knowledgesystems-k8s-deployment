@@ -36,8 +36,10 @@ spec:
             # Bring back once https://github.com/oncokb/oncokb-transcript/pull/488 is merged
             # - name: APPLICATION_API_PROXY_GERMLINE_URL
             #   value: "http://oncokb-core-germline:8888"
+            #   Disabling so that we can unlock user accounts
+            #   by making a change directly to the database
             - name: APPLICATION_REDIS_ENABLED
-              value: "true"
+              value: "false"
             - name: APPLICATION_REDIS_TYPE
               value: "$(REDIS_TYPE)"
             - name: APPLICATION_REDIS_ADDRESS
