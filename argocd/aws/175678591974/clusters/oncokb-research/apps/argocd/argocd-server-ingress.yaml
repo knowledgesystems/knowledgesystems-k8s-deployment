@@ -21,4 +21,4 @@ spec:
           port: 80
           scheme: h2c
   tls:
-    secretName: traefik-cert
+    secretName: argocd-cert
