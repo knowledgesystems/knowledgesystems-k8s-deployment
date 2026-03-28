@@ -45,7 +45,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-msk-blue
+                name: eks-msk-green
                 port:
                   number: 80
             path: /
@@ -55,7 +55,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-msk-blue
+                name: eks-msk-green
                 port:
                   number: 80
             path: /
@@ -65,7 +65,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-private-blue
+                name: eks-private-green
                 port:
                   number: 80
             path: /
@@ -75,7 +75,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-private-blue
+                name: eks-private-green
                 port:
                   number: 80
             path: /
@@ -85,7 +85,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-sclc-blue
+                name: eks-sclc-green
                 port:
                   number: 80
             path: /
@@ -95,7 +95,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-sclc-blue
+                name: eks-sclc-green
                 port:
                   number: 80
             path: /
