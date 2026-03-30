@@ -37,6 +37,8 @@ spec:
           value: "true"
         - name: VIBE_VEP_ANNOTATIONS_CLINVAR
           value: "true"
+        - name: VIBE_VEP_ANNOTATIONS_HOTSPOTS
+          value: /data/hotspots_v2_and_3d.txt
         startupProbe:
           httpGet:
             path: /health
