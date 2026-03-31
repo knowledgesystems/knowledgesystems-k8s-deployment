@@ -20,3 +20,21 @@ variable "AWS_DEFAULT_TAGS" {
     cdsi-team  = "data-visualization"
   }
 }
+
+variable "GITHUB_LFS_ROLE_NAME" {
+  description = "Name of the IAM role for the GitHub LFS Lambda"
+  type        = string
+  default     = "userServiceRole-github-lfs-lambda-role"
+}
+
+variable "DATAHUB_LFS_BUCKET_NAME" {
+  description = "Name of the S3 bucket used for GitHub LFS storage"
+  type        = string
+  default     = "datahub-git-lfs"
+}
+
+variable "LFS_SECRET_NAME" {
+  description = "Name of the Secrets Manager secret for GitHub LFS API keys"
+  type        = string
+  default     = "user-github-lfs-api-keys"
+}
