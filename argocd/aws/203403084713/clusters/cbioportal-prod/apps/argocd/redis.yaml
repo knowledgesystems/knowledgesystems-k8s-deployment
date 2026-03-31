@@ -118,7 +118,7 @@ spec:
         - name: master.resources.limits.cpu
           value: 150m
         - name: master.resources.requests.memory
-          value: 8Gi
+          value: 4Gi
         - name: master.resources.requests.cpu
           value: 100m
         - name: replica.replicaCount
@@ -156,7 +156,7 @@ spec:
         - name: replica.resources.limits.cpu
           value: 150m
         - name: replica.resources.requests.memory
-          value: 4Gi
+          value: 2Gi
         - name: replica.resources.requests.cpu
           value: 100m
   destination:
