@@ -1,3 +1,7 @@
+data "aws_iam_role" "github-lfs-lambda-role" {
+  name = var.GITHUB_LFS_LAMBDA_ROLE_NAME.arn
+}
+
 resource "aws_servicecatalog_provisioned_product" "cBioPortal_Public_DB_Dump" {
   name                       = "cBioPortal_Public_DB_Dump"
   product_id                 = "prod-5ghnhr2n5wnx4"
@@ -103,4 +107,28 @@ resource "aws_s3_bucket_public_access_block" "datahub-git-lfs-access" {
   ignore_public_acls      = false
   block_public_policy     = false
   restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_policy" "datahub-git-lfs-policy" {
+  bucket = aws_s3_bucket.datahub-git-lfs.id
+
+  depends_on = [aws_s3_bucket_public_access_block.datahub-git-lfs-access]
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "DenyPublicReadLFS"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.datahub-git-lfs.arn}/lfs/*"
+        Condition = {
+          StringNotEquals = {
+            "aws:PrincipalArn" = data.aws_iam_role.github_lfs_lambda.arn
+          }
+        }
+      }
+    ]
+  })
 }
