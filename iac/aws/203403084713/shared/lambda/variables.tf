@@ -20,15 +20,3 @@ variable "AWS_DEFAULT_TAGS" {
     cdsi-team  = "data-visualization"
   }
 }
-
-variable "S3_CDN_CERT_ARN" {
-  description = "ARN of the AWS certificate to be used with S3 service catalog CDNs"
-  type        = string
-  default     = "arn:aws:acm:us-east-1:203403084713:certificate/b3a29c0f-0e1a-4b58-b4ba-32d38492a16a"
-}
-
-variable "GITHUB_LFS_LAMBDA_ROLE_NAME" {
-  description = "Name of the role defined in the iam module to allow bucket access from lambda functions"
-  type        = string
-  default     = "github-lfs-lambda-role"
-}

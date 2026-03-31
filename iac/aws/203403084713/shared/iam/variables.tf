@@ -21,14 +21,14 @@ variable "AWS_DEFAULT_TAGS" {
   }
 }
 
-variable "S3_CDN_CERT_ARN" {
-  description = "ARN of the AWS certificate to be used with S3 service catalog CDNs"
+variable "DATAHUB_LFS_BUCKET_NAME" {
+  description = "Name of the S3 bucket used for GitHub LFS storage"
   type        = string
-  default     = "arn:aws:acm:us-east-1:203403084713:certificate/b3a29c0f-0e1a-4b58-b4ba-32d38492a16a"
+  default     = "datahub-git-lfs"
 }
 
-variable "GITHUB_LFS_LAMBDA_ROLE_NAME" {
-  description = "Name of the role defined in the iam module to allow bucket access from lambda functions"
+variable "GITHUB_LFS_SECRET_NAME" {
+  description = "Name of the Secrets Manager secret for GitHub LFS API keys"
   type        = string
-  default     = "github-lfs-lambda-role"
+  default     = "user-github-lfs-api-keys"
 }
