@@ -22,13 +22,15 @@ spec:
     spec:
       containers:
       - name: vibe-vep
-        image: inodb/vibe-vep:latest
+        image: inodb/vibe-vep:slim
         imagePullPolicy: Always
         args: ["serve", "--assembly=GRCh37,GRCh38", "--port=8080"]
         ports:
         - containerPort: 8080
           protocol: TCP
         env:
+        - name: VIBE_VEP_DATA_DIR
+          value: /data
         - name: VIBE_VEP_ANNOTATIONS_SIFT
           value: "true"
         - name: VIBE_VEP_ANNOTATIONS_POLYPHEN
@@ -39,6 +41,10 @@ spec:
           value: "true"
         - name: VIBE_VEP_ANNOTATIONS_HOTSPOTS
           value: /data/hotspots_v2_and_3d.txt
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          readOnly: true
         startupProbe:
           httpGet:
             path: /health
@@ -62,6 +68,10 @@ spec:
             memory: 2Gi
           limits:
             memory: 4Gi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: vibe-vep-data-pvc
       nodeSelector:
         workload: "cbio-dev"
       tolerations:
