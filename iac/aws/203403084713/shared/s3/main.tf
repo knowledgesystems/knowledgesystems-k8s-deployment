@@ -80,3 +80,18 @@ resource "aws_servicecatalog_provisioned_product" "g2s-dump" {
   }
 
 }
+
+resource "aws_s3_bucket" "datahub-git-lfs" {
+  bucket = "datahub-git-lfs"
+  tags = {
+    Name     = "datahub-git-lfs"
+    cdsi-app = "datahub"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "datahub-git-lfs-versioning" {
+  bucket = aws_s3_bucket.datahub-git-lfs.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
