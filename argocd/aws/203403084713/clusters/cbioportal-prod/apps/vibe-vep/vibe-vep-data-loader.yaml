@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vibe-vep-data-loader
+  namespace: genome-nexus
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        run: vibe-vep-data-loader
+    spec:
+      containers:
+      - name: loader
+        image: inodb/vibe-vep:slim
+        command: ["sh", "-c"]
+        args:
+        - |
+          set -e
+          echo "=== Downloading GRCh37 data ==="
+          vibe-vep download --assembly GRCh37
+          echo "=== Preparing GRCh37 ==="
+          vibe-vep prepare --assembly GRCh37
+          echo "=== Downloading GRCh38 data ==="
+          vibe-vep download --assembly GRCh38
+          echo "=== Preparing GRCh38 ==="
+          vibe-vep prepare --assembly GRCh38
+          echo "=== Done ==="
+          ls -lhR /data/
+        env:
+        - name: VIBE_VEP_DATA_DIR
+          value: /data
+        - name: VIBE_VEP_ANNOTATIONS_SIFT
+          value: "true"
+        - name: VIBE_VEP_ANNOTATIONS_POLYPHEN
+          value: "true"
+        - name: VIBE_VEP_ANNOTATIONS_ALPHAMISSENSE
+          value: "true"
+        - name: VIBE_VEP_ANNOTATIONS_CLINVAR
+          value: "true"
+        resources:
+          requests:
+            memory: 4Gi
+            cpu: "2"
+          limits:
+            memory: 8Gi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: vibe-vep-data-pvc
+      nodeSelector:
+        workload: "cbio-dev"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+      restartPolicy: Never
