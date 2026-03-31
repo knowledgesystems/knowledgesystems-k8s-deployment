@@ -14,6 +14,7 @@
   * [IP Blocking](tutorials/ip-blocking.md)
 * [Apps](apps/README.md)
   * [Genome Nexus](apps/genome-nexus.md)
+  * [GitHub LFS](apps/github-lfs.md)
 * [Troubleshooting](troubleshooting.md)
 * [Incidents Log](incidents-log)
   * [Nginx Ingress Timeout Failure](incidents-log/nginx-ingress-timeout-failure.md)

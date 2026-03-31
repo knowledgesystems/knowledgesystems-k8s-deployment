@@ -30,5 +30,5 @@ variable "S3_CDN_CERT_ARN" {
 variable "GITHUB_LFS_LAMBDA_ROLE_NAME" {
   description = "Name of the role defined in the iam module to allow bucket access from lambda functions"
   type        = string
-  default     = "github-lfs-lambda-role"
+  default     = "userServiceRole-github-lfs-lambda-role"
 }
