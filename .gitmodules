@@ -1,0 +1,3 @@
+[submodule "iac/aws/203403084713/shared/lambda/git-lfs-s3"]
+	path = iac/aws/203403084713/shared/lambda/git-lfs-s3
+	url = https://github.mskcc.org/cdsi/git-lfs-s3.git
