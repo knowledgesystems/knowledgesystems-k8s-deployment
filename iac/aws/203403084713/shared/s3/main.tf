@@ -1,5 +1,5 @@
 data "aws_iam_role" "github-lfs-lambda-role" {
-  name = var.GITHUB_LFS_LAMBDA_ROLE_NAME.arn
+  name = var.GITHUB_LFS_LAMBDA_ROLE_NAME
 }
 
 resource "aws_servicecatalog_provisioned_product" "cBioPortal_Public_DB_Dump" {
@@ -125,7 +125,7 @@ resource "aws_s3_bucket_policy" "datahub-git-lfs-policy" {
         Resource  = "${aws_s3_bucket.datahub-git-lfs.arn}/lfs/*"
         Condition = {
           StringNotEquals = {
-            "aws:PrincipalArn" = data.aws_iam_role.github_lfs_lambda.arn
+            "aws:PrincipalArn" = data.aws_iam_role.github-lfs-lambda-role.arn
           }
         }
       }
