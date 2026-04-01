@@ -121,6 +121,7 @@ data:
     endpoints:
       agents:
         contextStrategy: 'summarize'
+        # summaryModel: claude-3-5-haiku-20241022
         recursionLimit: 50
         maxRecursionLimit: 100
         disableBuilder: false
