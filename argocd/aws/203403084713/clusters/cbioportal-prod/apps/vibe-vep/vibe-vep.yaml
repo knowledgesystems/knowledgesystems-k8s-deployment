@@ -48,8 +48,8 @@ spec:
           httpGet:
             path: /health
             port: 8080
-          periodSeconds: 5
-          failureThreshold: 60
+          periodSeconds: 10
+          failureThreshold: 120
         readinessProbe:
           httpGet:
             path: /health
@@ -64,9 +64,9 @@ spec:
           timeoutSeconds: 10
         resources:
           requests:
-            memory: 2Gi
-          limits:
             memory: 4Gi
+          limits:
+            memory: 8Gi
       volumes:
       - name: data
         persistentVolumeClaim:
