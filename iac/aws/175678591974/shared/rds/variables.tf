@@ -28,9 +28,9 @@ variable "VPC_ID" {
 }
 
 variable "SUBNET_IDS" {
-  description = "Subnets for the RDS subnet group"
+  description = "Public subnets for the RDS subnet group"
   type        = list(string)
-  default     = ["subnet-0f12260d835e34eaa", "subnet-0e33028044f5134d0", "subnet-0dce8bb1a75d09101", "subnet-0605f2e69906444e1"]
+  default     = ["subnet-0f814b811374c05e8", "subnet-00347c38f00ad8944", "subnet-044ac65e48ee7baa8", "subnet-0454403b8778da308"]
 }
 
 variable "DB_INSTANCE_IDENTIFIER" {
