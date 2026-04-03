@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oncokb-core-demo
+  namespace: oncokb
+  labels:
+    run: oncokb-core-demo
+    tags.datadoghq.com/service: oncokb-core-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: oncokb-core-demo
+  strategy:
+    rollingUpdate:
+      maxSurge: 3
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-core-demo
+        tags.datadoghq.com/service: oncokb-core-demo
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
+    spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
+      containers:
+        - name: oncokb-core-demo
+          image: mskcc/oncokb:6.0.0-no-frontend
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: oncokb-core-demo
+            - secretRef:
+                name: oncokb-db-public-rds-oncokb-user
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
+          command: ["java"]
+          args:
+            - "-Xms250m"
+            - "-XX:+UseSerialGC"
+            - "-XX:MinHeapFreeRatio=20"
+            - "-XX:MaxHeapFreeRatio=40"
+            - "-XX:GCTimeRatio=4"
+            - "-XX:AdaptiveSizePolicyWeight=90"
+            - "-XX:+UnlockExperimentalVMOptions"
+            - "-XX:+UseCGroupMemoryLimitForHeap"
+            - "-XX:MaxRAMFraction=2"
+            - "-XX:+PrintFlagsFinal"
+            - "-XshowSettings:vm"
+            - "-XX:MaxRAM=1024m"
+            - "-Dapp.name=oncokb-core-demo"
+            - "-Djdbc.driverClassName=com.mysql.jdbc.Driver"
+            - "-Djdbc.url=$(DB_URL)/oncokb_core_demo?useUnicode=yes&characterEncoding=UTF-8&useSSL=false"
+            - "-Djdbc.username=$(DB_USERNAME)"
+            - "-Djdbc.password=$(DB_PASSWORD)"
+            - "-Dgenomenexus.api=https://www.genomenexus.org/"
+            - "-Dshow_sitemaps=false"
+            - "-Dswagger_description=This website is for demonstration purpose. Only information of BRAF, TP53 and ROS1 are available."
+            - "-Dswagger_url=https://demo.oncokb.org"
+            - "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus"
+            - "-Dsentry.sample.rate=0.1"
+            - "-Dlog4j.configuration=file:/config/log4j.properties"
+            - "-jar"
+            - "/webapp-runner.jar"
+            - "--enable-compression"
+            - "--port"
+            - "8888"
+            - "/app.war"
+          readinessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 20
+          livenessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            initialDelaySeconds: 360
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          ports:
+            - name: http
+              containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1024Mi
+            limits:
+              memory: 1536Mi
+      nodeSelector:
+        workload: oncokb-nonessential
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: oncokb-nonessential
+          effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-core-demo
+  namespace: oncokb
+  labels:
+    run: oncokb-core-demo
+spec:
+  type: ClusterIP
+  selector:
+    run: oncokb-core-demo
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8888
