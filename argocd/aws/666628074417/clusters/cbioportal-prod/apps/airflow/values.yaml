@@ -6,6 +6,9 @@ postgresql:
   global:
     imagePullSecrets:
       - "dockerhub-creds"
+  primary:
+    persistence:
+      existingClaim: data-airflow-postgresql
 
 registry:
   secretName: "dockerhub-creds"
