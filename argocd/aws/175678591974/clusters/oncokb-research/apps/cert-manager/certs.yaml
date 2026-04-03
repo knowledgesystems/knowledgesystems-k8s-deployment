@@ -20,7 +20,7 @@ spec:
   secretName: oncokb-cert-secret
   dnsNames:
     - "demo.oncokb.org"
-    - "public.oncokb.org"
+    - "public.api.oncokb.org"
     - "sop.oncokb.org"
   issuerRef:
     name: letsencrypt
