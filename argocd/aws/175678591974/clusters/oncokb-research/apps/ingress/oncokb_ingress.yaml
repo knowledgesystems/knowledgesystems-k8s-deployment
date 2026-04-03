@@ -6,16 +6,16 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - kind: Rule
-      match: Host(`demo.oncokb.org`)
-      services:
-        - name: oncokb-core-demo
-          port: 80
-    - kind: Rule
-      match: Host(`public.oncokb.org`)
-      services:
-        - name: oncokb-core-public
-          port: 80
+    # - kind: Rule
+    #   match: Host(`demo.oncokb.org`)
+    #   services:
+    #     - name: oncokb-core-demo
+    #       port: 80
+    # - kind: Rule
+    #   match: Host(`public.oncokb.org`)
+    #   services:
+    #     - name: oncokb-core-public
+    #       port: 80
     - kind: Rule
       match: Host(`sop2.oncokb.org`)
       services:
