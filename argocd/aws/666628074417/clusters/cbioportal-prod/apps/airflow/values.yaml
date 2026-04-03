@@ -64,10 +64,11 @@ extraEnv: |-
         fieldPath: status.hostIP
 
 images:
+  useDefaultImageForMigration: false
   airflow:
     pullPolicy: Always
     repository: jamesko0/cmo-airflow
-    tag: 2.9.2
+    tag: 3.0.1
 
 logs:
   persistence:
