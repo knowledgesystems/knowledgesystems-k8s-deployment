@@ -1,0 +1,25 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: oncokb
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`demo.oncokb.org`)
+      services:
+        - name: oncokb-core-demo
+          port: 80
+    - kind: Rule
+      match: Host(`public.oncokb.org`)
+      services:
+        - name: oncokb-core-public
+          port: 80
+    - kind: Rule
+      match: Host(`sop2.oncokb.org`)
+      services:
+        - name: oncokb-sop
+          port: 4321
+  tls:
+    secretName: oncokb-cert-secret

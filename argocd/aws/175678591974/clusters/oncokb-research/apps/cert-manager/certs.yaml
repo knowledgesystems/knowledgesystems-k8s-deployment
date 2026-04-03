@@ -10,3 +10,17 @@ spec:
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: oncokb-cert
+spec:
+  secretName: oncokb-cert-secret
+  dnsNames:
+    - "demo.oncokb.org"
+    - "public.oncokb.org"
+    - "sop2.oncokb.org"
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
