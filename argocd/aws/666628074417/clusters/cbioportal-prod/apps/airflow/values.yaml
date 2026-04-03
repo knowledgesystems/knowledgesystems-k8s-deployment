@@ -64,11 +64,12 @@ extraEnv: |-
         fieldPath: status.hostIP
 
 images:
+  # https://airflow.apache.org/docs/helm-chart/stable/parameters-ref.html
   useDefaultImageForMigration: false
   airflow:
     pullPolicy: Always
-    repository: jamesko0/cmo-airflow
-    tag: 3.0.1
+    repository: cbioportal/airflow-server
+    tag: 2.10.5
 
 logs:
   persistence:
