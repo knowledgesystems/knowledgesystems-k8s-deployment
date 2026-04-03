@@ -17,7 +17,7 @@ spec:
     #     - name: oncokb-core-public
     #       port: 80
     - kind: Rule
-      match: Host(`sop2.oncokb.org`)
+      match: Host(`sop.oncokb.org`)
       services:
         - name: oncokb-sop
           port: 4321
