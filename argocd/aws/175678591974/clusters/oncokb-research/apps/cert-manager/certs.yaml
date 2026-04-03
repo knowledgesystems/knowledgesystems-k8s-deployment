@@ -19,8 +19,6 @@ metadata:
 spec:
   secretName: oncokb-cert-secret
   dnsNames:
-    - "demo.oncokb.org"
-    - "public.oncokb.org"
     - "sop2.oncokb.org"
   issuerRef:
     name: letsencrypt
