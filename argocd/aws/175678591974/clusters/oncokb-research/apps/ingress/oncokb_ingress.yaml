@@ -12,7 +12,7 @@ spec:
         - name: oncokb-core-demo
           port: 80
     - kind: Rule
-      match: Host(`public.oncokb.org`)
+      match: Host(`public.api.oncokb.org`)
       services:
         - name: oncokb-core-public
           port: 80
