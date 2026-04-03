@@ -63,7 +63,7 @@ extraEnv: |-
 images:
   airflow:
     pullPolicy: IfNotPresent
-    repository: apache/airflow
+    repository: jamesko0/cmo-airflow
     tag: 2.9.2
 
 logs:
