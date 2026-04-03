@@ -70,10 +70,10 @@ variable "MASTER_USERNAME" {
   default     = "admin"
 }
 
-variable "MASTER_PASSWORD" {
-  description = "Master password for the DB instance"
+variable "MASTER_PASSWORD_SECRET_NAME" {
+  description = "Secrets Manager secret name that stores the DB master password"
   type        = string
-  sensitive   = true
+  default     = "user-oncokb-public-db-pw"
 }
 
 variable "PUBLICLY_ACCESSIBLE" {

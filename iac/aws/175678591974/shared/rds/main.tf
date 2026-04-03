@@ -6,6 +6,14 @@ data "aws_kms_alias" "rds" {
   name = var.KMS_KEY_ID
 }
 
+data "aws_secretsmanager_secret" "rds_master_password" {
+  name = var.MASTER_PASSWORD_SECRET_NAME
+}
+
+data "aws_secretsmanager_secret_version" "rds_master_password" {
+  secret_id = data.aws_secretsmanager_secret.rds_master_password.id
+}
+
 resource "aws_security_group" "oncokb_public_db_sg" {
   name        = "${var.DB_INSTANCE_IDENTIFIER}-sg"
   description = "Security group for ${var.DB_INSTANCE_IDENTIFIER}"
@@ -64,7 +72,7 @@ resource "aws_db_instance" "oncokb_public_db" {
   engine_version       = var.DB_ENGINE_VERSION
   instance_class       = var.DB_INSTANCE_CLASS
   username             = var.MASTER_USERNAME
-  password             = var.MASTER_PASSWORD
+  password             = data.aws_secretsmanager_secret_version.rds_master_password.secret_string
   port                 = 3306
   parameter_group_name = "default.mysql8.0"
   option_group_name    = "default:mysql-8-0"
