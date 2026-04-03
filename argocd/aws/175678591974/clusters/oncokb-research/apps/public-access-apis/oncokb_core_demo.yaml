@@ -100,11 +100,11 @@ spec:
             limits:
               memory: 1536Mi
       nodeSelector:
-        workload: oncokb-nonessential
+        workload: nonessential
       tolerations:
         - key: workload
           operator: Equal
-          value: oncokb-nonessential
+          value: nonessential
           effect: NoSchedule
 ---
 apiVersion: v1
