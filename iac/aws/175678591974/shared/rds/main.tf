@@ -89,10 +89,8 @@ resource "aws_db_instance" "oncokb_public_db" {
   db_subnet_group_name   = aws_db_subnet_group.oncokb_public_db.name
   vpc_security_group_ids = [aws_security_group.oncokb_public_db_sg.id]
 
-  database_insights_mode                = "standard"
-  performance_insights_enabled          = true
-  performance_insights_retention_period = 7
-  skip_final_snapshot                   = true
+  performance_insights_enabled = false
+  skip_final_snapshot          = true
 
   tags = {
     Name = var.DB_INSTANCE_IDENTIFIER
