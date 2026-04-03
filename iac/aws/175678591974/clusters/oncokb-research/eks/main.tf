@@ -25,6 +25,23 @@ locals {
         (var.LABEL_KEY) = "ingress"
       }
     }
+    nonessential = {
+      instance_types = ["t4g.medium"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "nonessential"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "nonessential"
+      }
+    }
   }
 }
 

@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oncokb-core-public
+  namespace: oncokb
+  labels:
+    run: oncokb-core-public
+    tags.datadoghq.com/service: oncokb-core-public
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: oncokb-core-public
+  strategy:
+    rollingUpdate:
+      maxSurge: 3
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-core-public
+        tags.datadoghq.com/service: oncokb-core-public
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
+    spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
+      containers:
+        - name: oncokb-core-public
+          image: mskcc/oncokb:6.0.0-no-frontend
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: oncokb-core-public
+            - secretRef:
+                name: oncokb-db-public-rds-oncokb-user
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
+          command: ["java"]
+          args:
+            - "-Xms250m"
+            - "-XX:+UseSerialGC"
+            - "-XX:MinHeapFreeRatio=20"
+            - "-XX:MaxHeapFreeRatio=40"
+            - "-XX:GCTimeRatio=4"
+            - "-XX:AdaptiveSizePolicyWeight=90"
+            - "-XX:+UnlockExperimentalVMOptions"
+            - "-XX:+UseCGroupMemoryLimitForHeap"
+            - "-XX:MaxRAMFraction=2"
+            - "-XX:+PrintFlagsFinal"
+            - "-XshowSettings:vm"
+            - "-XX:MaxRAM=1024m"
+            - "-Dapp.name=oncokb-core-public"
+            - "-Djdbc.driverClassName=com.mysql.jdbc.Driver"
+            - "-Djdbc.url=$(DB_URL)/oncokb_core_public?useUnicode=yes&characterEncoding=UTF-8&useSSL=false"
+            - "-Djdbc.username=$(DB_USERNAME)"
+            - "-Djdbc.password=$(DB_PASSWORD)"
+            - "-Dgenomenexus.api=https://www.genomenexus.org/"
+            - "-Dshow_sitemaps=false"
+            - "-Dswagger_url=https://public.api.oncokb.org"
+            - "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb,org.genome_nexus"
+            - "-Dsentry.sample.rate=0.1"
+            - "-Dis_public_instance=true"
+            - "-Dlog4j.configuration=file:/config/log4j.properties"
+            - "-jar"
+            - "/webapp-runner.jar"
+            - "--enable-compression"
+            - "--port"
+            - "8888"
+            - "/app.war"
+          readinessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 20
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /api/v1/utils/allActionableVariants
+              port: 8888
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 60
+          ports:
+            - name: http
+              containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1024Mi
+            limits:
+              memory: 1536Mi
+      nodeSelector:
+        workload: oncokb-nonessential
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: oncokb-nonessential
+          effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-core-public
+  namespace: oncokb
+  labels:
+    run: oncokb-core-public
+spec:
+  type: ClusterIP
+  selector:
+    run: oncokb-core-public
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8888
