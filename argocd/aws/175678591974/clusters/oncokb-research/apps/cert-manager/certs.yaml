@@ -15,6 +15,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: oncokb-cert
+  namespace: default
 spec:
   secretName: oncokb-cert-secret
   dnsNames:
