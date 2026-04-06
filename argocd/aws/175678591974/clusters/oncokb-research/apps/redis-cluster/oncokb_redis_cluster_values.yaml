@@ -5,7 +5,7 @@ cluster:
 image:
   registry: public.ecr.aws
   repository: bitnami/redis-cluster
-  tag: 7.0.10-debian-11-r0
+  tag: 8.2.1-debian-12-r0
 
 existingSecret: redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
