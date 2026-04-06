@@ -22,6 +22,7 @@ spec:
     - "demo.oncokb.org"
     - "public.api.oncokb.org"
     - "sop.oncokb.org"
+    - "curation2.oncokb.org"
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer

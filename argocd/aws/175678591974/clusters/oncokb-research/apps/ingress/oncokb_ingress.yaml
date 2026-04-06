@@ -21,5 +21,10 @@ spec:
       services:
         - name: oncokb-sop
           port: 4321
+    - kind: Rule
+      match: Host(`curation2.oncokb.org`)
+      services:
+        - name: oncokb-curation
+          port: 80
   tls:
     secretName: oncokb-cert-secret
