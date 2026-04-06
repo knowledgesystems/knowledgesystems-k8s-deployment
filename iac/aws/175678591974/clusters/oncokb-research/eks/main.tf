@@ -28,9 +28,9 @@ locals {
     curation = {
       instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      max_size       = 2
-      min_size       = 2
+      desired_size   = 3
+      max_size       = 3
+      min_size       = 3
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -43,6 +43,28 @@ locals {
       }
       tags = {
         cdsi-app   = "curation"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
+    main = {
+      instance_types = ["r7g.2xlarge"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "main"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "main"
+      }
+      tags = {
+        cdsi-app   = "main"
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }

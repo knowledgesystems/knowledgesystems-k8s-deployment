@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: oncokb-transcript
+    tags.datadoghq.com/service: oncokb-transcript
+  name: oncokb-transcript
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: oncokb-transcript
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-transcript
+        tags.datadoghq.com/service: oncokb-transcript
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
+    spec:
+      containers:
+        - name: oncokb-transcript
+          image: oncokb/oncokb-transcript:0.9.4
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,api-docs,no-liquibase
+            - name: APPLICATION_REDIS_ENABLED
+              value: "true"
+            - name: APPLICATION_REDIS_TYPE
+              value: "$(REDIS_TYPE)"
+            - name: APPLICATION_REDIS_ADDRESS
+              value: "$(REDIS_ADDRESS)"
+            - name: APPLICATION_REDIS_PASSWORD
+              value: "$(REDIS_PASSWROD)"
+            - name: SPRING_DATASOURCE_URL
+              value: "$(DB_URL)/oncokb_transcript"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "$(DB_USERNAME)"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "$(DB_PASSWORD)"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: LOGGING_PATTERN_CONSOLE
+              value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
+          envFrom:
+            - secretRef:
+                name: oncokb-transcript
+            - secretRef:
+                name: oncokb-db-oncokb-transcript
+            - secretRef:
+                name: redis-cluster
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 3000
+          ports:
+            - name: http
+              containerPort: 9090
+          resources:
+            requests:
+              cpu: 100m
+              memory: 3Gi
+            limits:
+              cpu: 1000m
+              memory: 6Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: main
+          effect: NoSchedule
+      nodeSelector:
+        workload: main
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-transcript
+spec:
+  ports:
+    - port: 9090
+      name: http
+      targetPort: 9090
+  selector:
+    run: oncokb-transcript
+  type: ClusterIP

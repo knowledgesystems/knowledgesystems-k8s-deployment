@@ -9,11 +9,7 @@ agents:
   tolerations:
     - key: workload
       operator: Equal
-      value: core
-      effect: NoSchedule
-    - key: workload
-      operator: Equal
-      value: pubweb
+      value: main
       effect: NoSchedule
     - key: workload
       operator: Equal
