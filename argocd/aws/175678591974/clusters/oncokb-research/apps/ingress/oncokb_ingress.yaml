@@ -22,9 +22,19 @@ spec:
         - name: oncokb-sop
           port: 4321
     - kind: Rule
-      match: Host(`curation2.oncokb.org`)
+      match: Host(`curation.oncokb.org`)
       services:
         - name: oncokb-curation
           port: 9090
+    - kind: Rule
+      match: Host(`keycloak.oncokb.org`)
+      services:
+        - name: keycloak-http
+          port: 80
+    - kind: Rule
+      match: Host(`staging.oncokb.org`)
+      services:
+        - name: oncokb-public-staging
+          port: 9095
   tls:
     secretName: oncokb-cert-secret
