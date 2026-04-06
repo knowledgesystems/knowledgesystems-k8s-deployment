@@ -36,8 +36,6 @@ spec:
             - secretRef:
                 name: oncokb-core
             - secretRef:
-                name: aws-cli-credentials
-            - secretRef:
                 name: oncokb-github
             - secretRef:
                 name: redis-cluster
