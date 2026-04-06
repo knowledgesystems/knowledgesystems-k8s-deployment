@@ -25,6 +25,7 @@ spec:
     - "curation.oncokb.org"
     - "keycloak.oncokb.org"
     - "staging.oncokb.org"
+    - "oncokb2.oncokb.org"
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
