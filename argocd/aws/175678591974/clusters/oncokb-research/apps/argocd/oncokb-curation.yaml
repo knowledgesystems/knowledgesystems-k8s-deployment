@@ -16,7 +16,7 @@ spec:
       targetRevision: 20.8.0
       chart: redis
       helm:
-        releaseName: oncokb-curation-redis
+        releaseName: redis
         valueFiles:
           - $k8s-repo/argocd/aws/175678591974/clusters/oncokb-research/apps/oncokb-curation/oncokb_curation_redis_values.yaml
   destination:
