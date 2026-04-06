@@ -1,0 +1,156 @@
+dags:
+  gitSync:
+    enabled: true
+    repo: https://github.com/oncokb/oncokb-pipeline.git
+    branch: master
+    repoSubPath: oncokb-airflow/oncokb/dags
+    syncWait: 60
+    httpSecret: oncokb-github-airflow
+    httpSecretUsernameKey: USERNAME
+    httpSecretPasswordKey: PRIVATE_ACCESS_TOKEN
+
+postgresql:
+  enabled: false
+
+redis:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/redis
+
+externalDatabase:
+  type: mysql
+  database: oncokb_airflow_v2
+  host: oncokb-public-db.cabgyoe4yt4e.us-east-1.rds.amazonaws.com
+  port: 3306
+  userSecret: oncokb-db-public-rds-admin
+  userSecretKey: DB_USERNAME
+  passwordSecret: oncokb-db-public-rds-admin
+  passwordSecretKey: DB_PASSWORD
+
+scheduler:
+  logCleanup:
+    enabled: true
+    retentionMinutes: 10080
+
+worker:
+  logCleanup:
+    enabled: true
+    retentionMinutes: 10080
+
+rbac:
+  create: false
+
+serviceAccount:
+  create: false
+  name: oncokb-airflow-service-account
+
+airflow:
+  executor: CeleryExecutor
+  image:
+    repository: mskcc/oncokb-airflow
+    tag: 2.8.4-python3.9-v4-beta.1
+  config:
+    PYTHONPATH: "/opt/airflow/dags/repo/oncokb-airflow/"
+    AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
+    AIRFLOW__WEBSERVER__BASE_URL: "https://airflow.oncokb.org"
+    AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS: "false"
+  users:
+    - username: admin
+      role: admin
+      firstName: OncoKB
+      lastName: Admin
+      password: ${ADMIN_PASSWORD}
+      email: dev.oncokb@gmail.com
+  usersTemplates:
+    ADMIN_PASSWORD:
+      kind: secret
+      name: oncokb-airflow-admin-user
+      key: PASSWORD
+  connections:
+    - id: oncokb_redis_cluster_headless
+      type: redis
+      login: ""
+      password: ${ONCOKB_REDIS_CLUSTER_PASSWORD}
+      host: redis-cluster-headless
+      port: 6379
+    - id: slack_alerts_connection
+      type: http
+      login: ""
+      password: ${ONCOKB_SLACK_HOOK_PASSWORD}
+      host: "https://hooks.slack.com/services/"
+    - id: oncokb_public_db_conn_id
+      type: mysql
+      login: ${ONCOKB_DATABASE_USERNAME}
+      password: ${ONCOKB_DATABASE_PASSWORD}
+      host: ${ONCOKB_DATABASE_HOST}
+      port: 3306
+    - id: aws_service_account
+      type: generic
+      login: ${SERVICE_ACCOUNT_USERNAME}
+      password: ${SERVICE_ACCOUNT_PASSWORD}
+      extra: |
+        {
+          "role_arn": "arn:aws:iam::175678591974:role/mskAutomationUser"
+        }
+    - id: oncokb_admin_gmail
+      type: email
+      login: "admin@oncokb.org"
+      password: ${ONCOKB_ADMIN_EMAIL_PASSWORD}
+      extra: |
+        {
+          "address": {
+            "contact": "contact@oncokb.org",
+            "license": "licenses@oncokb.org",
+            "registration": "registration@oncokb.org",
+            "techDev": "dev@oncokb.org"
+          }
+        }
+  connectionsTemplates:
+    ONCOKB_REDIS_CLUSTER_PASSWORD:
+      kind: secret
+      name: redis-cluster
+      key: REDIS_PASSWORD
+    ONCOKB_SLACK_HOOK_PASSWORD:
+      kind: secret
+      name: oncokb-slack
+      key: PASSWORD
+    ONCOKB_DATABASE_USERNAME:
+      kind: secret
+      name: oncokb-db-public-rds-oncokb-user
+      key: DB_USERNAME
+    ONCOKB_DATABASE_PASSWORD:
+      kind: secret
+      name: oncokb-db-public-rds-oncokb-user
+      key: DB_PASSWORD
+    ONCOKB_DATABASE_HOST:
+      kind: secret
+      name: oncokb-db-public-rds-oncokb-user
+      key: DB_HOST
+    SERVICE_ACCOUNT_USERNAME:
+      kind: secret
+      name: oncokb-research-sa
+      key: SERVICE_ACCOUNT_USERNAME
+    SERVICE_ACCOUNT_PASSWORD:
+      kind: secret
+      name: oncokb-research-sa
+      key: SERVICE_ACCOUNT_PASSWORD
+    ONCOKB_ADMIN_EMAIL_PASSWORD:
+      kind: secret
+      name: oncokb-usage-analysis-config
+      key: ADMIN_EMAIL_PASSWORD
+  variables:
+    - key: oncokb_k8_namespace
+      value: default
+    - key: oncokb_redis_cluster_num_replicas_per_master
+      value: 1
+    - key: oncokb_redis_cluster_total_num_masters
+      value: 10
+    - key: oncokb_redis_cluster_usage_threshold
+      value: 0.8
+  defaultNodeSelector:
+    workload: airflow
+  defaultTolerations:
+    - key: workload
+      operator: Equal
+      value: airflow
+      effect: NoSchedule
