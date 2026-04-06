@@ -1,0 +1,37 @@
+cluster:
+  nodes: 20
+  replicas: 1
+
+image:
+  registry: public.ecr.aws
+  repository: bitnami/redis-cluster
+  tag: 7.0.10-debian-11-r0
+
+existingSecret: oncokb-redis-cluster
+existingSecretPasswordKey: REDIS_PASSWORD
+
+redis:
+  configmap: |-
+    maxmemory 1Gb
+    maxmemory-policy allkeys-lru
+  livenessProbe:
+    failureThreshold: 10
+    initialDelaySeconds: 60
+    timeoutSeconds: 5
+  nodeSelector:
+    workload: redis-cluster
+  readinessProbe:
+    failureThreshold: 10
+    timeoutSeconds: 5
+  resources:
+    requests:
+      cpu: 100m
+      memory: 2Gi
+    limits:
+      cpu: 1
+      memory: 3Gi
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: redis-cluster

@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oncokb-curation
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/175678591974/clusters/oncokb-research/apps/oncokb-curation
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 20.8.0
+      chart: redis
+      helm:
+        releaseName: oncokb-curation-redis
+        valueFiles:
+          - $k8s-repo/argocd/aws/175678591974/clusters/oncokb-research/apps/oncokb-curation/oncokb_curation_redis_values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

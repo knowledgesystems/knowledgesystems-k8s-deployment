@@ -25,6 +25,50 @@ locals {
         (var.LABEL_KEY) = "ingress"
       }
     }
+    curation = {
+      instance_types = ["t4g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "curation"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "curation"
+      }
+      tags = {
+        cdsi-app   = "curation"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
+    redis-cluster = {
+      instance_types = ["r7g.xlarge"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 2
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "redis-cluster"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "redis-cluster"
+      }
+      tags = {
+        cdsi-app   = "redis-cluster"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
     nonessential = {
       instance_types = ["t4g.medium"]
       ami_type       = "BOTTLEROCKET_ARM_64"
