@@ -47,7 +47,7 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
-    redis-cluster = {
+    redis-cl = {
       instance_types = ["r7g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
@@ -56,15 +56,15 @@ locals {
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
-          value  = "redis-cluster"
+          value  = "redis-cl"
           effect = var.TAINT_EFFECT
         }
       }
       labels = {
-        (var.LABEL_KEY) = "redis-cluster"
+        (var.LABEL_KEY) = "redis-cl"
       }
       tags = {
-        cdsi-app   = "redis-cluster"
+        cdsi-app   = "redis-cl"
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
