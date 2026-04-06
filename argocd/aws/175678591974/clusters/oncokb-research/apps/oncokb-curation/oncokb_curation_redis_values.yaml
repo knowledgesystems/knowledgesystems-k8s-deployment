@@ -15,6 +15,13 @@ auth:
   existingSecret: redis-cluster
   existingSecretPasswordKey: REDIS_PASSWORD
 
+persistence:
+  enabled: true
+  storageClass: efs-sc
+  accessModes:
+    - ReadWriteMany
+  size: 4Gi
+
 master:
   nodeSelector:
     workload: curation
