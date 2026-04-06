@@ -36,5 +36,10 @@ spec:
       services:
         - name: oncokb-public-staging
           port: 9095
+    - kind: Rule
+      match: Host(`oncokb2.oncokb.org`)
+      services:
+        - name: oncokb-public
+          port: 9095
   tls:
     secretName: oncokb-cert-secret
