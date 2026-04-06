@@ -1,0 +1,34 @@
+global:
+  security:
+    allowInsecureImages: true
+
+# Pull from AWS ECR so we don't get docker rate limiting issues
+image:
+  registry: public.ecr.aws
+  repository: bitnami/redis
+  tag: 7.4.2-debian-12-r4
+
+architecture: replication
+
+auth:
+  enabled: true
+  existingSecret: oncokb-redis-cluster
+  existingSecretPasswordKey: REDIS_PASSWORD
+
+master:
+  nodeSelector:
+    workload: curation
+  tolerations:
+    - key: workload
+      value: curation
+      operator: Equal
+      effect: NoSchedule
+
+replica:
+  nodeSelector:
+    workload: curation
+  tolerations:
+    - key: workload
+      value: curation
+      operator: Equal
+      effect: NoSchedule

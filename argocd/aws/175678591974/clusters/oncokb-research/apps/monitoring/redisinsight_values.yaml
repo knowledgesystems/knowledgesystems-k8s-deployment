@@ -1,0 +1,11 @@
+nodeSelector:
+  workload: nonessential
+
+tolerations:
+  - key: workload
+    operator: Equal
+    value: nonessential
+    effect: NoSchedule
+
+persistence:
+  enabled: false
