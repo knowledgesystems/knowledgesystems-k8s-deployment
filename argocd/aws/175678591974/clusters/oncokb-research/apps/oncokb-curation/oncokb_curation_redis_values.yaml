@@ -15,14 +15,17 @@ auth:
   existingSecret: redis-cluster
   existingSecretPasswordKey: REDIS_PASSWORD
 
-persistence:
-  enabled: true
-  storageClass: efs-sc
-  accessModes:
-    - ReadWriteMany
-  size: 4Gi
-
 master:
+  persistence:
+    enabled: true
+    storageClass: gp2
+    accessModes:
+      - ReadWriteOnce
+    size: 4Gi
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenScaled: Delete
+    whenDeleted: Delete
   nodeSelector:
     workload: curation
   tolerations:
@@ -32,6 +35,16 @@ master:
       effect: NoSchedule
 
 replica:
+  persistence:
+    enabled: true
+    storageClass: gp2
+    accessModes:
+      - ReadWriteOnce
+    size: 4Gi
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenScaled: Delete
+    whenDeleted: Delete
   nodeSelector:
     workload: curation
   tolerations:
