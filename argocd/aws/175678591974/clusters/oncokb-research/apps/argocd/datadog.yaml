@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: datadog
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/175678591974/clusters/oncokb-research/apps/datadog
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: datadog
+    - repoURL: https://helm.datadoghq.com
+      targetRevision: 3.109.2
+      chart: datadog
+      helm:
+        releaseName: datadog
+        valueFiles:
+          - $datadog/argocd/aws/175678591974/clusters/oncokb-research/apps/datadog/values.yaml
+  destination:
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

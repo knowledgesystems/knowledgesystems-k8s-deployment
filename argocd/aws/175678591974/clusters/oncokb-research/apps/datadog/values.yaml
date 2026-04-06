@@ -1,0 +1,68 @@
+agents:
+  podAnnotations:
+    container.apparmor.security.beta.kubernetes.io/agent: unconfined
+    container.apparmor.security.beta.kubernetes.io/process-agent: unconfined
+  enabled: true
+  image:
+    name: agent
+    tag: 7.52.0
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: core
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: pubweb
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: curation
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: airflow
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: redis-cl
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: nonessential
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: ingress
+      effect: NoSchedule
+clusterAgent:
+  admissionController:
+    enabled: true
+    mutateUnlabelled: false
+    agentSidecarInjection:
+      enabled: true
+  podAnnotations:
+    container.apparmor.security.beta.kubernetes.io/cluster-agent: unconfined
+  tokenExistingSecret: datadog
+  createPodDisruptionBudget: true
+  enabled: true
+  image:
+    name: cluster-agent
+    tag: 7.52.0
+  replicas: 1
+datadog:
+  logLevel: INFO
+  helmCheck:
+    enabled: false
+    collectEvents: false
+  clusterName: oncokb-research-444e139c
+  apiKeyExistingSecret: datadog
+  clusterChecks:
+    enabled: true
+  logs:
+    containerCollectAll: true
+    enabled: true
+  apm:
+    instrumentation:
+      skipKPITelemetry: true
+targetSystem: linux
