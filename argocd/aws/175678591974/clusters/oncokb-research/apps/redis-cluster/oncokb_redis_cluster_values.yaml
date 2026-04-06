@@ -7,7 +7,7 @@ image:
   repository: bitnami/redis-cluster
   tag: 7.0.10-debian-11-r0
 
-existingSecret: oncokb-redis-cluster
+existingSecret: redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
 
 persistence:

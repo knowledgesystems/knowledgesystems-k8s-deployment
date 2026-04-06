@@ -35,7 +35,7 @@ spec:
             - secretRef:
                 name: oncokb-core-curation
             - secretRef:
-                name: oncokb-redis-cluster-ng
+                name: redis-cluster
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-user
           volumeMounts:

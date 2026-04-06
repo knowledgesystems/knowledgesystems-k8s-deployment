@@ -12,7 +12,7 @@ architecture: replication
 
 auth:
   enabled: true
-  existingSecret: oncokb-redis-cluster
+  existingSecret: redis-cluster
   existingSecretPasswordKey: REDIS_PASSWORD
 
 master:

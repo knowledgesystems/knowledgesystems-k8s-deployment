@@ -16,7 +16,7 @@ spec:
       targetRevision: 8.4.0
       chart: redis-cluster
       helm:
-        releaseName: oncokb-redis-cluster-ng
+        releaseName: redis-cluster
         valueFiles:
           - $k8s-repo/argocd/aws/175678591974/clusters/oncokb-research/apps/redis-cluster/oncokb_redis_cluster_values.yaml
   destination:
