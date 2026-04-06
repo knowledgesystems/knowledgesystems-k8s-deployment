@@ -1,3 +1,7 @@
+global:
+  security:
+    allowInsecureImages: true
+
 cluster:
   nodes: 20
   replicas: 1
