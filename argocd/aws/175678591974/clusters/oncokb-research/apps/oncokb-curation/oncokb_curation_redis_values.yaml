@@ -1,12 +1,12 @@
 global:
   security:
     allowInsecureImages: true
+  imagePullSecrets:
+    - oncokb-dockerhub-creds
 
-# Pull from AWS ECR so we don't get docker rate limiting issues
 image:
-  registry: public.ecr.aws
-  repository: bitnami/redis
-  tag: 7.4.2-debian-12-r4
+  registry: docker.io
+  repository: bitnamilegacy/redis
 
 architecture: replication
 
