@@ -10,6 +10,13 @@ image:
 existingSecret: oncokb-redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
 
+persistence:
+  enabled: true
+  storageClass: efs-sc
+  accessModes:
+    - ReadWriteMany
+  size: 8Gi
+
 redis:
   configmap: |-
     maxmemory 1Gb
@@ -19,7 +26,7 @@ redis:
     initialDelaySeconds: 60
     timeoutSeconds: 5
   nodeSelector:
-    workload: redis-cluster
+    workload: redis-cl
   readinessProbe:
     failureThreshold: 10
     timeoutSeconds: 5
@@ -34,4 +41,4 @@ redis:
     - effect: NoSchedule
       key: workload
       operator: Equal
-      value: redis-cluster
+      value: redis-cl
