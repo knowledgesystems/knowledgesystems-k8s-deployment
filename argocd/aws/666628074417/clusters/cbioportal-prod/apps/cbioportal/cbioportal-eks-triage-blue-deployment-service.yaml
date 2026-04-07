@@ -62,7 +62,7 @@ spec:
           command: ["java"]
           args: [
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
-            "-Xms100m", "-Xmx15g", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseShenandoahGC", "-XX:ShenandoahUncommitDelay=1000", "-XX:ShenandoahGuaranteedGCInterval=10000",
+            "-Xms100m", "-Xmx4g", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseShenandoahGC", "-XX:ShenandoahUncommitDelay=1000", "-XX:ShenandoahGuaranteedGCInterval=10000",
             #"-XX:+AlwaysPreTouch",
             #"-XX:+UseTransparentHugePages",
             #"-XX:+UseNUMA",
@@ -148,17 +148,17 @@ spec:
               protocol: TCP
           resources:
             requests:
-              memory: 12Gi
+              memory: 2Gi
             limits:
-              memory: 26Gi
+              memory: 4Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       # run on big memory machine
       nodeSelector:
-        workload: cbioportal
+        workload: cbio-triage
       tolerations:
         - key: workload
-          value: cbioportal
+          value: cbio-triage
           operator: Equal
           effect: NoSchedule
       dnsPolicy: ClusterFirst
