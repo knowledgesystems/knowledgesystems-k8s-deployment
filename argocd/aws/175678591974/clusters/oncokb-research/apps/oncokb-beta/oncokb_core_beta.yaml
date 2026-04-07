@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: oncokb-core-beta
+    tags.datadoghq.com/env: eks-beta-oncokb
+    tags.datadoghq.com/service: oncokb-core
+  name: oncokb-core-beta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-core-beta
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-core-beta
+        tags.datadoghq.com/env: eks-beta-oncokb
+        tags.datadoghq.com/service: oncokb-core
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
+    spec:
+      volumes:
+        - name: log4j-properties
+          configMap:
+            name: oncokb-core-log4j-properties
+      containers:
+        - name: oncokb-core-beta
+          image: mskcc/oncokb:7.0.0-germline.2
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: oncokb-core-beta
+            - secretRef:
+                name: redis-cluster-beta
+            - secretRef:
+                name: oncokb-db-public-rds-oncokb-user
+          volumeMounts:
+            - mountPath: /config/
+              name: log4j-properties
+          command: ["java"]
+          args:
+            - "-Dapp.name=$(APP_NAME)"
+            - "-Djdbc.driverClassName=com.mysql.jdbc.Driver"
+            - "-Djdbc.url=$(DB_URL)/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false"
+            - "-Djdbc.username=$(DB_USERNAME)"
+            - "-Djdbc.password=$(DB_PASSWORD)"
+            - "-Dgenomenexus.api=https://www.genomenexus.org/"
+            - "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)"
+            - "-Doncokb_transcript.url=https://beta.transcript.oncokb.org"
+            - "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)"
+            - "-Dredis.enable=false"
+            - "-Dswagger_url=https://beta.oncokb.org"
+            - "-Dshow_sitemaps=false"
+            - "-Dsentry.stacktrace.app.packages=org.mskcc.cbio.oncokb"
+            - "-Dsentry.sample.rate=1"
+            - "-Dlog4j.configuration=file:/config/log4j.properties"
+            - "-jar"
+            - "/webapp-runner.jar"
+            - "--enable-compression"
+            - "--port"
+            - "8888"
+            - "/app.war"
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8888
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 20
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8888
+            initialDelaySeconds: 480
+            timeoutSeconds: 5
+            periodSeconds: 5
+            failureThreshold: 100
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1500m
+              memory: 2Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: beta
+          effect: NoSchedule
+      nodeSelector:
+        workload: beta
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: oncokb-core-beta
+  name: oncokb-core-beta
+spec:
+  ports:
+    - port: 8888
+  selector:
+    run: oncokb-core-beta
+  type: ClusterIP

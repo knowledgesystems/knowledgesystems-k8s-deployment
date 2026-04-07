@@ -25,6 +25,10 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: beta
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: nonessential
       effect: NoSchedule
     - key: workload

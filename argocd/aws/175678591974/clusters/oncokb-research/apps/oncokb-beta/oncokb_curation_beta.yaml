@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: oncokb-curation-beta
+    tags.datadoghq.com/env: eks-beta-oncokb
+    tags.datadoghq.com/service: oncokb-curation
+  name: oncokb-curation-beta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-curation-beta
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: oncokb-curation-beta
+        tags.datadoghq.com/env: eks-beta-oncokb
+        tags.datadoghq.com/service: oncokb-curation
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
+    spec:
+      containers:
+        - name: oncokb-curation-beta
+          image: mskcc/oncokb-curation:2.2.26
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,api-docs,no-liquibase
+            - name: APPLICATION_FIREBASE_ENABLED
+              value: "true"
+            - name: APPLICATION_REDIS_ENABLED
+              value: "true"
+            - name: APPLICATION_REDIS_TYPE
+              value: "$(REDIS_TYPE)"
+            - name: APPLICATION_REDIS_ADDRESS
+              value: "$(REDIS_ADDRESS)"
+            - name: APPLICATION_REDIS_PASSWORD
+              value: "$(REDIS_PASSWORD)"
+            - name: SPRING_DATASOURCE_URL
+              value: "$(DB_URL)/oncokb_curation_beta"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "$(DB_USERNAME)"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "$(DB_PASSWORD)"
+            - name: SPRING_REDIS_HOST
+              value: "$(REDIS_HOST)"
+            - name: SPRING_REDIS_PORT
+              value: "$(REDIS_PORT)"
+            - name: SPRING_REDIS_PASSWORD
+              value: "$(REDIS_PASSWORD)"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: LOGGING_PATTERN_CONSOLE
+              value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
+            - name: APPLICATION_ONCOKBDATARELEASE_URL
+              value: "http://oncokb-data-release-beta:8085"
+            - name: JHIPSTER_CORS_ALLOWED_ORIGIN_PATTERNS
+              value: "https://*.oncokb.org"
+          envFrom:
+            - secretRef:
+                name: oncokb-curation-beta
+            - secretRef:
+                name: oncokb-db-public-rds-oncokb-transcript
+            - secretRef:
+                name: oncokb-curation-redis
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 3000
+          ports:
+            - name: http
+              containerPort: 9090
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /app/resources/oncokb-firebase-credentials.json
+              subPath: oncokb-firebase-credentials.json
+              name: firebase-credentials
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: beta
+          effect: NoSchedule
+      nodeSelector:
+        workload: beta
+      volumes:
+        - name: firebase-credentials
+          secret:
+            secretName: oncokb-firebase-dev-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-curation-beta
+spec:
+  ports:
+    - port: 9090
+      name: http
+      targetPort: 9090
+  selector:
+    run: oncokb-curation-beta
+  type: ClusterIP
