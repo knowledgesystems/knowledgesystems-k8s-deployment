@@ -17,6 +17,18 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: cbio-dev
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cbio-sclc
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: cbio-triage
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: redis
       effect: NoSchedule
     - key: workload
