@@ -27,4 +27,4 @@ spec:
         - name: oncokb-patient-report-beta
           port: 8080
   tls:
-    secretName: oncokb-cert-secret
+    secretName: oncokb-beta-cert-secret
