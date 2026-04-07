@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oncokb-data-release-beta
+  labels:
+    run: oncokb-data-release-beta
+    tags.datadoghq.com/env: eks-oncokb-beta
+    tags.datadoghq.com/service: oncokb-data-release-beta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-data-release-beta
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        run: oncokb-data-release-beta
+        tags.datadoghq.com/env: eks-oncokb-beta
+        tags.datadoghq.com/service: oncokb-data-release-beta
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
+    spec:
+      imagePullSecrets:
+        - name: oncokb-dockerhub-creds
+      containers:
+        - name: oncokb-data-release-beta
+          image: mskcc/oncokb-data-release:v6.3-range-beta
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8085
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: oncokb-data-release-beta
+          env:
+            - name: FIREBASE_SERVICE_ACCOUNT_PATH
+              value: "/oncokb-firebase-credentials.json"
+            - name: GIN_MODE
+              value: "debug"
+            - name: HTTP_CLIENT_TIMEOUT_SECONDS
+              value: "60"
+          volumeMounts:
+            - name: firebase-credentials
+              mountPath: /oncokb-firebase-credentials.json
+              subPath: oncokb-firebase-credentials.json
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+            periodSeconds: 15
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 120
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 6
+          securityContext: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "oncokb-beta"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: oncokb-beta
+      volumes:
+        - name: firebase-credentials
+          secret:
+            secretName: oncokb-firebase-dev-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-data-release-beta
+  labels:
+    run: oncokb-data-release-beta
+spec:
+  type: ClusterIP
+  selector:
+    run: oncokb-data-release-beta
+  ports:
+    - name: http
+      port: 8085
+      targetPort: http
+      protocol: TCP
