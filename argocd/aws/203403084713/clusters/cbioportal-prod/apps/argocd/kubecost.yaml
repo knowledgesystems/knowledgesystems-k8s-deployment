@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubecost
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/kubecost
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s
+    - repoURL: https://kubecost.github.io/kubecost
+      targetRevision: 3.1.6
+      chart: kubecost
+      helm:
+        releaseName: kubecost
+        valueFiles:
+          - $k8s/argocd/aws/203403084713/clusters/cbioportal-prod/apps/kubecost/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
