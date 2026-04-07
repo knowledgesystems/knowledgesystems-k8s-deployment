@@ -183,9 +183,9 @@ locals {
     cbioportal = {
       instance_types = ["m7g.4xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 3
-      max_size       = 4
-      min_size       = 3
+      desired_size   = 2
+      max_size       = 3
+      min_size       = 2
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -257,7 +257,7 @@ locals {
       }
     }
     cbio-sclc = {
-      instance_types = ["t4g.medium"]
+      instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 1
       max_size       = 1
@@ -269,12 +269,33 @@ locals {
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
-          value  = "cbio-dev"
+          value  = "cbio-sclc"
           effect = var.TAINT_EFFECT
         }
       }
       labels = {
-        (var.LABEL_KEY) = "cbio-dev"
+        (var.LABEL_KEY) = "cbio-sclc"
+      }
+    }
+    cbio-triage = {
+      instance_types = ["t4g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+        data_vol = var.DATA_VOL_CONFIG
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbio-triage"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbio-triage"
       }
     }
   }
