@@ -12,7 +12,15 @@ existingSecret: redis-cluster-beta
 existingSecretPasswordKey: REDIS_PASSWORD
 
 image:
+  registry: docker.io
   repository: bitnamilegacy/redis-cluster
+
+persistence:
+  enabled: true
+  storageClass: efs-sc
+  accessModes:
+    - ReadWriteMany
+  size: 4Gi
 
 redis:
   configmap: |-
