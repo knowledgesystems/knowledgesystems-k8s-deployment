@@ -116,6 +116,28 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
+    beta = {
+      instance_types = ["t4g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "beta"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "beta"
+      }
+      tags = {
+        cdsi-app   = "beta"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
     nonessential = {
       instance_types = ["t4g.medium"]
       ami_type       = "BOTTLEROCKET_ARM_64"
