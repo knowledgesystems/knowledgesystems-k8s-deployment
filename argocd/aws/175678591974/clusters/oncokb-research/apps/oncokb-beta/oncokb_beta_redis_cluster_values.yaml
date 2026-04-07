@@ -1,0 +1,41 @@
+cluster:
+  nodes: 3
+  replicas: 0
+
+global:
+  security:
+    allowInsecureImages: true
+  imagePullSecrets:
+    - oncokb-dockerhub-creds
+
+existingSecret: redis-cluster-beta
+existingSecretPasswordKey: REDIS_PASSWORD
+
+image:
+  repository: bitnamilegacy/redis-cluster
+
+redis:
+  configmap: |-
+    maxmemory 1Gb
+    maxmemory-policy allkeys-lru
+  livenessProbe:
+    failureThreshold: 10
+    initialDelaySeconds: 60
+    timeoutSeconds: 5
+  nodeSelector:
+    workload: beta
+  readinessProbe:
+    failureThreshold: 10
+    timeoutSeconds: 5
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+    limits:
+      cpu: 100m
+      memory: 200Mi
+  tolerations:
+    - effect: NoSchedule
+      key: workload
+      operator: Equal
+      value: beta

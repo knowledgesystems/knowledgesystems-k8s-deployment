@@ -1,0 +1,30 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: oncokb-beta
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`beta.oncokb.org`)
+      services:
+        - name: oncokb-public-beta
+          port: 9095
+    - kind: Rule
+      match: Host(`beta.transcript.oncokb.org`)
+      services:
+        - name: oncokb-transcript-beta
+          port: 9090
+    - kind: Rule
+      match: Host(`beta.curation.oncokb.org`)
+      services:
+        - name: oncokb-curation-beta
+          port: 9090
+    - kind: Rule
+      match: Host(`beta.report.oncokb.org`)
+      services:
+        - name: oncokb-patient-report-beta
+          port: 8080
+  tls:
+    secretName: oncokb-cert-secret

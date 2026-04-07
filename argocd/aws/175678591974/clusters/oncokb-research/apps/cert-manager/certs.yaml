@@ -26,6 +26,10 @@ spec:
     - "keycloak.oncokb.org"
     - "staging.oncokb.org"
     - "oncokb2.oncokb.org"
+    - "beta.oncokb.org"
+    - "beta.transcript.oncokb.org"
+    - "beta.curation.oncokb.org"
+    - "beta.report.oncokb.org"
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
