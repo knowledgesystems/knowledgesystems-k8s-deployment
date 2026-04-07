@@ -72,10 +72,10 @@ spec:
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "oncokb-beta"
+          value: "beta"
           effect: "NoSchedule"
       nodeSelector:
-        workload: oncokb-beta
+        workload: beta
       volumes:
         - name: firebase-credentials
           secret:
