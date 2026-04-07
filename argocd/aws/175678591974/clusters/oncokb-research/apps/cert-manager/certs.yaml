@@ -26,6 +26,18 @@ spec:
     - "keycloak.oncokb.org"
     - "staging.oncokb.org"
     - "oncokb2.oncokb.org"
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: oncokb-beta-cert
+  namespace: default
+spec:
+  secretName: oncokb-beta-cert-secret
+  dnsNames:
     - "beta.oncokb.org"
     - "beta.transcript.oncokb.org"
     - "beta.curation.oncokb.org"
