@@ -256,6 +256,27 @@ locals {
         (var.LABEL_KEY) = "cbio-dev"
       }
     }
+    cbio-sclc = {
+      instance_types = ["t4g.medium"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+        data_vol = var.DATA_VOL_CONFIG
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbio-dev"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbio-dev"
+      }
+    }
   }
 }
 
