@@ -236,7 +236,7 @@ locals {
       }
     }
     cbio-dev = {
-      instance_types = ["r8g.medium"]
+      instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 1
       max_size       = 1
