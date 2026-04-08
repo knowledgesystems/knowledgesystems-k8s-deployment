@@ -32,3 +32,6 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Binary files for lambda
+iac/aws/203403084713/shared/lambda/*.zip

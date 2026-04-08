@@ -38,3 +38,9 @@ variable "LFS_SECRET_NAME" {
   type        = string
   default     = "user-github-lfs-api-keys"
 }
+
+variable "GIT_LFS_S3_VERSION" {
+  description = "Release version of knowledgesystems/git-lfs-s3 to deploy"
+  type        = string
+  default     = "v1.0.0"
+}
