@@ -440,28 +440,6 @@ locals {
         cdsi-owner = "nasirz1@mskcc.org"
       }
     }
-    prometheus = {
-      instance_types = ["t3.large"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      max_size       = 1
-      min_size       = 1
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "prometheus"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "prometheus"
-      }
-      tags = {
-        cdsi-app   = "oncokb"
-        cdsi-team  = "oncokb"
-        cdsi-owner = "luc2@mskcc.org"
-      }
-    }
     k8s-cost = {
       instance_types = ["t3.small"]
       ami_type       = "BOTTLEROCKET_x86_64"
