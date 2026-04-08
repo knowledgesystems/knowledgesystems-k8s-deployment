@@ -181,7 +181,7 @@ locals {
       }
     }
     cbioportal = {
-      instance_types = ["m7g.4xlarge"]
+      instance_types = ["m7g.2xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       max_size       = 3
