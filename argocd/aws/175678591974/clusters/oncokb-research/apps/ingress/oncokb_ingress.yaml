@@ -41,5 +41,10 @@ spec:
       services:
         - name: oncokb-public
           port: 9095
+    - kind: Rule
+      match: Host(`airflow2.oncokb.org`)
+      services:
+        - name: oncokb-airflow-web
+          port: 8080
   tls:
     secretName: oncokb-cert-secret
