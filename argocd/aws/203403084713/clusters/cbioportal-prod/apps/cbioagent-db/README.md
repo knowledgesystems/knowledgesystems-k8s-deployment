@@ -32,13 +32,13 @@ db = db.getSiblingDB("cBioAgent");
 try { db.dropUser("readonly_dev"); } catch(e) {}
 db.createUser({
   user: "readonly_dev",
-  pwd: "cbio-dev-ro-2026",
+  pwd: "<password>",
   roles: [{ role: "read", db: "cBioAgent" }]
 });
 '
 ```
 
-Root password is in the `cbioagent-mongodb-creds` secret (`mongodb-root-password` key).
+Credentials are in the `cbioagent-mongodb-creds` secret and `portal-configuration` repo.
 
 ### External Developer Access
 
