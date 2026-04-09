@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: cbioportal:apps/Deployment:default/eks-triage-blue
   labels:
     run: eks-triage-blue
     tags.datadoghq.com/env: eks-triage
@@ -170,6 +172,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: cbioportal:/Service:default/eks-triage-blue
   labels:
     run: eks-triage-blue
   name: eks-triage-blue
