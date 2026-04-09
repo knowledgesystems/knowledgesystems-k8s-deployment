@@ -152,8 +152,8 @@ locals {
       }
     }
     gn-db-sm = {
-      instance_types = ["r8i.large"]
-      ami_type       = "BOTTLEROCKET_x86_64"
+      instance_types = ["r7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 1
       min_size       = 1
       max_size       = 1
