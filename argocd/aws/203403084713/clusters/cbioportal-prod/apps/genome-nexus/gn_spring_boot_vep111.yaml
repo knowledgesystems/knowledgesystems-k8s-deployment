@@ -40,7 +40,7 @@ spec:
             "-Dvep.url=http://gn-vep-111.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Dcache.enabled=true",
             "-Dgenomenexus.server.version=2.1.2",
-            "-Dspring.mongodb.embedded.version=1.2",
+            "-Dspring.mongodb.embedded.version=1.3",
             "-Xms100m",
             "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
