@@ -24,5 +24,5 @@ variable "AWS_DEFAULT_TAGS" {
 variable "GITHUB_LFS_CURATORS" {
   description = "List of curator names for GitHub LFS API key generation"
   type        = list(string)
-  default     = ["nasirz1"]
+  default     = ["nasirz1", "madupurr", "kundrar", "alhamadr", "satravab"]
 }
