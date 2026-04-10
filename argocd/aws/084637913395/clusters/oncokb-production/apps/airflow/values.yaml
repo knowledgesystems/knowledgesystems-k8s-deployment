@@ -111,6 +111,18 @@ airflow:
       password: ${ONCOKB_DATABASE_PASSWORD}
       host: ${ONCOKB_DATABASE_HOST}
       port: 3306
+    - id: aact_db
+      type: "postgres"
+      login: ${AACT_DATABASE_USERNAME}
+      password: ${AACT_DATABASE_PASSWORD}
+      host: ${AACT_DATABASE_HOST}
+      port: 5432
+    - id: oncokb_curation_db
+      type: "mysql"
+      login: ${ONCOKB_DATABASE_USERNAME}
+      password: ${ONCOKB_DATABASE_PASSWORD}
+      host: ${ONCOKB_DATABASE_HOST}
+      port: 3306
   connectionsTemplates:
     ONCOKB_REDIS_CLUSTER_PASSWORD:
       kind: secret
@@ -131,6 +143,18 @@ airflow:
     ONCOKB_DATABASE_HOST:
       kind: secret
       name: oncokb-db-public-rds-oncokb-user
+      key: DB_HOST
+    AACT_DATABASE_USERNAME:
+      kind: secret
+      name: aact-ctti-db
+      key: DB_USER
+    AACT_DATABASE_PASSWORD:
+      kind: secret
+      name: aact-ctti-db
+      key: DB_PASSWORD
+    AACT_DATABASE_HOST:
+      kind: secret
+      name: aact-ctti-db
       key: DB_HOST
   variables:
     - key: oncokb_k8_namespace
