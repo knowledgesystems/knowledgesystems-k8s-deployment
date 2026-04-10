@@ -179,8 +179,8 @@ locals {
       }
     }
     gn-db-md = {
-      instance_types = ["r8i.xlarge"]
-      ami_type       = "BOTTLEROCKET_x86_64"
+      instance_types = ["r7g.xlarge"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       min_size       = 2
       max_size       = 2
@@ -206,8 +206,8 @@ locals {
       }
     }
     gn-db-lg = {
-      instance_types = ["r8i.2xlarge"]
-      ami_type       = "BOTTLEROCKET_x86_64"
+      instance_types = ["r7g.2xlarge"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       min_size       = 2
       max_size       = 2
