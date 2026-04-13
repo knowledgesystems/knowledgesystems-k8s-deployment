@@ -32,6 +32,14 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
+              value: "$(SERVICE_ACCOUNT_USERNAME)"
+            - name: APPLICATION_SAMLAWS_SERVICEACCOUNTPASSWORD
+              value: "$(SERVICE_ACCOUNT_PASSWORD)"
+            - name: APPLICATION_SAMLAWS_PRINCIPALARN
+              value: "$(PRINCIPAL_ARN)"
+            - name: APPLICATION_SAMLAWS_ROLEARN
+              value: "$(ROLE_ARN)"
             - name: APPLICATION_REDIS_ENABLED
               value: "false"
             - name: APPLICATION_REDIS_TYPE
