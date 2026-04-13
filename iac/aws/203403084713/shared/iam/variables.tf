@@ -24,7 +24,7 @@ variable "AWS_DEFAULT_TAGS" {
 variable "DATAHUB_LFS_BUCKET_NAME" {
   description = "Name of the S3 bucket used for GitHub LFS storage"
   type        = string
-  default     = "datahub-git-lfs"
+  default     = "sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr"
 }
 
 variable "GITHUB_LFS_SECRET_NAME" {
