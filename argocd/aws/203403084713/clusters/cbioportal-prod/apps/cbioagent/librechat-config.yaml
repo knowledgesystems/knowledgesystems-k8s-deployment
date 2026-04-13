@@ -125,6 +125,7 @@ data:
         recursionLimit: 50
         maxRecursionLimit: 100
         disableBuilder: false
+        contextStrategy: summarize
       assistants:
         disableBuilder: true
 
