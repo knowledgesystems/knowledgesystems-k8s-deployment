@@ -35,6 +35,7 @@ resource "aws_lambda_function" "github_lfs_function" {
     variables = {
       S3_BUCKET       = data.aws_s3_bucket.github_lfs.id
       LFS_SECRET_NAME = var.LFS_SECRET_NAME
+      LFS_PATH_PREFIX = var.LFS_PATH_PREFIX
     }
   }
 

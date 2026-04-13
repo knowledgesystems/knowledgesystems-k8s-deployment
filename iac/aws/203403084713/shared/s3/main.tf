@@ -1,5 +1,12 @@
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_role" "github-lfs-lambda-role" {
   name = var.GITHUB_LFS_LAMBDA_ROLE_NAME
+}
+
+locals {
+  datahub_bucket_name = one([for o in aws_servicecatalog_provisioned_product.cbioportal-datahub.outputs : o.value if o.key == "ContentBucket"])
+  datahub_cf_dist_id  = one([for o in aws_servicecatalog_provisioned_product.cbioportal-datahub.outputs : o.value if o.key == "CloudFrontDistribution"])
 }
 
 resource "aws_servicecatalog_provisioned_product" "cBioPortal_Public_DB_Dump" {
@@ -83,6 +90,55 @@ resource "aws_servicecatalog_provisioned_product" "g2s-dump" {
     value = "prod"
   }
 
+}
+
+resource "aws_s3_bucket_policy" "cbioportal-datahub-policy" {
+  bucket     = local.datahub_bucket_name
+  depends_on = [aws_servicecatalog_provisioned_product.cbioportal-datahub]
+
+  policy = jsonencode({
+    Version = "2008-10-17"
+    Statement = [
+      {
+        Sid       = "DenyInsecureTransport"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "*"
+        Resource  = "arn:aws:s3:::${local.datahub_bucket_name}/*"
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      },
+      {
+        Sid    = "AllowCFNGet"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "arn:aws:s3:::${local.datahub_bucket_name}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${local.datahub_cf_dist_id}"
+          }
+        }
+      },
+      {
+        Sid       = "DenyPublicReadLFS"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "arn:aws:s3:::${local.datahub_bucket_name}/${var.LFS_PATH_PREFIX}/*"
+        Condition = {
+          StringNotEquals = {
+            "aws:PrincipalArn" = data.aws_iam_role.github-lfs-lambda-role.arn
+          }
+        }
+      }
+    ]
+  })
 }
 
 resource "aws_s3_bucket" "datahub-git-lfs" {

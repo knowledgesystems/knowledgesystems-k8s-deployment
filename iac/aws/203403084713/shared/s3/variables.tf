@@ -32,3 +32,9 @@ variable "GITHUB_LFS_LAMBDA_ROLE_NAME" {
   type        = string
   default     = "userServiceRole-github-lfs-lambda-role"
 }
+
+variable "LFS_PATH_PREFIX" {
+  description = "S3 key prefix for LFS objects, used to restrict access in the bucket policy"
+  type        = string
+  default     = "lfs/objects"
+}
