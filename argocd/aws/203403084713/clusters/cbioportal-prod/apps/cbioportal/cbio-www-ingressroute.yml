@@ -13,7 +13,7 @@ spec:
     - match: >-
         Host(`www.cbioportal.org`) &&
         HeaderRegexp(`User-Agent`, `Mozilla`) &&
-        !HeaderRegexp(`User-Agent`, `(?i)headless|phantomjs|selenium`)
+        !HeaderRegexp(`User-Agent`, `(?i)headless`)
       kind: Rule
       middlewares:
         - name: ipblock
