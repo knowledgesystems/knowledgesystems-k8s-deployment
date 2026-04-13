@@ -30,7 +30,7 @@ variable "GITHUB_LFS_ROLE_NAME" {
 variable "DATAHUB_LFS_BUCKET_NAME" {
   description = "Name of the S3 bucket used for GitHub LFS storage"
   type        = string
-  default     = "datahub-git-lfs"
+  default     = "sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr"
 }
 
 variable "LFS_SECRET_NAME" {
@@ -39,8 +39,14 @@ variable "LFS_SECRET_NAME" {
   default     = "user-github-lfs-api-keys"
 }
 
+variable "LFS_PATH_PREFIX" {
+  description = "S3 key prefix for LFS objects, passed to the Lambda as LFS_PATH_PREFIX"
+  type        = string
+  default     = "lfs/objects"
+}
+
 variable "GIT_LFS_S3_VERSION" {
   description = "Release version of knowledgesystems/git-lfs-s3 to deploy"
   type        = string
-  default     = "v1.0.0"
+  default     = "v1.0.2"
 }
