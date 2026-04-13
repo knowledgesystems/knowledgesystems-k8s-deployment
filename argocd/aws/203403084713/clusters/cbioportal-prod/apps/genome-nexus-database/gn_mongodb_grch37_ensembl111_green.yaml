@@ -28,7 +28,7 @@ spec:
               protocol: TCP
           env:
             - name: COLLECTION_UPDATE_LIST
-              value: "ensembl.biomart_transcripts"
+              value: "ensembl.biomart_transcripts,ensembl.canonical_transcript_per_hgnc,hotspot.mutation,signal.mutation,ensembl.nucleotide_context,oncokb.gene,version"
             - name: MONGO_DB
               value: "annotator"
           volumeMounts:
