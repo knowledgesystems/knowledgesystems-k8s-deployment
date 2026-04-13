@@ -77,6 +77,8 @@ spec:
                 name: redis-cluster
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-public
+            - secretRef:
+                name: oncokb-research-sa
           readinessProbe:
             httpGet:
               path: /
