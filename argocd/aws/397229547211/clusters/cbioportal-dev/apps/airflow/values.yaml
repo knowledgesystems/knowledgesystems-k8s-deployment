@@ -22,8 +22,6 @@ config:
     smtp_ssl: False
     smtp_port: 587
     smtp_mail_from: cbioportalpipelines@gmail.com
-  core:
-    allowed_deserialization_classes_regexp: airflow\..* .*\..*StudyBuilder
   webserver:
     base_url: https://airflow.cbioportal.aws.mskcc.org
   kubernetes_executor:
@@ -37,8 +35,6 @@ images:
     pullPolicy: IfNotPresent
 
 env:
-  - name: "PYTHONPATH"
-    value: "/opt/airflow/dags/repo/nci-crdc-pipeline"
   - name: AIRFLOW__METRICS__STATSD_ON
     value: "True"
   - name: AIRFLOW__METRICS__STATSD_PORT
@@ -99,9 +95,6 @@ workers:
     - name: pv
       mountPath: /opt/airflow/git_repos
       readOnly: false
-    - name: gcp-keyfile
-      mountPath: /opt/airflow/secrets/gcp-keyfile
-      readOnly: true
     - name: git-secret
       mountPath: /home/airflow/.ssh
       readOnly: true
@@ -125,10 +118,6 @@ workers:
     - name: pv
       persistentVolumeClaim:
         claimName: efs-pv-claim
-    - name: gcp-keyfile
-      secret:
-        # Assumes that `Secret/airflow-gcp-keyfile` contains a key called `gcp_key.json`
-        secretName: airflow-gcp-keyfile
     - name: git-secret
       secret:
         # Assumes that `Secret/airflow-git-secret` contains an SSH key called `id_ed25519`
