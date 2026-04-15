@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: oncokb-data-save-and-restart
+spec:
+  timeZone: "America/New_York"
+  schedule: "0 20 * * *" # Runs once daily at 8:00 PM.
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          imagePullSecrets:
+            - name: oncokb-dockerhub-creds
+          serviceAccountName: oncokb-staging-restart-sa
+          restartPolicy: Never
+          containers:
+            - name: save-gene-and-restart-staging
+              image: "mskcc/oncokb-k8s-with-tools:1.0.0"
+              imagePullPolicy: IfNotPresent
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                  ephemeral-storage: 200Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+                  ephemeral-storage: 500Mi
+              command:
+                - sh
+                - -c
+                - |
+                  set -e
+
+                  GENE_ID=4005
+                  API_URL="http://oncokb-data-release:8085/api/v1/gene-data"
+                  echo "Triggering MySQL refresh using oncokb-data-release server"
+
+                  curl -sS -X POST "${API_URL}/save" \
+                    -H "Content-Type: application/json" \
+                    --fail \
+                    --data "{\"entrezGeneIds\":[${GENE_ID}]}"
+
+                  echo "Polling job status until completion..."
+                  while true; do
+                    # Wait a short grace period to see if a new job queues.
+                    # The server should return a job id.
+                    sleep 5
+                    STATUS_JSON=$(curl -s "${API_URL}/status/${GENE_ID}" || echo "")
+                    STATUS=$(echo "$STATUS_JSON" | jq -r '.status // empty')
+                    ERROR_MSG=$(echo "$STATUS_JSON" | jq -r '.error // empty')
+
+                    if [ "$STATUS" = "succeeded" ]; then
+                      echo "Job succeeded"
+                      break
+                    elif [ "$STATUS" = "failed" ]; then
+                      echo "Job failed: ${ERROR_MSG}"
+                      exit 1
+                    fi
+                    sleep 5
+                  done
+
+                  echo "Restarting staging core environment"
+                  kubectl rollout restart deployment/oncokb-core-curation -n default
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cronjob"
+              effect: "NoSchedule"
+          nodeSelector:
+            workload: cronjob

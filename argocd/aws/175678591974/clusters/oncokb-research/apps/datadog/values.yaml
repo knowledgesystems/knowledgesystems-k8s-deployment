@@ -21,6 +21,10 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: cronjob
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: redis-cl
       effect: NoSchedule
     - key: workload
