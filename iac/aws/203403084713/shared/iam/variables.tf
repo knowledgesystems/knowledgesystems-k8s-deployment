@@ -32,3 +32,15 @@ variable "GITHUB_LFS_SECRET_NAME" {
   type        = string
   default     = "user-github-lfs-api-keys"
 }
+
+variable "DATABRICKS_UNITY_CATALOG_ROLE_ARN" {
+  description = "ARN of the Databricks Unity Catalog master role that can assume the pipelines-databricks role"
+  type        = string
+  default     = "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL"
+}
+
+variable "DATABRICKS_EXTERNAL_ID" {
+  description = "External ID for the Databricks Unity Catalog trust relationship"
+  type        = string
+  default     = "2eaf52b2-1d9c-450e-8ecc-18fad034703b"
+}
