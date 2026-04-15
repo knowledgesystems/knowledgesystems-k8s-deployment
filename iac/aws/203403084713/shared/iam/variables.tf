@@ -44,3 +44,9 @@ variable "DATABRICKS_EXTERNAL_ID" {
   type        = string
   default     = "2eaf52b2-1d9c-450e-8ecc-18fad034703b"
 }
+
+variable "LFS_PATH_PREFIX" {
+  description = "S3 key prefix for LFS objects, excluded from Databricks pipeline access"
+  type        = string
+  default     = "lfs"
+}
