@@ -37,11 +37,6 @@ spec:
         - name: oncokb-public-staging
           port: 9095
     - kind: Rule
-      match: Host(`oncokb.org`)
-      services:
-        - name: oncokb-public
-          port: 9095
-    - kind: Rule
       match: Host(`www.oncokb.org`)
       services:
         - name: oncokb-public
