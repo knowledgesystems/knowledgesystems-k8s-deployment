@@ -42,7 +42,7 @@ variable "DATABRICKS_UNITY_CATALOG_ROLE_ARN" {
 variable "DATABRICKS_EXTERNAL_ID" {
   description = "External ID for the Databricks Unity Catalog trust relationship"
   type        = string
-  default     = "2eaf52b2-1d9c-450e-8ecc-18fad034703b"
+  default     = "ab82e057-3e68-48ee-bdf4-38ee2984c068"
 }
 
 variable "LFS_PATH_PREFIX" {
