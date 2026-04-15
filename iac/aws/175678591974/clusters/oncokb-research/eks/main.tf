@@ -94,6 +94,28 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
+    cronjob = {
+      instance_types = ["t4g.small"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cronjob"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cronjob"
+      }
+      tags = {
+        cdsi-app   = "cronjob"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
     redis-cl = {
       instance_types = ["r7g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
