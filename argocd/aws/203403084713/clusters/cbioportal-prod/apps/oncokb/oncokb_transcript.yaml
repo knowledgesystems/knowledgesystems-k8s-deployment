@@ -9,7 +9,7 @@ metadata:
   name: oncokb-transcript
   namespace: oncokb
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: oncokb-transcript
