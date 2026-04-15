@@ -109,6 +109,15 @@ resource "aws_iam_policy" "userServicePolicy-pipelineBucketAccess" {
         ]
       },
       {
+        Effect = "Deny"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${data.aws_s3_bucket.github-lfs.arn}/${var.LFS_PATH_PREFIX}/*"
+      },
+      {
         Effect   = "Allow"
         Action   = "sts:AssumeRole"
         Resource = "arn:aws:iam::${local.account_id}:role/userServiceRole-pipelines-databricks"
