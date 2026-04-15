@@ -25,7 +25,6 @@ spec:
     - "curation.oncokb.org"
     - "keycloak.oncokb.org"
     - "staging.oncokb.org"
-    - "oncokb.org"
     - "www.oncokb.org"
     - "transcript.oncokb.org"
     - "airflow.oncokb.org"
