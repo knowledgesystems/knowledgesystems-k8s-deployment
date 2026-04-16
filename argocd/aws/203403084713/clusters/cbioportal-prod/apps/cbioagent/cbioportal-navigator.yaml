@@ -16,7 +16,11 @@ spec:
     spec:
       containers:
         - name: cbioportal-navigator
-          image: ghcr.io/cbioportal/cbioportal-navigator:latest
+          # Pinned to the frozen fuzhaoyuan :latest (the repo was transferred to
+          # the cbioportal org and new builds now push to ghcr.io/cbioportal/... ,
+          # but prod stays on this tag until we explicitly promote newer builds).
+          # The beta instance uses ghcr.io/cbioportal/cbioportal-navigator:beta.
+          image: ghcr.io/fuzhaoyuan/cbioportal-navigator:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8002
