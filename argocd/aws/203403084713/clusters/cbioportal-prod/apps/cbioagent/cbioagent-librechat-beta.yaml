@@ -42,6 +42,13 @@ spec:
             - secretRef:
                 name: librechat-credentials-env
                 optional: true
+          env:
+            # Override OAuth redirect URLs so users stay on beta.chat.cbioportal.org
+            # after login. Requires beta callback URI registered in OAuth apps.
+            - name: DOMAIN_CLIENT
+              value: https://beta.chat.cbioportal.org
+            - name: DOMAIN_SERVER
+              value: https://beta.chat.cbioportal.org
           resources:
             requests:
               memory: 2Gi
