@@ -65,7 +65,7 @@ images:
   airflow:
     pullPolicy: Always
     repository: cbioportal/airflow-server
-    tag: 2.10.5
+    tag: 2.10.6
 
 logs:
   persistence:
