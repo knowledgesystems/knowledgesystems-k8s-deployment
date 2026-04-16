@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioagent-beta
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent-beta
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - path: helm/librechat
+      repoURL: https://github.com/danny-avila/LibreChat.git
+      targetRevision: v0.7.9-rc1
+      helm:
+        releaseName: cbioagent-beta
+        valueFiles:
+          - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent-beta/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
