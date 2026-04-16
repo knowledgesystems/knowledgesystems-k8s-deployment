@@ -120,9 +120,6 @@ secret:
   - envName: AIRFLOW_CONN_PLLIMSKSPARKY3_SSH
     secretKey: AIRFLOW_CONN_PLLIMSKSPARKY3_SSH
     secretName: airflow-sparky3-ssh-uri
-  - envName: AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD
-    secretKey: AIRFLOW_VAR_IMPACT_PIPELINE_PASSWORD
-    secretName: airflow-impact-pipeline-password
   - envName: AIRFLOW_CONN_IMPORTER_SSH
     secretKey: AIRFLOW_CONN_GENIE_IMPORTER_SSH
     secretName: airflow-genie-importer-ssh-uri
