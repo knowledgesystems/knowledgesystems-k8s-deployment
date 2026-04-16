@@ -1,0 +1,58 @@
+# Beta variant of the cbioportal-navigator MCP server. Built from the `beta`
+# branch of cBioPortal/cbioportal-navigator by the repo's docker-publish workflow,
+# which auto-tags per branch.
+#
+# Only the beta LibreChat instance (beta.chat.cbioportal.org) uses this — the
+# cBioNavigatorBeta agent's tools are suffixed with `_mcp_cbioportal-navigator-beta`
+# and its mcpServerNames references this service.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-navigator-beta
+  labels:
+    run: cbioportal-navigator-beta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioportal-navigator-beta
+  template:
+    metadata:
+      labels:
+        run: cbioportal-navigator-beta
+    spec:
+      containers:
+        - name: cbioportal-navigator-beta
+          image: ghcr.io/cbioportal/cbioportal-navigator:beta
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8002
+          envFrom:
+            - secretRef:
+                name: cbioportal-navigator-env
+                optional: true
+          env:
+            - name: CBIOPORTAL_BASE_URL
+              value: https://www.cbioportal.org
+            - name: NODE_ENV
+              value: production
+      nodeSelector:
+        workload: "cbioagent"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbioagent"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-navigator-beta
+spec:
+  selector:
+    run: cbioportal-navigator-beta
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8002
+  type: ClusterIP
