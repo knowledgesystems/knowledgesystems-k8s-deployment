@@ -1,0 +1,113 @@
+# Values for the beta cBioAgent LibreChat instance at beta.chat.cbioportal.org.
+# Rendered by the upstream LibreChat helm chart with releaseName: cbioagent-beta.
+#
+# Beta reuses all prod *backends* (MongoDB, meilisearch, rag-api if present,
+# the navigator, clickhouse-mcp, and the shared images PVC). Only the
+# LibreChat pod + its librechat.yaml ConfigMap are separate — beta exists to
+# test new agent variants and LibreChat changes without affecting prod.
+#
+# Keep this file in sync with apps/cbioagent/values.yaml for anything that
+# should behave the same way on both environments. The differences below are
+# intentional: resource names, domain, config map name, replica count.
+
+# Keep existing resource names (cbioagent-librechat-beta Deployment/Service)
+# rather than the chart default of <release>-<chart> = cbioagent-beta-librechat.
+fullnameOverride: cbioagent-librechat-beta
+
+replicaCount: 1
+
+global:
+  librechat:
+    existingSecretName: "librechat-credentials-env"
+    existingSecretApiKey: OPENAI_API_KEY
+
+librechat:
+  existingSecretName: "librechat-credentials-env"
+  existingConfigYaml: "librechat-config-beta"
+  # Non-secret env vars. Secrets (JWT_SECRET, CREDS_KEY, CREDS_IV,
+  # JWT_REFRESH_SECRET, MEILI_MASTER_KEY, API keys, etc.) live in the
+  # librechat-credentials-env Secret in portal-configuration and are mounted
+  # via existingSecretName. Because the Deployment's envFrom lists the Secret
+  # after this ConfigMap, any overlap is resolved in the Secret's favor.
+  configEnv:
+    PRODUCT_FEEDBACK_ENABLED: "true"
+    DEBUG_PLUGINS: "true"
+    PLUGIN_MODELS: "gpt-4,gpt-4-turbo-preview,gpt-4-0125-preview,gpt-4-1106-preview,gpt-4-0613,gpt-3.5-turbo,gpt-3.5-turbo-0125,gpt-3.5-turbo-1106,gpt-3.5-turbo-0613"
+    # Point at the prod meilisearch/rag-api — beta reuses them rather than
+    # standing up its own.
+    MEILI_HOST: "http://cbioagent-meilisearch.default.svc.cluster.local:7700"
+    RAG_API_URL: "http://cbioagent-librechat-rag-api.default.svc.cluster.local:8000"
+    # Beta-specific public URL. The chart has no env: support, only envFrom,
+    # so this has to go via the configenv ConfigMap.
+    DOMAIN_CLIENT: "https://beta.chat.cbioportal.org"
+    DOMAIN_SERVER: "https://beta.chat.cbioportal.org"
+  # Disable the chart-managed image PVC so we can mount the same PVC prod uses
+  # (see volumes/volumeMounts below). Keeps beta image uploads visible in prod
+  # and vice versa — both instances share one MongoDB + one storage volume.
+  imageVolume:
+    enabled: false
+
+image:
+  repository: cbioportal/librechat
+  registry: docker.io
+  pullPolicy: Always
+  tag: "v0.8.3-rc1-custom-v7"
+
+# Sub-charts: all disabled. Beta shares prod's backend services.
+mongodb:
+  enabled: false
+meilisearch:
+  enabled: false
+librechat-rag-api:
+  enabled: false
+
+nodeSelector:
+  workload: cbioagent
+
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "cbioagent"
+    effect: "NoSchedule"
+
+# Ingress is defined as a raw manifest in this directory (ingress.yaml) rather
+# than via the chart's ingress template, to match the prod pattern.
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    memory: 2Gi
+  limits:
+    memory: 4Gi
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  timeoutSeconds: 1
+  periodSeconds: 5
+  failureThreshold: 3
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 20
+  timeoutSeconds: 1
+  periodSeconds: 12
+  failureThreshold: 5
+
+volumes:
+  - name: image-volume
+    persistentVolumeClaim:
+      claimName: cbioagent-librechat-images
+  - name: aws-creds
+    persistentVolumeClaim:
+      claimName: aws-credentials-pvc
+volumeMounts:
+  - name: image-volume
+    mountPath: /app/client/public/images
+  - name: aws-creds
+    mountPath: /home/node/.aws
+    readOnly: true
