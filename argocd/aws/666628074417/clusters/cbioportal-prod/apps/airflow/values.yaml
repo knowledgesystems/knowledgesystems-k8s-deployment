@@ -19,8 +19,6 @@ config:
     access_control_allow_methods: POST, GET, OPTIONS, DELETE
     access_control_allow_origins: http://pipelines3.cbioportal.aws.mskcc.org
     auth_backends: airflow.api.auth.backend.basic_auth
-  core:
-    allowed_deserialization_classes_regexp: airflow\..* .*\..*StudyBuilder
   kubernetes_executor:
     delete_worker_pods: true
     delete_worker_pods_on_failure: true
@@ -44,14 +42,12 @@ dags:
     subPath: ""
 
 env:
-  - name: PYTHONPATH
-    value: /opt/airflow/dags/repo/nci-crdc-pipeline
   - name: AIRFLOW__METRICS__STATSD_ON
     value: "True"
   - name: AIRFLOW__METRICS__STATSD_PORT
     value: "8125"
   - name: AIRFLOW__METRICS__STATSD_PREFIX
-    value: airflow
+    value: "airflow"
   - name: "DEPLOYMENT"
     value: "PROD"
 
@@ -154,9 +150,6 @@ workers:
     - mountPath: /opt/airflow/git_repos
       name: pv
       readOnly: false
-    - mountPath: /opt/airflow/secrets/gcp-keyfile
-      name: gcp-keyfile
-      readOnly: true
     - mountPath: /home/airflow/.ssh
       name: git-secret
       readOnly: true
@@ -185,9 +178,6 @@ workers:
     - name: pv
       persistentVolumeClaim:
         claimName: efs-pv-claim
-    - name: gcp-keyfile
-      secret:
-        secretName: airflow-gcp-keyfile
     - name: git-secret
       secret:
         secretName: airflow-git-secret
