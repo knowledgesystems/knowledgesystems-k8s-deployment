@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: cbioportal-navigator
-          image: ghcr.io/fuzhaoyuan/cbioportal-navigator:latest
+          image: ghcr.io/cbioportal/cbioportal-navigator:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8002
