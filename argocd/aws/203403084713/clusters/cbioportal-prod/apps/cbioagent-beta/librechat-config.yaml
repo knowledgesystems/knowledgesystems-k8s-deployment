@@ -16,6 +16,7 @@ data:
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
         - 'cbioportal-navigator'
+        - 'cbioportal-navigator-beta'
 
     # Custom interface configuration
     interface:
@@ -100,6 +101,10 @@ data:
       cbioportal-navigator:
         type: streamable-http
         url: http://cbioportal-navigator:80/mcp
+        chatMenu: false
+      cbioportal-navigator-beta:
+        type: streamable-http
+        url: http://cbioportal-navigator-beta:80/mcp
         chatMenu: false
 
     endpoints:
