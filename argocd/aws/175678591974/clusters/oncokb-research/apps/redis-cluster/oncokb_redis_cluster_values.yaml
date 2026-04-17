@@ -14,6 +14,10 @@ global:
 existingSecret: redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
 
+# We cannot use EFS because high latency hurts AOF/RDB persistence when the cache size grows
+persistence:
+  storageClass: gp2
+
 redis:
   configmap: |-
     maxmemory 1Gb
