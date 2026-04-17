@@ -9,6 +9,12 @@ librechat:
   existingConfigYaml: "librechat-config"
   configEnv:
     PRODUCT_FEEDBACK_ENABLED: "true"
+    # Public URLs. Must live in the ConfigMap, not the shared
+    # librechat-credentials-env Secret, because the Secret is mounted after
+    # the ConfigMap in envFrom and would otherwise override beta's ConfigMap
+    # values (beta.chat.cbioportal.org) with these prod URLs.
+    DOMAIN_CLIENT: "https://chat.cbioportal.org"
+    DOMAIN_SERVER: "https://chat.cbioportal.org"
   imageVolume:
     accessModes: ReadWriteMany
     storageClassName: efs-sc
