@@ -14,13 +14,6 @@ global:
 existingSecret: redis-cluster
 existingSecretPasswordKey: REDIS_PASSWORD
 
-persistence:
-  enabled: true
-  storageClass: efs-sc
-  accessModes:
-    - ReadWriteMany
-  size: 8Gi
-
 redis:
   configmap: |-
     maxmemory 1Gb
