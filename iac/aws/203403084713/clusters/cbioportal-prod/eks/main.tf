@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 locals {
   # Use locals for node groups to enforce required tags
   node_groups = {
@@ -65,6 +67,9 @@ locals {
       desired_size   = 2
       max_size       = 3
       min_size       = 2
+      labels = {
+        "karpenter.sh/controller" = "true"
+      }
     }
     redis = {
       instance_types = ["r7g.large"]
@@ -388,6 +393,10 @@ locals {
       }
     }
   }
+
+  karpenter_discovery_tag_value = var.CLUSTER_NAME
+  account_id                    = data.aws_caller_identity.current.account_id
+  permissions_boundary_policy   = "AutomationOrUserServiceRolePermissions"
 }
 
 module "eks_cluster" {
@@ -415,6 +424,10 @@ module "eks_cluster" {
   # Disable cloudwatch logging
   cluster_enabled_log_types   = []
   create_cloudwatch_log_group = false
+
+  node_security_group_tags = {
+    "karpenter.sh/discovery" = local.karpenter_discovery_tag_value
+  }
 
   # EKS Managed Node Groups
   eks_managed_node_groups = {
@@ -460,4 +473,45 @@ resource "aws_eks_addon" "s3_mountpoint_addon" {
 
 module "ec2" {
   source = "../ec2"
+}
+
+/*
+Karpenter
+ */
+
+module "karpenter" {
+  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/karpenter?ref=v21.9.0"
+  cluster_name = module.eks_cluster.cluster_name
+
+  iam_role_name                     = "userServiceRole-KarpenterController"
+  iam_role_use_name_prefix          = false
+  iam_role_permissions_boundary_arn = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+
+  node_iam_role_name                 = "userServiceRole-KarpenterNode"
+  node_iam_role_use_name_prefix      = false
+  node_iam_role_permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+
+  iam_policy_name            = "userServicePolicy-KarpenterController"
+  iam_policy_use_name_prefix = false
+}
+
+resource "helm_release" "karpenter" {
+  namespace  = "kube-system"
+  name       = "karpenter"
+  repository = "oci://public.ecr.aws/karpenter"
+  chart      = "karpenter"
+  version    = "1.11.1"
+
+  values = [
+    yamlencode({
+      settings = {
+        clusterName       = module.eks_cluster.cluster_name
+        clusterEndpoint   = module.eks_cluster.cluster_endpoint
+        interruptionQueue = module.karpenter.queue_name
+      }
+      nodeSelector = {
+        "karpenter.sh/controller" = "true"
+      }
+    })
+  ]
 }

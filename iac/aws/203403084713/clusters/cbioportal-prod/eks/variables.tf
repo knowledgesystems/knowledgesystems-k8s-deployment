@@ -75,6 +75,12 @@ variable "API_PRIVATE" {
   default     = true
 }
 
+variable "ENABLE_CLUSTER_CREATOR_ADMIN_PERMISSIONS" {
+  description = "Indicates whether or not to add the cluster creator (the identity used by Terraform) as an administrator via access entry"
+  type        = bool
+  default     = true
+}
+
 variable "TAINT_KEY" {
   description = "Default key for taints"
   type        = string
