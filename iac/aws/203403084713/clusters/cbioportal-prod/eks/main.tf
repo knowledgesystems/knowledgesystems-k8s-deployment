@@ -109,29 +109,6 @@ locals {
         (var.LABEL_KEY) = "ingress"
       }
     }
-    paladin = {
-      instance_types = ["t3.xlarge"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
-      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "paladin"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "paladin"
-      }
-      tags = {
-        cdsi-app   = "paladin"
-        cdsi-team  = "data-engineering"
-        cdsi-owner = "moored2@mskcc.org"
-      }
-    }
     cbio-session = {
       instance_types = ["r7i.xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
