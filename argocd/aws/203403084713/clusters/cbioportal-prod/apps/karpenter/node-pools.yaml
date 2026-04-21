@@ -26,7 +26,7 @@ spec:
         kind: EC2NodeClass
         name: x86-standard
   limits:
-    memory: Gi
+    memory: 12Gi
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized
     consolidateAfter: 30s
