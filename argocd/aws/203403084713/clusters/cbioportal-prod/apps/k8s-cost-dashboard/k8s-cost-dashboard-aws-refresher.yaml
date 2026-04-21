@@ -94,10 +94,5 @@ spec:
               persistentVolumeClaim:
                 claimName: k8s-cost-dashboard-aws-pvc
           nodeSelector:
-            workload: k8s-cost
-          tolerations:
-            - key: "workload"
-              operator: "Equal"
-              value: "k8s-cost"
-              effect: "NoSchedule"
+            workload-class: x86-general
           restartPolicy: OnFailure

@@ -95,12 +95,7 @@ extraVolumes: |
   - name: keycloak12-sclc-theme
     emptyDir: {}
 nodeSelector:
-  workload: keycloak
-tolerations:
-  - key: workload
-    operator: Equal
-    value: keycloak
-    effect: NoSchedule
+  workload-class: x86-general
 postgresql:
   enabled: false
 image:

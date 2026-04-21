@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 locals {
   # Use locals for node groups to enforce required tags
   node_groups = {
@@ -65,6 +67,9 @@ locals {
       desired_size   = 2
       max_size       = 3
       min_size       = 2
+      labels = {
+        "karpenter.sh/controller" = "true"
+      }
     }
     redis = {
       instance_types = ["r7g.large"]
@@ -102,29 +107,6 @@ locals {
       }
       labels = {
         (var.LABEL_KEY) = "ingress"
-      }
-    }
-    paladin = {
-      instance_types = ["t3.xlarge"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
-      subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "paladin"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "paladin"
-      }
-      tags = {
-        cdsi-app   = "paladin"
-        cdsi-team  = "data-engineering"
-        cdsi-owner = "moored2@mskcc.org"
       }
     }
     cbio-session = {
@@ -284,23 +266,6 @@ locals {
         cdsi-owner = "lix2@mskcc.org"
       }
     }
-    keycloak = {
-      instance_types = ["t3.medium"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "keycloak"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "keycloak"
-      }
-    }
     cbioagent = {
       instance_types = ["m7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -347,28 +312,6 @@ locals {
         cdsi-owner = "nasirz1@mskcc.org"
       }
     }
-    k8s-cost = {
-      instance_types = ["t3.small"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      max_size       = 1
-      min_size       = 1
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "k8s-cost"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "k8s-cost"
-      }
-      tags = {
-        cdsi-app   = "k8s-cost-dashboard"
-        cdsi-team  = "data-visualization"
-        cdsi-owner = "nasirz1@mskcc.org"
-      }
-    }
     cbio-api = {
       instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -388,6 +331,10 @@ locals {
       }
     }
   }
+
+  karpenter_discovery_tag_value = var.CLUSTER_NAME
+  account_id                    = data.aws_caller_identity.current.account_id
+  permissions_boundary_policy   = "AutomationOrUserServiceRolePermissions"
 }
 
 module "eks_cluster" {
@@ -415,6 +362,10 @@ module "eks_cluster" {
   # Disable cloudwatch logging
   cluster_enabled_log_types   = []
   create_cloudwatch_log_group = false
+
+  node_security_group_tags = {
+    "karpenter.sh/discovery" = local.karpenter_discovery_tag_value
+  }
 
   # EKS Managed Node Groups
   eks_managed_node_groups = {
@@ -460,4 +411,47 @@ resource "aws_eks_addon" "s3_mountpoint_addon" {
 
 module "ec2" {
   source = "../ec2"
+}
+
+/*
+Karpenter
+ */
+
+module "karpenter" {
+  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/karpenter?ref=v21.9.0"
+  cluster_name = module.eks_cluster.cluster_name
+
+  iam_role_name                     = "userServiceRole-KarpenterController"
+  iam_role_use_name_prefix          = false
+  iam_role_permissions_boundary_arn = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+
+  node_iam_role_name                 = "userServiceRole-KarpenterNode"
+  node_iam_role_use_name_prefix      = false
+  node_iam_role_permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+
+  iam_policy_name            = "userServicePolicy-KarpenterController"
+  iam_policy_use_name_prefix = false
+
+  create_instance_profile = true
+}
+
+resource "helm_release" "karpenter" {
+  namespace  = "kube-system"
+  name       = "karpenter"
+  repository = "oci://public.ecr.aws/karpenter"
+  chart      = "karpenter"
+  version    = "1.11.1"
+
+  values = [
+    yamlencode({
+      settings = {
+        clusterName       = module.eks_cluster.cluster_name
+        clusterEndpoint   = module.eks_cluster.cluster_endpoint
+        interruptionQueue = module.karpenter.queue_name
+      }
+      nodeSelector = {
+        "karpenter.sh/controller" = "true"
+      }
+    })
+  ]
 }
