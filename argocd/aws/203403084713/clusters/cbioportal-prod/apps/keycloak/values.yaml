@@ -103,3 +103,5 @@ image:
   tag: 11.0.0
 imagePullSecrets:
   - name: dockerhub-creds
+podDisruptionBudget:
+  minAvailable: 1
