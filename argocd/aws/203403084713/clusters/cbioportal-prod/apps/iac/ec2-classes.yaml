@@ -6,6 +6,13 @@ spec:
   role: "userServiceRole-KarpenterNode"
   amiSelectorTerms:
     - alias: bottlerocket@v1.56.0
+  subnetSelectorTerms:
+    - id: "subnet-0d2671d84a3f5eb99"
+    - id: "subnet-06f2712e78e593152"
+    - id: "subnet-001ff98812a2e49e5"
+    - id: "subnet-0b42183b1df0e9061"
+    - id: "subnet-01b9abeeefc878fc4"
+    - id: "subnet-03225fc0c62f573b7"
   securityGroupSelectorTerms:
     - tags:
         "karpenter.sh/discovery": "cbioportal-prod"
