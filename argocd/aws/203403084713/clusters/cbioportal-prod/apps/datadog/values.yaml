@@ -9,6 +9,10 @@ agents:
   tolerations:
     - key: workload
       operator: Equal
+      value: paladin
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: cbioportal
       effect: NoSchedule
     - key: workload
