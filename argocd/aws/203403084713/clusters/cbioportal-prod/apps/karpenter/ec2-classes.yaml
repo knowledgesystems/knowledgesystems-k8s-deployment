@@ -1,0 +1,11 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: x86-standard
+spec:
+  role: "userServiceRole-KarpenterNode"
+  amiSelectorTerms:
+    - alias: bottlerocket@v1.56.0
+  securityGroupSelectorTerms:
+    - tags:
+        "karpenter.sh/discovery": "cbioportal-prod"
