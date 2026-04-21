@@ -493,6 +493,8 @@ module "karpenter" {
 
   iam_policy_name            = "userServicePolicy-KarpenterController"
   iam_policy_use_name_prefix = false
+
+  create_instance_profile = true
 }
 
 resource "helm_release" "karpenter" {
