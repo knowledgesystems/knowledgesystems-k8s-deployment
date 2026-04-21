@@ -382,6 +382,23 @@ module "eks_cluster" {
   }
 }
 
+resource "kubernetes_storage_class_v1" "ebs-storage-class-default" {
+  metadata {
+    name = "ebs-sc"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
+
+  parameters = {
+    type      = "gp3"
+  }
+}
+
 module "iam" {
   source                    = "../iam"
   cluster_oidc_provider_arn = module.eks_cluster.cluster_oidc_provider
