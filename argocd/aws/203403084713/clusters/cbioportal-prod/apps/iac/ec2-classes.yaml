@@ -3,7 +3,7 @@ kind: EC2NodeClass
 metadata:
   name: x86-standard
 spec:
-  role: "userServiceRole-KarpenterNode"
+  instanceProfile: "userServiceRole-KarpenterNode"
   amiSelectorTerms:
     - alias: bottlerocket@v1.56.0
   subnetSelectorTerms:
