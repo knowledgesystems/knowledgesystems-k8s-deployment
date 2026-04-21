@@ -266,23 +266,6 @@ locals {
         cdsi-owner = "lix2@mskcc.org"
       }
     }
-    keycloak = {
-      instance_types = ["t3.medium"]
-      ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "keycloak"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "keycloak"
-      }
-    }
     cbioagent = {
       instance_types = ["m7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
