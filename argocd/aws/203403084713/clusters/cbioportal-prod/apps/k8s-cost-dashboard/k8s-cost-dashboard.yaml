@@ -66,16 +66,11 @@ spec:
             - name: aws-creds
               mountPath: /root/.aws
       nodeSelector:
-        workload: "k8s-cost"
+        workload-class: x86-general
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-      tolerations:
-        - effect: NoSchedule
-          key: workload
-          operator: Equal
-          value: k8s-cost
       volumes:
         - name: cache
           persistentVolumeClaim:
