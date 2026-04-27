@@ -31,7 +31,7 @@ spec:
             name: oncokb-core-log4j-properties
       containers:
         - name: oncokb-core-beta
-          image: mskcc/oncokb:7.0.0-germline.4
+          image: mskcc/oncokb:7.0.0-germline.5
           imagePullPolicy: Always
           envFrom:
             - secretRef:
