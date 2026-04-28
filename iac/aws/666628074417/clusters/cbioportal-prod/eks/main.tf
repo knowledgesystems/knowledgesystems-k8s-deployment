@@ -28,9 +28,9 @@ locals {
     redis = {
       instance_types = ["t3.medium"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 5
-      min_size       = 5
-      max_size       = 5
+      desired_size   = 3
+      min_size       = 3
+      max_size       = 3
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -139,7 +139,7 @@ locals {
       }
     }
     cbioportal = {
-      instance_types = ["r7g.xlarge"]
+      instance_types = ["r7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       max_size       = 3
