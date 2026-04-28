@@ -22,6 +22,17 @@ config:
   kubernetes_executor:
     delete_worker_pods: true
     delete_worker_pods_on_failure: true
+  scheduler:
+    # Reduce how often the same DAG file is re-parsed (default: 30)
+    min_file_process_interval: 300
+    # Reduce how often the scheduler scans for NEW files (default: 300)
+    dag_dir_list_interval: 600
+    # How many parallel processes to use for DAG parsing.
+    # For 20 DAGs, 2-4 is usually sufficient depending on your CPU cores.
+    parsing_processes: 2
+    # Allow the scheduler to sleep longer between loops if idle (default: 1)
+    scheduler_idle_sleep_time: 5
+
   smtp:
     smtp_host: smtp.gmail.com
     smtp_mail_from: cbioportalpipelines@gmail.com
