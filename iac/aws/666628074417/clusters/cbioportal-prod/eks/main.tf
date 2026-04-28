@@ -97,31 +97,6 @@ locals {
         (var.LABEL_KEY) = "airflow"
       }
     }
-    cellxgene = {
-      instance_types = ["m7g.xlarge"]
-      ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
-      block_device_mappings = {
-        root_vol = var.ROOT_VOL_CONFIG
-      }
-      taints = {
-        dedicated = {
-          key    = var.TAINT_KEY
-          value  = "cellxgene"
-          effect = var.TAINT_EFFECT
-        }
-      }
-      labels = {
-        (var.LABEL_KEY) = "cellxgene"
-      }
-      tags = {
-        cdsi-app   = "cellxgene"
-        cdsi-team  = "data-visualization"
-        cdsi-owner = "hweej@mskcc.org"
-      }
-    }
     cbioagent = {
       instance_types = ["m7g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
