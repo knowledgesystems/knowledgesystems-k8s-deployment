@@ -45,7 +45,7 @@ spec:
                   saml2aws --version
                   
                   # Accounts list
-                  ACCOUNTS=("0846" "2034" "3972" "6666" "7624")
+                  ACCOUNTS=("0846" "2034" "3972" "6666" "7624" "1756")
                   
                   # Loop for login
                   for ACCOUNT in "${ACCOUNTS[@]}"; do
