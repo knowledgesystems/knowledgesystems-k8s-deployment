@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oncokb-core-v2
+  labels:
+    run: oncokb-core-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: oncokb-core-v2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        run: oncokb-core-v2
+    spec:
+      imagePullSecrets:
+        - name: oncokb-dockerhub-creds
+      containers:
+        - name: oncokb-core-v2
+          image: mskcc/oncokb-core-v2:0.0.0
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: oncokb-core-v2
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+            periodSeconds: 15
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 120
+            timeoutSeconds: 5
+            periodSeconds: 20
+            failureThreshold: 6
+          securityContext: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "beta"
+          effect: "NoSchedule"
+      nodeSelector:
+        workload: beta
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oncokb-core-v2
+  labels:
+    run: oncokb-core-v2
+spec:
+  type: ClusterIP
+  selector:
+    run: oncokb-core-v2
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
