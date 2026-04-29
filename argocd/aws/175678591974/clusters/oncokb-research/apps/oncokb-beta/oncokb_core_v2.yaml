@@ -4,6 +4,7 @@ metadata:
   name: oncokb-core-v2
   labels:
     run: oncokb-core-v2
+    tags.datadoghq.com/service: oncokb-core-v2
 spec:
   replicas: 1
   selector:
