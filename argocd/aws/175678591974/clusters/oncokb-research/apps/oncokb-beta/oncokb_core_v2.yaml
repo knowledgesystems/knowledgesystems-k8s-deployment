@@ -17,6 +17,8 @@ spec:
     metadata:
       labels:
         run: oncokb-core-v2
+        tags.datadoghq.com/service: oncokb-core-v2
+        admission.datadoghq.com/enabled: "true"
     spec:
       imagePullSecrets:
         - name: oncokb-dockerhub-creds
