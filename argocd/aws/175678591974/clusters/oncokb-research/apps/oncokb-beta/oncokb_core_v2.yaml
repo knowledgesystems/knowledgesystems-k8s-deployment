@@ -31,6 +31,11 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          env:
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_LOGS_INJECTION
+              value: "true"
           envFrom:
             - secretRef:
                 name: oncokb-core-v2
