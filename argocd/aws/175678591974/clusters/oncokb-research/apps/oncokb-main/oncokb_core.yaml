@@ -30,7 +30,7 @@ spec:
             name: oncokb-core-log4j-properties
       containers:
         - name: oncokb-core
-          image: mskcc/oncokb:6.0.0
+          image: mskcc/oncokb:6.1.0
           imagePullPolicy: Always
           envFrom:
             - secretRef:
@@ -60,7 +60,7 @@ spec:
             - "-XX:MaxRAM=2g"
             - "-Dapp.name=$(APP_NAME)"
             - "-Djdbc.driverClassName=com.mysql.jdbc.Driver"
-            - "-Djdbc.url=$(DB_URL)/oncokb_core_v7_0?useUnicode=yes&characterEncoding=UTF-8&useSSL=false"
+            - "-Djdbc.url=$(DB_URL)/oncokb_core_v7_1?useUnicode=yes&characterEncoding=UTF-8&useSSL=false"
             - "-Djdbc.username=$(DB_USERNAME)"
             - "-Djdbc.password=$(DB_PASSWORD)"
             - "-Dgenomenexus.api=https://www.genomenexus.org/"
