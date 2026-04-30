@@ -38,6 +38,8 @@ spec:
               value: "true"
             - name: DD_LOGS_INJECTION
               value: "true"
+            - name: DD_DBM_PROPAGATION_MODE
+              value: "full"
           envFrom:
             - secretRef:
                 name: oncokb-core-v2
