@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: oncokb-curation
-          image: mskcc/oncokb-curation:2.2.28
+          image: mskcc/oncokb-curation:2.2.29
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
