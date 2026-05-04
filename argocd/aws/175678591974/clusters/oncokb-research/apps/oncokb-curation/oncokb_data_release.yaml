@@ -42,7 +42,7 @@ spec:
             - name: FIREBASE_SERVICE_ACCOUNT_PATH
               value: "/oncokb-firebase-credentials.json"
             - name: GIN_MODE
-              value: "debug"
+              value: "release"
             - name: HTTP_CLIENT_TIMEOUT_SECONDS
               value: "60"
           volumeMounts:
