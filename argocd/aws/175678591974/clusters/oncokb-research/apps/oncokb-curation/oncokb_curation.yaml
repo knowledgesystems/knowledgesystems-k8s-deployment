@@ -4,6 +4,7 @@ metadata:
   name: oncokb-curation
   labels:
     run: oncokb-curation
+    tags.datadoghq.com/env: eks-prod-oncokb
     tags.datadoghq.com/service: oncokb-curation
 spec:
   replicas: 1
@@ -18,6 +19,7 @@ spec:
     metadata:
       labels:
         run: oncokb-curation
+        tags.datadoghq.com/env: eks-prod-oncokb
         tags.datadoghq.com/service: oncokb-curation
         admission.datadoghq.com/enabled: "true"
       annotations:
