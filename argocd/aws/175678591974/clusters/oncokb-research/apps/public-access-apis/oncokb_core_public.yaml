@@ -4,6 +4,7 @@ metadata:
   name: oncokb-core-public
   labels:
     run: oncokb-core-public
+    tags.datadoghq.com/env: eks-prod-oncokb
     tags.datadoghq.com/service: oncokb-core-public
 spec:
   replicas: 2
@@ -19,6 +20,7 @@ spec:
     metadata:
       labels:
         run: oncokb-core-public
+        tags.datadoghq.com/env: eks-prod-oncokb
         tags.datadoghq.com/service: oncokb-core-public
         admission.datadoghq.com/enabled: "true"
       annotations:
