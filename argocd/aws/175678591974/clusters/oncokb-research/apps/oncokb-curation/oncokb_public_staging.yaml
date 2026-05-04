@@ -5,6 +5,7 @@ metadata:
   labels:
     app: oncokb-public-staging
     version: "v1"
+    tags.datadoghq.com/env: eks-prod-oncokb
     tags.datadoghq.com/service: oncokb-public-staging
 spec:
   replicas: 1
@@ -21,6 +22,7 @@ spec:
       labels:
         app: oncokb-public-staging
         version: "v1"
+        tags.datadoghq.com/env: eks-prod-oncokb
         tags.datadoghq.com/service: oncokb-public-staging
         admission.datadoghq.com/enabled: "true"
       annotations:
@@ -28,7 +30,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-staging
-          image: mskcc/oncokb-public:6.7.1
+          image: mskcc/oncokb-public:6.8.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
