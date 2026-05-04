@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     run: oncokb-transcript
+    tags.datadoghq.com/env: eks-prod-oncokb
     tags.datadoghq.com/service: oncokb-transcript
   name: oncokb-transcript
 spec:
@@ -18,6 +19,7 @@ spec:
     metadata:
       labels:
         run: oncokb-transcript
+        tags.datadoghq.com/env: eks-prod-oncokb
         tags.datadoghq.com/service: oncokb-transcript
         admission.datadoghq.com/enabled: "true"
       annotations:
