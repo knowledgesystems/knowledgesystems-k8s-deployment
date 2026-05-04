@@ -45,6 +45,8 @@ spec:
               value: "release"
             - name: HTTP_CLIENT_TIMEOUT_SECONDS
               value: "60"
+            - name: LOG_FORMAT
+              value: "json"
           volumeMounts:
             - name: firebase-credentials
               mountPath: /oncokb-firebase-credentials.json
