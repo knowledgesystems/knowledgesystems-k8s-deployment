@@ -10,7 +10,7 @@ metadata:
     tags.datadoghq.com/version: 6.4.0
   name: eks-triage-green
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       run: eks-triage-green
