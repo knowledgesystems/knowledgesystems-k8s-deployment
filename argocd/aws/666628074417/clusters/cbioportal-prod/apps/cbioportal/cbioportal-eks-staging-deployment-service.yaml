@@ -162,9 +162,6 @@ spec:
         - --bitly.access.token=$(BITLY_ACCESS_TOKEN)
         #  Add this when you need to override frontend config
         - --frontend.config=/cbioportal/frontendConfig.json
-        - --sentry.dsn=$(SENTRY_DSN)
-        #- --sentryjs.frontend_project_endpoint=$(SENTRY_FRONTEND_DSN)
-        - --sentry.factory=org.cbioportal.logging.SentryClientFactory
         - --sitemaps=false
         # internal oncokb instance gives 5x error on FGFR1
         - --oncokb.public_api.url=https://core.oncokb.aws.mskcc.org/api/v1
