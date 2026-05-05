@@ -31,7 +31,7 @@ spec:
             name: oncokb-core-log4j-properties
       containers:
         - name: oncokb-core-curation
-          image: mskcc/oncokb:6.2.0
+          image: mskcc/oncokb:6.3.0-tumor-type-desc
           imagePullPolicy: Always
           envFrom:
             - secretRef:
