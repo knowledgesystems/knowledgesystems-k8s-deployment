@@ -165,3 +165,16 @@ data:
             modelLabel: "cBioNavigatorBeta"
             greeting: |
               **BETA** — testing variant of cBioNavigator. Get help navigating the cBioPortal web interface. NOTE: Limit of 20 messages per 30 minutes, and 20M tokens per week. <br /><br /><a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank" style="display: inline-block; background-color: #4b5563; color: #f9fafb; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#374151'" onmouseout="this.style.backgroundColor='#4b5563'">Learn more</a>
+        - name: "cBioChatAgentBeta"
+          label: "cBioChatAgentBeta"
+          default: false
+          description: "Unified agent of both DBAgent and Navigator"
+          iconURL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(31,140,197)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z'/%3E%3Cpath d='M15 5.764v15'/%3E%3Cpath d='M9 3.236v15'/%3E%3C/svg%3E"
+          showIconInHeader: true
+          showIconInMenu: true
+          showSwitchAgent: true
+          preset:
+            endpoint: "agents"
+            agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
+            temperature: 0
+            modelLabel: "cBioChatAgentBeta"
