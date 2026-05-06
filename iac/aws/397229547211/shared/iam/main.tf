@@ -91,7 +91,8 @@ resource "aws_iam_policy" "databricks_bucket_notifications" {
           "sqs:GetQueueAttributes",
           "sqs:SetQueueAttributes",
           "sqs:TagQueue",
-          "sqs:ChangeMessageVisibility"
+          "sqs:ChangeMessageVisibility",
+          "sqs:PurgeQueue"
         ]
         Resource = concat(
           [for bucket in var.DATABRICKS_S3_BUCKETS : "arn:aws:s3:::${bucket}"],
