@@ -27,10 +27,10 @@ variable "DATABRICKS_UNITY_CATALOG_ROLE_ARN" {
   default     = "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL"
 }
 
-variable "DATABRICKS_EXTERNAL_ID" {
-  description = "External ID for the Databricks trust relationship"
-  type        = string
-  default     = "d702e0b7-689c-4c82-9e12-fc0c444e2bd7"
+variable "DATABRICKS_EXTERNAL_IDS" {
+  description = "External IDs for the Databricks trust relationship"
+  type        = list(string)
+  default     = ["d702e0b7-689c-4c82-9e12-fc0c444e2bd7", "68d58679-24ba-47ad-b403-a18946bd1f71"]
 }
 
 variable "DATABRICKS_S3_BUCKETS" {
