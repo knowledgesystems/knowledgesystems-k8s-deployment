@@ -23,7 +23,7 @@ resource "aws_iam_role" "databricks_s3" {
         Action = "sts:AssumeRole"
         Condition = {
           StringEquals = {
-            "sts:ExternalId" = var.DATABRICKS_EXTERNAL_ID
+            "sts:ExternalId" = var.DATABRICKS_EXTERNAL_IDS
           }
         }
       }
