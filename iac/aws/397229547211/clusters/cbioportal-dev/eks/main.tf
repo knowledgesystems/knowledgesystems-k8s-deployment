@@ -3,6 +3,7 @@ locals {
   node_groups = {
     addons = {
       instance_types = ["m5.large"]
+      capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 2
       max_size       = 3
@@ -13,6 +14,7 @@ locals {
     }
     ingress = {
       instance_types = ["m5.large"]
+      capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 1
       min_size       = 1
@@ -30,6 +32,7 @@ locals {
     }
     airflow = {
       instance_types = ["r5.xlarge"]
+      capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 0
       min_size       = 0
@@ -50,6 +53,7 @@ locals {
     }
     redis = {
       instance_types = ["r5.large"]
+      capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 0
       min_size       = 0
@@ -70,6 +74,7 @@ locals {
     }
     cbioportal = {
       instance_types = ["r7g.xlarge"]
+      capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 0
       min_size       = 0
