@@ -3,21 +3,27 @@ postgresql:
 
 extraInitContainers: |
   - name: theme-provider
-    image: oncokb/keycloak:1.1.0
+    image: mskcc/oncokb-keycloak:1.2.0
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh", "-c"]
     args:
-      - cp -R /themes/keycloak-oncokb/* /keycloak-oncokb
+      - cp -R /themes/keycloak-oncokb/* /keycloak-oncokb && cp -R /themes/curation-login-theme/* /curation-login-theme
     volumeMounts:
       - name: keycloak-oncokb
         mountPath: /keycloak-oncokb
+      - name: curation-login-theme
+        mountPath: /curation-login-theme
 
 extraVolumeMounts: |
   - name: keycloak-oncokb
     mountPath: /opt/jboss/keycloak/themes/keycloak-oncokb
+  - name: curation-login-theme
+    mountPath: /opt/jboss/keycloak/themes/curation-login-theme
 
 extraVolumes: |
   - name: keycloak-oncokb
+    emptyDir: {}
+  - name: curation-login-theme
     emptyDir: {}
 
 extraEnv: |
