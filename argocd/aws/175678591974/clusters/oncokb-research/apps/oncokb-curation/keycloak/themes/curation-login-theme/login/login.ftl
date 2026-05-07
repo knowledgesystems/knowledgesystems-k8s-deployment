@@ -1,5 +1,6 @@
+<#import "template.ftl" as layout>
 <!DOCTYPE html>
-<html lang="${locale.currentLanguageTag!'en'}">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -105,7 +106,7 @@
                 </div>
 
                 <#if message?has_content && message.type != 'success'>
-                    <div class="ock-error" style="margin-top:14px">${kcSanitize(message.summary)?no_esc}</div>
+                    <div class="ock-error" style="margin-top:14px">${layout.kcSanitize(message.summary)?no_esc}</div>
                 </#if>
 
                 <div class="ock-divider">
