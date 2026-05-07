@@ -267,7 +267,8 @@ locals {
       }
     }
     cbioagent = {
-      instance_types = ["m7g.large"]
+      instance_types = ["c7g.large", "c6g.large"]
+      capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       max_size       = 2
