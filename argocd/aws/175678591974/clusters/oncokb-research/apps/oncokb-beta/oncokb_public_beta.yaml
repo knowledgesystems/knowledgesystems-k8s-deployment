@@ -94,7 +94,7 @@ spec:
               port: 9095
             initialDelaySeconds: 30
             timeoutSeconds: 5
-            periodSeconds: 5
+            periodSeconds: 15
             failureThreshold: 10
           livenessProbe:
             httpGet:
