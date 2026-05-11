@@ -7,11 +7,36 @@ spec:
   backoffLimit: 1
   template:
     spec:
-      restartPolicy: Never
+      restartPolicy: Never      
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+      initContainers:
+        - name: fetch-test-data
+          image: curlimages/curl:latest
+          envFrom:
+            - secretRef:
+                name: oncokb-test-github-token
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              curl -fsSL \
+                -H "Authorization: token ${ONCOKB_TEST_GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github.v3.raw" \
+                -H "Accept-Encoding: identity" \
+                -o /shared/mutations.txt.gz \
+                "https://api.github.com/repos/oncokb/oncokb-test/contents/mutations.txt.gz"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /shared
       containers:
-        - name: hello-world
+        - name: check-file-size
           image: busybox
-          command: ["/bin/sh", "-c", "echo 'Hello World'"]
+          command: ["/bin/sh", "-c", "ls -lh /mutations.txt.gz && du -sh /mutations.txt.gz"]
+          volumeMounts:
+            - name: shared-data
+              mountPath: /mutations.txt.gz
+              subPath: mutations.txt.gz
       nodeSelector:
         workload: beta
       tolerations:
