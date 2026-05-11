@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: oncokb-regression-test
+spec:
+  ttlSecondsAfterFinished: 86400 # Look into this
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: hello-world
+          image: busybox
+          command: ["/bin/sh", "-c", "echo 'Hello World'"]
+      nodeSelector:
+        workload: beta
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "beta"
+          effect: "NoSchedule"
