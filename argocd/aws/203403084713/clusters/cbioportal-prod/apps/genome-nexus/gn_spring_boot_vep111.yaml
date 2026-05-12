@@ -76,7 +76,7 @@ spec:
           requests:
               memory: 3Gi
           limits:
-              memory: 6Gi
+              memory: 6Gi # when starting up, uses ~5.5GB, then goes down to < 1GB
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
