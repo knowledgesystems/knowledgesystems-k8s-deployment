@@ -30,9 +30,12 @@ spec:
             - name: shared-data
               mountPath: /shared
       containers:
-        - name: check-file-size
-          image: busybox
-          command: ["/bin/sh", "-c", "ls -lh /mutations.txt.gz && du -sh /mutations.txt.gz"]
+        - name: run-regression-test
+          image: mskcc/oncokb-test:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: oncokb-credentials
           volumeMounts:
             - name: shared-data
               mountPath: /mutations.txt.gz
