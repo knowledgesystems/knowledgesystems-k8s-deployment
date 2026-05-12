@@ -270,9 +270,9 @@ locals {
       instance_types = ["c7g.large", "c6g.large"]
       capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      max_size       = 2
-      min_size       = 2
+      desired_size   = 3
+      max_size       = 3
+      min_size       = 3
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
