@@ -51,7 +51,9 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  tag: "v0.8.3-rc1-custom-v7"
+  # Beta runs ahead of prod to validate dep/lib bumps before promotion.
+  # v8 = v7 + @librechat/agents 3.1.50→3.1.68 (matches upstream v0.8.5).
+  tag: "v0.8.3-rc1-custom-v8"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
