@@ -44,7 +44,7 @@ spec:
             "-Dgenomenexus.server.version=2.1.2",
             "-Dspring.mongodb.embedded.version=1.3",
             "-Xms100m",
-            "-Xmx5g",
+            "-Xmx8g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -81,7 +81,7 @@ spec:
           requests:
               memory: 3Gi
           limits:
-              memory: 6Gi
+              memory: 11Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
