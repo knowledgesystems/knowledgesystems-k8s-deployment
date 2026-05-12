@@ -100,7 +100,7 @@ spec:
             httpGet:
               path: /
               port: 9095
-            initialDelaySeconds: 180
+            initialDelaySeconds: 600
             timeoutSeconds: 5
             periodSeconds: 5
             failureThreshold: 5
