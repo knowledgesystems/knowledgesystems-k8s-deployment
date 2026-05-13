@@ -74,7 +74,7 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 60
+            timeoutSeconds: 120
             periodSeconds: 30
             failureThreshold: 60
           livenessProbe:
@@ -82,7 +82,7 @@ spec:
               path: /api/v1/utils/allActionableVariants
               port: 8888
             initialDelaySeconds: 600
-            timeoutSeconds: 60
+            timeoutSeconds: 120
             periodSeconds: 10
             failureThreshold: 72
           name: oncokb-core-germline-v2
