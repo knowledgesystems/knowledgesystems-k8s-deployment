@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   labels:
     run: oncokb-core-germline-v2
+    tags.datadoghq.com/env: eks-internal-prod-oncokb
+    tags.datadoghq.com/service: oncokb-core-germline-v2
   name: oncokb-core-germline-v2
 spec:
   replicas: 1
@@ -17,6 +19,11 @@ spec:
     metadata:
       labels:
         run: oncokb-core-germline-v2
+        tags.datadoghq.com/env: eks-internal-prod-oncokb
+        tags.datadoghq.com/service: oncokb-core-germline-v2
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       volumes:
         - name: log4j-properties

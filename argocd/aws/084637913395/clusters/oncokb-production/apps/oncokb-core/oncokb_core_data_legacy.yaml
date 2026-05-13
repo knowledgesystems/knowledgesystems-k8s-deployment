@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   labels:
     run: oncokb-core-data-legacy
+    tags.datadoghq.com/env: eks-internal-prod-oncokb
+    tags.datadoghq.com/service: oncokb-core-data-legacy
   name: oncokb-core-data-legacy
 spec:
   replicas: 1
@@ -17,6 +19,11 @@ spec:
     metadata:
       labels:
         run: oncokb-core-data-legacy
+        tags.datadoghq.com/env: eks-internal-prod-oncokb
+        tags.datadoghq.com/service: oncokb-core-data-legacy
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
       containers:
         - env:
@@ -29,22 +36,23 @@ spec:
                 name: oncokb-redis-cluster
           image: oncokb/oncokb:1.4.10
           command: ["java"]
-          args: [
-            "-Dapp.name=$(APP_NAME)",
-            "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-            "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_legacy?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
-            "-Djdbc.username=$(DB_USERNAME)",
-            "-Djdbc.password=$(DB_PASSWORD)",
-            "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
-            "-Dredis.enable=false",
-            "-Dshow_sitemaps=false",
-            "-jar",
-            "/webapp-runner.jar",
-            "--enable-compression",
-            "--port",
-            "8888",
-            "/app.war"
-          ]
+          args:
+            [
+              "-Dapp.name=$(APP_NAME)",
+              "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
+              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_legacy?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.username=$(DB_USERNAME)",
+              "-Djdbc.password=$(DB_PASSWORD)",
+              "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)",
+              "-Dredis.enable=false",
+              "-Dshow_sitemaps=false",
+              "-jar",
+              "/webapp-runner.jar",
+              "--enable-compression",
+              "--port",
+              "8888",
+              "/app.war",
+            ]
           imagePullPolicy: Always
           # use actionable variants endpoint to cache everything
           readinessProbe:
@@ -85,10 +93,10 @@ spec:
       nodeSelector:
         workload: legacy-apps
       tolerations:
-      - key: "workload"
-        operator: "Equal"
-        value: "legacy-apps"
-        effect: "NoSchedule"
+        - key: "workload"
+          operator: "Equal"
+          value: "legacy-apps"
+          effect: "NoSchedule"
 ---
 apiVersion: v1
 kind: Service
