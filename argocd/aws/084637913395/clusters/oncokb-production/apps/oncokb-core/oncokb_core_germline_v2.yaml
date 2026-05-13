@@ -71,21 +71,20 @@ spec:
           # use actionable variants endpoint to cache everything
           readinessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
             initialDelaySeconds: 15
-            timeoutSeconds: 10
-            periodSeconds: 20
-            failureThreshold: 62
+            timeoutSeconds: 60
+            periodSeconds: 30
+            failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /api/v1/utils/allActionableVariants
+              path: /v1/health
               port: 8888
-            # wait for the pod is ready
-            initialDelaySeconds: 300
-            timeoutSeconds: 5
-            periodSeconds: 20
-            failureThreshold: 60
+            initialDelaySeconds: 600
+            timeoutSeconds: 60
+            periodSeconds: 10
+            failureThreshold: 72
           name: oncokb-core-germline-v2
           ports:
             - containerPort: 8888
