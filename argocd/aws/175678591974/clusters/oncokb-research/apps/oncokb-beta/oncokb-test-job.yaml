@@ -4,7 +4,7 @@ metadata:
   name: oncokb-regression-test
 spec:
   ttlSecondsAfterFinished: 86400 # Look into this
-  backoffLimit: 1
+  backoffLimit: 0
   template:
     spec:
       restartPolicy: Never      
