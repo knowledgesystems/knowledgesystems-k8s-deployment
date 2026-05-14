@@ -37,9 +37,9 @@ spec:
             - name: ONCOKB_BASE_URL
               value: http://oncokb-core-curation:8888
             - name: BATCH_SIZE
-              value: 500
+              value: "500"
             - name: WORKER_SIZE
-              value: 8
+              value: "8"
           volumeMounts:
             - name: shared-data
               mountPath: /mutations.txt.gz
