@@ -243,9 +243,9 @@ locals {
     genome-nexus = {
       instance_types = ["r7i.xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 3
+      desired_size   = 2
       min_size       = 2
-      max_size       = 3
+      max_size       = 2
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
         data_vol = var.DATA_VOL_CONFIG
