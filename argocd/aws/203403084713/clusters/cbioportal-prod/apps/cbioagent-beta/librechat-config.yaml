@@ -93,6 +93,9 @@ data:
         - "swapi.dev"
         - "librechat.ai"
         - "google.com"
+        - "clinicaltrials.gov"
+        - "www.ebi.ac.uk"
+        - "query-api.iedb.org"
 
     mcpServers:
       cbioportal-database:

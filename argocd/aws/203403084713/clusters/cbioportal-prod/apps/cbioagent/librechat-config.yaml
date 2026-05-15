@@ -106,6 +106,9 @@ data:
         - "swapi.dev"
         - "librechat.ai"
         - "google.com"
+        - "clinicaltrials.gov"
+        - "www.ebi.ac.uk"
+        - "query-api.iedb.org"
 
     # MCP Servers Object Structure
     mcpServers:
