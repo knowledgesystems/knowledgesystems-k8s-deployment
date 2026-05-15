@@ -109,13 +109,14 @@ data:
     N=$(echo "$TABLES" | grep -c . || true)
     log "cloning $N tables from $SRC_DB → $DST_DB"
 
-    # 5) Per-table CLONE.
+    # 5) Per-table zero-copy CLONE. SharedMergeTree parts are hard-linked,
+    # so each statement is near-instant and storage stays at zero until
+    # the LLM-prep ALTERs in step 6 cause copy-on-write divergence.
     i=0
     for t in $TABLES; do
       i=$((i+1))
       log "  [$i/$N] $t"
-      clickhouse-client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} AS ${SRC_DB}.${t}"
-      clickhouse-client $CH_FLAGS --query "INSERT INTO ${DST_DB}.${t} SELECT * FROM ${SRC_DB}.${t}"
+      clickhouse-client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
     done
 
     # 6) Apply LLM-prep SQL files (numeric-prefix sorted) from the
