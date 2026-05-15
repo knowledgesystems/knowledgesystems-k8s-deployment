@@ -58,7 +58,6 @@ data:
     : "${CLICKHOUSE_SECURE:?missing}"
     : "${CLICKHOUSE_ADMIN_USER:?missing}"
     : "${CLICKHOUSE_ADMIN_PASSWORD:?missing}"
-    : "${LLM_USER_NAME:?missing}"
 
     MGMT_DB="${MGMT_DB:-publicdb_update_management_database}"
     SRC_PREFIX="${SRC_PREFIX:-cbioportal_public_}"
