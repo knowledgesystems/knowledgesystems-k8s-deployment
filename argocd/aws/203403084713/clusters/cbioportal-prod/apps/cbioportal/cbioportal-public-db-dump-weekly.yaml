@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
-  name: cbioportal-public-mysqldump-weekly
+  name: cbioportal-public-db-dump-weekly
 spec:
   schedule: "59 23 * * 6"
   successfulJobsHistoryLimit: 3
@@ -12,7 +12,7 @@ spec:
     spec:
       template:
         spec:
-          serviceAccountName: cbioportal-mysql-dump-weekly
+          serviceAccountName: cbioportal-public-db-dump-weekly
           nodeSelector:
             workload: cbio-dev
           tolerations:
@@ -23,23 +23,7 @@ spec:
           containers:
             - envFrom:
                 - secretRef:
-                    name: cbioportal-mysql-dump
-              env:
-                - name: PUBLIC_BLUE_DB_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: cbioportal-public-blue
-                      key: DB_PORTAL_DB_NAME
-                - name: PUBLIC_GREEN_DB_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: cbioportal-public-green
-                      key: DB_PORTAL_DB_NAME
-                - name: PUBLIC_DB_HOST
-                  valueFrom:
-                    secretKeyRef:
-                      name: cbioportal-public-blue
-                      key: DB_HOST
+                    name: cbioportal-public-db-dump-weekly
               name: cbioportal-public-mysqldump-weekly
               image: ubuntu:22.04
               command: ["/bin/sh", "-c"]

@@ -13,3 +13,9 @@ variable "cluster_name" {
   description = "AWS eks cluster name"
   type        = string
 }
+
+variable "cbioportal_public_db_dump_bucket" {
+  description = "S3 bucket name for cBioPortal public database weekly dumps"
+  type        = string
+  default     = "sc-203403084713-pp-jbeobuumvm3r4-bucket-rbgakorqrcyx"
+}
