@@ -75,7 +75,7 @@ data:
     log() { echo "[clone $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
 
     # 1) Production color.
-    PROD_COLOR=$(clickhouse-client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'" | tr -d '[:space:]')
+    PROD_COLOR=$(clickhouse client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'" | tr -d '[:space:]')
     if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
       log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
     fi
@@ -95,11 +95,11 @@ data:
     log "active=${ACTIVE_DB:-<unset>}; building into ${DST_DB}"
 
     # 3) Rebuild target.
-    clickhouse-client $CH_FLAGS --query "DROP DATABASE IF EXISTS ${DST_DB}"
-    clickhouse-client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
+    clickhouse client $CH_FLAGS --query "DROP DATABASE IF EXISTS ${DST_DB}"
+    clickhouse client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
 
     # 4) Enumerate source tables (exclude sensitive + backup).
-    TABLES=$(clickhouse-client $CH_FLAGS --query "
+    TABLES=$(clickhouse client $CH_FLAGS --query "
       SELECT name FROM system.tables
       WHERE database = '${SRC_DB}'
         AND name NOT IN ${EXCLUDED_TABLES}
@@ -116,7 +116,7 @@ data:
     for t in $TABLES; do
       i=$((i+1))
       log "  [$i/$N] $t"
-      clickhouse-client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
+      clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
     done
 
     # 6) Apply LLM-prep SQL files (numeric-prefix sorted) from the
@@ -124,7 +124,7 @@ data:
     log "applying LLM-prep SQL files"
     for f in $(ls /workdir/sql/*.sql 2>/dev/null | sort); do
       log "  → $(basename "$f")"
-      clickhouse-client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+      clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
     done
 
     # 7) Hand off state to the rollout container.
@@ -242,7 +242,7 @@ spec:
                 - mountPath: /workdir
                   name: workdir
             - name: clone
-              image: clickhouse/clickhouse-client:25.4-alpine
+              image: clickhouse/clickhouse-server:26.2-alpine
               command: ["/bin/sh", "/scripts/clone.sh"]
               envFrom:
                 - secretRef:
