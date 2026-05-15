@@ -72,7 +72,7 @@ spec:
           requests:
               memory: 3Gi
           limits:
-              memory: 7Gi
+              memory: 8Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
