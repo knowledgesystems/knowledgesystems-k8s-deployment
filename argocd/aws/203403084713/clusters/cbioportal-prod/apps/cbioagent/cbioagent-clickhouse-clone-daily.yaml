@@ -197,7 +197,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: cbioagent
 spec:
-  schedule: "0 5 * * *"  # daily 05:00 UTC, after the MySQL→ClickHouse sync
+  schedule: "0 13 * * *"  # daily 13:00 UTC = 09:00 ET (DST) / 08:00 ET (EST)
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
