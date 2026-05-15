@@ -119,3 +119,67 @@ resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentFargateCbi
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
   role = aws_iam_role.userServiceRoleFargatePodExecutionCbioportal.name
 }
+
+# cBioPortal public DB dump policy
+resource "aws_iam_policy" "userServiceCbioportalPublicDBDump" {
+  name        = "userServiceCbioportalPublicDBDump"
+  path        = "/"
+  description = "This service is needed for the cronjob running on cbioportal-prod cluster. The cronjob is responsible for dumping the public database on a weekly basis."
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "VisualEditor0"
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObjectAcl",
+          "s3:GetObject",
+          "s3:PutBucketAcl",
+          "s3:ListBucket",
+          "s3:DeleteObject",
+          "s3:GetBucketAcl",
+          "s3:GetBucketLocation",
+          "s3:PutObjectAcl"
+        ]
+        Resource = [
+          "arn:aws:s3:::${var.cbioportal_public_db_dump_bucket}",
+          "arn:aws:s3:::${var.cbioportal_public_db_dump_bucket}/*"
+        ]
+      }
+    ]
+  })
+}
+
+# cBioPortal public DB dump role
+resource "aws_iam_role" "userServiceRoleCbioportalPublicDBDump" {
+  name        = "userServiceRoleCbioportalPublicDBDump"
+  description = "This role allows the cronjob running on cbioportal-prod cluster to dump the cbioportal public database on a weekly basis."
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Principal = {
+          Federated = "arn:aws:iam::${local.account_id}:oidc-provider/${var.cluster_oidc_provider_arn}"
+        }
+        Condition = {
+          StringEquals = {
+            "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+}
+
+# cBioPortal public DB dump policy attachment
+resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentCbioportalPublicDBDump" {
+  policy_arn = aws_iam_policy.userServiceCbioportalPublicDBDump.arn
+  role       = aws_iam_role.userServiceRoleCbioportalPublicDBDump.name
+}
