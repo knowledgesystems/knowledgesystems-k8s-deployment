@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: ONCOKB_BASE_URL
-              value: http://oncokb-core-curation:8888
+              value: http://oncokb-core-beta:8888
             - name: BATCH_SIZE
               value: "500"
             - name: WORKER_SIZE
