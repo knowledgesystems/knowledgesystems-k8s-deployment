@@ -32,9 +32,15 @@ metadata:
     # treat live drift as authoritative.
     argocd.argoproj.io/sync-options: IgnoreExtraneous=true
 data:
-  # Initial seed; the cron writes the active buffer name on each run.
-  # With this value, the first run will build into _green and flip here.
-  CLICKHOUSE_DATABASE: cbioportal_public_librechat_blue
+  # Initial seed = the currently-live LLM clone DB. Keeping this value
+  # equal to what the Secret holds on Day 1 means the MCP pod can roll
+  # safely the moment this ConfigMap is added to its envFrom — no read
+  # against a not-yet-built buffer. On the first cron run, clone.sh
+  # falls through to its bootstrap branch (unrecognised value) and
+  # builds cbioportal_public_librechat_blue; rollout.sh then patches
+  # this ConfigMap to that name and rolls the MCP. From there the
+  # buffers ping-pong normally.
+  CLICKHOUSE_DATABASE: cgds_public_librechat_20251209
 ---
 apiVersion: v1
 kind: ConfigMap
