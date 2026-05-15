@@ -117,16 +117,11 @@ data:
       clickhouse-client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
     done
 
-    # 7) Idempotent re-grants for llm_user.
-    for c in blue green; do
-      db="${DST_PREFIX}${c}"
-      if clickhouse-client $CH_FLAGS --query "EXISTS DATABASE ${db}" | grep -q '^1$'; then
-        log "GRANT SELECT ON ${db}.* TO ${LLM_USER_NAME}"
-        clickhouse-client $CH_FLAGS --query "GRANT SELECT ON ${db}.* TO ${LLM_USER_NAME}"
-      fi
-    done
-
-    # 8) Hand off state to the rollout container.
+    # 7) Hand off state to the rollout container.
+    # (No GRANT step: llm_user already has `GRANT SELECT ON <db>.*` set up
+    # manually. ClickHouse stores grants by DB name, so they persist across
+    # DROP DATABASE + CREATE DATABASE cycles and the `.*` wildcard covers
+    # all tables the clone creates.)
     echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
     log "done. ACTIVE_DB=${DST_DB}"
 
