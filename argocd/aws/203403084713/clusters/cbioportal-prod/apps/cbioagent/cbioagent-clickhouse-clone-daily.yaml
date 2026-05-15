@@ -1,0 +1,265 @@
+# Daily clone of the active cBioPortal production color into one of two
+# ping-pong librechat clone databases (cbioportal_public_librechat_blue or
+# _green) in ClickHouse, with LLM-prep SQL overrides applied. When the
+# build target ends up different from the buffer the MCP is currently
+# reading, the rollout container flips the clickhouse-mcp-active
+# ConfigMap and rolls cbioagent-clickhouse-mcp.
+#
+# This bundle ships:
+#   - clickhouse-mcp-active ConfigMap (CLICKHOUSE_DATABASE pointer)
+#   - cbioagent-clone-job-scripts ConfigMap (clone.sh + rollout.sh)
+#   - clickhouse-clone-job ServiceAccount + Role + RoleBinding
+#   - cbioagent-clickhouse-clone-daily CronJob (3 containers: fetch-sql →
+#     clone → rollout)
+#
+# Companion changes:
+#   - portal-configuration: clickhouse-librechat-admin Secret (admin creds)
+#   - cbioagent-clickhouse-mcp.yaml: envFrom extended to include the
+#     clickhouse-mcp-active ConfigMap
+#
+# SQL files reach the cron Pod via the existing cbioportal/mcp:latest
+# image (COPY . /app in its Dockerfile, no .dockerignore), copied into a
+# shared emptyDir by the fetch-sql initContainer. No new clone-job image
+# is built.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-mcp-active
+  namespace: default
+  annotations:
+    # The cron updates this on color flips; commit a starting value but
+    # treat live drift as authoritative.
+    argocd.argoproj.io/sync-options: IgnoreExtraneous=true
+data:
+  # Initial seed; the cron writes the active buffer name on each run.
+  # With this value, the first run will build into _green and flip here.
+  CLICKHOUSE_DATABASE: cbioportal_public_librechat_blue
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbioagent-clone-job-scripts
+  namespace: default
+data:
+  clone.sh: |
+    #!/bin/sh
+    set -eu
+
+    # Required env (from clickhouse-librechat-admin Secret via envFrom)
+    : "${CLICKHOUSE_HOST:?missing}"
+    : "${CLICKHOUSE_PORT:?missing}"
+    : "${CLICKHOUSE_SECURE:?missing}"
+    : "${CLICKHOUSE_ADMIN_USER:?missing}"
+    : "${CLICKHOUSE_ADMIN_PASSWORD:?missing}"
+    : "${LLM_USER_NAME:?missing}"
+
+    MGMT_DB="${MGMT_DB:-publicdb_update_management_database}"
+    SRC_PREFIX="${SRC_PREFIX:-cbioportal_public_}"
+    DST_PREFIX="${DST_PREFIX:-cbioportal_public_librechat_}"
+    EXCLUDED_TABLES="('authorities','data_access_tokens','users')"
+    EXCLUDED_TABLES_LIKE="%_BACKUP"
+
+    CH_FLAGS="--host=${CLICKHOUSE_HOST} --port=${CLICKHOUSE_PORT} --user=${CLICKHOUSE_ADMIN_USER} --password=${CLICKHOUSE_ADMIN_PASSWORD}"
+    [ "$CLICKHOUSE_SECURE" = "true" ] && CH_FLAGS="$CH_FLAGS --secure"
+
+    log() { echo "[clone $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
+
+    # 1) Production color (from the ClickHouse mirror of the MySQL mgmt DB).
+    PROD_COLOR=$(clickhouse-client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'" | tr -d '[:space:]')
+    if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
+      log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
+    fi
+    SRC_DB="${SRC_PREFIX}${PROD_COLOR}"
+    log "production color=$PROD_COLOR, source=$SRC_DB"
+
+    # 2) Active librechat buffer (read from the ConfigMap mounted at /active).
+    #    Falls through to bootstrap mode if value is unrecognised.
+    ACTIVE_DB="$(cat /active/CLICKHOUSE_DATABASE 2>/dev/null || echo '')"
+    case "$ACTIVE_DB" in
+      "${DST_PREFIX}blue")  TARGET_COLOR="green" ;;
+      "${DST_PREFIX}green") TARGET_COLOR="blue"  ;;
+      *) log "active='${ACTIVE_DB}' — bootstrapping into ${DST_PREFIX}blue"
+         TARGET_COLOR="blue" ;;
+    esac
+    DST_DB="${DST_PREFIX}${TARGET_COLOR}"
+    log "active=${ACTIVE_DB:-<unset>}; building into ${DST_DB}"
+
+    # 3) Rebuild target.
+    clickhouse-client $CH_FLAGS --query "DROP DATABASE IF EXISTS ${DST_DB}"
+    clickhouse-client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
+
+    # 4) Enumerate source tables (exclude sensitive + backup).
+    TABLES=$(clickhouse-client $CH_FLAGS --query "SELECT name FROM system.tables WHERE database='${SRC_DB}' AND name NOT IN ${EXCLUDED_TABLES} AND name NOT LIKE '${EXCLUDED_TABLES_LIKE}' ORDER BY name")
+    N=$(echo "$TABLES" | grep -c . || true)
+    log "cloning $N tables from $SRC_DB → $DST_DB"
+
+    # 5) Per-table CLONE.
+    i=0
+    for t in $TABLES; do
+      i=$((i+1))
+      log "  [$i/$N] $t"
+      clickhouse-client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} AS ${SRC_DB}.${t}"
+      clickhouse-client $CH_FLAGS --query "INSERT INTO ${DST_DB}.${t} SELECT * FROM ${SRC_DB}.${t}"
+    done
+
+    # 6) Apply LLM-prep SQL files (numeric-prefix sorted) from the
+    #    fetch-sql initContainer's payload.
+    log "applying LLM-prep SQL files"
+    for f in $(ls /workdir/sql/*.sql 2>/dev/null | sort); do
+      log "  → $(basename "$f")"
+      clickhouse-client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+    done
+
+    # 7) Idempotent re-grants for llm_user.
+    for c in blue green; do
+      db="${DST_PREFIX}${c}"
+      if clickhouse-client $CH_FLAGS --query "EXISTS DATABASE ${db}" | grep -q '^1$'; then
+        log "GRANT SELECT ON ${db}.* TO ${LLM_USER_NAME}"
+        clickhouse-client $CH_FLAGS --query "GRANT SELECT ON ${db}.* TO ${LLM_USER_NAME}"
+      fi
+    done
+
+    # 8) Hand off state to the rollout container.
+    echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
+    log "done. ACTIVE_DB=${DST_DB}"
+
+  rollout.sh: |
+    #!/bin/sh
+    set -eu
+
+    : "${MCP_NAMESPACE:?missing}"
+    : "${MCP_DEPLOYMENT:?missing}"
+    : "${MCP_CONFIGMAP:?missing}"
+
+    log() { echo "[rollout $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
+
+    # Read what the clone container produced.
+    . /workdir/state.env
+    : "${ACTIVE_DB:?missing from state.env}"
+    log "ACTIVE_DB=${ACTIVE_DB}"
+
+    CURRENT=$(kubectl -n "${MCP_NAMESPACE}" get configmap "${MCP_CONFIGMAP}" -o jsonpath='{.data.CLICKHOUSE_DATABASE}' 2>/dev/null || echo "")
+    if [ "$CURRENT" != "$ACTIVE_DB" ]; then
+      log "flipping ConfigMap from '${CURRENT:-<unset>}' → '${ACTIVE_DB}'"
+      kubectl -n "${MCP_NAMESPACE}" patch configmap "${MCP_CONFIGMAP}" \
+        --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
+    fi
+    log "rolling deployment ${MCP_DEPLOYMENT}"
+    kubectl -n "${MCP_NAMESPACE}" rollout restart deployment "${MCP_DEPLOYMENT}"
+    log "done"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: clickhouse-clone-job
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: clickhouse-clone-job-role
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["clickhouse-mcp-active"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["cbioagent-clickhouse-mcp"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: clickhouse-clone-job-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: clickhouse-clone-job
+    namespace: default
+roleRef:
+  kind: Role
+  name: clickhouse-clone-job-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioagent-clickhouse-clone-daily
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  schedule: "0 5 * * *"  # daily 05:00 UTC, after the MySQL→ClickHouse sync
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200
+      template:
+        spec:
+          serviceAccountName: clickhouse-clone-job
+          # Use cbio-dev node pool (matches the cbioportal-public-mysqldump-weekly
+          # cron). cbioagent pool is shaped for low-RAM long-running MCP pods.
+          nodeSelector:
+            workload: cbio-dev
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbio-dev"
+              effect: "NoSchedule"
+          restartPolicy: OnFailure
+          volumes:
+            - name: workdir
+              emptyDir: {}
+            - name: scripts
+              configMap:
+                name: cbioagent-clone-job-scripts
+                defaultMode: 0555
+            - name: active-readonly
+              configMap:
+                name: clickhouse-mcp-active
+          # Three sequential containers: fetch SQL → clone → rollout.
+          initContainers:
+            - name: fetch-sql
+              image: cbioportal/mcp:latest
+              imagePullPolicy: Always
+              command: ["sh", "-c", "cp -rv /app/sql /workdir/sql && ls /workdir/sql"]
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+            - name: clone
+              image: clickhouse/clickhouse-client:25.4-alpine
+              command: ["/bin/sh", "/scripts/clone.sh"]
+              envFrom:
+                - secretRef:
+                    name: clickhouse-librechat-admin
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                - mountPath: /scripts
+                  name: scripts
+                  readOnly: true
+                - mountPath: /active
+                  name: active-readonly
+                  readOnly: true
+          containers:
+            - name: rollout
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "/scripts/rollout.sh"]
+              env:
+                - name: MCP_NAMESPACE
+                  value: "default"
+                - name: MCP_DEPLOYMENT
+                  value: "cbioagent-clickhouse-mcp"
+                - name: MCP_CONFIGMAP
+                  value: "clickhouse-mcp-active"
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                  readOnly: true
+                - mountPath: /scripts
+                  name: scripts
+                  readOnly: true
