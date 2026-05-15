@@ -23,6 +23,13 @@ spec:
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
+            # ConfigMap mounted AFTER the Secret so its CLICKHOUSE_DATABASE
+            # value wins (envFrom: last-writer-wins on key collisions). The
+            # cbioagent-clickhouse-clone-daily CronJob owns this ConfigMap
+            # and updates it when the production color flips, then rolls
+            # this Deployment.
+            - configMapRef:
+                name: clickhouse-mcp-active
       nodeSelector:
         workload: "cbioagent"
       tolerations:
