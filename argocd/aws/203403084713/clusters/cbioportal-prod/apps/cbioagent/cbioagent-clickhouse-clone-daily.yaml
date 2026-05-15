@@ -63,8 +63,12 @@ data:
     MGMT_DB="${MGMT_DB:-publicdb_update_management_database}"
     SRC_PREFIX="${SRC_PREFIX:-cbioportal_public_}"
     DST_PREFIX="${DST_PREFIX:-cbioportal_public_librechat_}"
+    # llm_user can be reached by anyone with access to cBioDBAgent, so the
+    # clone must not carry any auth/credential data. The explicit list
+    # covers today's cBioPortal schema; the substring patterns below are
+    # defense-in-depth for future schema additions (e.g. oauth_*, sessions).
     EXCLUDED_TABLES="('authorities','data_access_tokens','users')"
-    EXCLUDED_TABLES_LIKE="%_BACKUP"
+    EXCLUDED_SUBSTRINGS="'_backup','token','oauth','session','login','password','credential','secret'"
 
     CH_FLAGS="--host=${CLICKHOUSE_HOST} --port=${CLICKHOUSE_PORT} --user=${CLICKHOUSE_ADMIN_USER} --password=${CLICKHOUSE_ADMIN_PASSWORD}"
     [ "$CLICKHOUSE_SECURE" = "true" ] && CH_FLAGS="$CH_FLAGS --secure"
@@ -96,7 +100,13 @@ data:
     clickhouse-client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
 
     # 4) Enumerate source tables (exclude sensitive + backup).
-    TABLES=$(clickhouse-client $CH_FLAGS --query "SELECT name FROM system.tables WHERE database='${SRC_DB}' AND name NOT IN ${EXCLUDED_TABLES} AND name NOT LIKE '${EXCLUDED_TABLES_LIKE}' ORDER BY name")
+    TABLES=$(clickhouse-client $CH_FLAGS --query "
+      SELECT name FROM system.tables
+      WHERE database = '${SRC_DB}'
+        AND name NOT IN ${EXCLUDED_TABLES}
+        AND NOT multiSearchAny(lower(name), [${EXCLUDED_SUBSTRINGS}])
+      ORDER BY name
+    ")
     N=$(echo "$TABLES" | grep -c . || true)
     log "cloning $N tables from $SRC_DB → $DST_DB"
 
