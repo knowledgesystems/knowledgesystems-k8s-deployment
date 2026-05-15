@@ -62,6 +62,11 @@ spec:
         ports:
         - containerPort: 8080
           protocol: TCP
+        resources:
+          requests:
+            memory: 3Gi
+          limits:
+            memory: 7Gi
       nodeSelector:
         workload: "gn-vep"
       tolerations:
