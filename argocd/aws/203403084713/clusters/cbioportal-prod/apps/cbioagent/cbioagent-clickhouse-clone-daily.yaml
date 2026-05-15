@@ -75,7 +75,7 @@ data:
 
     log() { echo "[clone $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
 
-    # 1) Production color (from the ClickHouse mirror of the MySQL mgmt DB).
+    # 1) Production color.
     PROD_COLOR=$(clickhouse-client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'" | tr -d '[:space:]')
     if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
       log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
