@@ -11,17 +11,17 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - path: helm/librechat
-      repoURL: https://github.com/danny-avila/LibreChat.git
-      targetRevision: v0.7.9-rc1
+    - chart: librechat
+      repoURL: ghcr.io/danny-avila/librechat-chart
+      targetRevision: 1.9.1
       helm:
         releaseName: cbioagent
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent/values.yaml
-#  syncPolicy:
-#    automated:
-#      prune: true
-#      selfHeal: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
   destination:
     namespace: default
     server: https://kubernetes.default.svc

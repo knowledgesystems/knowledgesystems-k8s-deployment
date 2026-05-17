@@ -1,0 +1,120 @@
+name: Validate Configs
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  validate-yaml-syntax:
+    name: Validate YAML Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Create yamllint config
+        run: |
+          cat > .yamllint.yml <<'YAMLLINT'
+          extends: default
+          rules:
+            line-length:
+              max: 500
+              allow-non-breakable-inline-mappings: true
+            truthy:
+              check-keys: false
+            comments:
+              min-spaces-from-content: 1
+            document-start: disable
+            indentation:
+              spaces: consistent
+              indent-sequences: whatever
+          YAMLLINT
+
+      - name: Lint YAML files in cbioagent directories
+        run: |
+          echo "::group::Finding YAML files to validate"
+          FILES=$(find argocd/aws/*/clusters/*/apps/cbioagent -name '*.yaml' -o -name '*.yml' 2>/dev/null)
+          if [ -z "$FILES" ]; then
+            echo "No YAML files found in cbioagent directories"
+            exit 0
+          fi
+          echo "$FILES"
+          echo "::endgroup::"
+
+          echo "::group::Running yamllint"
+          echo "$FILES" | xargs yamllint -c .yamllint.yml --format github
+          echo "::endgroup::"
+
+          echo "All YAML files passed syntax validation."
+
+  validate-k8s-manifests:
+    name: Validate Kubernetes Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          KUBECONFORM_VERSION="v0.6.7"
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar xz -C /usr/local/bin kubeconform
+          kubeconform -v
+
+      - name: Validate Kubernetes manifests in cbioagent directories
+        run: |
+          ERRORS=0
+
+          # Collect K8s manifest files (exclude Helm values files which are not
+          # standalone K8s resources)
+          echo "::group::Finding Kubernetes manifest files"
+          MANIFEST_FILES=""
+          for f in $(find argocd/aws/*/clusters/*/apps/cbioagent -name '*.yaml' -o -name '*.yml' 2>/dev/null); do
+            # Skip Helm values files -- these are chart inputs, not K8s manifests
+            basename=$(basename "$f")
+            if [ "$basename" = "values.yaml" ] || [ "$basename" = "values.yml" ]; then
+              echo "Skipping Helm values file: $f"
+              continue
+            fi
+            MANIFEST_FILES="$MANIFEST_FILES $f"
+          done
+
+          if [ -z "$MANIFEST_FILES" ]; then
+            echo "No Kubernetes manifest files found"
+            exit 0
+          fi
+          echo "Files to validate:"
+          echo "$MANIFEST_FILES" | tr ' ' '\n' | sed '/^$/d'
+          echo "::endgroup::"
+
+          # Validate each file with kubeconform
+          for f in $MANIFEST_FILES; do
+            echo "::group::Validating $f"
+            if kubeconform \
+              -strict \
+              -summary \
+              -output text \
+              -kubernetes-version 1.29.0 \
+              -ignore-missing-schemas \
+              "$f"; then
+              echo "PASS: $f"
+            else
+              echo "::error file=$f::kubeconform validation failed for $f"
+              ERRORS=$((ERRORS + 1))
+            fi
+            echo "::endgroup::"
+          done
+
+          if [ "$ERRORS" -gt 0 ]; then
+            echo ""
+            echo "::error::$ERRORS file(s) failed Kubernetes manifest validation."
+            exit 1
+          fi
+
+          echo ""
+          echo "All Kubernetes manifests passed validation."
