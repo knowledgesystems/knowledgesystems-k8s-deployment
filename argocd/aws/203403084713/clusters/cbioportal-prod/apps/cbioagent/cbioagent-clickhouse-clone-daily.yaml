@@ -119,11 +119,18 @@ data:
       clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
     done
 
-    # 6) Apply LLM-prep SQL files (numeric-prefix sorted) from the
-    #    fetch-sql initContainer's payload.
-    log "applying LLM-prep SQL files"
+    # 6) Apply LLM-prep SQL files from the fetch-sql initContainer's
+    #    payload. Two phases:
+    #      a) sql/*.sql (portable, numeric order)
+    #      b) sql/portal-specific/<portal>/*.sql for every subdir
+    log "applying LLM-prep SQL files (portable)"
     for f in $(ls /workdir/sql/*.sql 2>/dev/null | sort); do
-      log "  → $(basename "$f")"
+      log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
+      clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+    done
+    log "applying LLM-prep SQL files (portal-specific)"
+    for f in $(ls /workdir/sql/portal-specific/*/*.sql 2>/dev/null | sort); do
+      log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
       clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
     done
 
