@@ -25,3 +25,15 @@ spec:
   destination:
     namespace: default
     server: https://kubernetes.default.svc
+  # The cron job cbioagent-clickhouse-clone-daily owns the live value of
+  # data.CLICKHOUSE_DATABASE in this ConfigMap — it patches the field on
+  # every successful clone+flip. Without this entry Argo CD treats the
+  # cron's patch as drift and reverts it back to the seed value, which
+  # silently keeps the MCP pointed at whichever DB was last in git.
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: clickhouse-mcp-active
+      namespace: default
+      jsonPointers:
+        - /data/CLICKHOUSE_DATABASE
