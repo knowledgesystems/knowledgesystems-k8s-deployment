@@ -27,20 +27,16 @@ kind: ConfigMap
 metadata:
   name: clickhouse-mcp-active
   namespace: default
-  annotations:
-    # The cron updates this on color flips; commit a starting value but
-    # treat live drift as authoritative.
-    argocd.argoproj.io/sync-options: IgnoreExtraneous=true
 data:
-  # Initial seed = the currently-live LLM clone DB. Keeping this value
-  # equal to what the Secret holds on Day 1 means the MCP pod can roll
-  # safely the moment this ConfigMap is added to its envFrom — no read
-  # against a not-yet-built buffer. On the first cron run, clone.sh
-  # falls through to its bootstrap branch (unrecognised value) and
-  # builds cbioportal_public_librechat_blue; rollout.sh then patches
-  # this ConfigMap to that name and rolls the MCP. From there the
-  # buffers ping-pong normally.
-  CLICKHOUSE_DATABASE: cgds_public_librechat_20251209
+  # Initial seed. The cbioagent Argo Application has an ignoreDifferences
+  # entry on /data/CLICKHOUSE_DATABASE so the cron's daily flip isn't
+  # reverted — but in practice empty-string `group: ""` gets stripped on
+  # apply and the matcher fails to fire, so Argo re-asserts this seed on
+  # every sync anyway. Until that's fixed (or until the active-buffer
+  # pointer moves into ClickHouse per #442), keep this value equal to
+  # whichever buffer the MCP should be reading; otherwise every Argo sync
+  # rolls the MCP back to whatever this names. Today: blue.
+  CLICKHOUSE_DATABASE: cbioportal_public_librechat_blue
 ---
 apiVersion: v1
 kind: ConfigMap
