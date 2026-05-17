@@ -18,18 +18,23 @@ spec:
         releaseName: cbioagent
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent/values.yaml
-#  syncPolicy:
-#    automated:
-#      prune: true
-#      selfHeal: true
+  syncPolicy:
+    # Sync still triggered manually; this option just opts the *next*
+    # sync (whenever it happens) into honoring ignoreDifferences. By
+    # default ignoreDifferences only affects the diff display — Argo's
+    # sync still overwrites ignored fields back to git unless you tell
+    # it otherwise.
+    # https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#respect-ignore-difference-configs
+    syncOptions:
+      - RespectIgnoreDifferences=true
   destination:
     namespace: default
     server: https://kubernetes.default.svc
   # The cron job cbioagent-clickhouse-clone-daily owns the live value of
   # data.CLICKHOUSE_DATABASE in this ConfigMap — it patches the field on
-  # every successful clone+flip. Without this entry Argo CD treats the
-  # cron's patch as drift and reverts it back to the seed value, which
-  # silently keeps the MCP pointed at whichever DB was last in git.
+  # every successful clone+flip. Combined with the RespectIgnoreDifferences
+  # sync option above, Argo leaves the cron's patch alone instead of
+  # reverting it to the seed value in cbioagent-clickhouse-clone-daily.yaml.
   ignoreDifferences:
     - group: ""
       kind: ConfigMap
