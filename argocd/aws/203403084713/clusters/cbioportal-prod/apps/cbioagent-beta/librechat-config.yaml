@@ -120,9 +120,8 @@ data:
       provider: bedrock
       # Haiku is the standard summarization model — cheaper/faster than the
       # main agent's Sonnet, and summarization doesn't need Sonnet's reasoning.
-      # Matches the original intent of the dropped patch (which had a commented
-      # `summaryModel: claude-3-5-haiku-...` line in prod's old config).
-      model: us.anthropic.claude-3-5-haiku-20241022-v1:0
+      # Paired with the main agent's Sonnet 4.5 (4.x generation parity).
+      model: us.anthropic.claude-haiku-4-5-20251001-v1:0
       trigger:
         type: token_ratio
         value: 0.85
