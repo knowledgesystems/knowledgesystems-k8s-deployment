@@ -79,7 +79,14 @@ data:
       prompts: false
       bookmarks: false
       multiConvo: false
-      agents: true
+      # Default USER role: can USE existing agents but not create/share new
+      # ones. Promote individual mskcc.org users to ADMIN in MongoDB if they
+      # need to author agents. Mirrors the prod cbioagent config.
+      agents:
+        use: true
+        create: false
+        share: false
+        public: false
       marketplace:
         use: false
       runCode: false
