@@ -110,9 +110,24 @@ data:
         url: http://cbioportal-navigator-beta:80/mcp
         chatMenu: false
 
+    # Context summarization (upstream v0.8.5+ native config).
+    # Replaces the old `endpoints.agents.contextStrategy: 'summarize'` patch
+    # that we maintained in v0.8.3-rc1-custom (now dropped). Long-running
+    # agent conversations are summarized when ~85% of the context budget is
+    # used, rather than dropping older messages.
+    summarization:
+      enabled: true
+      provider: bedrock
+      # Haiku is the standard summarization model — cheaper/faster than the
+      # main agent's Sonnet, and summarization doesn't need Sonnet's reasoning.
+      # Paired with the main agent's Sonnet 4.5 (4.x generation parity).
+      model: us.anthropic.claude-haiku-4-5-20251001-v1:0
+      trigger:
+        type: token_ratio
+        value: 0.85
+
     endpoints:
       agents:
-        contextStrategy: 'summarize'
         recursionLimit: 50
         maxRecursionLimit: 100
         disableBuilder: false

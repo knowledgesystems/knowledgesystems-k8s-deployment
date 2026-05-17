@@ -51,9 +51,11 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  # Beta runs ahead of prod to validate dep/lib bumps before promotion.
-  # v8 = v7 + @librechat/agents 3.1.50→3.1.68 (matches upstream v0.8.5).
-  tag: "v0.8.3-rc1-custom-v8"
+  # Beta runs ahead of prod to validate the LibreChat upstream upgrade.
+  # custom-v1 = upstream v0.8.6-rc1 + our 37 cBioPortal patches (rebased onto
+  # v0.8.6-rc1). Drops the local context-summarization patches in favor of
+  # upstream's native top-level `summarization:` config (see librechat-config.yaml).
+  tag: "v0.8.6-rc1-custom-v1"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
