@@ -25,6 +25,14 @@ spec:
         valueFiles:
           - $k8s/argocd/aws/203403084713/clusters/cbioportal-prod/apps/keycloak/values.yaml
           - $portal-configuration/argocd/aws/203403084713/clusters/cbioportal-prod/helm/keycloak-values.yaml
+    - repoURL: https://codecentric.github.io/helm-charts
+      targetRevision: 9.0.1
+      chart: keycloak
+      helm:
+        releaseName: keycloak-staging
+        valueFiles:
+          - $k8s/argocd/aws/203403084713/clusters/cbioportal-prod/apps/keycloak/values.yaml
+          - $portal-configuration/argocd/aws/203403084713/clusters/cbioportal-prod/helm/keycloak-values-staging.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
