@@ -23,8 +23,13 @@ jobs:
           cat > .yamllint.yml <<'YAMLLINT'
           extends: default
           rules:
+            # 1000 chars accommodates inlined data URLs (e.g. SVG icons in
+            # librechat-config.yaml modelSpec iconURL) and long single-line
+            # greeting strings — these can't be wrapped without breaking
+            # the rendered output (folded scalars would inject spaces into
+            # data: URLs).
             line-length:
-              max: 500
+              max: 1000
               allow-non-breakable-inline-mappings: true
             truthy:
               check-keys: false
