@@ -88,18 +88,15 @@ data:
       prompts: false
       bookmarks: false
       multiConvo: false
-      # Default USER role: can USE existing agents but not create/share new
-      # ones. mskcc.org users are promoted to a custom AGENT_BUILDER role
-      # in the Roles collection that grants USE + CREATE + SHARE so they
-      # can author agents; full ADMIN stays scoped to actual admins. This
-      # block seeds the USER role's permissions at startup — the seed
-      # upserts only the USER row so the AGENT_BUILDER role and any
-      # already-promoted users are untouched.
-      agents:
-        use: true
-        create: false
-        share: false
-        public: false
+      # `agents: true` only seeds the USE flag on each role; CREATE / SHARE /
+      # SHARE_PUBLIC come from the Roles collection in MongoDB and are NOT
+      # touched on pod restart. Using the object form here (use/create/share/
+      # public) clobbers all four flags on BOTH the USER and ADMIN roles at
+      # every startup (see #450 incident), so we keep the shorthand and
+      # express the per-role CREATE/SHARE policy directly in mongo:
+      #   USER  → CREATE:false, SHARE:false, SHARE_PUBLIC:false
+      #   ADMIN → CREATE:true,  SHARE:true,  SHARE_PUBLIC:true
+      agents: true
       marketplace:
         use: false
       runCode: false
