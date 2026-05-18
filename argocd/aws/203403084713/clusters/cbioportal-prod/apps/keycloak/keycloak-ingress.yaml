@@ -34,7 +34,20 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+    - host: keycloak-staging.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: keycloak-staging-http
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
   tls:
     - hosts:
         - keycloak.cbioportal.org
       secretName: keycloak-cert
+    - hosts:
+        - keycloak-staging.cbioportal.org
+      secretName: keycloak-staging-cert
