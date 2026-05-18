@@ -78,13 +78,13 @@ ingress:
   enabled: false
 
 resources:
-  # Lowered from 2Gi → 1Gi so prod + beta can co-tenant the single
+  # Lowered from 2Gi → 512Mi so prod + beta can co-tenant the single
   # `workload=cbioagent` node until #452 lets karpenter provision a
   # second one. Revert to 2Gi after the karpenter fix. Beta is a
-  # testing instance — if it OOMs at 1Gi during a session, that's a
+  # testing instance — if it OOMs during a session, that's a
   # signal to fix #452 sooner, not to bump the request back.
   requests:
-    memory: 1Gi
+    memory: 512Mi
   limits:
     memory: 4Gi
 
