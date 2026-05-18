@@ -27,7 +27,7 @@ spec:
         - name: oncokb-dockerhub-creds
       containers:
         - name: oncokb-core-v2
-          image: mskcc/oncokb-core-v2@sha256:9687bb8a8708da2eac597ce3e88d2cda866812e02efef18a4ddf39f62dd949bc
+          image: mskcc/oncokb-core-v2@sha256:0b19b19d29217b57b7c7dc80c8f1cd32879ac15e075709e09ad399cade1be899
           imagePullPolicy: Always
           ports:
             - name: http
