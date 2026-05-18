@@ -26,3 +26,9 @@ variable "GITHUB_LFS_CURATORS" {
   type        = list(string)
   default     = ["nasirz1", "madupurr", "kundrar", "alhamadr", "satravab", "datahub"]
 }
+
+variable "KEYCLOAK_DB_PASSWORD_VERSION" {
+  description = "Bump this to trigger a password rotation for keycloak-db"
+  type        = number
+  default     = 2
+}
