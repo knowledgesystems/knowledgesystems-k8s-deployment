@@ -11,20 +11,24 @@ spec:
       directory:
         recurse: true
       ref: k8s-repo
-    - path: helm/librechat
-      repoURL: https://github.com/danny-avila/LibreChat.git
-      targetRevision: v0.7.9-rc1
+    - chart: librechat
+      repoURL: ghcr.io/danny-avila/librechat-chart
+      targetRevision: 1.9.1
       helm:
         releaseName: cbioagent
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent/values.yaml
   syncPolicy:
-    # RespectIgnoreDifferences alone wasn't enough: with the default
-    # client-side apply, Argo sends the whole resource and the API
-    # server's three-way merge clobbers the ignored field back to git.
-    # ServerSideApply lets Argo build the patch from managed-fields and
-    # omit the ignored JSON pointer entirely, so the cron's in-cluster
-    # value survives the sync.
+    automated:
+      prune: true
+      selfHeal: true
+    # RespectIgnoreDifferences + ServerSideApply together let the cron's
+    # in-cluster patch on `clickhouse-mcp-active.data.CLICKHOUSE_DATABASE`
+    # survive each sync. RespectIgnoreDifferences alone wasn't enough:
+    # with the default client-side apply, Argo sends the whole resource
+    # and the API server's three-way merge clobbers the ignored field
+    # back to git. ServerSideApply lets Argo build the patch from
+    # managed-fields and omit the ignored JSON pointer entirely.
     # Refs:
     #   https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#respect-ignore-difference-configs
     #   https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#server-side-apply
