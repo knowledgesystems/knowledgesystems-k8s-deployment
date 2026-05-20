@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: oncokb-transcript-beta
-          image: calvinlu3/oncokb-transcript:0.9.4
+          image: calvinlu3/oncokb-transcript:0.9.4-test
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
