@@ -8,5 +8,6 @@ spec:
     uablock:
       pathRegex:
         - "^/api/molecular-profiles/co-expressions/fetch$"
+        - "^/api/generic_assay_meta/fetch$"
       statusCode: 404
       responseMessage: "Not Found"
