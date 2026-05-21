@@ -16,6 +16,8 @@ spec:
       middlewares:
         - name: ipblock
           namespace: default
+        - name: pathblock
+          namespace: default
       services:
         - name: cbioportal-backend-public-green
           port: 80
@@ -24,6 +26,8 @@ spec:
       kind: Rule
       middlewares:
         - name: ipblock
+          namespace: default
+        - name: pathblock
           namespace: default
       services:
         - name: cbioportal-backend-public-api-green

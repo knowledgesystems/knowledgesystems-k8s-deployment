@@ -1,0 +1,12 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: pathblock
+  namespace: default
+spec:
+  plugin:
+    uablock:
+      pathRegex:
+        - "^/api/molecular-profiles/co-expressions/fetch$"
+      statusCode: 404
+      responseMessage: "Not Found"
