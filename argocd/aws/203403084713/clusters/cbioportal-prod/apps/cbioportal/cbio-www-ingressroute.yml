@@ -11,7 +11,7 @@ spec:
   routes:
     # Browser traffic: User-Agent contains Mozilla
     - match: >-
-        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)headless`)
+        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
       kind: Rule
       middlewares:
         - name: ipblock
