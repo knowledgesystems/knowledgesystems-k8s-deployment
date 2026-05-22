@@ -62,6 +62,18 @@ resources:
     cpu: "2"
     memory: 1500Mi
 
+# Let's us schedule replicas on the same node, but prefer to schedule them on different nodes if possible
+affinity: |
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: keycloakx
+              app.kubernetes.io/instance: keycloak-beta
+          topologyKey: kubernetes.io/hostname
+
 nodeSelector:
   workload: keycloak
 
