@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-beta
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/175678591974/clusters/oncokb-research/apps/keycloak
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    - repoURL: https://codecentric.github.io/helm-charts
+      targetRevision: 7.1.11
+      chart: keycloakx
+      helm:
+        releaseName: keycloak-beta
+        valueFiles:
+          - $k8s-repo/argocd/aws/175678591974/clusters/oncokb-research/apps/keycloak/values.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

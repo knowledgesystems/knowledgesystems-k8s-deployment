@@ -1,0 +1,66 @@
+fullnameOverride: keycloak-beta
+
+replicas: 2
+podDisruptionBudget:
+  minAvailable: 1
+updateStrategy: RollingUpdate
+
+proxy:
+  # Traefik uses X-Forwarded-* headers instead of the standard Forwarded header, so we need to set the mode to xforwarded
+  mode: xforwarded
+
+database:
+  vendor: mysql
+
+extraEnv: |
+  - name: KEYCLOAK_ADMIN
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: KEYCLOAK_ADMIN
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: KEYCLOAK_ADMIN_PASSWORD
+  - name: KC_DB_URL_HOST
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: DB_ADDRESS
+  - name: KC_DB_URL_DATABASE
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: DB_DATABASE
+  - name: KC_DB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-db-public-rds-admin
+        key: DB_USERNAME
+  - name: KC_DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-db-public-rds-admin
+        key: DB_PASSWORD
+  - name: KC_HOSTNAME
+    value: beta.keycloak.oncokb.org
+  - name: KC_LOG_LEVEL
+    value: INFO
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1700Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+nodeSelector:
+  workload: keycloak
+
+tolerations:
+  - key: workload
+    operator: Equal
+    value: keycloak
+    effect: NoSchedule

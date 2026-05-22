@@ -24,6 +24,7 @@ spec:
     - "sop.oncokb.org"
     - "curation.oncokb.org"
     - "keycloak.oncokb.org"
+    - "beta.keycloak.oncokb.org"
     - "staging.oncokb.org"
     - "www.oncokb.org"
     - "transcript.oncokb.org"
