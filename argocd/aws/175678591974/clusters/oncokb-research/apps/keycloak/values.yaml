@@ -5,6 +5,12 @@ podDisruptionBudget:
   minAvailable: 1
 updateStrategy: RollingUpdate
 
+command:
+  - /opt/keycloak/bin/kc.sh
+
+args:
+  - start
+
 proxy:
   # Traefik uses X-Forwarded-* headers instead of the standard Forwarded header, so we need to set the mode to xforwarded
   mode: xforwarded
