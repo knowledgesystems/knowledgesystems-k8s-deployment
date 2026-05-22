@@ -1,8 +1,8 @@
 fullnameOverride: keycloak-beta
 
-replicas: 1
+replicas: 2
 podDisruptionBudget:
-  minAvailable: 0
+  minAvailable: 1
 updateStrategy: RollingUpdate
 
 command:
@@ -57,10 +57,10 @@ extraEnv: |
 resources:
   requests:
     cpu: 500m
-    memory: 1700Mi
+    memory: 1000Mi
   limits:
     cpu: "2"
-    memory: 2Gi
+    memory: 1500Mi
 
 nodeSelector:
   workload: keycloak
