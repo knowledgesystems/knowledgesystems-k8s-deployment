@@ -47,6 +47,28 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
+    keycloak = {
+      instance_types = ["t4g.medium"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "keycloak"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "keycloak"
+      }
+      tags = {
+        cdsi-app   = "keycloak"
+        cdsi-team  = "oncokb"
+        cdsi-owner = "luc2@mskcc.org"
+      }
+    }
     main = {
       instance_types = ["r7g.2xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
