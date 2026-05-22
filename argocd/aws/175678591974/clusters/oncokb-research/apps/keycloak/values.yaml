@@ -1,8 +1,8 @@
 fullnameOverride: keycloak-beta
 
-replicas: 2
+replicas: 1
 podDisruptionBudget:
-  minAvailable: 1
+  minAvailable: 0
 updateStrategy: RollingUpdate
 
 command:
@@ -19,12 +19,12 @@ database:
   vendor: mysql
 
 extraEnv: |
-  - name: KEYCLOAK_ADMIN
+  - name: KC_BOOTSTRAP_ADMIN_USERNAME
     valueFrom:
       secretKeyRef:
         name: oncokb-keycloak-beta
         key: KEYCLOAK_ADMIN
-  - name: KEYCLOAK_ADMIN_PASSWORD
+  - name: KC_BOOTSTRAP_ADMIN_PASSWORD
     valueFrom:
       secretKeyRef:
         name: oncokb-keycloak-beta
