@@ -58,13 +58,17 @@ spec:
               # If DB not initialized yet, /var/lib/mysql must be empty for
               # docker-entrypoint's --initialize step. Use /tmp this boot;
               # on next restart the data dir exists and we switch to the PVC.
+              # 2GB redo log (vs MySQL 8's 100MB default) so heavy bulk imports
+              # don't get throttled by `Threads are unable to reserve space in
+              # redo log` waits.
+              MYSQL_ARGS="--local-infile=1 --innodb-redo-log-capacity=2147483648"
               if [ -d /var/lib/mysql/mysql ]; then
                 mkdir -p /var/lib/mysql/tmp
-                exec docker-entrypoint.sh mysqld --local-infile=1 --tmpdir=/var/lib/mysql/tmp
+                exec docker-entrypoint.sh mysqld $MYSQL_ARGS --tmpdir=/var/lib/mysql/tmp
               else
                 # Uninitialized data dir: clear any leftover tmp/ so --initialize succeeds.
                 rm -rf /var/lib/mysql/tmp
-                exec docker-entrypoint.sh mysqld --local-infile=1 --tmpdir=/tmp
+                exec docker-entrypoint.sh mysqld $MYSQL_ARGS --tmpdir=/tmp
               fi
           env:
             - name: MYSQL_ROOT_PASSWORD
