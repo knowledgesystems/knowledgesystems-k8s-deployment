@@ -93,22 +93,25 @@ spec:
                 mkdir /datahub && cd /datahub
                 git init -q
                 git remote add origin "$HEAD_CLONE_URL"
-                git sparse-checkout init
-                # .lfsconfig must be present for git-lfs smudge to see the S3
-                # endpoint URL; otherwise it falls back to GitHub LFS and 404s
-                # on freshly committed objects.
-                git sparse-checkout set "$study_dir" ".lfsconfig"
+                # Cone mode auto-includes root files (.lfsconfig, .gitattributes)
+                # which we need for the explicit git lfs pull below.
+                git sparse-checkout init --cone
+                git sparse-checkout set "$study_dir"
                 GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1 -q
                 if [ $? -ne 0 ]; then
                   echo "ERROR: Failed to fetch branch $PR_BRANCH"
                   IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
                   continue
                 fi
-                # Smudge filter fetches LFS objects per-file during checkout.
-                # Combined with sparse-checkout above, only this study's LFS
-                # files get downloaded from the .lfsconfig endpoint (datahub LFS
-                # is on S3 via API Gateway, no GitHub bandwidth quota anymore).
-                git checkout FETCH_HEAD -q
+                GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
+
+                # datahub's .lfsconfig sets fetchexclude=*, which silently
+                # blocks both the smudge filter on checkout AND a plain
+                # `git lfs pull`. Override with --exclude='' and scope the
+                # download to just this study with --include. LFS objects
+                # come from the S3-backed API Gateway endpoint set in
+                # .lfsconfig (no GitHub LFS bandwidth quota).
+                git lfs pull --include="${study_dir}/**" --exclude='' 2>&1 | sed 's/^/  /' || true
 
                 if [ ! -f "$study_dir/meta_study.txt" ]; then
                   echo "Skipping $study_dir (no meta_study.txt)"
