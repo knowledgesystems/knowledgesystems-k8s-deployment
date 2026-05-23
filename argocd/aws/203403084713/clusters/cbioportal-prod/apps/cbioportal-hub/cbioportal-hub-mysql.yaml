@@ -31,6 +31,12 @@ spec:
         app: cbioportal-hub-mysql
     spec:
       initContainers:
+        - name: init-mysql-tmpdir
+          image: busybox:1.36
+          command: ["sh", "-c", "mkdir -p /var/lib/mysql/tmp"]
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
         - name: init-cgds-sql
           image: cbioportal/cbioportal:6.4.4
           command: ["sh", "-c", "cp /cbioportal/db-scripts/cgds.sql /docker-entrypoint-initdb.d/01-cgds.sql"]
@@ -51,10 +57,6 @@ spec:
       containers:
         - name: mysql
           image: mysql:8.0
-          lifecycle:
-            postStart:
-              exec:
-                command: ["sh", "-c", "mkdir -p /var/lib/mysql/tmp"]
           args:
             - --local-infile=1
             - --tmpdir=/var/lib/mysql/tmp
