@@ -78,27 +78,6 @@ spec:
 
               echo "Changed studies: $CHANGED_STUDIES"
 
-              # Resolve LFS pointers by downloading actual content via GitHub media URLs
-              # (workaround for datahub repo LFS bandwidth quota limits)
-              resolve_lfs_files() {
-                local dir="$1"
-                local branch="$2"
-                find "$dir" -type f | while read -r filepath; do
-                  if head -1 "$filepath" 2>/dev/null | grep -q 'version https://git-lfs.github.com/spec/v1'; then
-                    local rel_path="${filepath#/datahub/}"
-                    local url="https://media.githubusercontent.com/media/${HEAD_REPO_FULL}/${branch}/${rel_path}"
-                    echo "  Downloading LFS file: $rel_path"
-                    local tmp="${filepath}.tmp"
-                    if curl -sfL "$url" -o "$tmp"; then
-                      mv "$tmp" "$filepath"
-                    else
-                      echo "  WARNING: Failed to download $rel_path from media URL"
-                      rm -f "$tmp"
-                    fi
-                  fi
-                done
-              }
-
               # Process studies one at a time to limit disk usage
               STUDY_COUNT=$(echo "$CHANGED_STUDIES" | wc -l)
               STUDY_INDEX=0
@@ -115,17 +94,21 @@ spec:
                 git init -q
                 git remote add origin "$HEAD_CLONE_URL"
                 git sparse-checkout init
-                git sparse-checkout set "$study_dir"
+                # .lfsconfig must be present for git-lfs smudge to see the S3
+                # endpoint URL; otherwise it falls back to GitHub LFS and 404s
+                # on freshly committed objects.
+                git sparse-checkout set "$study_dir" ".lfsconfig"
                 GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1 -q
                 if [ $? -ne 0 ]; then
                   echo "ERROR: Failed to fetch branch $PR_BRANCH"
                   IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
                   continue
                 fi
-                GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
-
-                # Resolve LFS files for this study
-                resolve_lfs_files "/datahub/$study_dir" "$PR_BRANCH"
+                # Smudge filter fetches LFS objects per-file during checkout.
+                # Combined with sparse-checkout above, only this study's LFS
+                # files get downloaded from the .lfsconfig endpoint (datahub LFS
+                # is on S3 via API Gateway, no GitHub bandwidth quota anymore).
+                git checkout FETCH_HEAD -q
 
                 if [ ! -f "$study_dir/meta_study.txt" ]; then
                   echo "Skipping $study_dir (no meta_study.txt)"
