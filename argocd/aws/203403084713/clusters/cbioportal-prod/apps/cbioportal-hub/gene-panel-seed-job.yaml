@@ -17,35 +17,36 @@ spec:
           args:
             - |
               set -e
-              apt-get update && apt-get install -y curl jq > /dev/null 2>&1
+              apt-get update && apt-get install -y git git-lfs > /dev/null 2>&1
+              git lfs install
               set +e
 
-              echo "Downloading reference gene panels from datahub..."
-              mkdir -p /panels
-              # Get filenames via API, then download via media URL (bypasses LFS pointer issue)
-              FILENAMES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/contents/reference_data/gene_panels" \
-                | jq -r '.[].name')
+              echo "Cloning reference_data/gene_panels from datahub master..."
+              mkdir /datahub && cd /datahub
+              git init -q
+              git remote add origin https://github.com/cBioPortal/datahub.git
+              # Cone mode auto-includes .lfsconfig + .gitattributes at root
+              git sparse-checkout init --cone
+              git sparse-checkout set reference_data/gene_panels
+              GIT_LFS_SKIP_SMUDGE=1 git fetch origin master --depth=1 -q
+              GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
+              # Pull all reference panels via the S3 LFS endpoint.
+              # --exclude='' overrides .lfsconfig fetchexclude=*.
+              git lfs pull --include="reference_data/gene_panels/**" --exclude=''
 
+              FILENAMES=$(ls reference_data/gene_panels)
               TOTAL=$(echo "$FILENAMES" | wc -l)
               INDEX=0
               FAILURES=0
 
               for filename in $FILENAMES; do
                 INDEX=$((INDEX + 1))
-                url="https://media.githubusercontent.com/media/cBioPortal/datahub/master/reference_data/gene_panels/${filename}"
                 echo "[$INDEX/$TOTAL] Importing $filename..."
-                curl -sfL "$url" -o "/panels/$filename"
-                if [ $? -ne 0 ]; then
-                  echo "  WARNING: Failed to download $filename"
-                  FAILURES=$((FAILURES + 1))
-                  continue
-                fi
-
                 java -Xmx512M -Dspring.profiles.active=dbcp \
                   -cp /core/core-1.0.16.jar \
                   -DPORTAL_HOME=/cbioportal \
                   org.mskcc.cbio.portal.scripts.ImportGenePanel \
-                  --data "/panels/$filename" --noprogress 2>&1
+                  --data "reference_data/gene_panels/$filename" --noprogress 2>&1
                 if [ $? -ne 0 ]; then
                   echo "  WARNING: Failed to import $filename"
                   FAILURES=$((FAILURES + 1))

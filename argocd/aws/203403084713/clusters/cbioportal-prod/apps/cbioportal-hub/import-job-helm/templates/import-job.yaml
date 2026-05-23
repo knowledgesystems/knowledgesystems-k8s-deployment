@@ -43,19 +43,31 @@ spec:
               CHANGED_PANELS=$(echo "$ALL_CHANGED_FILES" | grep '^reference_data/gene_panels/data_gene_panel_' || true)
               if [ -n "$CHANGED_PANELS" ]; then
                 echo "Importing changed reference gene panels..."
-                mkdir -p /panels
+                rm -rf /datahub
+                mkdir /datahub && cd /datahub
+                git init -q
+                git remote add origin "$HEAD_CLONE_URL"
+                git sparse-checkout init --cone
+                git sparse-checkout set reference_data/gene_panels
+                GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1 -q
+                GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
+                # Build --include flags for just the changed panels and pull them
+                # via the S3 LFS endpoint. --exclude='' overrides .lfsconfig
+                # fetchexclude=*.
+                INCLUDE_ARGS=""
                 for panel_path in $CHANGED_PANELS; do
-                  filename=$(basename "$panel_path")
-                  url="https://media.githubusercontent.com/media/${HEAD_REPO_FULL}/${PR_BRANCH}/${panel_path}"
-                  echo "  Downloading $filename..."
-                  curl -sfL "$url" -o "/panels/$filename" || continue
+                  INCLUDE_ARGS="$INCLUDE_ARGS --include=$panel_path"
+                done
+                git lfs pull $INCLUDE_ARGS --exclude='' 2>&1 | sed 's/^/  /' || true
+                for panel_path in $CHANGED_PANELS; do
+                  echo "  Importing $(basename "$panel_path")..."
                   java -Xmx512M -Dspring.profiles.active=dbcp \
                     -cp /core/core-1.0.16.jar \
                     -DPORTAL_HOME=/cbioportal \
                     org.mskcc.cbio.portal.scripts.ImportGenePanel \
-                    --data "/panels/$filename" --noprogress 2>&1 || true
+                    --data "$panel_path" --noprogress 2>&1 || true
                 done
-                rm -rf /panels
+                rm -rf /datahub
               fi
 
               PUBLIC_STUDIES=$(echo "$ALL_CHANGED_FILES" \
