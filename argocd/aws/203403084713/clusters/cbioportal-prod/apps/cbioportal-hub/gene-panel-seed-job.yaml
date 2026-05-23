@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: gene-panel-seed
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   ttlSecondsAfterFinished: 86400
   backoffLimit: 1
