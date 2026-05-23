@@ -31,12 +31,6 @@ spec:
         app: cbioportal-hub-mysql
     spec:
       initContainers:
-        - name: init-mysql-tmpdir
-          image: busybox:1.36
-          command: ["sh", "-c", "mkdir -p /var/lib/mysql/tmp"]
-          volumeMounts:
-            - name: mysql-data
-              mountPath: /var/lib/mysql
         - name: init-cgds-sql
           image: cbioportal/cbioportal:6.4.4
           command: ["sh", "-c", "cp /cbioportal/db-scripts/cgds.sql /docker-entrypoint-initdb.d/01-cgds.sql"]
@@ -57,9 +51,21 @@ spec:
       containers:
         - name: mysql
           image: mysql:8.0
-          args:
-            - --local-infile=1
-            - --tmpdir=/var/lib/mysql/tmp
+          command:
+            - bash
+            - -c
+            - |
+              # If DB not initialized yet, /var/lib/mysql must be empty for
+              # docker-entrypoint's --initialize step. Use /tmp this boot;
+              # on next restart the data dir exists and we switch to the PVC.
+              if [ -d /var/lib/mysql/mysql ]; then
+                mkdir -p /var/lib/mysql/tmp
+                exec docker-entrypoint.sh mysqld --local-infile=1 --tmpdir=/var/lib/mysql/tmp
+              else
+                # Uninitialized data dir: clear any leftover tmp/ so --initialize succeeds.
+                rm -rf /var/lib/mysql/tmp
+                exec docker-entrypoint.sh mysqld --local-infile=1 --tmpdir=/tmp
+              fi
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: root_password
