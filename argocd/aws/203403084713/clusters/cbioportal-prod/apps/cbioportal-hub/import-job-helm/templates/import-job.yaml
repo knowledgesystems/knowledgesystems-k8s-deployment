@@ -26,7 +26,15 @@ spec:
               PR_BRANCH={{ .Values.prBranch }}
               IMPORT_FAILURES=0
 
-              # Use GitHub API to detect changed files
+              # Look up head repo so we can handle PRs from forks (cross-repo).
+              # The pulls API is always against the base repo (cBioPortal/datahub),
+              # but the branch + LFS content live on the head repo.
+              PR_INFO=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/pulls/$PR_NUMBER")
+              HEAD_REPO_FULL=$(echo "$PR_INFO" | jq -r '.head.repo.full_name')
+              HEAD_CLONE_URL=$(echo "$PR_INFO" | jq -r '.head.repo.clone_url')
+              echo "PR #$PR_NUMBER head: $HEAD_REPO_FULL@$PR_BRANCH"
+
+              # Use GitHub API to detect changed files (always on base repo)
               echo "Fetching changed files for PR #$PR_NUMBER..."
               ALL_CHANGED_FILES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/pulls/$PR_NUMBER/files?per_page=300" \
                 | jq -r '.[].filename')
@@ -38,7 +46,7 @@ spec:
                 mkdir -p /panels
                 for panel_path in $CHANGED_PANELS; do
                   filename=$(basename "$panel_path")
-                  url="https://media.githubusercontent.com/media/cBioPortal/datahub/${PR_BRANCH}/${panel_path}"
+                  url="https://media.githubusercontent.com/media/${HEAD_REPO_FULL}/${PR_BRANCH}/${panel_path}"
                   echo "  Downloading $filename..."
                   curl -sfL "$url" -o "/panels/$filename" || continue
                   java -Xmx512M -Dspring.profiles.active=dbcp \
@@ -78,7 +86,7 @@ spec:
                 find "$dir" -type f | while read -r filepath; do
                   if head -1 "$filepath" 2>/dev/null | grep -q 'version https://git-lfs.github.com/spec/v1'; then
                     local rel_path="${filepath#/datahub/}"
-                    local url="https://media.githubusercontent.com/media/cBioPortal/datahub/${branch}/${rel_path}"
+                    local url="https://media.githubusercontent.com/media/${HEAD_REPO_FULL}/${branch}/${rel_path}"
                     echo "  Downloading LFS file: $rel_path"
                     local tmp="${filepath}.tmp"
                     if curl -sfL "$url" -o "$tmp"; then
@@ -105,7 +113,7 @@ spec:
                 rm -rf /datahub
                 mkdir /datahub && cd /datahub
                 git init -q
-                git remote add origin https://github.com/cBioPortal/datahub.git
+                git remote add origin "$HEAD_CLONE_URL"
                 git sparse-checkout init
                 git sparse-checkout set "$study_dir"
                 GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1 -q
