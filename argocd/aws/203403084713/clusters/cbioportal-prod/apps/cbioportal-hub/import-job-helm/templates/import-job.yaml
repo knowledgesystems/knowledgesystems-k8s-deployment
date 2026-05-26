@@ -67,6 +67,18 @@ spec:
                   "https://api.github.com$path" "$@"
               }
               CHECK_ID=""; DEPLOY_ID=""
+              update_check_progress() {
+                # Refresh the in_progress check run with current per-study results
+                # so reviewers see growth without waiting for the whole loop to end.
+                [ -z "$CHECK_ID" ] && return 0
+                local processed=$((IMPORT_SUCCESSES + IMPORT_FAILURES))
+                local title="Importing... ($processed of ${STUDY_COUNT:-?} done, $IMPORT_FAILURES failed)"
+                gh_api PATCH "/repos/cBioPortal/datahub/check-runs/$CHECK_ID" \
+                  -H "Content-Type: application/json" \
+                  -d "$(jq -n --arg t "$title" --arg s "$(cat /tmp/summary.md)" --arg log "$LOG_URL" \
+                    '{status:"in_progress", details_url:$log,
+                      output:{title:$t, summary:$s}}')" > /dev/null || true
+              }
               # ---- /GitHub auth ----
 
               # Look up head repo so we can handle PRs from forks (cross-repo).
@@ -184,6 +196,7 @@ spec:
                   echo "ERROR: Failed to fetch branch $PR_BRANCH"
                   IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
                   printf -- '- :x: `%s` — failed to fetch branch `%s`\n' "$study_id" "$PR_BRANCH" >> /tmp/summary.md
+                  update_check_progress
                   continue
                 fi
                 GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
@@ -235,6 +248,7 @@ spec:
                   printf -- '- :white_check_mark: [%s](%s/study/summary?id=%s)\n' \
                     "$study_id" "$HUB_BASE" "$study_id" >> /tmp/summary.md
                 fi
+                update_check_progress
 
                 # Clean up to free disk before next study
                 rm -rf /datahub
