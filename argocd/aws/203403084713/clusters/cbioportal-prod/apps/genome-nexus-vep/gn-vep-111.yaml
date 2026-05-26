@@ -6,7 +6,7 @@ metadata:
   labels:
     run: gn-vep-111
 spec: 
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       run: gn-vep-111
@@ -24,6 +24,8 @@ spec:
       - name: gn-vep-111
         image: genomenexus/gn-vep:111-2.0.0
         imagePullPolicy: Always
+        command: ["java"]
+        args: ["-Xmx7g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
         env:
         - name: MYSQL_HOST
           valueFrom:
@@ -64,9 +66,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-            memory: 3Gi
+            memory: 4Gi
           limits:
-            memory: 7Gi
+            memory: 8Gi
       nodeSelector:
         workload: "gn-vep"
       tolerations:

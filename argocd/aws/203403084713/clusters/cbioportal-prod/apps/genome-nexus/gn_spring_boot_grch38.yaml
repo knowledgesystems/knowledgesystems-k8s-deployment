@@ -40,8 +40,8 @@ spec:
         args: [
             # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
             # include shenandoah)
-            "-Xms100m",
-            "-Xmx10g",
+            "-Xms500m",
+            "-Xmx6g",
             "-XX:+UnlockExperimentalVMOptions",
             "-XX:+UseShenandoahGC",
             "-XX:ShenandoahUncommitDelay=1000",
@@ -101,9 +101,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-            memory: 6Gi
+            memory: 3Gi
           limits:
-            memory: 14Gi
+            memory: 7Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
