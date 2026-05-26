@@ -25,7 +25,7 @@ spec:
         image: genomenexus/gn-vep:111-2.0.0
         imagePullPolicy: Always
         command: ["java"]
-        args: ["-Xmx7g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
+        args: ["-Xmx3g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
         env:
         - name: MYSQL_HOST
           valueFrom:
@@ -66,9 +66,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-            memory: 4Gi
+            memory: 2Gi
           limits:
-            memory: 8Gi
+            memory: 4Gi
       nodeSelector:
         workload: "gn-vep"
       tolerations:
