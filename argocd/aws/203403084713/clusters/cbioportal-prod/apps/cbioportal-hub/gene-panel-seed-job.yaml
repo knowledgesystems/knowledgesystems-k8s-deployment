@@ -24,6 +24,8 @@ spec:
               echo "Cloning reference_data/gene_panels from datahub master..."
               mkdir /datahub && cd /datahub
               git init -q
+              # Pin LFS endpoint so we don't accidentally hit GitHub LFS quotas.
+              git config --local lfs.url https://nsssw8k94d.execute-api.us-east-1.amazonaws.com/
               git remote add origin https://github.com/cBioPortal/datahub.git
               # Cone mode auto-includes .lfsconfig + .gitattributes at root
               git sparse-checkout init --cone
