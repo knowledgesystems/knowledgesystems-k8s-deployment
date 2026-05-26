@@ -24,7 +24,43 @@ spec:
 
               PR_NUMBER={{ .Values.prNumber }}
               PR_BRANCH={{ .Values.prBranch }}
+              HEAD_SHA={{ .Values.headSha }}
               IMPORT_FAILURES=0
+              IMPORT_SUCCESSES=0
+              HUB_BASE=https://hub.cbioportal.org
+              : > /tmp/summary.md  # per-study result lines, sent to GitHub at end
+
+              # ---- GitHub App auth (best-effort; no-op if Secret not mounted) ----
+              gh_token() {
+                if [ ! -f /etc/gh-app/key.pem ] || [ -z "$GH_CLIENT_ID" ]; then return 1; fi
+                if [ -s /tmp/gh-token ] && [ "$(($(date +%s) - $(stat -c %Y /tmp/gh-token)))" -lt 3000 ]; then
+                  cat /tmp/gh-token; return 0
+                fi
+                local hdr='{"alg":"RS256","typ":"JWT"}'
+                local now=$(date +%s)
+                local pl="{\"iat\":$now,\"exp\":$((now+540)),\"iss\":\"$GH_CLIENT_ID\"}"
+                local h=$(printf '%s' "$hdr" | openssl base64 -A | tr -d '=' | tr '/+' '_-')
+                local p=$(printf '%s' "$pl"  | openssl base64 -A | tr -d '=' | tr '/+' '_-')
+                local sig=$(printf '%s.%s' "$h" "$p" | openssl dgst -sha256 -sign /etc/gh-app/key.pem -binary \
+                  | openssl base64 -A | tr -d '=' | tr '/+' '_-')
+                local tok=$(curl -sf -X POST -H "Authorization: Bearer $h.$p.$sig" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/app/installations/$GH_INSTALLATION_ID/access_tokens" \
+                  | jq -r '.token // empty')
+                [ -z "$tok" ] && return 1
+                printf '%s' "$tok" > /tmp/gh-token
+                printf '%s' "$tok"
+              }
+              gh_api() {
+                local method=$1 path=$2; shift 2
+                local tok=$(gh_token) || return 1
+                curl -sf -X "$method" -H "Authorization: Bearer $tok" \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  "https://api.github.com$path" "$@"
+              }
+              CHECK_ID=""; DEPLOY_ID=""
+              # ---- /GitHub auth ----
 
               # Look up head repo so we can handle PRs from forks (cross-repo).
               # The pulls API is always against the base repo (cBioPortal/datahub),
@@ -33,6 +69,29 @@ spec:
               HEAD_REPO_FULL=$(echo "$PR_INFO" | jq -r '.head.repo.full_name')
               HEAD_CLONE_URL=$(echo "$PR_INFO" | jq -r '.head.repo.clone_url')
               echo "PR #$PR_NUMBER head: $HEAD_REPO_FULL@$PR_BRANCH"
+
+              # Post in_progress Check Run + Deployment (best-effort; ignored if no Secret).
+              CHECK_ID=$(gh_api POST "/repos/cBioPortal/datahub/check-runs" \
+                -H "Content-Type: application/json" \
+                -d "$(jq -n --arg sha "$HEAD_SHA" --arg base "$HUB_BASE" \
+                  '{name:"Hub preview import", head_sha:$sha, status:"in_progress",
+                    output:{title:"Importing studies...",
+                            summary:"Job is running. See [hub.cbioportal.org](\($base))."}}')" \
+                | jq -r '.id // empty')
+              DEPLOY_ID=$(gh_api POST "/repos/cBioPortal/datahub/deployments" \
+                -H "Content-Type: application/json" \
+                -d "$(jq -n --arg sha "$HEAD_SHA" \
+                  '{ref:$sha, environment:"hub-preview", auto_merge:false,
+                    required_contexts:[], transient_environment:true,
+                    description:"Per-PR preview on hub.cbioportal.org"}')" \
+                | jq -r '.id // empty')
+              if [ -n "$DEPLOY_ID" ]; then
+                gh_api POST "/repos/cBioPortal/datahub/deployments/$DEPLOY_ID/statuses" \
+                  -H "Content-Type: application/json" \
+                  -d "$(jq -n --arg u "$HUB_BASE/" \
+                    '{state:"in_progress", environment_url:$u, log_url:$u}')" > /dev/null || true
+              fi
+              [ -n "$CHECK_ID" ] && echo "Posted GitHub check_run=$CHECK_ID deployment=$DEPLOY_ID"
 
               # Use GitHub API to detect changed files (always on base repo)
               echo "Fetching changed files for PR #$PR_NUMBER..."
@@ -96,6 +155,7 @@ spec:
 
               for study_dir in $CHANGED_STUDIES; do
                 STUDY_INDEX=$((STUDY_INDEX + 1))
+                study_id=$(basename "$study_dir")
                 echo "========================================="
                 echo "[$STUDY_INDEX/$STUDY_COUNT] Processing $study_dir..."
                 echo "========================================="
@@ -113,6 +173,7 @@ spec:
                 if [ $? -ne 0 ]; then
                   echo "ERROR: Failed to fetch branch $PR_BRANCH"
                   IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                  printf -- '- :x: `%s` — failed to fetch branch `%s`\n' "$study_id" "$PR_BRANCH" >> /tmp/summary.md
                   continue
                 fi
                 GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
@@ -151,11 +212,18 @@ spec:
                   if [ $? -ne 0 ]; then
                     echo "WARNING: Direct import also failed for $study_dir. Continuing..."
                     IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                    printf -- '- :x: `%s` — import failed (see job logs)\n' "$study_id" >> /tmp/summary.md
                   else
                     echo "Successfully imported $study_dir (via direct import, skipped validation)"
+                    IMPORT_SUCCESSES=$((IMPORT_SUCCESSES + 1))
+                    printf -- '- :warning: [%s](%s/study/summary?id=%s) — imported via direct path (validation errors)\n' \
+                      "$study_id" "$HUB_BASE" "$study_id" >> /tmp/summary.md
                   fi
                 else
                   echo "Successfully imported $study_dir"
+                  IMPORT_SUCCESSES=$((IMPORT_SUCCESSES + 1))
+                  printf -- '- :white_check_mark: [%s](%s/study/summary?id=%s)\n' \
+                    "$study_id" "$HUB_BASE" "$study_id" >> /tmp/summary.md
                 fi
 
                 # Clean up to free disk before next study
@@ -165,9 +233,59 @@ spec:
               echo "========================================="
               echo "All imports attempted. Failures: $IMPORT_FAILURES"
               echo "========================================="
+
+              # ---- Finalize GitHub Check Run + Deployment status (best-effort) ----
+              if [ "$IMPORT_FAILURES" -eq 0 ] && [ "$IMPORT_SUCCESSES" -gt 0 ]; then
+                CONCL=success
+              elif [ "$IMPORT_SUCCESSES" -gt 0 ]; then
+                CONCL=neutral  # partial: at least one study made it
+              else
+                CONCL=failure
+              fi
+              FIRST_OK=$(grep -m1 ':white_check_mark:' /tmp/summary.md 2>/dev/null \
+                | grep -oE 'https://[^)]+' || true)
+              DETAILS_URL="${FIRST_OK:-$HUB_BASE/}"
+              TOTAL=$((IMPORT_SUCCESSES + IMPORT_FAILURES))
+
+              if [ -n "$CHECK_ID" ]; then
+                gh_api PATCH "/repos/cBioPortal/datahub/check-runs/$CHECK_ID" \
+                  -H "Content-Type: application/json" \
+                  -d "$(jq -n \
+                    --arg c "$CONCL" \
+                    --arg t "Imported $IMPORT_SUCCESSES of $TOTAL studies" \
+                    --arg s "$(cat /tmp/summary.md)" \
+                    --arg u "$DETAILS_URL" \
+                    '{status:"completed", conclusion:$c, details_url:$u,
+                      output:{title:$t, summary:$s}}')" > /dev/null \
+                  && echo "Updated check_run=$CHECK_ID conclusion=$CONCL" \
+                  || echo "WARN: failed to update check_run=$CHECK_ID"
+              fi
+              if [ -n "$DEPLOY_ID" ]; then
+                DSTATE=$([ "$CONCL" = success ] && echo success || echo failure)
+                gh_api POST "/repos/cBioPortal/datahub/deployments/$DEPLOY_ID/statuses" \
+                  -H "Content-Type: application/json" \
+                  -d "$(jq -n --arg s "$DSTATE" --arg u "$DETAILS_URL" \
+                    '{state:$s, environment_url:$u, log_url:$u}')" > /dev/null \
+                  && echo "Updated deployment=$DEPLOY_ID state=$DSTATE" \
+                  || echo "WARN: failed to update deployment=$DEPLOY_ID"
+              fi
           env:
             - name: PORTAL_HOME
               value: /cbioportal
+            # GitHub App credentials (optional — Secret may not exist; the script
+            # falls back to running the import without posting status).
+            - name: GH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: hub-preview-bot
+                  key: client-id
+                  optional: true
+            - name: GH_INSTALLATION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: hub-preview-bot
+                  key: installation-id
+                  optional: true
           resources:
             requests:
               memory: 1Gi
@@ -179,10 +297,20 @@ spec:
             - name: properties
               mountPath: /cbioportal/application.properties
               subPath: application.properties
+            - name: gh-app-key
+              mountPath: /etc/gh-app
+              readOnly: true
       volumes:
         - name: properties
           configMap:
             name: cbioportal-hub-import-config
+        - name: gh-app-key
+          secret:
+            secretName: hub-preview-bot
+            optional: true
+            items:
+              - key: private-key
+                path: key.pem
       nodeSelector:
         workload: cbio-dev
       tolerations:
