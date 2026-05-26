@@ -256,6 +256,18 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
+            - name: DD_PROFILING_ENDPOINT_COLLECTION_ENABLED
+              value: "true"
+            - name: DD_PROFILING_ALLOCATION_ENABLED
+              value: "true"
+            - name: DD_PROFILING_HEAP_ENABLED
+              value: "true"
+            - name: DD_TRACE_ENABLED
+              value: "true"
+            - name: DD_APM_ENABLED
+              value: "true"
+            - name: DD_TRACE_ANALYTICS_ENABLED
+              value: "true"
           envFrom:
             - secretRef:
                 name: cbioportal-msk-blue
