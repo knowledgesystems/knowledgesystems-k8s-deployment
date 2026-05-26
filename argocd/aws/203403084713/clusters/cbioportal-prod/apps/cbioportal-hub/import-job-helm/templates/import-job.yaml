@@ -28,6 +28,10 @@ spec:
               IMPORT_FAILURES=0
               IMPORT_SUCCESSES=0
               HUB_BASE=https://hub.cbioportal.org
+              # Force git-lfs at the canonical datahub S3 endpoint so cross-repo
+              # (forked) PRs don't fall back to the fork's GitHub LFS (which has
+              # per-account quotas that the upstream S3 endpoint doesn't).
+              DATAHUB_LFS_URL=https://nsssw8k94d.execute-api.us-east-1.amazonaws.com/
               : > /tmp/summary.md  # per-study result lines, sent to GitHub at end
 
               # ---- GitHub App auth (best-effort; no-op if Secret not mounted) ----
@@ -105,6 +109,7 @@ spec:
                 rm -rf /datahub
                 mkdir /datahub && cd /datahub
                 git init -q
+                git config --local lfs.url "$DATAHUB_LFS_URL"
                 git remote add origin "$HEAD_CLONE_URL"
                 git sparse-checkout init --cone
                 git sparse-checkout set reference_data/gene_panels
@@ -164,6 +169,7 @@ spec:
                 rm -rf /datahub
                 mkdir /datahub && cd /datahub
                 git init -q
+                git config --local lfs.url "$DATAHUB_LFS_URL"
                 git remote add origin "$HEAD_CLONE_URL"
                 # Cone mode auto-includes root files (.lfsconfig, .gitattributes)
                 # which we need for the explicit git lfs pull below.
