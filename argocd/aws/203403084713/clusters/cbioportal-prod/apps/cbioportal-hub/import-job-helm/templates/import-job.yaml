@@ -32,6 +32,9 @@ spec:
               # (forked) PRs don't fall back to the fork's GitHub LFS (which has
               # per-account quotas that the upstream S3 endpoint doesn't).
               DATAHUB_LFS_URL=https://nsssw8k94d.execute-api.us-east-1.amazonaws.com/
+              # ArgoCD logs link for this specific Job (predictable from PR# + sha[:7]).
+              JOB_NAME="datahub-import-$PR_NUMBER-$(echo "$HEAD_SHA" | cut -c1-7)"
+              LOG_URL="https://argocd.cbioportal.org/applications/datahub-import-$PR_NUMBER?resource=&node=batch%2FJob%2Fdefault%2F${JOB_NAME}%2F0&tab=logs"
               : > /tmp/summary.md  # per-study result lines, sent to GitHub at end
 
               # ---- GitHub App auth (best-effort; no-op if Secret not mounted) ----
@@ -77,10 +80,11 @@ spec:
               # Post in_progress Check Run + Deployment (best-effort; ignored if no Secret).
               CHECK_ID=$(gh_api POST "/repos/cBioPortal/datahub/check-runs" \
                 -H "Content-Type: application/json" \
-                -d "$(jq -n --arg sha "$HEAD_SHA" --arg base "$HUB_BASE" \
+                -d "$(jq -n --arg sha "$HEAD_SHA" --arg base "$HUB_BASE" --arg log "$LOG_URL" \
                   '{name:"Hub preview import", head_sha:$sha, status:"in_progress",
+                    details_url:$log,
                     output:{title:"Importing studies...",
-                            summary:"Job is running. See [hub.cbioportal.org](\($base))."}}')" \
+                            summary:"Job is running. [View live logs in ArgoCD](\($log)) or [hub.cbioportal.org](\($base))."}}')" \
                 | jq -r '.id // empty')
               DEPLOY_ID=$(gh_api POST "/repos/cBioPortal/datahub/deployments" \
                 -H "Content-Type: application/json" \
@@ -92,8 +96,8 @@ spec:
               if [ -n "$DEPLOY_ID" ]; then
                 gh_api POST "/repos/cBioPortal/datahub/deployments/$DEPLOY_ID/statuses" \
                   -H "Content-Type: application/json" \
-                  -d "$(jq -n --arg u "$HUB_BASE/" \
-                    '{state:"in_progress", environment_url:$u, log_url:$u}')" > /dev/null || true
+                  -d "$(jq -n --arg env "$HUB_BASE/" --arg log "$LOG_URL" \
+                    '{state:"in_progress", environment_url:$env, log_url:$log}')" > /dev/null || true
               fi
               [ -n "$CHECK_ID" ] && echo "Posted GitHub check_run=$CHECK_ID deployment=$DEPLOY_ID"
 
@@ -250,8 +254,16 @@ spec:
               fi
               FIRST_OK=$(grep -m1 ':white_check_mark:' /tmp/summary.md 2>/dev/null \
                 | grep -oE 'https://[^)]+' || true)
-              DETAILS_URL="${FIRST_OK:-$HUB_BASE/}"
+              # On success, send reviewer to the imported study. On failure, send
+              # them to the ArgoCD logs so they can see what went wrong.
+              if [ "$CONCL" = success ] && [ -n "$FIRST_OK" ]; then
+                DETAILS_URL="$FIRST_OK"
+              else
+                DETAILS_URL="$LOG_URL"
+              fi
               TOTAL=$((IMPORT_SUCCESSES + IMPORT_FAILURES))
+              # Append log footer to the markdown summary
+              printf '\n[View import logs in ArgoCD](%s)\n' "$LOG_URL" >> /tmp/summary.md
 
               if [ -n "$CHECK_ID" ]; then
                 gh_api PATCH "/repos/cBioPortal/datahub/check-runs/$CHECK_ID" \
@@ -270,8 +282,8 @@ spec:
                 DSTATE=$([ "$CONCL" = success ] && echo success || echo failure)
                 gh_api POST "/repos/cBioPortal/datahub/deployments/$DEPLOY_ID/statuses" \
                   -H "Content-Type: application/json" \
-                  -d "$(jq -n --arg s "$DSTATE" --arg u "$DETAILS_URL" \
-                    '{state:$s, environment_url:$u, log_url:$u}')" > /dev/null \
+                  -d "$(jq -n --arg s "$DSTATE" --arg env "${FIRST_OK:-$HUB_BASE/}" --arg log "$LOG_URL" \
+                    '{state:$s, environment_url:$env, log_url:$log}')" > /dev/null \
                   && echo "Updated deployment=$DEPLOY_ID state=$DSTATE" \
                   || echo "WARN: failed to update deployment=$DEPLOY_ID"
               fi
