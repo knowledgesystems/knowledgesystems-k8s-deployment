@@ -75,7 +75,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://deploy-preview-5573.preview.cbioportal.org/
+            - --frontend.url=https://frontend.cbioportal.org/
             - --enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -233,7 +233,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-staging
-          image: cbioportal/cbioportal-dev:12fd37c53d30afc834cd58b6386a5f270a921118-web-shenandoah
+          image: cbioportal/cbioportal@sha256:34322a618c91214023f65ace07a41ad533a7e8c2daee466e53a6cf170aae0651
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
