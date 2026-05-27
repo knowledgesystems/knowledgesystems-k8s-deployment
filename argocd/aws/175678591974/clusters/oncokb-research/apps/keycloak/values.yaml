@@ -15,6 +15,11 @@ proxy:
   # Traefik uses X-Forwarded-* headers instead of the standard Forwarded header, so we need to set the mode to xforwarded
   mode: xforwarded
 
+http:
+  # For backwards compatibility reasons Helm chart sets this to the value used by previous Keycloak versions.
+  # We are fine without this path
+  relativePath: "/"
+
 database:
   vendor: mysql
 
