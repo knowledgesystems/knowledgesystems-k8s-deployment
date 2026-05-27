@@ -68,7 +68,7 @@ spec:
           requests:
             memory: 2Gi
           limits:
-            memory: 6Gi
+            memory: 6Gi # usually uses less than 1G, but can spike to 5.5G when running a large job, so set to 6G for now
       nodeSelector:
         workload: "gn-vep"
       tolerations:

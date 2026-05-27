@@ -103,7 +103,7 @@ spec:
           requests:
             memory: 3Gi
           limits:
-            memory: 7Gi
+            memory: 7Gi  # when starting up, 1 pod use 4.5GB and another pod uses 5.7GB, then goes down to < 1GB for each pod
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
       # run on genome nexus machines
