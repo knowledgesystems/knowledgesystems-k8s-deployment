@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: mskcc/oncokb-public:6.17.0-beta.1
+          image: mskcc/oncokb-public:6.17.0-alpha-usage.0
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -69,6 +69,8 @@ spec:
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
+            - name: APPLICATION_USAGE_LIQUIBASE_SCHEMA
+              value: "oncokb_metrics_beta"
             - name: LOGGING_LEVEL_ROOT
               value: "INFO"
             - name: LOGGING_PATTERN_CONSOLE
