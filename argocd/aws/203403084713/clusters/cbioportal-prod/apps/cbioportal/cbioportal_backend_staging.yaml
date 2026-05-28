@@ -23,7 +23,7 @@ spec:
   template:
     metadata:
       annotations:
-        admission.datadoghq.com/java-lib.version: v1.24.2
+        admission.datadoghq.com/java-lib.version: v1.59.0
       creationTimestamp: null
       labels:
         admission.datadoghq.com/enabled: "true"
@@ -230,6 +230,24 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
+            - name: DD_PROFILING_ENDPOINT_COLLECTION_ENABLED
+              value: "true"
+            - name: DD_PROFILING_ALLOCATION_ENABLED
+              value: "true"
+            - name: DD_PROFILING_HEAP_ENABLED
+              value: "true"
+            - name: DD_TRACE_ENABLED
+              value: "true"
+            - name: DD_APM_ENABLED
+              value: "true"
+            - name: DD_TRACE_ANALYTICS_ENABLED
+              value: "true"
+            - name: DD_ENV
+              value: "eks-public-staging"
+            - name: DD_SERVICE
+              value: "cbioportal"
+            - name: DD_VERSION
+              value: "7.0.0"
           envFrom:
             - secretRef:
                 name: cbioportal-staging

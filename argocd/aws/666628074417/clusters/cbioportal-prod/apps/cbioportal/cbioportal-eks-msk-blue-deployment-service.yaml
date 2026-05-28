@@ -24,7 +24,7 @@ spec:
   template:
     metadata:
       annotations:
-        admission.datadoghq.com/java-lib.version: v1.24.2
+        admission.datadoghq.com/java-lib.version: v1.59.0
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-blue
