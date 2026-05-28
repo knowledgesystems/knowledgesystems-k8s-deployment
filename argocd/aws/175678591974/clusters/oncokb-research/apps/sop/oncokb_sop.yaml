@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - env:
-          image: mskcc/oncokb-sop:6.2.0
+          image: mskcc/oncokb-sop:6.3.0
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
