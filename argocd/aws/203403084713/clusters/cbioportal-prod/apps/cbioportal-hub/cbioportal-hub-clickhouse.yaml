@@ -1,0 +1,167 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cbioportal-hub-clickhouse-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: gp2
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbioportal-hub-clickhouse-init-scripts
+  namespace: default
+data:
+  # Verbatim from cBioPortal/cbioportal-docker-compose/data/, runs from
+  # /docker-entrypoint-initdb.d in lexical order on a fresh ClickHouse data dir.
+  001_load_schema.sh: |
+    #!/bin/bash
+    set -eo pipefail
+    echo "Loading schema..."
+    clickhouse-client \
+        --user "${CLICKHOUSE_USER}" \
+        --password "${CLICKHOUSE_PASSWORD}" \
+        --database "${CLICKHOUSE_DB}" \
+        --multiquery \
+        < /data/schema.sql
+    echo "Successfully loaded schema."
+  002_load_seed.sh: |
+    #!/bin/bash
+    set -eo pipefail
+    echo "Loading seed data..."
+    gunzip -c /data/seed.sql.gz | clickhouse-client \
+      --user "${CLICKHOUSE_USER}" \
+      --password "${CLICKHOUSE_PASSWORD}" \
+      --database "${CLICKHOUSE_DB}" \
+      --multiquery
+    echo "Successfully loaded seed data."
+  003_load_derived_tables.sh: |
+    #!/bin/bash
+    set -eo pipefail
+    echo "Creating derived tables..."
+    clickhouse-client \
+        --user "${CLICKHOUSE_USER}" \
+        --password "${CLICKHOUSE_PASSWORD}" \
+        --database "${CLICKHOUSE_DB}" \
+        --multiquery \
+        --param_optimize_backoff_secs="${CLICKHOUSE_OPTIMIZE_BACKOFF_SECS:-0}" \
+        < /data/clickhouse.sql
+    echo "Successfully created derived tables."
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-hub-clickhouse
+  namespace: default
+  labels:
+    app: cbioportal-hub-clickhouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cbioportal-hub-clickhouse
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cbioportal-hub-clickhouse
+    spec:
+      initContainers:
+        # Extract the v7 schema/seed/derived-tables SQL out of the cbioportal
+        # image into a shared emptyDir. Mirrors cBioPortal/cbioportal-docker-compose's
+        # data/init.sh, which uses `docker create` + `docker cp` for the same files.
+        - name: init-extract-sql
+          image: cbioportal/cbioportal:v7.0.0
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              cp /cbioportal/db-scripts/clickhouse/init/schema.sql /data/schema.sql
+              cp /cbioportal/db-scripts/clickhouse/init/seed-cbioportal_hg19_hg38_v2.14.5.sql.gz /data/seed.sql.gz
+              cp /cbioportal/db-scripts/clickhouse/clickhouse.sql /data/clickhouse.sql
+              ls -la /data/
+          volumeMounts:
+            - name: initsql
+              mountPath: /data
+      containers:
+        - name: clickhouse
+          image: clickhouse/clickhouse-server:24.8
+          env:
+            - name: CLICKHOUSE_USER
+              value: cbio_user
+            - name: CLICKHOUSE_PASSWORD
+              value: somepassword
+            - name: CLICKHOUSE_DB
+              value: cbioportal
+            - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
+              value: "1"
+          ports:
+            - containerPort: 8123
+              name: http
+            - containerPort: 9000
+              name: native
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 500m
+            limits:
+              memory: 8Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clickhouse
+            - name: initsql
+              mountPath: /data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 300
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cbioportal-hub-clickhouse-pvc
+        - name: initsql
+          emptyDir: {}
+        - name: init-scripts
+          configMap:
+            name: cbioportal-hub-clickhouse-init-scripts
+            defaultMode: 0755
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-hub-clickhouse
+  namespace: default
+  labels:
+    app: cbioportal-hub-clickhouse
+spec:
+  ports:
+    - port: 8123
+      name: http
+      targetPort: 8123
+    - port: 9000
+      name: native
+      targetPort: 9000
+  selector:
+    app: cbioportal-hub-clickhouse
+  type: ClusterIP
