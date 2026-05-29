@@ -13,6 +13,7 @@ spec:
       containers:
         - name: importer
           image: cbioportal/cbioportal:demo-bulk-load-fix
+          imagePullPolicy: Always
           command: ["/bin/bash", "-c"]
           args:
             - |

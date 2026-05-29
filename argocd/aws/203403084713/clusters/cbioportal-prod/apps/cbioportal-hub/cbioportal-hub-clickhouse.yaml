@@ -78,6 +78,7 @@ spec:
         # data/init.sh, which uses `docker create` + `docker cp` for the same files.
         - name: init-extract-sql
           image: cbioportal/cbioportal:demo-bulk-load-fix
+          imagePullPolicy: Always
           command: ["sh", "-c"]
           args:
             - |
