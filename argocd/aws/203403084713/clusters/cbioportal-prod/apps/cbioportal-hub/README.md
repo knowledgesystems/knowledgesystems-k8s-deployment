@@ -17,19 +17,19 @@ Per-PR preview cBioPortal instance at https://hub.cbioportal.org. Imports studie
 
 By default, when a `cBioPortal/datahub` PR is labeled `preview`, the import Job imports **every study touched by the PR**. Two PR-author-controlled knobs:
 
-### `hub-import-only:` (restrict to a subset)
+### `import-only:` (restrict to a subset)
 
 For large multi-study PRs (e.g. all 32 TCGA Pancan studies), reviewers typically only want to spot-check a couple. Add to the PR body:
 
 ```markdown
 ## Preview Configuration
 
-hub-import-only:
+import-only:
 - public/acc_tcga_pan_can_atlas_2018
 - public/brca_tcga_pan_can_atlas_2018
 ```
 
-The parser keys on the literal line `hub-import-only:`; the section header is human-readable only. The list is intersected with the PR's actually-changed studies, so you can't accidentally import paths the PR didn't touch. Paths must match the on-disk form (e.g. `public/<study>` or `crdc/gdc/<study>`).
+The parser keys on the literal line `import-only:`; the section header is human-readable only. The list is intersected with the PR's actually-changed studies, so you can't accidentally import paths the PR didn't touch. Paths must match the on-disk form (e.g. `public/<study>` or `crdc/gdc/<study>`).
 
 ### Validation is skipped on purpose
 
