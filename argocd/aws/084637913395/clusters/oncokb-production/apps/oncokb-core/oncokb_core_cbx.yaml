@@ -39,7 +39,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - secretRef:
                 name: oncokb-redis-cluster
-          image: mskcc/oncokb:6.2.0
+          image: mskcc/oncokb:6.6.3
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
@@ -48,7 +48,7 @@ spec:
             [
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v7_1?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v7_2?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
