@@ -172,8 +172,42 @@ spec:
               CHANGED_STUDIES=$(printf '%s\n%s' "$PUBLIC_STUDIES" "$GDC_STUDIES" \
                 | sed '/^$/d' | sort -u)
 
+              # Optional PR-body marker to restrict imports to a subset of the
+              # changed studies. Useful for big PRs (e.g. cBioPortal/datahub#2326
+              # touches 32 TCGA Pancan studies; a reviewer typically only wants
+              # to spot-check one or two). Recommended PR description format:
+              #
+              #   ## Preview Configuration
+              #
+              #   hub-import-only:
+              #   - public/acc_tcga_pan_can_atlas_2018
+              #   - public/brca_tcga_pan_can_atlas_2018
+              #
+              # The parser keys on the `hub-import-only:` line; the section
+              # header is purely for human readability.
+              #
+              # If the marker is present, intersect with CHANGED_STUDIES so we
+              # can't accidentally import paths the PR didn't actually change.
+              PR_BODY=$(echo "$PR_INFO" | jq -r '.body // ""')
+              HUB_ONLY=$(printf '%s\n' "$PR_BODY" | tr -d '\r' | awk '
+                /^hub-import-only:/ {found=1; next}
+                found {
+                  if ($0 ~ /^-[[:space:]]/) {
+                    sub(/^-[[:space:]]+/,"")
+                    sub(/[[:space:]]+$/,"")
+                    if (length($0) > 0) print
+                  } else { exit }
+                }')
+              if [ -n "$HUB_ONLY" ]; then
+                echo "PR body restricts hub imports to:"
+                echo "$HUB_ONLY" | sed 's/^/  /'
+                CHANGED_STUDIES=$(comm -12 \
+                  <(echo "$CHANGED_STUDIES" | sort -u) \
+                  <(echo "$HUB_ONLY" | sort -u))
+              fi
+
               if [ -z "$CHANGED_STUDIES" ]; then
-                echo "No changed studies detected."
+                echo "No changed studies detected (or hub-import-only filter eliminated all of them)."
                 exit 0
               fi
 
@@ -235,22 +269,14 @@ spec:
                   fi
                 done
 
-                # Try validated import first, fall back to direct import on validation errors
-                metaImport.py -u http://cbioportal-hub:80 \
-                  -s /datahub/$study_dir -o 2>&1
+                # Direct import — skips metaImport.py's online validation. datahub's
+                # own CI runs the canonical validators per PR, so re-validating
+                # here is duplicative and roughly doubles per-study wall time.
+                cbioportalImporter.py import-study -s /datahub/$study_dir 2>&1
                 if [ $? -ne 0 ]; then
-                  echo "Validation errors found. Attempting direct import (skipping validation)..."
-                  cbioportalImporter.py import-study -s /datahub/$study_dir 2>&1
-                  if [ $? -ne 0 ]; then
-                    echo "WARNING: Direct import also failed for $study_dir. Continuing..."
-                    IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
-                    printf -- '- :x: `%s` — import failed (see job logs)\n' "$study_id" >> /tmp/summary.md
-                  else
-                    echo "Successfully imported $study_dir (via direct import, skipped validation)"
-                    IMPORT_SUCCESSES=$((IMPORT_SUCCESSES + 1))
-                    printf -- '- :warning: [%s](%s/study/summary?id=%s) — imported via direct path (validation errors)\n' \
-                      "$study_id" "$HUB_BASE" "$study_id" >> /tmp/summary.md
-                  fi
+                  echo "WARNING: Import failed for $study_dir. Continuing..."
+                  IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                  printf -- '- :x: `%s` — import failed (see job logs)\n' "$study_id" >> /tmp/summary.md
                 else
                   echo "Successfully imported $study_dir"
                   IMPORT_SUCCESSES=$((IMPORT_SUCCESSES + 1))
