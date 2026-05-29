@@ -21,6 +21,7 @@ spec:
         # Same source file as the ClickHouse pod's init-extract-sql.
         - name: init-clickhouse-sql
           image: cbioportal/cbioportal:demo-bulk-load-fix
+          imagePullPolicy: Always
           command: ["sh", "-c", "cp /cbioportal/db-scripts/clickhouse/clickhouse.sql /shared/clickhouse.sql"]
           volumeMounts:
             - name: clickhouse-sql
@@ -28,6 +29,7 @@ spec:
       containers:
         - name: cbioportal-hub
           image: cbioportal/cbioportal:demo-bulk-load-fix
+          imagePullPolicy: Always
           workingDir: /cbioportal-webapp
           command: ["java"]
           args:
