@@ -49,8 +49,8 @@ spec:
               for filename in $FILENAMES; do
                 INDEX=$((INDEX + 1))
                 echo "[$INDEX/$TOTAL] Importing $filename..."
-                java -Xmx512M -Dspring.profiles.active=dbcp \
-                  -cp /core/core-1.0.16.jar \
+                java -Xmx512M -Dspring.profiles.active=clickhouse \
+                  -cp /core/core-IMPORTER.jar \
                   -DPORTAL_HOME=/cbioportal \
                   org.mskcc.cbio.portal.scripts.ImportGenePanel \
                   --data "reference_data/gene_panels/$filename" --noprogress 2>&1
