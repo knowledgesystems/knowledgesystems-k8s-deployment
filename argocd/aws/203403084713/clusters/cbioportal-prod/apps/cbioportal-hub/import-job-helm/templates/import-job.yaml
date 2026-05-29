@@ -12,7 +12,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: importer
-          image: cbioportal/cbioportal:6.4.4
+          image: cbioportal/cbioportal:v7.0.0
           command: ["/bin/bash", "-c"]
           args:
             - |
@@ -20,6 +20,15 @@ spec:
               set -e
               apt-get update && apt-get install -y git git-lfs curl jq > /dev/null 2>&1
               git lfs install
+              # v7 importer reads application.properties from inside core-IMPORTER.jar;
+              # mirror cbioportal-docker-compose's entrypoint.sh and re-pack it so the
+              # importer uses our runtime config (mounted at /cbioportal/application.properties).
+              cd /tmp && cp /cbioportal/application.properties . && jar uf /core/core-IMPORTER.jar application.properties
+              cd /
+              # metaImport refreshes derived ClickHouse tables after each study; it expects
+              # the script at $PORTAL_HOME/clickhouse.sql. The image already ships it under
+              # db-scripts/, just copy to where metaImport looks.
+              cp /cbioportal/db-scripts/clickhouse/clickhouse.sql /cbioportal/clickhouse.sql
               set +e
 
               PR_NUMBER={{ .Values.prNumber }}

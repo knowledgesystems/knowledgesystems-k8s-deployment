@@ -6,12 +6,20 @@ Per-PR preview cBioPortal instance at https://hub.cbioportal.org. Imports studie
 
 | Resource | Purpose |
 |---|---|
-| `Deployment cbioportal-hub` | Java cBioPortal serving the UI/API |
-| `Deployment cbioportal-hub-mysql` | MySQL 8 + PVC, init-seeded from `datahub/seedDB/` |
-| `Service cbioportal-hub` / `Service cbioportal-hub-mysql` | ClusterIP wiring |
+| `Deployment cbioportal-hub` | Java cBioPortal **v7** serving the UI/API |
+| `Deployment cbioportal-hub-clickhouse` | ClickHouse 24.8 + 50Gi PVC, init-seeded from `db-scripts/clickhouse/` bundled in the v7 cbioportal image |
+| `Service cbioportal-hub` / `Service cbioportal-hub-clickhouse` | ClusterIP wiring (hub on 80, ClickHouse on 8123/9000) |
 | `Ingress cbioportal-hub-ingress` | Traefik + cert-manager TLS for hub.cbioportal.org |
 | `Job gene-panel-seed` | One-shot, imports reference gene panels into a fresh DB |
 | `ApplicationSet datahub-pr-import-set` (`apps/argocd/`) | Generates one `datahub-import-<PR#>` Application per `preview`-labeled PR; each renders the helm chart at `import-job-helm/` into a Job |
+
+## v7 + ClickHouse architecture notes
+
+- cBioPortal v7 dropped MySQL — see [v6→v7 migration guide](https://docs.cbioportal.org/migration-v6-to-v7/). Hub mirrors the official [`cbioportal-docker-compose`](https://github.com/cBioPortal/cbioportal-docker-compose) v7 setup translated to k8s.
+- The ClickHouse Deployment's initContainer extracts `schema.sql`, `seed-cbioportal_hg19_hg38_v2.14.5.sql.gz`, and `clickhouse.sql` from the **cbioportal v7 image** at `/cbioportal/db-scripts/clickhouse/...` into a shared emptyDir. ClickHouse's `docker-entrypoint-initdb.d` then runs the `load_*.sh` scripts (in `cbioportal-hub-clickhouse-init-scripts` ConfigMap) in lexical order: schema → seed → derived tables.
+- Importer pods (per-PR `import-job-helm/templates/import-job.yaml` and `gene-panel-seed-job.yaml`) re-pack the runtime `application.properties` into `core-IMPORTER.jar` at start — mirrors `cbioportal-docker-compose/entrypoint.sh`. Skipping that step means the importer uses the JAR's bundled (wrong) DB connection.
+- The same script also copies `/cbioportal/db-scripts/clickhouse/clickhouse.sql` to `/cbioportal/clickhouse.sql` so `metaImport.py` can refresh derived tables after each study.
+- Connection: `jdbc:ch://cbioportal-hub-clickhouse:8123/cbioportal`, user `cbio_user`. Creds are inline plaintext in the manifests (preview-only).
 
 ## GitHub status integration (`hub-preview-bot`)
 

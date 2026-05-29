@@ -12,13 +12,18 @@ spec:
       restartPolicy: Never
       containers:
         - name: importer
-          image: cbioportal/cbioportal:6.4.4
+          image: cbioportal/cbioportal:v7.0.0
           command: ["/bin/bash", "-c"]
           args:
             - |
               set -e
               apt-get update && apt-get install -y git git-lfs > /dev/null 2>&1
               git lfs install
+              # v7: re-pack application.properties into core-IMPORTER.jar (per docker-compose entrypoint.sh)
+              cd /tmp && cp /cbioportal/application.properties . && jar uf /core/core-IMPORTER.jar application.properties
+              cd /
+              # metaImport / ImportGenePanel may refresh derived tables; expose clickhouse.sql at PORTAL_HOME.
+              cp /cbioportal/db-scripts/clickhouse/clickhouse.sql /cbioportal/clickhouse.sql || true
               set +e
 
               echo "Cloning reference_data/gene_panels from datahub master..."
