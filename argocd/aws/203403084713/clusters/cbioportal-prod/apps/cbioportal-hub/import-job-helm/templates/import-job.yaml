@@ -12,7 +12,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: importer
-          image: cbioportal/cbioportal:v7.0.0
+          image: cbioportal/cbioportal:demo-bulk-load-fix
           command: ["/bin/bash", "-c"]
           args:
             - |

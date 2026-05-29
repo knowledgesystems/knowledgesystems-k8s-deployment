@@ -77,7 +77,7 @@ spec:
         # image into a shared emptyDir. Mirrors cBioPortal/cbioportal-docker-compose's
         # data/init.sh, which uses `docker create` + `docker cp` for the same files.
         - name: init-extract-sql
-          image: cbioportal/cbioportal:v7.0.0
+          image: cbioportal/cbioportal:demo-bulk-load-fix
           command: ["sh", "-c"]
           args:
             - |
