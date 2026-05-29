@@ -13,6 +13,28 @@ Per-PR preview cBioPortal instance at https://hub.cbioportal.org. Imports studie
 | `Job gene-panel-seed` | One-shot, imports reference gene panels into a fresh DB |
 | `ApplicationSet datahub-pr-import-set` (`apps/argocd/`) | Generates one `datahub-import-<PR#>` Application per `preview`-labeled PR; each renders the helm chart at `import-job-helm/` into a Job |
 
+## Per-PR import behavior
+
+By default, when a `cBioPortal/datahub` PR is labeled `preview`, the import Job imports **every study touched by the PR**. Two PR-author-controlled knobs:
+
+### `hub-import-only:` (restrict to a subset)
+
+For large multi-study PRs (e.g. all 32 TCGA Pancan studies), reviewers typically only want to spot-check a couple. Add to the PR body:
+
+```markdown
+## Preview Configuration
+
+hub-import-only:
+- public/acc_tcga_pan_can_atlas_2018
+- public/brca_tcga_pan_can_atlas_2018
+```
+
+The parser keys on the literal line `hub-import-only:`; the section header is human-readable only. The list is intersected with the PR's actually-changed studies, so you can't accidentally import paths the PR didn't touch. Paths must match the on-disk form (e.g. `public/<study>` or `crdc/gdc/<study>`).
+
+### Validation is skipped on purpose
+
+The Job calls `cbioportalImporter.py import-study` directly — it does **not** run `metaImport.py -o` (online validation). datahub's own per-PR CI runs the canonical validators; doing it again in hub doubles wall-time without adding signal. If a study fails to import (data quality issue), the Check Run summary marks it ✗ and the PR-author can address it.
+
 ## v7 + ClickHouse architecture notes
 
 - cBioPortal v7 dropped MySQL — see [v6→v7 migration guide](https://docs.cbioportal.org/migration-v6-to-v7/). Hub mirrors the official [`cbioportal-docker-compose`](https://github.com/cBioPortal/cbioportal-docker-compose) v7 setup translated to k8s.
