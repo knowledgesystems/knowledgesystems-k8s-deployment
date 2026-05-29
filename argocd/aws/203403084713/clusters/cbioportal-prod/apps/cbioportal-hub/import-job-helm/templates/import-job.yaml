@@ -179,18 +179,18 @@ spec:
               #
               #   ## Preview Configuration
               #
-              #   hub-import-only:
+              #   import-only:
               #   - public/acc_tcga_pan_can_atlas_2018
               #   - public/brca_tcga_pan_can_atlas_2018
               #
-              # The parser keys on the `hub-import-only:` line; the section
+              # The parser keys on the `import-only:` line; the section
               # header is purely for human readability.
               #
               # If the marker is present, intersect with CHANGED_STUDIES so we
               # can't accidentally import paths the PR didn't actually change.
               PR_BODY=$(echo "$PR_INFO" | jq -r '.body // ""')
               HUB_ONLY=$(printf '%s\n' "$PR_BODY" | tr -d '\r' | awk '
-                /^hub-import-only:/ {found=1; next}
+                /^import-only:/ {found=1; next}
                 found {
                   if ($0 ~ /^-[[:space:]]/) {
                     sub(/^-[[:space:]]+/,"")
@@ -207,7 +207,7 @@ spec:
               fi
 
               if [ -z "$CHANGED_STUDIES" ]; then
-                echo "No changed studies detected (or hub-import-only filter eliminated all of them)."
+                echo "No changed studies detected (or import-only filter eliminated all of them)."
                 exit 0
               fi
 
