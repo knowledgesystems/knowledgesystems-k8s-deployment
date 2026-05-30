@@ -12,7 +12,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: importer
-          image: cbioportal/cbioportal:demo-bulk-load-fix
+          image: cbioportal/cbioportal-core:demo-bulk-load-fix
           imagePullPolicy: Always
           command: ["/bin/bash", "-c"]
           args:
@@ -20,11 +20,13 @@ spec:
               set -e
               apt-get update && apt-get install -y git git-lfs > /dev/null 2>&1
               git lfs install
-              # v7: re-pack application.properties into core-IMPORTER.jar (per docker-compose entrypoint.sh)
-              cd /tmp && cp /cbioportal/application.properties . && jar uf /core/core-IMPORTER.jar application.properties
+              # cbioportal-core image: scripts at /scripts/importer, JAR at /core-*.jar,
+              # application.properties at /, PORTAL_HOME=/.
+              CORE_JAR=$(ls /core-*.jar | head -1)
+              cd /tmp && cp /application.properties . && jar uf "$CORE_JAR" application.properties
               cd /
-              # metaImport / ImportGenePanel may refresh derived tables; expose clickhouse.sql at PORTAL_HOME.
-              cp /cbioportal/db-scripts/clickhouse/clickhouse.sql /cbioportal/clickhouse.sql || true
+              # Fetch clickhouse.sql from cbioportal repo (not in cbioportal-core image).
+              curl -sfL https://raw.githubusercontent.com/cBioPortal/cbioportal/master/src/main/resources/db-scripts/clickhouse/clickhouse.sql -o /clickhouse.sql || true
               set +e
 
               echo "Cloning reference_data/gene_panels from datahub master..."
@@ -51,8 +53,8 @@ spec:
                 INDEX=$((INDEX + 1))
                 echo "[$INDEX/$TOTAL] Importing $filename..."
                 java -Xmx512M -Dspring.profiles.active=clickhouse \
-                  -cp /core/core-IMPORTER.jar \
-                  -DPORTAL_HOME=/cbioportal \
+                  -cp /core-*.jar \
+                  -DPORTAL_HOME=/ \
                   org.mskcc.cbio.portal.scripts.ImportGenePanel \
                   --data "reference_data/gene_panels/$filename" --noprogress 2>&1
                 if [ $? -ne 0 ]; then
@@ -74,7 +76,7 @@ spec:
               memory: 1Gi
           volumeMounts:
             - name: properties
-              mountPath: /cbioportal/application.properties
+              mountPath: /application.properties
               subPath: application.properties
       volumes:
         - name: properties

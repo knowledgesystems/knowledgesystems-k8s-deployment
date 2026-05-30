@@ -12,7 +12,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: importer
-          image: cbioportal/cbioportal:demo-bulk-load-fix
+          image: cbioportal/cbioportal-core:demo-bulk-load-fix
           imagePullPolicy: Always
           command: ["/bin/bash", "-c"]
           args:
@@ -21,15 +21,19 @@ spec:
               set -e
               apt-get update && apt-get install -y git git-lfs curl jq > /dev/null 2>&1
               git lfs install
-              # v7 importer reads application.properties from inside core-IMPORTER.jar;
-              # mirror cbioportal-docker-compose's entrypoint.sh and re-pack it so the
-              # importer uses our runtime config (mounted at /cbioportal/application.properties).
-              cd /tmp && cp /cbioportal/application.properties . && jar uf /core/core-IMPORTER.jar application.properties
+              # cbioportal-core image layout: importer scripts at /scripts/importer/,
+              # core JAR at /core-*.jar, application.properties placeholder at /,
+              # PORTAL_HOME=/ . Adapt the script accordingly.
+              export PATH=/scripts/importer:$PATH
+              CORE_JAR=$(ls /core-*.jar | head -1)
+              # Re-pack runtime application.properties into the importer JAR (same
+              # trick as cbioportal-docker-compose/entrypoint.sh).
+              cd /tmp && cp /application.properties . && jar uf "$CORE_JAR" application.properties
               cd /
-              # metaImport refreshes derived ClickHouse tables after each study; it expects
-              # the script at $PORTAL_HOME/clickhouse.sql. The image already ships it under
-              # db-scripts/, just copy to where metaImport looks.
-              cp /cbioportal/db-scripts/clickhouse/clickhouse.sql /cbioportal/clickhouse.sql
+              # metaImport refreshes derived ClickHouse tables after each study via
+              # $PORTAL_HOME/clickhouse.sql. cbioportal-core doesn't ship this file
+              # (it lives in the cbioportal repo); fetch from raw.githubusercontent.com.
+              curl -sfL https://raw.githubusercontent.com/cBioPortal/cbioportal/master/src/main/resources/db-scripts/clickhouse/clickhouse.sql -o /clickhouse.sql || true
               set +e
 
               PR_NUMBER={{ .Values.prNumber }}
@@ -152,8 +156,8 @@ spec:
                 for panel_path in $CHANGED_PANELS; do
                   echo "  Importing $(basename "$panel_path")..."
                   java -Xmx512M -Dspring.profiles.active=clickhouse \
-                    -cp /core/core-IMPORTER.jar \
-                    -DPORTAL_HOME=/cbioportal \
+                    -cp /core-*.jar \
+                    -DPORTAL_HOME=/ \
                     org.mskcc.cbio.portal.scripts.ImportGenePanel \
                     --data "$panel_path" --noprogress 2>&1 || true
                 done
@@ -263,8 +267,8 @@ spec:
                   if [ -f "$panel" ] && [[ "$panel" != *"_matrix.txt" ]]; then
                     echo "Importing gene panel: $panel"
                     java -Xmx512M -Dspring.profiles.active=clickhouse \
-                      -cp /core/core-IMPORTER.jar \
-                      -DPORTAL_HOME=/cbioportal \
+                      -cp /core-*.jar \
+                      -DPORTAL_HOME=/ \
                       org.mskcc.cbio.portal.scripts.ImportGenePanel \
                       --data "$panel" --noprogress 2>&1 || true
                   fi
@@ -363,7 +367,7 @@ spec:
               ephemeral-storage: 15Gi
           volumeMounts:
             - name: properties
-              mountPath: /cbioportal/application.properties
+              mountPath: /application.properties
               subPath: application.properties
             - name: gh-app-key
               mountPath: /etc/gh-app
