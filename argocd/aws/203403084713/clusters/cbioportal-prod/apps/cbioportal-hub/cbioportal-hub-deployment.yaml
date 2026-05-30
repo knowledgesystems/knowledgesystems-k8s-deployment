@@ -41,8 +41,6 @@ spec:
             - "--authenticate=false"
             - "--sitemaps=false"
             - "--spring.datasource.url=jdbc:ch://cbioportal-hub-clickhouse:8123/cbioportal"
-            - "--spring.datasource.username=cbio_user"
-            - "--spring.datasource.password=somepassword"
             - "--spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver"
             - "--clickhouse_mode=true"
             - "--spring.profiles.active=clickhouse"
@@ -50,6 +48,21 @@ spec:
             - "--db.suppress_schema_version_mismatch_errors=true"
             - "--server.port=8080"
             - "--skin.blurb=This is a development instance for previewing studies from <a href=\"https://github.com/cBioPortal/datahub\">cBioPortal/datahub</a> pull requests. Data here may be incomplete or incorrect. For production use, visit <a href=\"https://www.cbioportal.org\">www.cbioportal.org</a>."
+          # Spring Boot relaxed-binding maps SPRING_DATASOURCE_USERNAME →
+          # spring.datasource.username (and likewise for password), so we
+          # can keep the rest of the JDBC config in args while sourcing the
+          # credentials from the hub-clickhouse-creds Secret.
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: password
           ports:
             - containerPort: 8080
               protocol: TCP

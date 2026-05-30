@@ -95,11 +95,20 @@ spec:
           image: clickhouse/clickhouse-server:24.8
           env:
             - name: CLICKHOUSE_USER
-              value: cbio_user
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: username
             - name: CLICKHOUSE_PASSWORD
-              value: somepassword
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: password
             - name: CLICKHOUSE_DB
-              value: cbioportal
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: database
             - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
               value: "1"
           ports:

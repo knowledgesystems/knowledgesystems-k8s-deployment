@@ -19,16 +19,18 @@ spec:
             - |
               # Install dependencies (fail fast here)
               set -e
-              apt-get update && apt-get install -y git git-lfs curl jq > /dev/null 2>&1
+              apt-get update && apt-get install -y git git-lfs curl jq gettext-base > /dev/null 2>&1
               git lfs install
               # cbioportal-core image layout: importer scripts at /scripts/importer/,
               # core JAR at /core-*.jar, application.properties placeholder at /,
               # PORTAL_HOME=/ . Adapt the script accordingly.
               export PATH=/scripts/importer:$PATH
               CORE_JAR=$(ls /core-*.jar | head -1)
-              # Re-pack runtime application.properties into the importer JAR (same
-              # trick as cbioportal-docker-compose/entrypoint.sh).
-              cd /tmp && cp /application.properties . && jar uf "$CORE_JAR" application.properties
+              # Substitute ${CLICKHOUSE_USER}/${CLICKHOUSE_PASSWORD} from the
+              # hub-clickhouse-creds Secret into application.properties, then
+              # re-pack into the importer JAR (entrypoint.sh trick from
+              # cbioportal-docker-compose).
+              cd /tmp && envsubst < /application.properties > application.properties && jar uf "$CORE_JAR" application.properties
               cd /
               # metaImport refreshes derived ClickHouse tables after each study via
               # $PORTAL_HOME/clickhouse.sql. cbioportal-core doesn't ship this file
@@ -350,6 +352,32 @@ spec:
             # hm450 = ~400K rows × ~80 samples ≈ ~200MB just for values).
             - name: JAVA_OPTS
               value: "-Xmx6g"
+            # metaImport.py reads these (NOT application.properties) when
+            # invoking clickhouse-client to rebuild derived tables after each
+            # study. Without them: "Derived table construction failed:
+            # ClickHouse properties not set" → *_derived tables stay empty →
+            # study/patient views return 0 rows from the v7 API. The same
+            # CLICKHOUSE_USER/PASSWORD are also envsubst'd into
+            # application.properties for the JDBC importer steps.
+            - name: CLICKHOUSE_HOST
+              value: cbioportal-hub-clickhouse
+            - name: CLICKHOUSE_NATIVE_PORT
+              value: "9000"
+            - name: CLICKHOUSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: username
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: password
+            - name: CLICKHOUSE_DB
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: database
             # GitHub App credentials (optional — Secret may not exist; the script
             # falls back to running the import without posting status).
             - name: GH_CLIENT_ID
