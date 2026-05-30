@@ -3,13 +3,13 @@ kind: ConfigMap
 metadata:
   name: cbioportal-hub-import-config
 data:
-  # Mounted at /cbioportal/application.properties in importer pods; the v7
-  # entrypoint shim re-packs this file into core-IMPORTER.jar so the importer
-  # talks to the right DB.
+  # Mounted at /application.properties in importer pods; the Job script runs
+  # envsubst to fill in ${CLICKHOUSE_USER}/${CLICKHOUSE_PASSWORD} from the
+  # hub-clickhouse-creds Secret before re-packing the file into core-*.jar.
   application.properties: |
     spring.datasource.url=jdbc:ch://cbioportal-hub-clickhouse:8123/cbioportal
-    spring.datasource.username=cbio_user
-    spring.datasource.password=somepassword
+    spring.datasource.username=${CLICKHOUSE_USER}
+    spring.datasource.password=${CLICKHOUSE_PASSWORD}
     spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
     clickhouse_mode=true
     spring.profiles.active=clickhouse

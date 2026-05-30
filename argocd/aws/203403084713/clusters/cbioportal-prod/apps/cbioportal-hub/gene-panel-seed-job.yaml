@@ -18,12 +18,14 @@ spec:
           args:
             - |
               set -e
-              apt-get update && apt-get install -y git git-lfs > /dev/null 2>&1
+              apt-get update && apt-get install -y git git-lfs gettext-base > /dev/null 2>&1
               git lfs install
               # cbioportal-core image: scripts at /scripts/importer, JAR at /core-*.jar,
               # application.properties at /, PORTAL_HOME=/.
               CORE_JAR=$(ls /core-*.jar | head -1)
-              cd /tmp && cp /application.properties . && jar uf "$CORE_JAR" application.properties
+              # envsubst fills in ${CLICKHOUSE_USER}/${CLICKHOUSE_PASSWORD}
+              # from the hub-clickhouse-creds Secret.
+              cd /tmp && envsubst < /application.properties > application.properties && jar uf "$CORE_JAR" application.properties
               cd /
               # Fetch clickhouse.sql from cbioportal repo (not in cbioportal-core image).
               curl -sfL https://raw.githubusercontent.com/cBioPortal/cbioportal/master/src/main/resources/db-scripts/clickhouse/clickhouse.sql -o /clickhouse.sql || true
@@ -69,6 +71,18 @@ spec:
           env:
             - name: PORTAL_HOME
               value: /cbioportal
+            # Consumed by envsubst (above) to fill in application.properties
+            # before re-packing into core-IMPORTER.jar.
+            - name: CLICKHOUSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: username
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-clickhouse-creds
+                  key: password
           resources:
             requests:
               memory: 512Mi
