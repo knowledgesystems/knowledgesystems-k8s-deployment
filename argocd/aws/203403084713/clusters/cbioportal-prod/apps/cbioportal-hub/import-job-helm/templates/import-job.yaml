@@ -21,6 +21,12 @@ spec:
               set -e
               apt-get update && apt-get install -y git git-lfs curl jq gettext-base > /dev/null 2>&1
               git lfs install
+              # rebuild_derived_tables.py (invoked via `metaImport.py derive-tables`)
+              # shells out to `clickhouse client`. The cbioportal-core image
+              # doesn't ship that binary; grab the static release for this arch.
+              CH_ARCH=$(uname -m); [ "$CH_ARCH" = "x86_64" ] && CH_ARCH=amd64
+              curl -sfL "https://builds.clickhouse.com/master/$CH_ARCH/clickhouse" -o /usr/local/bin/clickhouse \
+                && chmod +x /usr/local/bin/clickhouse
               # cbioportal-core image layout: importer scripts at /scripts/importer/,
               # core JAR at /core-*.jar, application.properties placeholder at /,
               # PORTAL_HOME=/ . Adapt the script accordingly.
@@ -280,15 +286,27 @@ spec:
                 # own CI runs the canonical validators per PR, so re-validating
                 # here is duplicative and roughly doubles per-study wall time.
                 cbioportalImporter.py import-study -s /datahub/$study_dir 2>&1
-                if [ $? -ne 0 ]; then
+                import_rc=$?
+                if [ $import_rc -ne 0 ]; then
                   echo "WARNING: Import failed for $study_dir. Continuing..."
                   IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
                   printf -- '- :x: `%s` — import failed (see job logs)\n' "$study_id" >> /tmp/summary.md
                 else
-                  echo "Successfully imported $study_dir"
-                  IMPORT_SUCCESSES=$((IMPORT_SUCCESSES + 1))
-                  printf -- '- :white_check_mark: [%s](%s/study/summary?id=%s)\n' \
-                    "$study_id" "$HUB_BASE" "$study_id" >> /tmp/summary.md
+                  # Refresh ClickHouse derived tables via the upstream
+                  # rebuild_derived_tables.py (the same path metaImport.py
+                  # takes after a full import). Without this, *_derived
+                  # tables stay stale and the v7 API returns 0 rows.
+                  echo "Rebuilding ClickHouse derived tables..."
+                  if metaImport.py derive-tables --derived-table-sql /clickhouse.sql 2>&1; then
+                    echo "Successfully imported $study_dir"
+                    IMPORT_SUCCESSES=$((IMPORT_SUCCESSES + 1))
+                    printf -- '- :white_check_mark: [%s](%s/study/summary?id=%s)\n' \
+                      "$study_id" "$HUB_BASE" "$study_id" >> /tmp/summary.md
+                  else
+                    echo "WARNING: Imported $study_dir but derived-table refresh failed."
+                    IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
+                    printf -- '- :warning: `%s` — imported but derived-table refresh failed\n' "$study_id" >> /tmp/summary.md
+                  fi
                 fi
                 update_check_progress
 
