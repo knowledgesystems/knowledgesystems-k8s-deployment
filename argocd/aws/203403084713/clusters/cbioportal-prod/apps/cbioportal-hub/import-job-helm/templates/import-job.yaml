@@ -343,7 +343,13 @@ spec:
               fi
           env:
             - name: PORTAL_HOME
-              value: /cbioportal
+              value: /
+            # Picked up by cbioportalImporter.py and passed to every java
+            # invocation. 6GB heap accommodates the in-memory TSV the
+            # bulk loader builds for large matrix files (e.g. methylation
+            # hm450 = ~400K rows × ~80 samples ≈ ~200MB just for values).
+            - name: JAVA_OPTS
+              value: "-Xmx6g"
             # GitHub App credentials (optional — Secret may not exist; the script
             # falls back to running the import without posting status).
             - name: GH_CLIENT_ID
@@ -360,10 +366,10 @@ spec:
                   optional: true
           resources:
             requests:
-              memory: 1Gi
+              memory: 2Gi
               ephemeral-storage: 1Gi
             limits:
-              memory: 4Gi
+              memory: 8Gi
               ephemeral-storage: 15Gi
           volumeMounts:
             - name: properties
