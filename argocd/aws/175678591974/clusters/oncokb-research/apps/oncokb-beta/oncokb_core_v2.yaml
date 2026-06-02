@@ -40,7 +40,7 @@ spec:
               value: "true"
             - name: DD_DBM_PROPAGATION_MODE
               value: "full"
-            - name: DD_DBM_PROPAGATION_MODE
+            - name: VEP_THREADS
               value: "8"
           envFrom:
             - secretRef:
