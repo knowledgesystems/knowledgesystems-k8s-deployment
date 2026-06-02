@@ -40,6 +40,8 @@ spec:
               value: "true"
             - name: DD_DBM_PROPAGATION_MODE
               value: "full"
+            - name: DD_PROFILING_EXECUTION_TRACE_ENABLED
+              value: "true"
             - name: VEP_THREADS
               value: "8"
           envFrom:
