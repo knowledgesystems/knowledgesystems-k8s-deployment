@@ -40,6 +40,8 @@ spec:
               value: "true"
             - name: DD_DBM_PROPAGATION_MODE
               value: "full"
+            - name: DD_DBM_PROPAGATION_MODE
+              value: "8"
           envFrom:
             - secretRef:
                 name: oncokb-core-v2
