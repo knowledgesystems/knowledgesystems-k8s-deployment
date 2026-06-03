@@ -4,7 +4,7 @@ metadata:
   name: oncokb-core-v2
   labels:
     run: oncokb-core-v2
-    tags.datadoghq.com/env: eks-beta-oncokb
+    tags.datadoghq.com/env: eks-test-oncokb
     tags.datadoghq.com/service: oncokb-core-v2
     tags.datadoghq.com/version: "v0.0.1"
 spec:
@@ -20,7 +20,7 @@ spec:
     metadata:
       labels:
         run: oncokb-core-v2
-        tags.datadoghq.com/env: eks-beta-oncokb
+        tags.datadoghq.com/env: eks-test-oncokb
         tags.datadoghq.com/service: oncokb-core-v2
         tags.datadoghq.com/version: "v0.0.1"
         admission.datadoghq.com/enabled: "true"
@@ -84,10 +84,10 @@ spec:
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "beta"
+          value: "test"
           effect: "NoSchedule"
       nodeSelector:
-        workload: beta
+        workload: test
 ---
 apiVersion: v1
 kind: Service
