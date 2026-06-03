@@ -39,6 +39,10 @@ agents:
       operator: Equal
       value: ingress
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: test
+      effect: NoSchedule
 clusterAgent:
   admissionController:
     enabled: true
