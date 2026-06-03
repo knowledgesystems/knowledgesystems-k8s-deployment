@@ -14,7 +14,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 0
+      maxUnavailable: 1   # node group is fixed at 3; rollout needs to free a slot
   template:
     metadata:
       labels:
