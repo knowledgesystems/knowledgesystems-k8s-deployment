@@ -6,6 +6,7 @@ metadata:
     run: oncokb-core-v2
     tags.datadoghq.com/env: eks-beta-oncokb
     tags.datadoghq.com/service: oncokb-core-v2
+    tags.datadoghq.com/version: "v0.0.1"
 spec:
   replicas: 1
   selector:
@@ -21,6 +22,7 @@ spec:
         run: oncokb-core-v2
         tags.datadoghq.com/env: eks-beta-oncokb
         tags.datadoghq.com/service: oncokb-core-v2
+        tags.datadoghq.com/version: "v0.0.1"
         admission.datadoghq.com/enabled: "true"
     spec:
       imagePullSecrets:
@@ -34,6 +36,18 @@ spec:
               containerPort: 8080
               protocol: TCP
           env:
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
             - name: DD_PROFILING_ENABLED
               value: "true"
             - name: DD_LOGS_INJECTION
