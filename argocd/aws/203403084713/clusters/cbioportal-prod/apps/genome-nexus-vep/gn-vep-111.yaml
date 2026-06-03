@@ -25,7 +25,7 @@ spec:
         image: genomenexus/gn-vep:111-2.0.0
         imagePullPolicy: Always
         command: ["java"]
-        args: ["-Xmx5g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
+        args: ["-Xmx4g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
         env:
         - name: MYSQL_HOST
           valueFrom:
@@ -66,9 +66,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-            memory: 2Gi
+            memory: 6Gi
           limits:
-            memory: 6Gi # usually uses less than 1G, but can spike to 5.5G when running a large job, so set to 6G for now
+            memory: 6.5Gi # bursts to ~5.5G under load; -Xmx4g leaves ~2.5G for JVM non-heap
       nodeSelector:
         workload: "gn-vep"
       tolerations:
@@ -76,6 +76,13 @@ spec:
           operator: "Equal"
           value: "gn-vep"
           effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                run: gn-vep-111
+            topologyKey: kubernetes.io/hostname
 ---
 apiVersion: v1
 kind: Service
