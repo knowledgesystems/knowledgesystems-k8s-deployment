@@ -5,8 +5,8 @@ metadata:
   namespace: genome-nexus
   labels:
     run: gn-vep-111
-spec: 
-  replicas: 2
+spec:
+  replicas: 3
   selector:
     matchLabels:
       run: gn-vep-111
@@ -14,7 +14,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -58,15 +58,17 @@ spec:
           httpGet:
             path: /vep/human/hgvs/ENST00000375759.3:c.10981A>T
             port: 8080
-          initialDelaySeconds: 190
-          timeoutSeconds: 60
-          periodSeconds: 30
+          initialDelaySeconds: 240
+          timeoutSeconds: 120
+          periodSeconds: 60
+          failureThreshold: 5
         ports:
         - containerPort: 8080
           protocol: TCP
         resources:
           requests:
             memory: 6Gi
+            cpu: 1500m
           limits:
             memory: 6.5Gi # bursts to ~5.5G under load; -Xmx4g leaves ~2.5G for JVM non-heap
       nodeSelector:
