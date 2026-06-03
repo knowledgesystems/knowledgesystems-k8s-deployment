@@ -85,6 +85,11 @@ service:
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+  spec:
+    # Preserve the real client source IP by routing traffic only through nodes
+    # that host a Traefik pod, preventing kube-proxy source NAT.
+    # Required for accurate X-Forwarded-For header population.
+    externalTrafficPolicy: Local
 api:
   dashboard: true
   insecure: true
