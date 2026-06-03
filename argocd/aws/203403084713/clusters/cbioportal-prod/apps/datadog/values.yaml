@@ -115,4 +115,12 @@ datadog:
   apm:
     instrumentation:
       skipKPITelemetry: true
+  otlp:
+    receiver:
+      protocols:
+        grpc:
+          # Accept OTLP traces from pods via status.hostIP:4317 (DD_AGENT_HOST).
+          # Required for cbioportal-mcp OpenTelemetry instrumentation.
+          enabled: true
+          endpoint: "0.0.0.0:4317"
 targetSystem: linux
