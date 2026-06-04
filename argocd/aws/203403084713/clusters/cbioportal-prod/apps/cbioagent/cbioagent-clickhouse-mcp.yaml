@@ -20,6 +20,17 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
+          env:
+            # Node-local Datadog agent IP exposed via Downward API.
+            # The telemetry module uses this to build the OTLP gRPC endpoint
+            # (http://<DD_AGENT_HOST>:4318) unless OTEL_EXPORTER_OTLP_ENDPOINT
+            # is set explicitly.
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: OTEL_SERVICE_NAME
+              value: "cbioportal-mcp"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
