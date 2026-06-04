@@ -6,7 +6,7 @@ metadata:
   labels:
     run: gn-vep-111
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       run: gn-vep-111
@@ -22,7 +22,7 @@ spec:
     spec: 
       containers:
       - name: gn-vep-111
-        image: genomenexus/gn-vep:111-2.0.0
+        image: genomenexus/gn-vep:111-3.1.1-beta
         imagePullPolicy: Always
         command: ["java"]
         args: ["-Xmx4g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
@@ -47,6 +47,8 @@ spec:
             secretKeyRef:
               name: genome-nexus-vep-111-rds-user
               key: MYSQL_PASSWORD
+        - name: MODE
+          value: Database
         readinessProbe:
           httpGet:
             path: /vep/human/hgvs/ENST00000375759.3:c.10981A>T
@@ -78,13 +80,6 @@ spec:
           operator: "Equal"
           value: "gn-vep"
           effect: "NoSchedule"
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                run: gn-vep-111
-            topologyKey: kubernetes.io/hostname
 ---
 apiVersion: v1
 kind: Service
