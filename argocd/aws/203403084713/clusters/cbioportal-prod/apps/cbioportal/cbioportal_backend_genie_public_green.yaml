@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-genie-public-green
     tags.datadoghq.com/env: eks-genie-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.0
+    tags.datadoghq.com/version: 7.0.1
   name: cbioportal-backend-genie-public-green
   namespace: default
 spec:
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-genie-public-green
         tags.datadoghq.com/env: eks-genie-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.0
+        tags.datadoghq.com/version: 7.0.1
     spec:
       containers:
         - args:
@@ -78,7 +78,7 @@ spec:
             - --java.rmi.server.hostname=localhost
             #- --logging.level.org.springframework.security=TRACE
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            # - --frontend.url=https://frontend.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=false
             - --skin.footer= | <a href="https://www.aacr.org/professionals/research/aacr-project-genie">AACR Project GENIE</a>
@@ -213,7 +213,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-genie-public-green
-          image: cbioportal/cbioportal:v7.0.0-web-shenandoah
+          image: cbioportal/cbioportal:v7.0.1-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
