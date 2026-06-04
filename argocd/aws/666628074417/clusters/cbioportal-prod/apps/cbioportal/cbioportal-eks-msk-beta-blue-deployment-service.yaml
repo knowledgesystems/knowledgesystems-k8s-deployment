@@ -7,7 +7,7 @@ metadata:
     run: eks-msk-beta-blue
     tags.datadoghq.com/env: eks-msk-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.0
+    tags.datadoghq.com/version: 7.0.1
   name: eks-msk-beta-blue
 spec:
   progressDeadlineSeconds: 600
@@ -30,7 +30,7 @@ spec:
         run: eks-msk-beta-blue
         tags.datadoghq.com/env: eks-msk-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.0
+        tags.datadoghq.com/version: 7.0.1
     spec:
       containers:
         - args:
@@ -81,7 +81,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            # - --frontend.url=https://frontend.cbioportal.org/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
             - --default_cross_cancer_study_list=mskimpact
@@ -255,7 +255,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal:v7.0.0-web-shenandoah
+          image: cbioportal/cbioportal:v7.0.1-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20

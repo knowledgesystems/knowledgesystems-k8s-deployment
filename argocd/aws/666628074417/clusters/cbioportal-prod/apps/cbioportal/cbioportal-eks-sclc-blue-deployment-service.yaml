@@ -7,7 +7,7 @@ metadata:
     run: eks-sclc-blue
     tags.datadoghq.com/env: eks-sclc
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.0
+    tags.datadoghq.com/version: 7.0.1
   name: eks-sclc-blue
 spec:
   progressDeadlineSeconds: 600
@@ -30,7 +30,7 @@ spec:
         run: eks-sclc-blue
         tags.datadoghq.com/env: eks-sclc
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.0
+        tags.datadoghq.com/version: 7.0.1
     spec:
       containers:
         - args:
@@ -81,7 +81,7 @@ spec:
             # /enable remote debug
 
             #            - --frontend.url=https://frontend.cbioportal.org/
-            - --frontend.url=https://frontend.cbioportal.org/
+            # - --frontend.url=https://frontend.cbioportal.org/
             - --quick_search.enabled=true
             - --skin.footer=
             - --skin.right_nav.whats_new_blurb=
@@ -216,7 +216,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-sclc-blue
-          image: cbioportal/cbioportal:v7.0.0-web-shenandoah
+          image: cbioportal/cbioportal:v7.0.1-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
