@@ -52,8 +52,13 @@ image:
   registry: docker.io
   pullPolicy: Always
   # Beta runs ahead of prod to validate dep/lib bumps before promotion.
-  # v8 = v7 + @librechat/agents 3.1.50→3.1.68 (matches upstream v0.8.5).
-  tag: "v0.8.3-rc1-custom-v8"
+  # v9 = v8 + merge of cBioPortal/LibreChat#14 (unified UI config), with
+  # the v6/v7 "Switch Agent" landing-page button and agent-selector
+  # tooltip header dropped (no longer needed now that cBioAgent ships a
+  # single unified agent). UI behaviors that used to live in code are
+  # now expressed via librechat.yaml (`interface.showSwitchAgent`,
+  # modelSpec `limitBadge` / `conversationStarterCategories`, etc.).
+  tag: "v0.8.3-rc1-custom-v9"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
