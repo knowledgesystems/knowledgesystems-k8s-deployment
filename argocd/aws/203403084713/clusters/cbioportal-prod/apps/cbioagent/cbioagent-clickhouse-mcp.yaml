@@ -31,6 +31,10 @@ spec:
                   fieldPath: status.hostIP
             - name: OTEL_SERVICE_NAME
               value: "cbioportal-mcp"
+            - name: DD_LLMOBS_ML_APP
+              value: "cbioportal-mcp"
+            - name: DD_SITE
+              value: "datadoghq.com"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
