@@ -8,6 +8,37 @@ spec:
     prefixes:
       - /navigator
 ---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-db-prefix
+  namespace: default
+spec:
+  stripPrefix:
+    prefixes:
+      - /db
+---
+# Rate-limit the public database MCP path. Unlike /navigator (which only
+# mints URLs), /db lets clients run arbitrary SELECTs against ClickHouse —
+# cap per-IP throughput so a single client (or scraper) can't DOS the
+# backend. average=2/sec sustained, burst=20 covers a normal chat session
+# firing a handful of tool calls in quick succession.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit-db
+  namespace: default
+spec:
+  rateLimit:
+    average: 2
+    period: 1s
+    burst: 20
+    sourceCriterion:
+      ipStrategy:
+        depth: 1
+---
+# /navigator — unchanged from the original single-path setup, kept as its
+# own Ingress so its middleware annotation only applies to itself.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -30,6 +61,35 @@ spec:
             backend:
               service:
                 name: cbioportal-navigator
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - mcp.cbioportal.org
+      secretName: mcp-cbio-cert
+---
+# /db — separate Ingress so its own (strip-prefix + rate-limit) middleware
+# chain applies. Same host + same TLS secret; Traefik merges Ingress rules
+# per host.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-cbioportal-db-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: default-strip-db-prefix@kubernetescrd,default-ratelimit-db@kubernetescrd
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  rules:
+    - host: mcp.cbioportal.org
+      http:
+        paths:
+          - path: /db
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp
                 port:
                   number: 80
   tls:
