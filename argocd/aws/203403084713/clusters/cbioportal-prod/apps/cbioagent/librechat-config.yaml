@@ -5,17 +5,11 @@ metadata:
   namespace: default
 data:
   librechat.yaml: |
-    # For more information, see the Configuration Guide:
-    # https://www.librechat.ai/docs/configuration/librechat_yaml/example
-
     # Configuration version (required)
     version: 1.2.1
 
     # Cache settings: Set to true to enable caching
     cache: true
-
-    # File strategy s3/firebase
-    # fileStrategy: "s3"
 
     # Allow internal k8s MCP server domains
     mcpSettings:
@@ -25,19 +19,15 @@ data:
 
     # Custom interface configuration
     interface:
-      customWelcome: "Hey {{user.name}}! Welcome to cBioAgent (WIP ⚠️)."
+      customWelcome: "Hey {{user.name}}! Welcome to cBioPortalChat — explore cBioPortal data with natural language."
       remoteAgents:
         use: true
         create: true
-      # MCP Servers UI configuration
       mcpServers:
         placeholder: 'MCP Servers'
-      # Privacy policy settings
       privacyPolicy:
         externalUrl: 'https://librechat.ai/privacy-policy'
         openNewTab: true
-
-      # Terms of service
       termsOfService:
         externalUrl: 'https://librechat.ai/tos'
         openNewTab: true
@@ -97,18 +87,15 @@ data:
       #   USER  → CREATE:false, SHARE:false, SHARE_PUBLIC:false
       #   ADMIN → CREATE:true,  SHARE:true,  SHARE_PUBLIC:true
       agents: true
+      showSwitchAgent: false
       marketplace:
         use: false
       runCode: false
       webSearch: false
 
-    # Example Registration Object Structure (optional)
     registration:
       socialLogins: ['github', 'google', 'discord', 'openid', 'facebook', 'apple', 'saml']
-      # allowedDomains:
-      # - "gmail.com"
 
-    # Example Actions Object Structure
     actions:
       allowedDomains:
         - "swapi.dev"
@@ -118,7 +105,6 @@ data:
         - "www.ebi.ac.uk"
         - "query-api.iedb.org"
 
-    # MCP Servers Object Structure
     mcpServers:
       cbioportal-database:
         type: streamable-http
@@ -128,24 +114,20 @@ data:
         url: http://cbioportal-navigator:80/mcp
         chatMenu: false
 
-    # Definition of endpoints
     endpoints:
       agents:
         contextStrategy: 'summarize'
-        # summaryModel: claude-3-5-haiku-20241022
         recursionLimit: 50
         maxRecursionLimit: 100
         disableBuilder: false
       assistants:
         disableBuilder: true
 
-    # File uploading configuration
     fileConfig:
       endpoints:
         anthropic:
           disabled: true
 
-    # Token limits
     balance:
       enabled: true
       startBalance: 20000000
@@ -154,104 +136,58 @@ data:
       refillIntervalUnit: "days"
       refillAmount: 20000000
 
-    # Model spec
+    # Unified single-agent spec. The previous cBioDBAgent
+    # (agent_4QP14nOYaCTkqK8E3Nopg) and cBioNavigator
+    # (agent_YKwPI8r-L0P3mqbqFdesd) agent docs are kept in MongoDB for
+    # rollback but are no longer exposed in the UI. Both the DB and
+    # Navigator MCP servers above remain configured so the unified agent
+    # can call their tools. The agent_id below is a prod-only clone of
+    # the beta unified agent — beta keeps its own ID
+    # (agent_OHVSJI9Gd6gwsDnFSL-Xl) so prompt/tool changes can be staged
+    # on beta first.
     modelSpecs:
       enforce: false
       prioritize: true
       list:
-        - name: "cBioDBAgent"
-          label: "cBioDBAgent - Talk to the cBioPortal database"
-          description: "An AI assistant for querying and exploring cBioPortal database."
-          iconURL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(31,140,197)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='9' ry='3'/%3E%3Cpath d='M3 5V19A9 3 0 0 0 21 19V5'/%3E%3Cpath d='M3 12A9 3 0 0 0 21 12'/%3E%3C/svg%3E"
+        - name: "cBioPortalChat"
+          label: "cBioPortalChat - Explore cBioPortal data and links"
+          default: true
+          description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
+          placeholder: "How can I help you explore cBioPortal?"
+          iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
           showIconInHeader: true
           showIconInMenu: true
-          showSwitchAgent: true
+          showSwitchAgent: false
+          limitBadge:
+            messages: "20 msgs / 30 min"
+            tokens: "20M tokens / week"
+          conversationStarterCategories:
+            - label: "Explore Data"
+              icon: "search"
+              description: "Find studies, datasets, and available molecular data in cBioPortal."
+              starters:
+                - "Which cBioPortal studies include lung adenocarcinoma samples with mutation and copy-number data?"
+                - "Which studies have RNA expression for renal cancer?"
+                - "How many studies have whole exome sequencing data?"
+                - "What TCGA data do you have?"
+            - label: "Navigate cBioPortal"
+              icon: "map"
+              description: "Create direct links to cBioPortal views, cohorts, plots, and study pages."
+              starters:
+                - "Give me an OncoPrint for EGFR and KRAS in TCGA lung adenocarcinoma."
+                - "Can you create a cohort of metastatic prostate cancer with AR amplification?"
+                - "Show me a KM plot of primary vs met prostate cancer in the MSK-IMPACT study."
+            - label: "Analyze Data"
+              icon: "heartbeat"
+              description: "Compare genes, cancer types, molecular profiles, cohorts, and outcomes."
+              starters:
+                - "Show me TP53 mutation frequency across all cancer types."
+                - "What are the most mutated genes in lung cancer?"
+                - "Compare low grade glioma by molecular subtype."
           preset:
             endpoint: "agents"
-            agent_id: "agent_4QP14nOYaCTkqK8E3Nopg"
-            maxTokens: 4096
-            thinking: false
+            agent_id: "agent_9ZXhcwLIsROBQX0u4JS5F"
             temperature: 0
-            modelLabel: "cBioDBAgent"
+            modelLabel: "cBioPortalChat"
             greeting: |
-              Ask questions below to explore the cBioPortal database, including studies, genes, mutations, and clinical attributes. NOTE: Limit of 20 messages per 30 minutes, and 20M tokens per week. <br /><br /><a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank" style="display: inline-block; background-color: #4b5563; color: #f9fafb; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#374151'" onmouseout="this.style.backgroundColor='#4b5563'">Learn more</a>
-        - name: "cBioNavigator"
-          label: "cBioNavigator - Get help navigating cBioPortal"
-          default: false
-          description: "An AI assistant trained on cBioPortal application to help you navigate the cbioportal.org web interface."
-          iconURL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(31,140,197)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z'/%3E%3Cpath d='M15 5.764v15'/%3E%3Cpath d='M9 3.236v15'/%3E%3C/svg%3E"
-          showIconInHeader: true
-          showIconInMenu: true
-          showSwitchAgent: true
-          preset:
-            endpoint: "agents"
-            agent_id: "agent_YKwPI8r-L0P3mqbqFdesd"
-            temperature: 0
-            modelLabel: "cBioNavigator"
-            greeting: |
-              Get help navigating the cBioPortal web interface. NOTE: Limit of 20 messages per 30 minutes, and 20M tokens per week. <br /><br /><a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank" style="display: inline-block; background-color: #4b5563; color: #f9fafb; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#374151'" onmouseout="this.style.backgroundColor='#4b5563'">Learn more</a>
-            promptPrefix: |
-              # cBioPortal Navigator System Prompt
-
-              ## Overview
-
-              You are an expert in cancer genomics and the cBioPortal platform. Your job is to convert user intent into direct cBioPortal URLs as quickly as possible. You are a navigator, not a textbook.
-
-              **Audience:** Cancer researchers, computational biologists, and clinicians.
-
-              **Tone:** Academic, precise, efficient. Use genomics vocabulary (mutations, amplifications, z-scores, OncoPrint).
-
-              ---
-
-              ## Tool Workflow
-
-              **Step 1: `resolve_and_route`** (always first)
-              Resolves study IDs from user query, returns metadata, recommends navigation tool. Never skip this step.
-
-              **Step 2: `get_studyviewfilter_options`** (if filtering by clinical attributes or generic assay data)
-              Returns exact valid values for clinical attributes and generic assay entities. Required because values are case-sensitive and cannot be guessed.
-
-              **Step 3: Navigation tool** (as recommended by router)
-              - `navigate_to_study_view` — cohort overview, filtered patient groups
-              - `navigate_to_patient_view` — individual patient profiles
-              - `navigate_to_results_view` — gene alteration analysis, OncoPrint
-              - `navigate_to_group_comparison` — subgroup comparison
-
-              ---
-
-              ## Interaction Guidelines
-
-              ### Link First
-              Always provide a direct URL when possible. Only fall back to breadcrumb instructions (e.g., `Home > Query > Select study > Enter Gene > Submit`) when a deep link cannot be generated.
-
-              ### Formatting
-              - **URLs:** on their own line or clearly hyperlinked, must point to cbioportal.org
-              - **Gene symbols:** UPPERCASE HUGO symbols (TP53, EGFR — not tp53 or p53)
-              - **Tool names:** capitalize proper names (OncoPrint, Mutations Tab, Survival Plot)
-
-              ### Study Context
-              cBioPortal organizes data by study, each with a unique ID (e.g., `luad_tcga_pan_can_atlas_2018`). Users must specify at least one study — use `resolve_and_route` to search when the query is ambiguous.
-
-              ---
-
-              ## Strict Constraints
-
-              ### Clinical Safety Guardrail (CRITICAL)
-              You are a research tool, not a doctor. Never interpret data for clinical decision-making. If asked (e.g., "Will this drug work for my patient?"), reply:
-
-              > "I can help you visualize the relevant data in cBioPortal, but this is for research purposes only. I cannot offer clinical advice or prognosis."
-
-              ### No Hallucination
-              Never invent study IDs or URLs. Always validate through `resolve_and_route`. If no studies match, guide users to browse at https://www.cbioportal.org
-
-              ---
-
-              ## Sample Interactions
-
-              **Gene query:**
-              User: "OncoPrint for KRAS in lung cancer"
-              → Provide direct link to the OncoPrint. Offer alternatives if user needs a different dataset.
-
-              **Clinical boundary:**
-              User: "My patient has V600E. Will this drug work?"
-              → Decline medical advice. Offer to show prevalence data or Treatments tab instead.
+              Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
