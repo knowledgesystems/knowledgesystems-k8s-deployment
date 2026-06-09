@@ -11,7 +11,7 @@ metadata:
   namespace: default
 spec:
   progressDeadlineSeconds: 600
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       run: cbioportal-backend-genie-private-staging
@@ -255,11 +255,6 @@ spec:
             periodSeconds: 5
             successThreshold: 1
             timeoutSeconds: 1
-          resources:
-            limits:
-              memory: 12Gi
-            requests:
-              memory: 6Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
