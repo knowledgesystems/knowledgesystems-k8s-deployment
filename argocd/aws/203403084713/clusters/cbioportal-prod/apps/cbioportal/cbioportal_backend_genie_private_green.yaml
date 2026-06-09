@@ -187,7 +187,7 @@ spec:
             - --filter_groups_by_appname=false
             # auth
             #- --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=/cbioportal/msk-beta-cbioportal-saml-idp-metadata.xml
-            - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak.cbioportal.org/auth/realms/genie-private/protocol/saml/descriptor
+            - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=https://keycloak-staging.cbioportal.org/auth/realms/genie-private/protocol/saml/descriptor
             - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.entity-id=cbioportal-genie-private-v6
             - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].certificate-location=file:/cbioportal/local.crt
             - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.signing.credentials[0].private-key-location=file:/cbioportal/local.key
@@ -195,10 +195,10 @@ spec:
             - --dat.method=oauth2
             - --dat.oauth2.clientId=cbioportal-genie-private-api-v6
             - --dat.oauth2.clientSecret=$(DAT_OAUTH2_CLIENT_SECRET)
-            - --dat.oauth2.accessTokenUri=https://keycloak.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/token
-            - --dat.oauth2.jwkUrl=https://keycloak.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/certs
-            - --dat.oauth2.issuer=https://keycloak.cbioportal.org/auth/realms/genie-private
-            - --dat.oauth2.userAuthorizationUri=https://keycloak.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/auth
+            - --dat.oauth2.accessTokenUri=https://keycloak-staging.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/token
+            - --dat.oauth2.jwkUrl=https://keycloak-staging.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/certs
+            - --dat.oauth2.issuer=https://keycloak-staging.cbioportal.org/auth/realms/genie-private
+            - --dat.oauth2.userAuthorizationUri=https://keycloak-staging.cbioportal.org/auth/realms/genie-private/protocol/openid-connect/auth
             - --dat.oauth2.redirectUri=https://genie-private.cbioportal.org/api/data-access-token/oauth2
             - --dat.oauth2.jwtRolesPath=realm_access::roles
             # this addresses same issue as
