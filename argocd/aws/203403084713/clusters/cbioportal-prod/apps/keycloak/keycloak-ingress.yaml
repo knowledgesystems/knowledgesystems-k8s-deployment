@@ -38,6 +38,3 @@ spec:
     - hosts:
         - keycloak.cbioportal.org
       secretName: keycloak-cert
-    - hosts:
-        - keycloak-staging.cbioportal.org
-      secretName: keycloak-staging-cert
