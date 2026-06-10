@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-viewer
+  namespace: default
+  labels:
+    app: slide-viewer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: slide-viewer
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0   # zero-downtime: new pod must be Ready before old is removed
+  template:
+    metadata:
+      labels:
+        app: slide-viewer
+    spec:
+      nodeSelector:
+        workload-class: x86-general
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: slide-viewer
+          # Image tag is updated by the CI/CD pipeline (docker-publish.yml)
+          image: 203403084713.dkr.ecr.us-east-1.amazonaws.com/cbioportal-slide-viewer:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: slide-viewer-config
+          env:
+            # Credentials from pre-existing Secret
+            # Create with:
+            #   kubectl create secret generic slide-viewer-secrets \
+            #     --from-literal=REEF_AWS_KEY=<key> \
+            #     --from-literal=REEF_AWS_SECRET=<secret> \
+            #     --from-literal=DATABRICKS_HOST=https://msk-mode-prod.cloud.databricks.com \
+            #     --from-literal=DATABRICKS_TOKEN=<pat>
+            - name: REEF_AWS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: REEF_AWS_KEY
+            - name: REEF_AWS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: REEF_AWS_SECRET
+            - name: DATABRICKS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: DATABRICKS_HOST
+            - name: DATABRICKS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: DATABRICKS_TOKEN
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "8Gi"
+              cpu: "4"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
