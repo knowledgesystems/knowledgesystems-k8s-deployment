@@ -183,7 +183,7 @@ locals {
       }
     }
     test = {
-      instance_types = ["t4g.2xlarge"]
+      instance_types = ["m7g.2xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 1
       max_size       = 1
