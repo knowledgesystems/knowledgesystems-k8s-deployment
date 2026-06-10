@@ -97,6 +97,7 @@ data:
         - "clinicaltrials.gov"
         - "www.ebi.ac.uk"
         - "query-api.iedb.org"
+        - "cedar-api.iedb.org"
 
     mcpServers:
       cbioportal-database:
