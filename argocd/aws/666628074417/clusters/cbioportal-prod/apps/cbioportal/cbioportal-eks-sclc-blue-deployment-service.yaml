@@ -135,11 +135,8 @@ spec:
             #  Add this when you need to override frontend config
             - --frontend.config=/cbioportal/frontendConfig.json
             - --sitemaps=false
-            # internal oncokb instance gives 5x error on FGFR1
-            - --oncokb.public_api.url=https://core.oncokb.aws.mskcc.org/api/v1
-            # token is not needed to access MSK OncoKB instance
-            - --oncokb.token=fake_token
-            - --oncokb.merge_icons_by_default=false
+            - --oncokb.public_api.url=https://www.oncokb.org/api/v1
+            - --oncokb.token=$(ONCOKB_TOKEN)
             - --genomenexus.url=https://v1.genomenexus.org
             - --show.genomenexus.annotation_sources=mutation_assessor
             - --matchminer.url=http://ec2-54-158-52-176.compute-1.amazonaws.com:5555
