@@ -35,6 +35,12 @@ spec:
               value: "cbioportal-mcp"
             - name: DD_SITE
               value: "datadoghq.com"
+            # Mount FastMCP under the external sub-path so trailing-slash
+            # redirects point to https://mcp.cbioportal.org/db/mcp/ rather
+            # than /mcp/. Paired with dropping the strip-db-prefix
+            # middleware on the mcp-cbioportal-db-ingress Ingress.
+            - name: CLICKHOUSE_MCP_HTTP_PATH
+              value: "/db/mcp"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
