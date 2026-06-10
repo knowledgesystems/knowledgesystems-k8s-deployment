@@ -1,0 +1,38 @@
+# Public database MCP for the MSK account, mirroring the cBioPortal Public
+# exposure at mcp.cbioportal.org/db. FastMCP is mounted at /db/mcp via the
+# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp, so this
+# Ingress does NOT use rewrite-target — the app sees the full path and
+# generates correct trailing-slash redirects.
+#
+# Rate-limit: 2 req/s sustained per IP, 20 concurrent connections per IP
+# (mirrors the Traefik 2 rps / burst 20 cap on the 203 account).
+#
+# Prereq: DNS for mcp.cbioportal.aws.mskcc.org must point at the same
+# nginx-ingress NLB as the other *.cbioportal.aws.mskcc.org hosts.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-cbioportal-db-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: http
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/limit-rps: "2"
+    nginx.ingress.kubernetes.io/limit-connections: "20"
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: mcp.cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /db
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp
+                port:
+                  number: 80
