@@ -1,18 +1,23 @@
-# Public database MCP for the MSK account, mirroring the cBioPortal Public
-# exposure at mcp.cbioportal.org/db. FastMCP is mounted at /db/mcp via the
-# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp, so this
-# Ingress does NOT use rewrite-target — the app sees the full path and
-# generates correct trailing-slash redirects.
+# Public database MCP for the MSK account, served as a sub-path of the
+# existing chat host (chat.cbioportal.aws.mskcc.org/db/mcp) to avoid the
+# DNS dependency on a separate mcp.* hostname. nginx-ingress merges
+# Ingresses per host, so this lives alongside cbioagent-ingress (which
+# owns /) without conflict — nginx picks the longest-prefix match.
+#
+# This Ingress intentionally does NOT use rewrite-target. The sibling
+# cbioagent-ingress rewrites everything to /, which would clobber the
+# /db/mcp path. By splitting into a separate Ingress, that rewrite
+# doesn't apply here. FastMCP is mounted at /db/mcp via the
+# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp, so the
+# full external path is preserved end-to-end and trailing-slash redirects
+# build correct URLs.
 #
 # Rate-limit: 2 req/s sustained per IP, 20 concurrent connections per IP
 # (mirrors the Traefik 2 rps / burst 20 cap on the 203 account).
-#
-# Prereq: DNS for mcp.cbioportal.aws.mskcc.org must point at the same
-# nginx-ingress NLB as the other *.cbioportal.aws.mskcc.org hosts.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mcp-cbioportal-db-ingress
+  name: cbioagent-db-ingress
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: http
@@ -26,7 +31,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: mcp.cbioportal.aws.mskcc.org
+    - host: chat.cbioportal.aws.mskcc.org
       http:
         paths:
           - path: /db
