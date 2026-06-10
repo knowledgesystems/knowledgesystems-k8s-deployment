@@ -109,7 +109,7 @@ data:
     mcpServers:
       cbioportal-database:
         type: streamable-http
-        url: http://cbioagent-clickhouse-mcp:80/mcp
+        url: http://cbioagent-clickhouse-mcp:80/db/mcp
       cbioportal-navigator:
         type: streamable-http
         url: http://cbioportal-navigator:80/mcp
