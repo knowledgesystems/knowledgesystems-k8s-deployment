@@ -44,7 +44,7 @@ spec:
                   name: librechat-credentials-env
                   key: MONGO_URI
             - name: MONGODB_DATABASE
-              value: "LibreChat"
+              value: "cBioAgent"
             - name: ENABLE_BASIC_METRICS
               value: "true"
             - name: ENABLE_TOKEN_METRICS
