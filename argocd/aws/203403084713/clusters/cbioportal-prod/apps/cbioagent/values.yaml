@@ -15,6 +15,11 @@ librechat:
     # values (beta.chat.cbioportal.org) with these prod URLs.
     DOMAIN_CLIENT: "https://chat.cbioportal.org"
     DOMAIN_SERVER: "https://chat.cbioportal.org"
+    NODE_OPTIONS: "--require dd-trace/init"
+    DD_LLMOBS_ENABLED: "1"
+    DD_LLMOBS_ML_APP: "cbioagent"
+    DD_LLMOBS_AGENTLESS_ENABLED: "true"
+    DD_SITE: "datadoghq.com"
   imageVolume:
     accessModes: ReadWriteMany
     storageClassName: efs-sc
