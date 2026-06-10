@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-viewer
+  namespace: default
+  labels:
+    app: slide-viewer
+spec:
+  type: ClusterIP
+  selector:
+    app: slide-viewer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
