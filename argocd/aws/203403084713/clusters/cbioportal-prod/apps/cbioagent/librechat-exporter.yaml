@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat-exporter
+  labels:
+    run: librechat-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: librechat-exporter
+  template:
+    metadata:
+      labels:
+        run: librechat-exporter
+        tags.datadoghq.com/env: "public"
+        tags.datadoghq.com/service: "librechat"
+        tags.datadoghq.com/version: "v0.8.3"
+      annotations:
+        # Datadog autodiscovery: scrape Prometheus metrics from this pod
+        ad.datadoghq.com/librechat-exporter.checks: |
+          {
+            "openmetrics": {
+              "instances": [
+                {
+                  "openmetrics_endpoint": "http://%%host%%:8000/metrics",
+                  "namespace": "librechat",
+                  "metrics": [".*"]
+                }
+              ]
+            }
+          }
+    spec:
+      containers:
+        - name: librechat-exporter
+          image: ghcr.io/virtuos/librechat_exporter:main
+          ports:
+            - containerPort: 8000
+          env:
+            # Rename MONGO_URI (LibreChat's key) to MONGODB_URI (exporter's key)
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-credentials-env
+                  key: MONGO_URI
+            - name: MONGODB_DATABASE
+              value: "LibreChat"
+            - name: ENABLE_BASIC_METRICS
+              value: "true"
+            - name: ENABLE_TOKEN_METRICS
+              value: "true"
+            - name: ENABLE_RATING_METRICS
+              value: "true"
+            - name: METRICS_CACHE_ENABLED
+              value: "true"
+            - name: METRICS_CACHE_TTL
+              value: "60"
+      nodeSelector:
+        workload: "cbioagent"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbioagent"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: librechat-exporter
+spec:
+  selector:
+    run: librechat-exporter
+  ports:
+    - port: 8000
+      name: metrics
+      targetPort: 8000
+  type: ClusterIP
