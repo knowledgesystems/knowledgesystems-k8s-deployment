@@ -57,7 +57,7 @@ spec:
             - name: DD_PROFILING_EXECUTION_TRACE_ENABLED
               value: "true"
             - name: VEP_THREADS
-              value: "24"
+              value: "16"
           envFrom:
             - secretRef:
                 name: oncokb-core-v2
