@@ -39,6 +39,11 @@ librechat-rag-api:
   postgresql:
     enabled: true
 
+podLabels:
+  tags.datadoghq.com/env: "public"
+  tags.datadoghq.com/service: "librechat"
+  tags.datadoghq.com/version: "v0.8.3"
+
 nodeSelector:
   workload: cbioagent
 
