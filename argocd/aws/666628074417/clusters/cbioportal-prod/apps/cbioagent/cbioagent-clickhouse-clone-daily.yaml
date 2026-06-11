@@ -157,9 +157,12 @@ data:
       fi
       log "study '${STUDY_FILTER}' found ($STUDY_HITS row(s)) in source"
       # Reusable IN-subquery fragments (resolved by ClickHouse, not shell).
+      # SAMPLE_SQ goes through patient because cbioportal's sample table
+      # only carries patient_id, not cancer_study_id (verified against
+      # the MSK ClickHouse schema 2026-06-11).
       STUDY_SQ="(SELECT cancer_study_id FROM ${SRC_DB}.cancer_study WHERE cancer_study_identifier='${STUDY_FILTER}')"
-      SAMPLE_SQ="(SELECT internal_id FROM ${SRC_DB}.sample WHERE cancer_study_id IN ${STUDY_SQ})"
       PATIENT_SQ="(SELECT internal_id FROM ${SRC_DB}.patient WHERE cancer_study_id IN ${STUDY_SQ})"
+      SAMPLE_SQ="(SELECT internal_id FROM ${SRC_DB}.sample WHERE patient_id IN ${PATIENT_SQ})"
       i=0
       for t in $TABLES; do
         i=$((i+1))
