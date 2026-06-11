@@ -58,6 +58,11 @@ data:
     MGMT_DB="${MGMT_DB:-publicdb_update_management_database}"
     SRC_PREFIX="${SRC_PREFIX:-cbioportal_public_}"
     DST_PREFIX="${DST_PREFIX:-cbioportal_public_librechat_}"
+    PORTAL_DB_VALUE="${PORTAL_DB_VALUE:-public}"
+    # When set, the clone keeps only rows tied to this cBioPortal study
+    # identifier (e.g. 'mskimpact' for the MSK 666 deployment). Empty =
+    # full clone (203 public-portal behaviour).
+    STUDY_FILTER="${STUDY_FILTER:-}"
     # llm_user can be reached by anyone with access to cBioDBAgent, so the
     # clone must not carry any auth/credential data. The explicit list
     # covers today's cBioPortal schema; the substring patterns below are
@@ -71,7 +76,7 @@ data:
     log() { echo "[clone $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
 
     # 1) Production color.
-    PROD_COLOR=$(clickhouse client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'" | tr -d '[:space:]')
+    PROD_COLOR=$(clickhouse client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='${PORTAL_DB_VALUE}'" | tr -d '[:space:]')
     if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
       log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
     fi
@@ -105,15 +110,73 @@ data:
     N=$(echo "$TABLES" | grep -c . || true)
     log "cloning $N tables from $SRC_DB → $DST_DB"
 
-    # 5) Per-table zero-copy CLONE. SharedMergeTree parts are hard-linked,
-    # so each statement is near-instant and storage stays at zero until
-    # the LLM-prep ALTERs in step 6 cause copy-on-write divergence.
-    i=0
-    for t in $TABLES; do
-      i=$((i+1))
-      log "  [$i/$N] $t"
-      clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
-    done
+    # 5) Per-table copy.
+    #
+    # STUDY_FILTER unset (default, 203 path): zero-copy CLONE — SharedMergeTree
+    # parts are hard-linked, so each statement is near-instant and storage
+    # stays at zero until the LLM-prep ALTERs in step 6 cause copy-on-write
+    # divergence.
+    #
+    # STUDY_FILTER set (MSK / per-study path): create empty schema, then
+    # INSERT only rows tied to the study. Detection per table (first match
+    # wins; falls through to full copy for study-agnostic tables like
+    # gene/oncotree):
+    #   1. cancer_study_identifier column → filter on it directly (used by
+    #      *_derived tables which carry the string study id)
+    #   2. cancer_study_id column → filter via subquery on cancer_study
+    #   3. sample_id column → filter via sample subquery
+    #   4. patient_id column → filter via patient subquery
+    #   5. otherwise → full copy (study-agnostic)
+    if [ -z "$STUDY_FILTER" ]; then
+      log "STUDY_FILTER unset → zero-copy CLONE for all tables"
+      i=0
+      for t in $TABLES; do
+        i=$((i+1))
+        log "  [$i/$N] $t (CLONE)"
+        clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
+      done
+    else
+      log "STUDY_FILTER='${STUDY_FILTER}' → filtered INSERT per table"
+      # Validate the study exists in source.
+      STUDY_HITS=$(clickhouse client $CH_FLAGS --query "SELECT count(*) FROM ${SRC_DB}.cancer_study WHERE cancer_study_identifier='${STUDY_FILTER}'" | tr -d '[:space:]')
+      if [ "$STUDY_HITS" = "0" ]; then
+        log "FAIL: study '${STUDY_FILTER}' not found in ${SRC_DB}.cancer_study"; exit 1
+      fi
+      log "study '${STUDY_FILTER}' found ($STUDY_HITS row(s)) in source"
+      # Reusable IN-subquery fragments (resolved by ClickHouse, not shell).
+      STUDY_SQ="(SELECT cancer_study_id FROM ${SRC_DB}.cancer_study WHERE cancer_study_identifier='${STUDY_FILTER}')"
+      SAMPLE_SQ="(SELECT internal_id FROM ${SRC_DB}.sample WHERE cancer_study_id IN ${STUDY_SQ})"
+      PATIENT_SQ="(SELECT internal_id FROM ${SRC_DB}.patient WHERE cancer_study_id IN ${STUDY_SQ})"
+      i=0
+      for t in $TABLES; do
+        i=$((i+1))
+        COLS=$(clickhouse client $CH_FLAGS --query "SELECT name FROM system.columns WHERE database='${SRC_DB}' AND table='${t}'")
+        clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} AS ${SRC_DB}.${t}"
+        if echo "$COLS" | grep -qw cancer_study_identifier; then
+          MODE="cancer_study_identifier"
+          FILTER="cancer_study_identifier='${STUDY_FILTER}'"
+        elif echo "$COLS" | grep -qw cancer_study_id; then
+          MODE="cancer_study_id"
+          FILTER="cancer_study_id IN ${STUDY_SQ}"
+        elif echo "$COLS" | grep -qw sample_id; then
+          MODE="sample_id"
+          FILTER="sample_id IN ${SAMPLE_SQ}"
+        elif echo "$COLS" | grep -qw patient_id; then
+          MODE="patient_id"
+          FILTER="patient_id IN ${PATIENT_SQ}"
+        else
+          MODE="full-copy"
+          FILTER=""
+        fi
+        if [ -n "$FILTER" ]; then
+          log "  [$i/$N] $t ($MODE)"
+          clickhouse client $CH_FLAGS --query "INSERT INTO ${DST_DB}.${t} SELECT * FROM ${SRC_DB}.${t} WHERE ${FILTER}"
+        else
+          log "  [$i/$N] $t (study-agnostic, $MODE)"
+          clickhouse client $CH_FLAGS --query "INSERT INTO ${DST_DB}.${t} SELECT * FROM ${SRC_DB}.${t}"
+        fi
+      done
+    fi
 
     # 6) Apply LLM-prep SQL files from the fetch-sql initContainer's
     #    payload. Two phases:
