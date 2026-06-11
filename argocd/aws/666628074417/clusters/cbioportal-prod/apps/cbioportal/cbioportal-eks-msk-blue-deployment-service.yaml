@@ -241,6 +241,7 @@ spec:
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
             - --server.port=8888
+            - --session.endpoint.publisher-api-key=$(VIRTUAL_STUDY_PUBLISHER_API_KEY)
           command:
             - java
           env:
