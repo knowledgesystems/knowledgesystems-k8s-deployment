@@ -1,0 +1,378 @@
+# Daily MSKIMPACT-only clone of the active MSK cBioPortal production
+# color into one of two ping-pong librechat clone databases
+# (cbioportal_msk_librechat_blue or _green) in ClickHouse, with LLM-prep
+# SQL overrides applied. When the build target ends up different from
+# the buffer the MCP is currently reading, the rollout container flips
+# the clickhouse-mcp-active ConfigMap and rolls cbioagent-clickhouse-mcp.
+#
+# Differences from the 203 (public) variant:
+#   - STUDY_FILTER=mskimpact: only mskimpact study rows are kept
+#     (not msk_target_test, not any other study in the source DB).
+#     Tables with cancer_study_identifier / cancer_study_id /
+#     sample_id / patient_id are filtered; study-agnostic tables
+#     (gene, oncotree, etc.) are copied wholesale.
+#   - SQL overrides come from a portal-configuration ConfigMap
+#     (cbioagent-clone-sql-msk) mounted at /workdir/sql, NOT from the
+#     cbioportal/mcp image. Keeps MSK study-selection preferences
+#     private. The fetch-sql initContainer that 203 uses is replaced
+#     by a busybox load-sql initContainer that copies from the
+#     ConfigMap mount to /workdir/sql.
+#   - Env vars target the MSK ClickHouse cluster + management DB:
+#       MGMT_DB=mskcc_update_management_database
+#       PORTAL_DB_VALUE=msk
+#       SRC_PREFIX=cbioportal_msk_
+#       DST_PREFIX=cbioportal_msk_librechat_
+#
+# This bundle ships:
+#   - clickhouse-mcp-active ConfigMap (CLICKHOUSE_DATABASE pointer)
+#   - cbioagent-clone-job-scripts ConfigMap (clone.sh + rollout.sh,
+#     kept identical to 203's so both accounts converge on one script)
+#   - clickhouse-clone-job ServiceAccount + Role + RoleBinding
+#   - cbioagent-clickhouse-clone-daily CronJob (3 containers: load-sql →
+#     clone → rollout)
+#
+# Companion changes:
+#   - portal-configuration: clickhouse-librechat-admin Secret +
+#     cbioagent-clone-sql-msk ConfigMap + cbioagent-study-guides-msk
+#     ConfigMap (the latter mounted by cbioagent-clickhouse-mcp).
+#   - cbioagent-clickhouse-mcp.yaml: envFrom extended to include the
+#     clickhouse-mcp-active ConfigMap; volume mount added for the
+#     study guides ConfigMap.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-mcp-active
+  namespace: default
+data:
+  # Initial seed. Same caveat as 203: until the empty-string-group
+  # ignoreDifferences gap is closed, Argo re-asserts this value on
+  # every sync, so keep it set to whichever buffer the MCP should be
+  # reading. Today (bootstrap): blue.
+  CLICKHOUSE_DATABASE: cbioportal_msk_librechat_blue
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbioagent-clone-job-scripts
+  namespace: default
+data:
+  clone.sh: |
+    #!/bin/sh
+    set -eu
+
+    # Required env (from clickhouse-librechat-admin Secret via envFrom)
+    : "${CLICKHOUSE_HOST:?missing}"
+    : "${CLICKHOUSE_PORT:?missing}"
+    : "${CLICKHOUSE_SECURE:?missing}"
+    : "${CLICKHOUSE_ADMIN_USER:?missing}"
+    : "${CLICKHOUSE_ADMIN_PASSWORD:?missing}"
+
+    MGMT_DB="${MGMT_DB:-publicdb_update_management_database}"
+    SRC_PREFIX="${SRC_PREFIX:-cbioportal_public_}"
+    DST_PREFIX="${DST_PREFIX:-cbioportal_public_librechat_}"
+    PORTAL_DB_VALUE="${PORTAL_DB_VALUE:-public}"
+    # When set, the clone keeps only rows tied to this cBioPortal study
+    # identifier (e.g. 'mskimpact' for the MSK 666 deployment). Empty =
+    # full clone (203 public-portal behaviour).
+    STUDY_FILTER="${STUDY_FILTER:-}"
+    # llm_user can be reached by anyone with access to cBioDBAgent, so the
+    # clone must not carry any auth/credential data. The explicit list
+    # covers today's cBioPortal schema; the substring patterns below are
+    # defense-in-depth for future schema additions (e.g. oauth_*, sessions).
+    EXCLUDED_TABLES="('authorities','data_access_tokens','users')"
+    EXCLUDED_SUBSTRINGS="'_backup','token','oauth','session','login','password','credential','secret'"
+
+    CH_FLAGS="--host=${CLICKHOUSE_HOST} --port=${CLICKHOUSE_PORT} --user=${CLICKHOUSE_ADMIN_USER} --password=${CLICKHOUSE_ADMIN_PASSWORD}"
+    [ "$CLICKHOUSE_SECURE" = "true" ] && CH_FLAGS="$CH_FLAGS --secure"
+
+    log() { echo "[clone $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
+
+    # 1) Production color.
+    PROD_COLOR=$(clickhouse client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='${PORTAL_DB_VALUE}'" | tr -d '[:space:]')
+    if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
+      log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
+    fi
+    SRC_DB="${SRC_PREFIX}${PROD_COLOR}"
+    log "production color=$PROD_COLOR, source=$SRC_DB"
+
+    # 2) Active librechat buffer (read from the ConfigMap mounted at /active).
+    #    Falls through to bootstrap mode if value is unrecognised.
+    ACTIVE_DB="$(cat /active/CLICKHOUSE_DATABASE 2>/dev/null || echo '')"
+    case "$ACTIVE_DB" in
+      "${DST_PREFIX}blue")  TARGET_COLOR="green" ;;
+      "${DST_PREFIX}green") TARGET_COLOR="blue"  ;;
+      *) log "active='${ACTIVE_DB}' — bootstrapping into ${DST_PREFIX}blue"
+         TARGET_COLOR="blue" ;;
+    esac
+    DST_DB="${DST_PREFIX}${TARGET_COLOR}"
+    log "active=${ACTIVE_DB:-<unset>}; building into ${DST_DB}"
+
+    # 3) Rebuild target.
+    clickhouse client $CH_FLAGS --query "DROP DATABASE IF EXISTS ${DST_DB}"
+    clickhouse client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
+
+    # 4) Enumerate source tables (exclude sensitive + backup).
+    TABLES=$(clickhouse client $CH_FLAGS --query "
+      SELECT name FROM system.tables
+      WHERE database = '${SRC_DB}'
+        AND name NOT IN ${EXCLUDED_TABLES}
+        AND NOT multiSearchAny(lower(name), [${EXCLUDED_SUBSTRINGS}])
+      ORDER BY name
+    ")
+    N=$(echo "$TABLES" | grep -c . || true)
+    log "cloning $N tables from $SRC_DB → $DST_DB"
+
+    # 5) Per-table copy.
+    #
+    # STUDY_FILTER unset (default, 203 path): zero-copy CLONE — SharedMergeTree
+    # parts are hard-linked, so each statement is near-instant and storage
+    # stays at zero until the LLM-prep ALTERs in step 6 cause copy-on-write
+    # divergence.
+    #
+    # STUDY_FILTER set (MSK / per-study path): create empty schema, then
+    # INSERT only rows tied to the study. Detection per table (first match
+    # wins; falls through to full copy for study-agnostic tables like
+    # gene/oncotree):
+    #   1. cancer_study_identifier column → filter on it directly (used by
+    #      *_derived tables which carry the string study id)
+    #   2. cancer_study_id column → filter via subquery on cancer_study
+    #   3. sample_id column → filter via sample subquery
+    #   4. patient_id column → filter via patient subquery
+    #   5. otherwise → full copy (study-agnostic)
+    if [ -z "$STUDY_FILTER" ]; then
+      log "STUDY_FILTER unset → zero-copy CLONE for all tables"
+      i=0
+      for t in $TABLES; do
+        i=$((i+1))
+        log "  [$i/$N] $t (CLONE)"
+        clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
+      done
+    else
+      log "STUDY_FILTER='${STUDY_FILTER}' → filtered INSERT per table"
+      # Validate the study exists in source.
+      STUDY_HITS=$(clickhouse client $CH_FLAGS --query "SELECT count(*) FROM ${SRC_DB}.cancer_study WHERE cancer_study_identifier='${STUDY_FILTER}'" | tr -d '[:space:]')
+      if [ "$STUDY_HITS" = "0" ]; then
+        log "FAIL: study '${STUDY_FILTER}' not found in ${SRC_DB}.cancer_study"; exit 1
+      fi
+      log "study '${STUDY_FILTER}' found ($STUDY_HITS row(s)) in source"
+      # Reusable IN-subquery fragments (resolved by ClickHouse, not shell).
+      STUDY_SQ="(SELECT cancer_study_id FROM ${SRC_DB}.cancer_study WHERE cancer_study_identifier='${STUDY_FILTER}')"
+      SAMPLE_SQ="(SELECT internal_id FROM ${SRC_DB}.sample WHERE cancer_study_id IN ${STUDY_SQ})"
+      PATIENT_SQ="(SELECT internal_id FROM ${SRC_DB}.patient WHERE cancer_study_id IN ${STUDY_SQ})"
+      i=0
+      for t in $TABLES; do
+        i=$((i+1))
+        COLS=$(clickhouse client $CH_FLAGS --query "SELECT name FROM system.columns WHERE database='${SRC_DB}' AND table='${t}'")
+        clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} AS ${SRC_DB}.${t}"
+        if echo "$COLS" | grep -qw cancer_study_identifier; then
+          MODE="cancer_study_identifier"
+          FILTER="cancer_study_identifier='${STUDY_FILTER}'"
+        elif echo "$COLS" | grep -qw cancer_study_id; then
+          MODE="cancer_study_id"
+          FILTER="cancer_study_id IN ${STUDY_SQ}"
+        elif echo "$COLS" | grep -qw sample_id; then
+          MODE="sample_id"
+          FILTER="sample_id IN ${SAMPLE_SQ}"
+        elif echo "$COLS" | grep -qw patient_id; then
+          MODE="patient_id"
+          FILTER="patient_id IN ${PATIENT_SQ}"
+        else
+          MODE="full-copy"
+          FILTER=""
+        fi
+        if [ -n "$FILTER" ]; then
+          log "  [$i/$N] $t ($MODE)"
+          clickhouse client $CH_FLAGS --query "INSERT INTO ${DST_DB}.${t} SELECT * FROM ${SRC_DB}.${t} WHERE ${FILTER}"
+        else
+          log "  [$i/$N] $t (study-agnostic, $MODE)"
+          clickhouse client $CH_FLAGS --query "INSERT INTO ${DST_DB}.${t} SELECT * FROM ${SRC_DB}.${t}"
+        fi
+      done
+    fi
+
+    # 6) Apply LLM-prep SQL files from the load-sql initContainer's payload.
+    #    Two phases:
+    #      a) sql/*.sql (portable, numeric order)
+    #      b) sql/portal-specific/<portal>/*.sql for every subdir
+    log "applying LLM-prep SQL files (portable)"
+    for f in $(ls /workdir/sql/*.sql 2>/dev/null | sort); do
+      log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
+      clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+    done
+    log "applying LLM-prep SQL files (portal-specific)"
+    for f in $(ls /workdir/sql/portal-specific/*/*.sql 2>/dev/null | sort); do
+      log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
+      clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+    done
+
+    # 7) Hand off state to the rollout container.
+    # (No GRANT step: llm_user already has `GRANT SELECT ON <db>.*` set up
+    # manually. ClickHouse stores grants by DB name, so they persist across
+    # DROP DATABASE + CREATE DATABASE cycles and the `.*` wildcard covers
+    # all tables the clone creates.)
+    echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
+    log "done. ACTIVE_DB=${DST_DB}"
+
+  rollout.sh: |
+    #!/bin/sh
+    set -eu
+
+    : "${MCP_NAMESPACE:?missing}"
+    : "${MCP_DEPLOYMENT:?missing}"
+    : "${MCP_CONFIGMAP:?missing}"
+
+    log() { echo "[rollout $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
+
+    # Read what the clone container produced.
+    . /workdir/state.env
+    : "${ACTIVE_DB:?missing from state.env}"
+    log "ACTIVE_DB=${ACTIVE_DB}"
+
+    CURRENT=$(kubectl -n "${MCP_NAMESPACE}" get configmap "${MCP_CONFIGMAP}" -o jsonpath='{.data.CLICKHOUSE_DATABASE}' 2>/dev/null || echo "")
+    if [ "$CURRENT" != "$ACTIVE_DB" ]; then
+      log "flipping ConfigMap from '${CURRENT:-<unset>}' → '${ACTIVE_DB}'"
+      kubectl -n "${MCP_NAMESPACE}" patch configmap "${MCP_CONFIGMAP}" \
+        --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
+    fi
+    log "rolling deployment ${MCP_DEPLOYMENT}"
+    kubectl -n "${MCP_NAMESPACE}" rollout restart deployment "${MCP_DEPLOYMENT}"
+    log "done"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: clickhouse-clone-job
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: clickhouse-clone-job-role
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["clickhouse-mcp-active"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["cbioagent-clickhouse-mcp"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: clickhouse-clone-job-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: clickhouse-clone-job
+    namespace: default
+roleRef:
+  kind: Role
+  name: clickhouse-clone-job-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioagent-clickhouse-clone-daily
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  schedule: "0 13 * * *"  # daily 13:00 UTC = 09:00 ET (DST) / 08:00 ET (EST)
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200
+      template:
+        spec:
+          serviceAccountName: clickhouse-clone-job
+          # MSK cluster only has the cbioagent workload pool labelled.
+          # The cron's spike is daily and short; sharing the pool with
+          # the MCP is acceptable here.
+          nodeSelector:
+            workload: cbioagent
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbioagent"
+              effect: "NoSchedule"
+          restartPolicy: OnFailure
+          volumes:
+            - name: workdir
+              emptyDir: {}
+            - name: scripts
+              configMap:
+                name: cbioagent-clone-job-scripts
+                defaultMode: 0555
+            - name: active-readonly
+              configMap:
+                name: clickhouse-mcp-active
+            # MSK-private SQL overrides (lives in portal-configuration).
+            # Mounted into the load-sql initContainer at /sql-mount and
+            # copied to /workdir/sql for the clone container to apply.
+            - name: sql-mount
+              configMap:
+                name: cbioagent-clone-sql-msk
+          # Three sequential containers: load-sql → clone → rollout.
+          initContainers:
+            # Replaces the 203 fetch-sql container (which pulls SQL from
+            # the cbioportal/mcp image). For MSK we mount a ConfigMap so
+            # the SQL stays in the private portal-configuration repo.
+            - name: load-sql
+              image: busybox:1.36
+              command: ["sh", "-c", "mkdir -p /workdir/sql && cp /sql-mount/*.sql /workdir/sql/ && ls /workdir/sql"]
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                - mountPath: /sql-mount
+                  name: sql-mount
+                  readOnly: true
+            - name: clone
+              image: clickhouse/clickhouse-server:26.2-alpine
+              command: ["/bin/sh", "/scripts/clone.sh"]
+              envFrom:
+                - secretRef:
+                    name: clickhouse-librechat-admin
+              env:
+                - name: MGMT_DB
+                  value: "mskcc_update_management_database"
+                - name: PORTAL_DB_VALUE
+                  value: "msk"
+                - name: SRC_PREFIX
+                  value: "cbioportal_msk_"
+                - name: DST_PREFIX
+                  value: "cbioportal_msk_librechat_"
+                - name: STUDY_FILTER
+                  value: "mskimpact"
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                - mountPath: /scripts
+                  name: scripts
+                  readOnly: true
+                - mountPath: /active
+                  name: active-readonly
+                  readOnly: true
+          containers:
+            - name: rollout
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "/scripts/rollout.sh"]
+              env:
+                - name: MCP_NAMESPACE
+                  value: "default"
+                - name: MCP_DEPLOYMENT
+                  value: "cbioagent-clickhouse-mcp"
+                - name: MCP_CONFIGMAP
+                  value: "clickhouse-mcp-active"
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                  readOnly: true
+                - mountPath: /scripts
+                  name: scripts
+                  readOnly: true
