@@ -16,6 +16,8 @@ librechat:
     DOMAIN_CLIENT: "https://chat.cbioportal.org"
     DOMAIN_SERVER: "https://chat.cbioportal.org"
     NODE_OPTIONS: "--require dd-trace/init"
+    DD_ENV: "public"
+    DD_VERSION: "v0.8.3"
     DD_LLMOBS_ENABLED: "1"
     DD_LLMOBS_ML_APP: "cbioagent"
     DD_LLMOBS_AGENTLESS_ENABLED: "true"
