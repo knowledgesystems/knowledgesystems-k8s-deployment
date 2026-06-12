@@ -11,12 +11,14 @@
 #     Tables with cancer_study_identifier / cancer_study_id /
 #     sample_id / patient_id are filtered; study-agnostic tables
 #     (gene, oncotree, etc.) are copied wholesale.
-#   - SQL overrides come from a portal-configuration ConfigMap
-#     (cbioagent-clone-sql-msk) mounted at /workdir/sql, NOT from the
-#     cbioportal/mcp image. Keeps MSK study-selection preferences
-#     private. The fetch-sql initContainer that 203 uses is replaced
-#     by a busybox load-sql initContainer that copies from the
-#     ConfigMap mount to /workdir/sql.
+#   - SQL overrides are split. Portable files (0-3: cleanup, column
+#     comments, oncotree, preferences table) come from the
+#     cbioportal/mcp image via the fetch-sql initContainer (same as
+#     203 — no duplication of upstream SQL). MSK-private files
+#     (4-msk-preferences.sql: study selections + mskimpact_gene_coverage
+#     view) come from the cbioagent-clone-sql-msk ConfigMap in
+#     portal-configuration via the load-msk-sql initContainer, which
+#     overlays them on top of /workdir/sql.
 #   - Env vars target the MSK ClickHouse cluster + management DB:
 #       MGMT_DB=mskcc_update_management_database
 #       PORTAL_DB_VALUE=msk
@@ -28,8 +30,8 @@
 #   - cbioagent-clone-job-scripts ConfigMap (clone.sh + rollout.sh,
 #     kept identical to 203's so both accounts converge on one script)
 #   - clickhouse-clone-job ServiceAccount + Role + RoleBinding
-#   - cbioagent-clickhouse-clone-daily CronJob (3 containers: load-sql →
-#     clone → rollout)
+#   - cbioagent-clickhouse-clone-daily CronJob (4 containers: fetch-sql →
+#     load-msk-sql → clone → rollout)
 #
 # Companion changes:
 #   - portal-configuration: clickhouse-librechat-admin Secret +
@@ -194,7 +196,11 @@ data:
       done
     fi
 
-    # 6) Apply LLM-prep SQL files from the load-sql initContainer's payload.
+    # 6) Apply LLM-prep SQL files. Portable files 0-3 land in /workdir/sql
+    #    via fetch-sql (from the cbioportal/mcp image); MSK-private file 4
+    #    is overlaid by load-msk-sql (from the cbioagent-clone-sql-msk
+    #    ConfigMap in portal-configuration). Numeric ordering controls
+    #    apply order — 4 sorts after 0-3 as intended.
     #    Two phases:
     #      a) sql/*.sql (portable, numeric order)
     #      b) sql/portal-specific/<portal>/*.sql for every subdir
@@ -316,19 +322,34 @@ spec:
               configMap:
                 name: clickhouse-mcp-active
             # MSK-private SQL overrides (lives in portal-configuration).
-            # Mounted into the load-sql initContainer at /sql-mount and
-            # copied to /workdir/sql for the clone container to apply.
+            # Currently just 4-msk-preferences.sql (preferences INSERTs +
+            # mskimpact_gene_coverage view). The portable files 0-3 come
+            # from the cbioportal/mcp image via fetch-sql instead — no
+            # duplication of upstream SQL.
             - name: sql-mount
               configMap:
                 name: cbioagent-clone-sql-msk
-          # Three sequential containers: load-sql → clone → rollout.
+          # Four sequential containers: fetch-sql → load-msk-sql → clone → rollout.
           initContainers:
-            # Replaces the 203 fetch-sql container (which pulls SQL from
-            # the cbioportal/mcp image). For MSK we mount a ConfigMap so
-            # the SQL stays in the private portal-configuration repo.
-            - name: load-sql
+            # 1) Pull the portable LLM-prep SQL files (cleanup, column
+            #    comments, oncotree enrichment, cancer_study_query_preferences
+            #    table) from the cbioportal/mcp image, identical to 203's
+            #    setup. imagePullPolicy: Always so each run picks up the
+            #    latest upstream changes.
+            - name: fetch-sql
+              image: cbioportal/mcp:latest
+              imagePullPolicy: Always
+              command: ["sh", "-c", "cp -rv /app/sql /workdir/sql && ls /workdir/sql"]
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+            # 2) Overlay the MSK-private SQL files on top. The ConfigMap
+            #    currently carries only 4-msk-preferences.sql; numeric
+            #    ordering ensures it applies after the 0-3 files from
+            #    fetch-sql.
+            - name: load-msk-sql
               image: busybox:1.36
-              command: ["sh", "-c", "mkdir -p /workdir/sql && cp /sql-mount/*.sql /workdir/sql/ && ls /workdir/sql"]
+              command: ["sh", "-c", "cp /sql-mount/*.sql /workdir/sql/ && ls /workdir/sql"]
               volumeMounts:
                 - mountPath: /workdir
                   name: workdir
