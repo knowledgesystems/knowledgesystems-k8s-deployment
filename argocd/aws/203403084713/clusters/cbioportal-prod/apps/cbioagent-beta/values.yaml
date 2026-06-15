@@ -115,8 +115,8 @@ volumes:
     persistentVolumeClaim:
       claimName: cbioagent-librechat-images
   - name: aws-creds
-    persistentVolumeClaim:
-      claimName: aws-credentials-pvc
+    secret:
+      secretName: aws-saml-credentials
 volumeMounts:
   - name: image-volume
     mountPath: /app/client/public/images
