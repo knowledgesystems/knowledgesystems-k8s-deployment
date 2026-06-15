@@ -1,26 +1,10 @@
-# Daily clone of the active cBioPortal production color into one of two
-# ping-pong librechat clone databases (cbioportal_public_librechat_blue or
-# _green) in ClickHouse, with LLM-prep SQL overrides applied. When the
-# build target ends up different from the buffer the MCP is currently
-# reading, the rollout container flips the clickhouse-mcp-active
-# ConfigMap and rolls cbioagent-clickhouse-mcp.
+# Daily clone of the active cBioPortal production color into a ping-pong
+# librechat buffer in ClickHouse, with LLM-prep SQL applied. Pod runs
+# fetch-sql → clone → patch-pointer; Reloader watches clickhouse-mcp-active
+# and rolls the MCP when the patch container flips the buffer pointer.
 #
-# This bundle ships:
-#   - clickhouse-mcp-active ConfigMap (CLICKHOUSE_DATABASE pointer)
-#   - cbioagent-clone-job-scripts ConfigMap (clone.sh + rollout.sh)
-#   - clickhouse-clone-job ServiceAccount + Role + RoleBinding
-#   - cbioagent-clickhouse-clone-daily CronJob (3 containers: fetch-sql →
-#     clone → rollout)
-#
-# Companion changes:
-#   - portal-configuration: clickhouse-librechat-admin Secret (admin creds)
-#   - cbioagent-clickhouse-mcp.yaml: envFrom extended to include the
-#     clickhouse-mcp-active ConfigMap
-#
-# SQL files reach the cron Pod via the existing cbioportal/mcp:latest
-# image (COPY . /app in its Dockerfile, no .dockerignore), copied into a
-# shared emptyDir by the fetch-sql initContainer. No new clone-job image
-# is built.
+# SQL files come from the cbioportal/mcp image (COPY . /app in its
+# Dockerfile, no .dockerignore) via the fetch-sql initContainer.
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -130,38 +114,11 @@ data:
       clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
     done
 
-    # 7) Hand off state to the rollout container.
-    # (No GRANT step: llm_user already has `GRANT SELECT ON <db>.*` set up
-    # manually. ClickHouse stores grants by DB name, so they persist across
-    # DROP DATABASE + CREATE DATABASE cycles and the `.*` wildcard covers
-    # all tables the clone creates.)
+    # 7) Hand off state to the patch-pointer container.
+    # llm_user grants persist across DROP DATABASE + CREATE DATABASE in
+    # ClickHouse so no GRANT step here.
     echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
     log "done. ACTIVE_DB=${DST_DB}"
-
-  rollout.sh: |
-    #!/bin/sh
-    set -eu
-
-    : "${MCP_NAMESPACE:?missing}"
-    : "${MCP_DEPLOYMENT:?missing}"
-    : "${MCP_CONFIGMAP:?missing}"
-
-    log() { echo "[rollout $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
-
-    # Read what the clone container produced.
-    . /workdir/state.env
-    : "${ACTIVE_DB:?missing from state.env}"
-    log "ACTIVE_DB=${ACTIVE_DB}"
-
-    CURRENT=$(kubectl -n "${MCP_NAMESPACE}" get configmap "${MCP_CONFIGMAP}" -o jsonpath='{.data.CLICKHOUSE_DATABASE}' 2>/dev/null || echo "")
-    if [ "$CURRENT" != "$ACTIVE_DB" ]; then
-      log "flipping ConfigMap from '${CURRENT:-<unset>}' → '${ACTIVE_DB}'"
-      kubectl -n "${MCP_NAMESPACE}" patch configmap "${MCP_CONFIGMAP}" \
-        --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
-    fi
-    log "rolling deployment ${MCP_DEPLOYMENT}"
-    kubectl -n "${MCP_NAMESPACE}" rollout restart deployment "${MCP_DEPLOYMENT}"
-    log "done"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -175,13 +132,10 @@ metadata:
   name: clickhouse-clone-job-role
   namespace: default
 rules:
+  # Reloader rolls cbioagent-clickhouse-mcp when this ConfigMap changes.
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames: ["clickhouse-mcp-active"]
-    verbs: ["get", "patch", "update"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    resourceNames: ["cbioagent-clickhouse-mcp"]
     verbs: ["get", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -235,7 +189,7 @@ spec:
             - name: active-readonly
               configMap:
                 name: clickhouse-mcp-active
-          # Three sequential containers: fetch SQL → clone → rollout.
+          # Three sequential containers: fetch-sql → clone → patch-pointer.
           initContainers:
             - name: fetch-sql
               image: cbioportal/mcp:latest
@@ -260,20 +214,22 @@ spec:
                   name: active-readonly
                   readOnly: true
           containers:
-            - name: rollout
+            # Patches clickhouse-mcp-active with the buffer the clone
+            # container wrote to /workdir/state.env. Reloader (watching
+            # clickhouse-mcp-active via the annotation on
+            # cbioagent-clickhouse-mcp) rolls the MCP.
+            - name: patch-pointer
               image: bitnami/kubectl:latest
-              command: ["/bin/sh", "/scripts/rollout.sh"]
-              env:
-                - name: MCP_NAMESPACE
-                  value: "default"
-                - name: MCP_DEPLOYMENT
-                  value: "cbioagent-clickhouse-mcp"
-                - name: MCP_CONFIGMAP
-                  value: "clickhouse-mcp-active"
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  . /workdir/state.env
+                  : "${ACTIVE_DB:?missing from state.env}"
+                  echo "patching clickhouse-mcp-active → ${ACTIVE_DB}"
+                  kubectl -n default patch configmap clickhouse-mcp-active \
+                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
               volumeMounts:
                 - mountPath: /workdir
                   name: workdir
-                  readOnly: true
-                - mountPath: /scripts
-                  name: scripts
                   readOnly: true
