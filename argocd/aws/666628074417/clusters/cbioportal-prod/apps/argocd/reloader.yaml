@@ -1,0 +1,37 @@
+# Stakater Reloader — watches ConfigMaps and Secrets for changes and
+# auto-rolls Deployments/StatefulSets/DaemonSets that opt in via an
+# annotation. Lets us drop the rollout container in the cbioagent
+# clone CronJob: the cron just patches clickhouse-mcp-active, and
+# Reloader sees that and restarts cbioagent-clickhouse-mcp.
+#
+# Targeted annotation pattern (preferred over auto-mode):
+#   metadata.annotations.configmap.reloader.stakater.com/reload:
+#     "clickhouse-mcp-active"
+#
+# Refs:
+#   https://github.com/stakater/Reloader
+#   https://stakater.github.io/stakater-charts/index.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: reloader
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://stakater.github.io/stakater-charts
+    chart: reloader
+    targetRevision: 2.2.12
+    helm:
+      releaseName: reloader
+      # Defaults watch all namespaces, no leader election (single replica),
+      # no extra metrics. Override here if/when we need to scope it.
+  destination:
+    namespace: reloader
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
