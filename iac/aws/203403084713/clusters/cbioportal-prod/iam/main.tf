@@ -218,7 +218,7 @@ resource "aws_iam_role" "userServiceRoleK8sAwsCredsManager" {
         }
         Condition = {
           StringEquals = {
-            "${var.cluster_oidc_provider_arn}:sub" = "system:serviceaccount:default:pod-restarter"
+            "${var.cluster_oidc_provider_arn}:sub" = "system:serviceaccount:default:k8s-aws-creds-manager-pod-restarter"
           }
         }
       }
