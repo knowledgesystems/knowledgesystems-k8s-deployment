@@ -24,6 +24,7 @@ global:
 librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config-beta"
+  AWS_PROFILE: "490004633549"
   # Non-secret env vars. Secrets (JWT_SECRET, CREDS_KEY, CREDS_IV,
   # JWT_REFRESH_SECRET, MEILI_MASTER_KEY, API keys, etc.) live in the
   # librechat-credentials-env Secret in portal-configuration and are mounted
