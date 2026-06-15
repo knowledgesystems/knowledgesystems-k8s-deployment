@@ -1,0 +1,2 @@
+global:
+  imagePullSecrets: dockerhub-creds
