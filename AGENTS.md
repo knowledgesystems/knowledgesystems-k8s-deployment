@@ -37,7 +37,3 @@ For ConfigMaps whose data is prose-shaped (markdown, SQL, scripts), prefer real 
 ### Secrets
 
 Don't add Secret manifests to this repo. They live in `portal-configuration` under `secrets/<app>/`.
-
-## Dev servers
-
-Headless dev server — bind to `0.0.0.0` (not `localhost`) and report `http://macbook-server-1337:<port>`.
