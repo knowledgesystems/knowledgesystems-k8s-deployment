@@ -7,3 +7,8 @@ output "fargate_pod_execution_role_arn" {
   value = aws_iam_role.userServiceRoleFargatePodExecutionCbioportal.arn
   description = "ARN of the IAM Role for fargate pod execution"
 }
+
+output "k8s_aws_creds_manager_role_arn" {
+  value       = aws_iam_role.userServiceRoleK8sAwsCredsManager.arn
+  description = "ARN of the IAM Role for the k8s AWS credentials manager"
+}
