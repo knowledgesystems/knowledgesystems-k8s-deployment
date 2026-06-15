@@ -83,12 +83,9 @@ livenessProbe:
 
 volumes:
   - name: aws-creds
-    secret:
-      secretName: k8s-aws-creds-manager
+    persistentVolumeClaim:
+      claimName: aws-credentials-pvc
 volumeMounts:
   - name: aws-creds
     mountPath: /home/node/.aws
     readOnly: true
-
-deploymentAnnotations:
-  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager"
