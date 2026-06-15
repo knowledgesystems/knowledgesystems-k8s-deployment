@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: k8s-cost-dashboard
+  annotations:
+    secret.reloader.stakater.com/reload: "k8s-aws-creds-manager"
   labels:
     run: k8s-cost-dashboard
 spec:
