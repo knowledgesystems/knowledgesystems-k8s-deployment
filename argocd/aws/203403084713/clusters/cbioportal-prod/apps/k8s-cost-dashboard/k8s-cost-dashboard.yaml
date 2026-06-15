@@ -65,6 +65,7 @@ spec:
               mountPath: /app/.cache
             - name: aws-creds
               mountPath: /root/.aws
+              readOnly: true
       nodeSelector:
         workload-class: x86-general
       restartPolicy: Always
@@ -76,8 +77,8 @@ spec:
           persistentVolumeClaim:
             claimName: k8s-cost-dashboard-cache
         - name: aws-creds
-          persistentVolumeClaim:
-            claimName: k8s-cost-dashboard-aws-pvc
+          secret:
+            secretName: k8s-aws-creds-manager
 ---
 apiVersion: v1
 kind: Service
