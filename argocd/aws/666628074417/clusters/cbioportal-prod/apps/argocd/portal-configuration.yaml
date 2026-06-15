@@ -11,6 +11,12 @@ spec:
       targetRevision: HEAD
       directory:
         recurse: true
+        # Kustomize-built ConfigMaps live in this subdir and are
+        # deployed by a dedicated Argo Application
+        # (cbioagent-msk-configmaps). Exclude here so this directory
+        # source doesn't try to apply kustomization.yaml + raw
+        # .sql/.md files as plain manifests.
+        exclude: 'secrets/cbioagent/msk-configmaps/**'
     - repoURL: https://github.com/knowledgesystems/portal-configuration
       path: argocd/aws/shared
       targetRevision: HEAD
