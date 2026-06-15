@@ -116,7 +116,7 @@ volumes:
       claimName: cbioagent-librechat-images
   - name: aws-creds
     secret:
-      secretName: aws-saml-credentials
+      secretName: k8s-aws-creds-manager
 volumeMounts:
   - name: image-volume
     mountPath: /app/client/public/images
