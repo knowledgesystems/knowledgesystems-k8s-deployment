@@ -12,6 +12,9 @@ spec:
           containers:
             - name: saml2aws
               image: public.ecr.aws/ubuntu/ubuntu:22.04_stable
+              env:
+                - name: DEBIAN_FRONTEND
+                  value: noninteractive
               command:
                 - /bin/bash
                 - -c
