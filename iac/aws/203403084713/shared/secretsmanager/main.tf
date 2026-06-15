@@ -31,3 +31,18 @@ resource "aws_secretsmanager_secret_version" "keycloak_db_pw" {
   secret_string_wo         = ephemeral.random_password.keycloak_db_pw.result
   secret_string_wo_version = var.KEYCLOAK_DB_PASSWORD_VERSION
 }
+
+resource "aws_secretsmanager_secret" "k8s_aws_creds_manager" {
+  name        = "user-k8s-aws-creds-manager"
+  description = "Service account credentials for multiple AWS accounts used by the K8s group"
+}
+
+ephemeral "aws_secretsmanager_secret_version" "k8s_aws_creds_manager_current" {
+  secret_id = aws_secretsmanager_secret.k8s_aws_creds_manager.id
+}
+
+resource "aws_secretsmanager_secret_version" "k8s_aws_creds_manager" {
+  secret_id                = aws_secretsmanager_secret.k8s_aws_creds_manager.id
+  secret_string_wo         = coalesce(var.K8S_AWS_CREDS_MANAGER_VALUE, ephemeral.aws_secretsmanager_secret_version.k8s_aws_creds_manager_current.secret_string)
+  secret_string_wo_version = var.K8S_AWS_CREDS_MANAGER_VERSION
+}

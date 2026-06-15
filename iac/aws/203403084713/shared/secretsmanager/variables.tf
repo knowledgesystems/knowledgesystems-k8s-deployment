@@ -32,3 +32,16 @@ variable "KEYCLOAK_DB_PASSWORD_VERSION" {
   type        = number
   default     = 2
 }
+
+variable "K8S_AWS_CREDS_MANAGER_VALUE" {
+  description = "JSON credentials for k8s-aws-creds-manager; supply only when rotating (bumping K8S_AWS_CREDS_MANAGER_VERSION)"
+  type        = string
+  ephemeral   = true
+  default     = null
+}
+
+variable "K8S_AWS_CREDS_MANAGER_VERSION" {
+  description = "Bump this to trigger a credential update for k8s-aws-creds-manager"
+  type        = number
+  default     = 2
+}

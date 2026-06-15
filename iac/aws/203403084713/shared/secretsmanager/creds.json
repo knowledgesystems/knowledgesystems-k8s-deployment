@@ -1,0 +1,41 @@
+{
+  "saml2aws_url": "https://ssofed.mskcc.org",
+  "accounts": [
+    {
+      "profile": "084637913395",
+      "username": "RES_SKI_OncoKB",
+      "password": "RES_SKI_OncoKB_MSKCC",
+      "role": "arn:aws:iam::084637913395:role/mskAutomationUser"
+    },
+    {
+      "profile": "175678591974",
+      "username": "SVC_OncoKB_R",
+      "password": "^TatEBaP1zyAR",
+      "role": "arn:aws:iam::175678591974:role/mskAutomationUser"
+    },
+    {
+      "profile": "203403084713",
+      "username": "SVC_SchultzLab_R",
+      "password": "F$zhi36V8kDY",
+      "role": "arn:aws:iam::203403084713:role/mskAutomationUser"
+    },
+    {
+      "profile": "397229547211",
+      "username": "SVC_cbioportal_D",
+      "password": "8.5?y+&lEaRH5+[=",
+      "role": "arn:aws:iam::397229547211:role/mskAutomationUser"
+    },
+    {
+      "profile": "666628074417",
+      "username": "res_ski_cbioportal",
+      "password": "3g3zGbC!",
+      "role": "arn:aws:iam::666628074417:role/mskAutomationUser"
+    },
+    {
+      "profile": "762447640649",
+      "username": "SVC_SKI_OncoKB_D",
+      "password": "59g#tGL8rPDn",
+      "role": "arn:aws:iam::762447640649:role/mskAutomationUser"
+    }
+  ]
+}
