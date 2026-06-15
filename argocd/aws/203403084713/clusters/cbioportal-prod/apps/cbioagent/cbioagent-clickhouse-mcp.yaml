@@ -41,6 +41,10 @@ spec:
             # middleware on the mcp-cbioportal-db-ingress Ingress.
             - name: CLICKHOUSE_MCP_HTTP_PATH
               value: "/db/mcp"
+            # Trust Traefik's X-Forwarded-* headers so Starlette/FastMCP
+            # builds external redirects with the original HTTPS scheme.
+            - name: FORWARDED_ALLOW_IPS
+              value: "*"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
