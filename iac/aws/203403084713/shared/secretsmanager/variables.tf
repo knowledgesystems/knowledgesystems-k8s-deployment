@@ -43,5 +43,5 @@ variable "K8S_AWS_CREDS_MANAGER_VALUE" {
 variable "K8S_AWS_CREDS_MANAGER_VERSION" {
   description = "Bump this to trigger a credential update for k8s-aws-creds-manager"
   type        = number
-  default     = 2
+  default     = 3
 }
