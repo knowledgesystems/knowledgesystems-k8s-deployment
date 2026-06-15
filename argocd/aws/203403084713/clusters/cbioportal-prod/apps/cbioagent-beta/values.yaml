@@ -124,3 +124,6 @@ volumeMounts:
   - name: aws-creds
     mountPath: /home/node/.aws
     readOnly: true
+deploymentAnnotations:
+  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
+  configmap.reloader.stakater.com/reload: "librechat-config-beta"
