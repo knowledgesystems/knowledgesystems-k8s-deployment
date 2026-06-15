@@ -183,3 +183,53 @@ resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentCbioportal
   policy_arn = aws_iam_policy.userServiceCbioportalPublicDBDump.arn
   role       = aws_iam_role.userServiceRoleCbioportalPublicDBDump.name
 }
+
+# K8s AWS credentials manager policy
+resource "aws_iam_policy" "userServicePolicyK8sAwsCredsManager" {
+  name        = "userServicePolicyK8sAwsCredsManager"
+  path        = "/"
+  description = "Policy to allow pods to retrieve credentials from Secrets Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "secretsmanager:GetSecretValue"
+        Resource = "arn:aws:secretsmanager:${local.account_region}:${local.account_id}:secret:${var.k8s_aws_creds_manager_secret_name}*"
+      }
+    ]
+  })
+}
+
+# K8s AWS credentials manager role
+resource "aws_iam_role" "userServiceRoleK8sAwsCredsManager" {
+  name        = "userServiceRoleK8sAwsCredsManager"
+  description = "Role for pod-restarter service account to access credentials in Secrets Manager"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Principal = {
+          Federated = "arn:aws:iam::${local.account_id}:oidc-provider/${var.cluster_oidc_provider_arn}"
+        }
+        Condition = {
+          StringEquals = {
+            "${var.cluster_oidc_provider_arn}:sub" = "system:serviceaccount:default:pod-restarter"
+          }
+        }
+      }
+    ]
+  })
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+}
+
+# K8s AWS credentials manager policy attachment
+resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentK8sAwsCredsManager" {
+  policy_arn = aws_iam_policy.userServicePolicyK8sAwsCredsManager.arn
+  role       = aws_iam_role.userServiceRoleK8sAwsCredsManager.name
+}

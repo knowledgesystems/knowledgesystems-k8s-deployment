@@ -19,3 +19,9 @@ variable "cbioportal_public_db_dump_bucket" {
   type        = string
   default     = "sc-203403084713-pp-jbeobuumvm3r4-bucket-rbgakorqrcyx"
 }
+
+variable "k8s_aws_creds_manager_secret_name" {
+  description = "Secrets Manager secret name."
+  type        = string
+  default     = "user-k8s-aws-creds-manager"
+}

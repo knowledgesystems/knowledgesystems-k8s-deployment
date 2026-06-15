@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: k8s-aws-creds-manager-cronjob
+spec:
+  schedule: "0 */6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: k8s-aws-creds-manager-pod-restarter
+          containers:
+            - name: saml2aws
+              image: public.ecr.aws/ubuntu/ubuntu:22.04_stable
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  export HOME=/home/node
+                  mkdir -p $HOME/.aws
+
+                  # Install dependencies
+                  apt-get update -qq
+                  apt-get install -y wget jq awscli
+
+                  # Install kubectl
+                  KUBECTL_VERSION=$(wget -qO- https://dl.k8s.io/release/stable.txt)
+                  wget -q https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/arm64/kubectl
+                  chmod +x kubectl && mv kubectl /usr/local/bin/
+
+                  # Install saml2aws
+                  wget -O saml2aws.tar.gz https://github.com/Versent/saml2aws/releases/download/v2.36.18/saml2aws_2.36.18_linux_arm64.tar.gz
+                  tar -xzvf saml2aws.tar.gz
+                  mv saml2aws /usr/local/bin/ && chmod +x /usr/local/bin/saml2aws
+
+                  # Fetch credentials from AWS Secrets Manager
+                  SECRET_JSON=$(aws secretsmanager get-secret-value \
+                    --secret-id user-k8s-aws-creds-manager \
+                    --query SecretString \
+                    --output text)
+
+                  SAML2AWS_URL=$(echo $SECRET_JSON | jq -r '.saml2aws_url')
+                  ACCOUNT_COUNT=$(echo $SECRET_JSON | jq '.accounts | length')
+                  echo "Refreshing credentials for $ACCOUNT_COUNT account(s)"
+
+                  # Loop over every account dynamically
+                  for i in $(seq 0 $(($ACCOUNT_COUNT - 1))); do
+                    PROFILE=$(echo $SECRET_JSON  | jq -r ".accounts[$i].profile")
+                    USERNAME=$(echo $SECRET_JSON | jq -r ".accounts[$i].username")
+                    PASSWORD=$(echo $SECRET_JSON | jq -r ".accounts[$i].password")
+                    ROLE=$(echo $SECRET_JSON     | jq -r ".accounts[$i].role")
+
+                    # Use per-account URL if set, otherwise fall back to top-level
+                    ACCOUNT_URL=$(echo $SECRET_JSON | jq -r ".accounts[$i].saml2aws_url // .saml2aws_url")
+
+                    echo "Refreshing profile: $PROFILE"
+
+                    export SAML2AWS_USERNAME=$USERNAME
+                    export SAML2AWS_PASSWORD=$PASSWORD
+                    export SAML2AWS_ROLE=$ROLE
+
+                    saml2aws configure \
+                      --idp-provider=Ping \
+                      --mfa=Auto \
+                      --url=$ACCOUNT_URL \
+                      --aws-urn=urn:amazon:webservices \
+                      --session-duration=28800 \
+                      --skip-prompt \
+                      --profile=$PROFILE
+
+                    saml2aws login \
+                      --profile=$PROFILE \
+                      --force \
+                      --skip-prompt
+                  done
+
+                  # Push the combined credentials file into a K8s Secret
+                  kubectl create secret generic aws-saml-credentials \
+                    --from-file=credentials=$HOME/.aws/credentials \
+                    --dry-run=client -o yaml | kubectl apply -f -
+
+                  echo "Done. Credentials secret updated."
+          nodeSelector:
+            workload: cbioportal
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbioportal"
+              effect: "NoSchedule"
+          restartPolicy: OnFailure
