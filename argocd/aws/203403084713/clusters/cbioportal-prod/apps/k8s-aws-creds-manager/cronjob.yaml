@@ -76,7 +76,7 @@ spec:
                   done
 
                   # Push the combined credentials file into a K8s Secret
-                  kubectl create secret generic aws-saml-credentials \
+                  kubectl create secret generic k8s-aws-creds-manager \
                     --from-file=credentials=$HOME/.aws/credentials \
                     --dry-run=client -o yaml | kubectl apply -f -
 
