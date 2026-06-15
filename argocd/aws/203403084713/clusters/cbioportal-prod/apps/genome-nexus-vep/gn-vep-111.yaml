@@ -22,7 +22,7 @@ spec:
     spec: 
       containers:
       - name: gn-vep-111
-        image: genomenexus/gn-vep:111-3.1.1-beta
+        image: genomenexus/gn-vep:111-3.1.1-rc1
         imagePullPolicy: Always
         command: ["java"]
         args: ["-Xmx4g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
