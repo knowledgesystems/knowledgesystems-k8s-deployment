@@ -4,6 +4,11 @@ metadata:
   name: cbioagent-clickhouse-mcp
   labels:
     run: cbioagent-clickhouse-mcp
+  annotations:
+    # Reloader (stakater) rolls this Deployment when clickhouse-mcp-active
+    # changes — the daily clone cron flips that ConfigMap's
+    # CLICKHOUSE_DATABASE on each successful build.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
 spec:
   replicas: 1
   selector:

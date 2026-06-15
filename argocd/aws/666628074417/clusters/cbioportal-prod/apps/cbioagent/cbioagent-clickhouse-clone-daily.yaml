@@ -1,49 +1,12 @@
-# Daily MSKIMPACT-only clone of the active MSK cBioPortal production
-# color into one of two ping-pong librechat clone databases
-# (cbioportal_msk_librechat_blue or _green) in ClickHouse, with LLM-prep
-# SQL overrides applied. When the build target ends up different from
-# the buffer the MCP is currently reading, the rollout container flips
-# the clickhouse-mcp-active ConfigMap and rolls cbioagent-clickhouse-mcp.
+# Daily mskimpact-only clone of the active MSK cBioPortal production
+# color into a ping-pong librechat buffer in ClickHouse, with LLM-prep
+# SQL applied. Pod runs fetch-sql → load-msk-sql → clone → patch-pointer;
+# Reloader watches clickhouse-mcp-active and rolls the MCP when the
+# patch container flips the buffer pointer.
 #
-# Differences from the 203 (public) variant:
-#   - STUDY_FILTER=mskimpact: only mskimpact study rows are kept
-#     (not msk_target_test, not any other study in the source DB).
-#     Tables with cancer_study_identifier / cancer_study_id /
-#     sample_id / patient_id are filtered; study-agnostic tables
-#     (gene, oncotree, etc.) are copied wholesale.
-#   - SQL overrides are split. Portable files (0-3: cleanup, column
-#     comments, oncotree, preferences table) come from the
-#     cbioportal/mcp image via the fetch-sql initContainer (same as
-#     203 — no duplication of upstream SQL). MSK-private files
-#     (4-msk-preferences.sql: study selections + mskimpact_gene_coverage
-#     view) come from the cbioagent-clone-sql-msk ConfigMap in
-#     portal-configuration via the load-msk-sql initContainer, which
-#     overlays them on top of /workdir/sql.
-#   - Env vars target the MSK ClickHouse cluster + management DB:
-#       MGMT_DB=mskcc_update_management_database
-#       PORTAL_DB_VALUE=msk
-#       SRC_PREFIX=cbioportal_msk_
-#       DST_PREFIX=cbioportal_msk_librechat_
-#
-# This bundle ships:
-#   - clickhouse-mcp-active ConfigMap (CLICKHOUSE_DATABASE pointer)
-#   - clickhouse-clone-job ServiceAccount + Role + RoleBinding
-#   - cbioagent-clickhouse-clone-daily CronJob (4 containers: fetch-sql →
-#     load-msk-sql → clone → rollout)
-#
-# The CronJob mounts the cbioagent-clone-job-scripts ConfigMap by name —
-# its source-of-truth (clone.sh + rollout.sh) lives next to the MSK SQL
-# and study guides in portal-configuration's msk-configmaps/ subdir and
-# is built into the ConfigMap by Kustomize. Kept private because the
-# per-table filter heuristic encodes MSK schema specifics.
-#
-# Companion changes:
-#   - portal-configuration: clickhouse-librechat-admin Secret +
-#     cbioagent-clone-sql-msk ConfigMap + cbioagent-study-guides-msk
-#     ConfigMap (the latter mounted by cbioagent-clickhouse-mcp).
-#   - cbioagent-clickhouse-mcp.yaml: envFrom extended to include the
-#     clickhouse-mcp-active ConfigMap; volume mount added for the
-#     study guides ConfigMap.
+# Scripts (clone.sh) and MSK-private SQL/study-guides live in
+# portal-configuration's msk-configmaps/ Kustomize subdir; portable
+# SQL files come from the cbioportal/mcp image.
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -70,13 +33,11 @@ metadata:
   name: clickhouse-clone-job-role
   namespace: default
 rules:
+  # Reloader (stakater) rolls cbioagent-clickhouse-mcp when this ConfigMap
+  # changes, so the cron only needs patch access to it.
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames: ["clickhouse-mcp-active"]
-    verbs: ["get", "patch", "update"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    resourceNames: ["cbioagent-clickhouse-mcp"]
     verbs: ["get", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -193,20 +154,22 @@ spec:
                   name: active-readonly
                   readOnly: true
           containers:
-            - name: rollout
+            # Patches clickhouse-mcp-active with the buffer the clone
+            # container wrote to /workdir/state.env. Reloader (in the
+            # reloader namespace, watching clickhouse-mcp-active via the
+            # annotation on cbioagent-clickhouse-mcp) rolls the MCP.
+            - name: patch-pointer
               image: bitnami/kubectl:latest
-              command: ["/bin/sh", "/scripts/rollout.sh"]
-              env:
-                - name: MCP_NAMESPACE
-                  value: "default"
-                - name: MCP_DEPLOYMENT
-                  value: "cbioagent-clickhouse-mcp"
-                - name: MCP_CONFIGMAP
-                  value: "clickhouse-mcp-active"
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  . /workdir/state.env
+                  : "${ACTIVE_DB:?missing from state.env}"
+                  echo "patching clickhouse-mcp-active → ${ACTIVE_DB}"
+                  kubectl -n default patch configmap clickhouse-mcp-active \
+                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
               volumeMounts:
                 - mountPath: /workdir
                   name: workdir
-                  readOnly: true
-                - mountPath: /scripts
-                  name: scripts
                   readOnly: true
