@@ -1,0 +1,33 @@
+# Deploys the MSK-private ConfigMaps used by the cbioagent clone CronJob
+# (cbioagent-clone-sql-msk) and the MCP Deployment
+# (cbioagent-study-guides-msk). Source content lives as real .sql / .md
+# files in portal-configuration's
+# argocd/aws/666628074417/.../secrets/cbioagent/msk-configmaps/ subdir,
+# and a kustomization.yaml in that subdir uses configMapGenerator to
+# build the ConfigMaps at sync time. GitHub renders the .md natively
+# and the .sql is no longer buried in YAML quoting.
+#
+# Companion change in portal-configuration.yaml (the main Argo
+# Application for portal-configuration): the corresponding source
+# excludes secrets/cbioagent/msk-configmaps/** so it doesn't try to
+# apply kustomization.yaml as a plain manifest.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioagent-msk-configmaps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/knowledgesystems/portal-configuration
+    path: argocd/aws/666628074417/clusters/cbioportal-prod/secrets/cbioagent/msk-configmaps
+    targetRevision: HEAD
+    # No explicit `kustomize:` block needed — Argo auto-detects a
+    # kustomization.yaml in the source path and renders accordingly.
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
