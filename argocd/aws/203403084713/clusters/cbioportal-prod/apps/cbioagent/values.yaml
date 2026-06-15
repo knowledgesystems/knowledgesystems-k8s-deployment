@@ -8,7 +8,6 @@ librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
   configEnv:
-    AWS_PROFILE: "490004633549"
     PRODUCT_FEEDBACK_ENABLED: "true"
     # Public URLs. Must live in the ConfigMap, not the shared
     # librechat-credentials-env Secret, because the Secret is mounted after
@@ -84,12 +83,9 @@ livenessProbe:
 
 volumes:
   - name: aws-creds
-    secret:
-      secretName: k8s-aws-creds-manager
+    persistentVolumeClaim:
+      claimName: aws-credentials-pvc
 volumeMounts:
   - name: aws-creds
     mountPath: /home/node/.aws
     readOnly: true
-deploymentAnnotations:
-  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
-  configmap.reloader.stakater.com/reload: "librechat-config"

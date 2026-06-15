@@ -30,7 +30,6 @@ librechat:
   # via existingSecretName. Because the Deployment's envFrom lists the Secret
   # after this ConfigMap, any overlap is resolved in the Secret's favor.
   configEnv:
-    AWS_PROFILE: "490004633549"
     PRODUCT_FEEDBACK_ENABLED: "true"
     DEBUG_PLUGINS: "true"
     PLUGIN_MODELS: "gpt-4,gpt-4-turbo-preview,gpt-4-0125-preview,gpt-4-1106-preview,gpt-4-0613,gpt-3.5-turbo,gpt-3.5-turbo-0125,gpt-3.5-turbo-1106,gpt-3.5-turbo-0613"
@@ -116,14 +115,11 @@ volumes:
     persistentVolumeClaim:
       claimName: cbioagent-librechat-images
   - name: aws-creds
-    secret:
-      secretName: k8s-aws-creds-manager
+    persistentVolumeClaim:
+      claimName: aws-credentials-pvc
 volumeMounts:
   - name: image-volume
     mountPath: /app/client/public/images
   - name: aws-creds
     mountPath: /home/node/.aws
     readOnly: true
-deploymentAnnotations:
-  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
-  configmap.reloader.stakater.com/reload: "librechat-config-beta"
