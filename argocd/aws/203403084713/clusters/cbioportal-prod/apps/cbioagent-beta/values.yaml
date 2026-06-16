@@ -16,6 +16,10 @@ fullnameOverride: cbioagent-librechat-beta
 
 replicaCount: 1
 
+deploymentAnnotations:
+  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
+  configmap.reloader.stakater.com/reload: "librechat-config-beta"
+
 global:
   librechat:
     existingSecretName: "librechat-credentials-env"
