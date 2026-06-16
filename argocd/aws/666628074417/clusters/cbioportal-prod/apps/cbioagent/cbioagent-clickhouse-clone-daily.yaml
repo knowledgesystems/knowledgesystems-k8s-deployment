@@ -1,0 +1,175 @@
+# Daily mskimpact-only clone of the active MSK cBioPortal production
+# color into a ping-pong librechat buffer in ClickHouse, with LLM-prep
+# SQL applied. Pod runs fetch-sql → load-msk-sql → clone → patch-pointer;
+# Reloader watches clickhouse-mcp-active and rolls the MCP when the
+# patch container flips the buffer pointer.
+#
+# Scripts (clone.sh) and MSK-private SQL/study-guides live in
+# portal-configuration's msk-configmaps/ Kustomize subdir; portable
+# SQL files come from the cbioportal/mcp image.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-mcp-active
+  namespace: default
+data:
+  # Initial seed. Same caveat as 203: until the empty-string-group
+  # ignoreDifferences gap is closed, Argo re-asserts this value on
+  # every sync, so keep it set to whichever buffer the MCP should be
+  # reading. Today (bootstrap): blue.
+  CLICKHOUSE_DATABASE: cbioportal_msk_librechat_blue
+---
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: clickhouse-clone-job
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: clickhouse-clone-job-role
+  namespace: default
+rules:
+  # Reloader (stakater) rolls cbioagent-clickhouse-mcp when this ConfigMap
+  # changes, so the cron only needs patch access to it.
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["clickhouse-mcp-active"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: clickhouse-clone-job-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: clickhouse-clone-job
+    namespace: default
+roleRef:
+  kind: Role
+  name: clickhouse-clone-job-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioagent-clickhouse-clone-daily
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  schedule: "0 13 * * *"  # daily 13:00 UTC = 09:00 ET (DST) / 08:00 ET (EST)
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200
+      template:
+        spec:
+          serviceAccountName: clickhouse-clone-job
+          # MSK cluster only has the cbioagent workload pool labelled.
+          # The cron's spike is daily and short; sharing the pool with
+          # the MCP is acceptable here.
+          nodeSelector:
+            workload: cbioagent
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbioagent"
+              effect: "NoSchedule"
+          restartPolicy: OnFailure
+          volumes:
+            - name: workdir
+              emptyDir: {}
+            - name: scripts
+              configMap:
+                name: cbioagent-clone-job-scripts
+                defaultMode: 0555
+            - name: active-readonly
+              configMap:
+                name: clickhouse-mcp-active
+            # MSK-private SQL overrides (lives in portal-configuration).
+            # Currently just 4-msk-preferences.sql (preferences INSERTs +
+            # mskimpact_gene_coverage view). The portable files 0-3 come
+            # from the cbioportal/mcp image via fetch-sql instead — no
+            # duplication of upstream SQL.
+            - name: sql-mount
+              configMap:
+                name: cbioagent-clone-sql-msk
+          # Four sequential containers: fetch-sql → load-msk-sql → clone → rollout.
+          initContainers:
+            # 1) Pull the portable LLM-prep SQL files (cleanup, column
+            #    comments, oncotree enrichment, cancer_study_query_preferences
+            #    table) from the cbioportal/mcp image, identical to 203's
+            #    setup. imagePullPolicy: Always so each run picks up the
+            #    latest upstream changes.
+            - name: fetch-sql
+              image: cbioportal/mcp:latest
+              imagePullPolicy: Always
+              command: ["sh", "-c", "cp -rv /app/sql /workdir/sql && ls /workdir/sql"]
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+            # 2) Overlay the MSK-private SQL files on top. The ConfigMap
+            #    currently carries only 4-msk-preferences.sql; numeric
+            #    ordering ensures it applies after the 0-3 files from
+            #    fetch-sql.
+            - name: load-msk-sql
+              image: busybox:1.36
+              command: ["sh", "-c", "cp /sql-mount/*.sql /workdir/sql/ && ls /workdir/sql"]
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                - mountPath: /sql-mount
+                  name: sql-mount
+                  readOnly: true
+            - name: clone
+              image: clickhouse/clickhouse-server:26.2-alpine
+              command: ["/bin/sh", "/scripts/clone.sh"]
+              envFrom:
+                - secretRef:
+                    name: clickhouse-librechat-admin
+              env:
+                - name: MGMT_DB
+                  value: "mskcc_update_management_database"
+                - name: PORTAL_DB_VALUE
+                  value: "msk"
+                - name: SRC_PREFIX
+                  value: "cbioportal_msk_"
+                - name: DST_PREFIX
+                  value: "cbioportal_msk_librechat_"
+                - name: STUDY_FILTER
+                  value: "mskimpact"
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                - mountPath: /scripts
+                  name: scripts
+                  readOnly: true
+                - mountPath: /active
+                  name: active-readonly
+                  readOnly: true
+          containers:
+            # Patches clickhouse-mcp-active with the buffer the clone
+            # container wrote to /workdir/state.env. Reloader (in the
+            # reloader namespace, watching clickhouse-mcp-active via the
+            # annotation on cbioagent-clickhouse-mcp) rolls the MCP.
+            - name: patch-pointer
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  . /workdir/state.env
+                  : "${ACTIVE_DB:?missing from state.env}"
+                  echo "patching clickhouse-mcp-active → ${ACTIVE_DB}"
+                  kubectl -n default patch configmap clickhouse-mcp-active \
+                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                  readOnly: true

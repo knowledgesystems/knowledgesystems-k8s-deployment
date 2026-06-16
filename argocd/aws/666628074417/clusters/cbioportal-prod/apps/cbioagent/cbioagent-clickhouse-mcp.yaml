@@ -4,6 +4,11 @@ metadata:
   name: cbioagent-clickhouse-mcp
   labels:
     run: cbioagent-clickhouse-mcp
+  annotations:
+    # Reloader (stakater) rolls this Deployment when clickhouse-mcp-active
+    # changes — the daily clone cron flips that ConfigMap's
+    # CLICKHOUSE_DATABASE on each successful build.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
 spec:
   replicas: 1
   selector:
@@ -22,8 +27,8 @@ spec:
             - containerPort: 8000
           env:
             # Mount FastMCP under the external sub-path so trailing-slash
-            # redirects point to https://mcp.cbioportal.aws.mskcc.org/db/mcp/
-            # rather than /mcp/. Paired with the mcp-cbioportal-db-ingress
+            # redirects point to https://chat.cbioportal.aws.mskcc.org/db/mcp/
+            # rather than /mcp/. Paired with the cbioagent-db-ingress
             # Ingress in this app: NO rewrite-target so the app sees the
             # full external path.
             - name: CLICKHOUSE_MCP_HTTP_PATH
@@ -31,6 +36,26 @@ spec:
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
+            # ConfigMap mounted AFTER the Secret so its CLICKHOUSE_DATABASE
+            # value wins (envFrom: last-writer-wins on key collisions). The
+            # cbioagent-clickhouse-clone-daily CronJob owns this ConfigMap
+            # and updates it when the production color flips, then rolls
+            # this Deployment.
+            - configMapRef:
+                name: clickhouse-mcp-active
+          volumeMounts:
+            # MSK-private study guides (lives in portal-configuration).
+            # Overlays the image's baked-in study-guides directory while
+            # the container is running, so the MCP server's
+            # _load_study_guide(study_id) picks up MSK content (e.g.
+            # mskimpact.md) instead of the public-portal guides.
+            - mountPath: /app/src/cbioportal_mcp/resources/study-guides
+              name: study-guides
+              readOnly: true
+      volumes:
+        - name: study-guides
+          configMap:
+            name: cbioagent-study-guides-msk
       nodeSelector:
         workload: "cbioagent"
       tolerations:
