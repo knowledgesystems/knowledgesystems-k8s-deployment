@@ -29,7 +29,7 @@ spec:
             #- -Xms5g
             #- -Xmx14g
             - -Xms100m
-            - -Xmx10g
+            - -Xmx11g
             - -XX:+UnlockExperimentalVMOptions
             - -XX:+UseShenandoahGC
             - -XX:ShenandoahUncommitDelay=1000
@@ -232,7 +232,7 @@ spec:
             timeoutSeconds: 1
           resources:
             limits:
-              memory: 8Gi
+              memory: 12Gi
             requests:
               memory: 2Gi
           terminationMessagePath: /dev/termination-log
