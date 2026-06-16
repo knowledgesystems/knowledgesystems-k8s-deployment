@@ -4,11 +4,16 @@ global:
     existingSecretName: "librechat-credentials-env"
     existingSecretApiKey: OPENAI_API_KEY
 
+deploymentAnnotations:
+  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
+  configmap.reloader.stakater.com/reload: "librechat-config"
+
 librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
   configEnv:
     PRODUCT_FEEDBACK_ENABLED: "true"
+    AWS_PROFILE: "490004633549"
     # Public URLs. Must live in the ConfigMap, not the shared
     # librechat-credentials-env Secret, because the Secret is mounted after
     # the ConfigMap in envFrom and would otherwise override beta's ConfigMap
@@ -83,8 +88,8 @@ livenessProbe:
 
 volumes:
   - name: aws-creds
-    persistentVolumeClaim:
-      claimName: aws-credentials-pvc
+    secret:
+      secretName: k8s-aws-creds-manager
 volumeMounts:
   - name: aws-creds
     mountPath: /home/node/.aws
