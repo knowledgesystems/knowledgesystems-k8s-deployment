@@ -35,6 +35,7 @@ librechat:
   # after this ConfigMap, any overlap is resolved in the Secret's favor.
   configEnv:
     PRODUCT_FEEDBACK_ENABLED: "true"
+    AWS_PROFILE: "490004633549"
     DEBUG_PLUGINS: "true"
     PLUGIN_MODELS: "gpt-4,gpt-4-turbo-preview,gpt-4-0125-preview,gpt-4-1106-preview,gpt-4-0613,gpt-3.5-turbo,gpt-3.5-turbo-0125,gpt-3.5-turbo-1106,gpt-3.5-turbo-0613"
     # Point at the prod meilisearch/rag-api — beta reuses them rather than
@@ -119,8 +120,8 @@ volumes:
     persistentVolumeClaim:
       claimName: cbioagent-librechat-images
   - name: aws-creds
-    persistentVolumeClaim:
-      claimName: aws-credentials-pvc
+    secret:
+      secretName: k8s-aws-creds-manager
 volumeMounts:
   - name: image-volume
     mountPath: /app/client/public/images
