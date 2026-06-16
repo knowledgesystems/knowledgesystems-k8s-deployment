@@ -8,20 +8,19 @@ node, with an EBS-backed SQLite catalog at `/app/data`. Zarr datasets are fetche
 over HTTPS from the public cbioportal imaging bucket — no datasource signing is configured
 (all datasets are public).
 
-## One-time manual steps (not in git)
+## One-time manual steps
 
-### 1. Create the Secret
+### 1. Secret
 
-Secret values are never committed. Create the Secret directly:
+The `cell-explorer-secrets` Secret is **not** in this repo — it lives in the private
+`portal-configuration` repo under `secrets/cell-explorer/` (cluster secrets convention).
+It must provide these keys, all consumed via `envFrom.secretRef` by the Deployment:
 
-```bash
-kubectl -n cell-explorer create secret generic cell-explorer-secrets \
-  --from-literal=KEYCLOAK_CLIENT_SECRET='<from keycloak cell-explorer realm>' \
-  --from-literal=ANTHROPIC_API_KEY='<anthropic key>' \
-  --from-literal=ADMIN_API_KEY='<generate: python -c "import secrets; print(secrets.token_urlsafe(32))">' \
-  --from-literal=CLI_STATE_SECRET='<generate: python -c "import secrets; print(secrets.token_urlsafe(32))">'
-# Optional Langfuse tracing: append --from-literal=LANGFUSE_PUBLIC_KEY=... etc.
-```
+- `KEYCLOAK_CLIENT_SECRET` — from the Keycloak `cell-explorer` realm
+- `ANTHROPIC_API_KEY` — chat agent
+- `ADMIN_API_KEY` — admin API (generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"`)
+- `CLI_STATE_SECRET` — CLI auth (generate the same way)
+- optional Langfuse: `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`
 
 ### 2. DNS
 
