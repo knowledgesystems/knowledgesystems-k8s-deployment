@@ -13,7 +13,7 @@ spec:
       ref: k8s-repo
     - chart: librechat
       repoURL: ghcr.io/danny-avila/librechat-chart
-      targetRevision: 1.9.1
+      targetRevision: 1.9.8
       helm:
         releaseName: cbioagent
         valueFiles:
