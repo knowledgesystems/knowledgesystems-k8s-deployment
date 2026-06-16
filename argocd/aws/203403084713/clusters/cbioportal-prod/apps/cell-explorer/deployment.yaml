@@ -38,6 +38,14 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /app/data
+          # Alembic migrations run before uvicorn serves /health; give a slow
+          # first-boot migration up to 5min before liveness/readiness apply.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /health
