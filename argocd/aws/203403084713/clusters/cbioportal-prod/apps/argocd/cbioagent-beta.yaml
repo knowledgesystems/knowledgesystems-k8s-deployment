@@ -13,7 +13,7 @@ spec:
       ref: k8s-repo
     - path: helm/librechat
       repoURL: https://github.com/danny-avila/LibreChat.git
-      targetRevision: v0.7.9-rc1
+      targetRevision: v0.8.3-rc1
       helm:
         releaseName: cbioagent-beta
         valueFiles:
