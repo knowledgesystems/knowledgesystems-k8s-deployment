@@ -332,6 +332,30 @@ locals {
         (var.LABEL_KEY) = "cbio-api"
       }
     }
+    cell-explorer = {
+      instance_types = ["m7i.large"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      # Pin to a single subnet/AZ so the EBS-backed PVC always reattaches.
+      subnet_ids = ["subnet-066aca23688737c91"]
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cell-explorer"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cell-explorer"
+      }
+      tags = {
+        cdsi-app   = "cell-explorer"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "hweej@mskcc.org"
+      }
+    }
   }
 
   karpenter_discovery_tag_value = var.CLUSTER_NAME
@@ -397,7 +421,7 @@ resource "kubernetes_storage_class_v1" "ebs-storage-class-default" {
   allow_volume_expansion = true
 
   parameters = {
-    type      = "gp3"
+    type = "gp3"
   }
 }
 
