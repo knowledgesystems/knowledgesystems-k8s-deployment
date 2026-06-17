@@ -33,6 +33,14 @@ spec:
             # full external path.
             - name: CLICKHOUSE_MCP_HTTP_PATH
               value: "/db/mcp"
+            # Trust X-Forwarded-* from any in-cluster source so uvicorn's
+            # 307 trailing-slash redirect honors Traefik's
+            # X-Forwarded-Proto: https. Without this the Location
+            # downgrades to http:// and strict clients (Claude Desktop,
+            # etc.) refuse to follow. The listener is only reachable via
+            # in-cluster Services, so "*" is fine.
+            - name: CLICKHOUSE_MCP_FORWARDED_ALLOW_IPS
+              value: "*"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
