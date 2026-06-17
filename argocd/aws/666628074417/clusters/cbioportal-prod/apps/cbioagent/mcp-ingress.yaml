@@ -53,15 +53,21 @@ spec:
           #
           # 203 doesn't need this because mcp.cbioportal.org is a
           # dedicated subdomain — no LibreChat SPA collision.
+          # pathType: ImplementationSpecific — nginx-ingress's admission
+          # webhook rejects `pathType: Prefix` for paths containing dots
+          # (treated as regex meta-characters under strict validation).
+          # ImplementationSpecific delegates path matching to the
+          # controller, which handles the literal `.well-known` segment
+          # as a normal prefix.
           - path: /.well-known/oauth-protected-resource
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: cbioagent-clickhouse-mcp
                 port:
                   number: 80
           - path: /.well-known/oauth-authorization-server
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: cbioagent-clickhouse-mcp
