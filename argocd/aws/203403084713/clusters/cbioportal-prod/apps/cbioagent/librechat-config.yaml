@@ -172,14 +172,14 @@ data:
                 - "How many studies have whole exome sequencing data?"
                 - "What TCGA data do you have?"
             - label: "Navigate cBioPortal"
-              icon: "map"
+              icon: "map-pin"
               description: "Create direct links to cBioPortal views, cohorts, plots, and study pages."
               starters:
                 - "Give me an OncoPrint for EGFR and KRAS in TCGA lung adenocarcinoma."
                 - "Can you create a cohort of metastatic prostate cancer with AR amplification?"
                 - "Show me a KM plot of primary vs met prostate cancer in the MSK-IMPACT study."
             - label: "Analyze Data"
-              icon: "heartbeat"
+              icon: "heart-pulse"
               description: "Compare genes, cancer types, molecular profiles, cohorts, and outcomes."
               starters:
                 - "Show me TP53 mutation frequency across all cancer types."
