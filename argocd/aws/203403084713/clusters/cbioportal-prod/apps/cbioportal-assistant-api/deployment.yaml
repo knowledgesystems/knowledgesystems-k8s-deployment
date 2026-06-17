@@ -36,7 +36,7 @@ spec:
                   key: AWS_PROFILE
           volumeMounts:
             - name: aws-creds
-              mountPath: /home/node/.aws
+              mountPath: /root/.aws
               readOnly: true
           livenessProbe:
             httpGet:
@@ -75,7 +75,6 @@ metadata:
   name: cbioportal-assistant-api-ingress
   namespace: default
   annotations:
-    acme.cert-manager.io/http01-ingress-class: traefik
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: traefik
     kubernetes.io/tls-acme: "true"
