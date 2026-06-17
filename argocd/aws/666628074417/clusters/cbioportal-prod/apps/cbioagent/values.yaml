@@ -6,6 +6,10 @@ global:
   imagePullSecrets:
     - dockerhub-creds
 
+deploymentAnnotations:
+  configmap.reloader.stakater.com/reload: "librechat-config"
+  secret.reloader.stakater.com/reload: "librechat-credentials-env"
+
 librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
