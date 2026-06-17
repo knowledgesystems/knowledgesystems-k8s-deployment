@@ -44,18 +44,26 @@ spec:
             - configMapRef:
                 name: clickhouse-mcp-active
           volumeMounts:
-            # MSK-private study guides (lives in portal-configuration).
-            # Overlays the image's baked-in study-guides directory while
-            # the container is running, so the MCP server's
-            # _load_study_guide(study_id) picks up MSK content (e.g.
+            # MSK study guides (lives in portal-configuration). Overlays
+            # the image's baked-in study-guides directory so the MCP's
+            # _load_study_guide(study_id) returns MSK content (e.g.
             # mskimpact.md) instead of the public-portal guides.
             - mountPath: /app/src/cbioportal_mcp/resources/study-guides
               name: study-guides
+              readOnly: true
+            # MSK general guides surfaced via the MCP's
+            # get_general_guide(name) tool — e.g. cdsi-info on CDSI data
+            # provenance.
+            - mountPath: /app/src/cbioportal_mcp/resources/guides
+              name: general-guides
               readOnly: true
       volumes:
         - name: study-guides
           configMap:
             name: cbioagent-study-guides-msk
+        - name: general-guides
+          configMap:
+            name: cbioagent-general-guides-msk
       nodeSelector:
         workload: "cbioagent"
       tolerations:
