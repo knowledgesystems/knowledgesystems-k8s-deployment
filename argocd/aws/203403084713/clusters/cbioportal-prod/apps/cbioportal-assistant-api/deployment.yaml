@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-assistant-api
+  namespace: default
+  annotations:
+    secret.reloader.stakater.com/reload: "cbioportal-assistant-api-secrets,k8s-aws-creds-manager"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cbioportal-assistant-api
+  template:
+    metadata:
+      labels:
+        app: cbioportal-assistant-api
+    spec:
+      containers:
+        - name: api
+          image: cbioportal/cbioportal-dev:assistant-api-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3001
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-assistant-api-secrets
+                  key: JWT_SECRET
+            - name: AWS_PROFILE
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-assistant-api-secrets
+                  key: AWS_PROFILE
+          volumeMounts:
+            - name: aws-creds
+              mountPath: /home/node/.aws
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: aws-creds
+          secret:
+            secretName: k8s-aws-creds-manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-assistant-api
+  namespace: default
+spec:
+  selector:
+    app: cbioportal-assistant-api
+  ports:
+    - port: 80
+      name: http
+      targetPort: 3001
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cbioportal-assistant-api-ingress
+  namespace: default
+  annotations:
+    acme.cert-manager.io/http01-ingress-class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/tls-acme: "true"
+  labels:
+    app.kubernetes.io/instance: cbioportal-assistant-api
+spec:
+  rules:
+    - host: assistant-api.cbioportal.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioportal-assistant-api
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - assistant-api.cbioportal.org
+      secretName: assistant-api-cbioportal-cert
