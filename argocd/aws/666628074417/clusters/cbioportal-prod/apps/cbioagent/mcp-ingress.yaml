@@ -41,3 +41,29 @@ spec:
                 name: cbioagent-clickhouse-mcp
                 port:
                   number: 80
+          # Route OAuth discovery paths to the MCP backend so they 404
+          # cleanly. Without these, nginx falls through to the LibreChat
+          # SPA's catch-all at `/`, which serves index.html (200 OK,
+          # text/html). Claude Desktop interprets the 200 as "OAuth is
+          # required here" and tries Dynamic Client Registration, which
+          # fails ("Couldn't register with cBioPortal MSK DB's sign-in
+          # service"). FastMCP returns 404 for any path outside /db/mcp,
+          # which is the correct signal for "no OAuth required" — the
+          # client then connects unauthenticated.
+          #
+          # 203 doesn't need this because mcp.cbioportal.org is a
+          # dedicated subdomain — no LibreChat SPA collision.
+          - path: /.well-known/oauth-protected-resource
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp
+                port:
+                  number: 80
+          - path: /.well-known/oauth-authorization-server
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp
+                port:
+                  number: 80
