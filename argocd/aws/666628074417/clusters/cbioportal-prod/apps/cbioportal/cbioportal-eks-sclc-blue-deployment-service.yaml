@@ -7,7 +7,7 @@ metadata:
     run: eks-sclc-blue
     tags.datadoghq.com/env: eks-sclc
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.2
+    tags.datadoghq.com/version: 7.0.3
   name: eks-sclc-blue
 spec:
   progressDeadlineSeconds: 600
@@ -30,7 +30,7 @@ spec:
         run: eks-sclc-blue
         tags.datadoghq.com/env: eks-sclc
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.2
+        tags.datadoghq.com/version: 7.0.3
     spec:
       containers:
         - args:
@@ -214,7 +214,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-sclc-blue
-          image: cbioportal/cbioportal:v7.0.2-web-shenandoah
+          image: cbioportal/cbioportal:v7.0.3-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
