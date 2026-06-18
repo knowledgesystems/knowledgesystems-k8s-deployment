@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-api-blue
     tags.datadoghq.com/env: eks-public-api
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.2
+    tags.datadoghq.com/version: 7.0.3
   name: cbioportal-backend-public-api-blue
 spec:
   progressDeadlineSeconds: 600
@@ -28,7 +28,7 @@ spec:
         run: cbioportal-backend-public-api-blue
         tags.datadoghq.com/env: eks-public-api
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.2
+        tags.datadoghq.com/version: 7.0.3
     spec:
       containers:
         - args:
@@ -258,7 +258,7 @@ spec:
             - name: DD_SERVICE
               value: "cbioportal"
             - name: DD_VERSION
-              value: "7.0.2"
+              value: "7.0.3"
             # 1. Ensure collection is explicitly enabled
             - name: DD_TRACE_CLIENT_IP_ENABLED
               value: "true"
@@ -274,7 +274,7 @@ spec:
             - secretRef:
                 name: cbioportal-public-blue
           # Please change this in tandem with the website backend image.
-          image: cbioportal/cbioportal:v7.0.2-web-shenandoah
+          image: cbioportal/cbioportal:v7.0.3-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
