@@ -203,7 +203,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-green
-          image: cbioportal/cbioportal@sha256:04c42a74314d41b5c0c5775ab76ecff793c3417ca731281b1454393da5a346f9
+          image: cbioportal/cbioportal@sha256:de3344943f7fac9f4d5593cd4c07133e3b04d88b49b79863103f8250ae694dbb
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
