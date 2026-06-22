@@ -11,10 +11,11 @@ spec:
     targetRevision: HEAD
     directory:
       recurse: true
+  # Manual sync — we bring cell-explorer up one resource at a time and sync by
+  # hand; no automated/selfHeal/prune.
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
   destination:
     namespace: cell-explorer
     server: https://kubernetes.default.svc
