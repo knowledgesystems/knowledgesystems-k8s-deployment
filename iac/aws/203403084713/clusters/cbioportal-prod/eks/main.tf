@@ -332,7 +332,10 @@ locals {
         (var.LABEL_KEY) = "cbio-api"
       }
     }
-    cell-explorer = {
+    # Nodegroup name kept <=12 chars: the module derives an IAM role name_prefix
+    # "userServiceRole-<name>-<hash>-" which AWS caps at 38. Workload taint/label
+    # below stay "cell-explorer" to match the Deployment's nodeSelector.
+    cellexplorer = {
       instance_types = ["m7i.large", "m6i.large", "m5.large"]
       capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_x86_64"
