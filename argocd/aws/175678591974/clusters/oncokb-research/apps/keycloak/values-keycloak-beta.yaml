@@ -1,9 +1,7 @@
 # Values for the keycloak-beta Helm release.
 fullnameOverride: keycloak-beta
 
-replicas: 2
-podDisruptionBudget:
-  minAvailable: 1
+replicas: 1
 updateStrategy: RollingUpdate
 
 command:
@@ -63,10 +61,10 @@ extraEnv: |
 resources:
   requests:
     cpu: 500m
-    memory: 1000Mi
+    memory: 500Mi
   limits:
-    cpu: "2"
-    memory: 1500Mi
+    cpu: "1"
+    memory: 1000Mi
 
 # Let's us schedule replicas on the same node, but prefer to schedule them on different nodes if possible
 affinity: |
