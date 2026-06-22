@@ -20,14 +20,15 @@ data:
     # Custom interface configuration
     interface:
       customWelcome: "Hey {{user.name}}! Welcome to cBioPortalChat — explore cBioPortal data with natural language."
+      # Empty string suppresses LibreChat's default "LibreChat vX.X.X -
+      # Every AI for Everyone." footer string. Combined with omitting
+      # privacyPolicy below, the chat footer renders empty.
+      customFooter: ""
       remoteAgents:
         use: true
         create: true
       mcpServers:
         placeholder: 'MCP Servers'
-      privacyPolicy:
-        externalUrl: 'https://librechat.ai/privacy-policy'
-        openNewTab: true
       termsOfService:
         externalUrl: 'https://librechat.ai/tos'
         openNewTab: true
