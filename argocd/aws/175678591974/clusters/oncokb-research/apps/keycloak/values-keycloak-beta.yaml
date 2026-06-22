@@ -1,0 +1,90 @@
+# Values for the keycloak-beta Helm release.
+fullnameOverride: keycloak-beta
+
+replicas: 2
+podDisruptionBudget:
+  minAvailable: 1
+updateStrategy: RollingUpdate
+
+command:
+  - /opt/keycloak/bin/kc.sh
+
+args:
+  - start
+
+proxy:
+  # Traefik uses X-Forwarded-* headers instead of the standard Forwarded header, so we need to set the mode to xforwarded
+  mode: xforwarded
+
+http:
+  # For backwards compatibility reasons Helm chart sets this to the value used by previous Keycloak versions.
+  # We are fine without this path
+  relativePath: "/"
+
+database:
+  vendor: mysql
+
+extraEnv: |
+  - name: KC_BOOTSTRAP_ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: KEYCLOAK_ADMIN
+  - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: KEYCLOAK_ADMIN_PASSWORD
+  - name: KC_DB_URL_HOST
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: DB_ADDRESS
+  - name: KC_DB_URL_DATABASE
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-keycloak-beta
+        key: DB_DATABASE
+  - name: KC_DB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-db-public-rds-admin
+        key: DB_USERNAME
+  - name: KC_DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: oncokb-db-public-rds-admin
+        key: DB_PASSWORD
+  - name: KC_HOSTNAME
+    value: beta.keycloak.oncokb.org
+  - name: KC_LOG_LEVEL
+    value: INFO
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1000Mi
+  limits:
+    cpu: "2"
+    memory: 1500Mi
+
+# Let's us schedule replicas on the same node, but prefer to schedule them on different nodes if possible
+affinity: |
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: keycloakx
+              app.kubernetes.io/instance: keycloak-beta
+          topologyKey: kubernetes.io/hostname
+
+nodeSelector:
+  workload: keycloak
+
+tolerations:
+  - key: workload
+    operator: Equal
+    value: keycloak
+    effect: NoSchedule
