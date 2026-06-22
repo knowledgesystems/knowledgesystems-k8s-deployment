@@ -25,7 +25,7 @@ spec:
       targetRevision: 7.1.11
       chart: keycloakx
       helm:
-        releaseName: keycloak
+        releaseName: keycloak-v2
         valueFiles:
           - $k8s-repo/argocd/aws/175678591974/clusters/oncokb-research/apps/keycloak/values-keycloak.yaml
   destination:

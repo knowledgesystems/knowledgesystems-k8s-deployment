@@ -1,5 +1,5 @@
 # Values for the keycloak Helm release.
-fullnameOverride: keycloak
+fullnameOverride: keycloak-v2
 
 replicas: 2
 podDisruptionBudget:
