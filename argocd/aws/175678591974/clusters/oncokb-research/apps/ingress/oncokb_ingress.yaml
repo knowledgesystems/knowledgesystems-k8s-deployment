@@ -27,7 +27,7 @@ spec:
         - name: oncokb-curation
           port: 9090
     - kind: Rule
-      match: Host(`keycloak.oncokb.org`)
+      match: Host(`keycloakv2.oncokb.org`)
       services:
         - name: keycloak-http
           port: 80
