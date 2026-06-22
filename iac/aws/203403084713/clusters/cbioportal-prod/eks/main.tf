@@ -333,12 +333,14 @@ locals {
       }
     }
     cell-explorer = {
-      instance_types = ["m7i.large"]
+      instance_types = ["m7i.large", "m6i.large", "m5.large"]
+      capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
-      min_size       = 1
-      max_size       = 1
-      # Pin to a single subnet/AZ so the EBS-backed PVC always reattaches.
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      # Single subnet/AZ so the EBS-backed PVC reattaches when a spot
+      # interruption reschedules the pod onto the other node.
       subnet_ids = ["subnet-066aca23688737c91"]
       taints = {
         dedicated = {
