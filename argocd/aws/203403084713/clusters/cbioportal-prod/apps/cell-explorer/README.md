@@ -51,9 +51,11 @@ Bring it up in this order with `terraform`/`kubectl`, validating each step befor
 
 ### DNS
 
-Point `cell-explorer.cbioportal.org` at the cluster's nginx ingress load balancer
-(same target as other `*.cbioportal.org` apps). cert-manager issues the TLS cert
-automatically once DNS resolves.
+Point `cell-explorer.cbioportal.org` at the cluster's Traefik ingress load balancer
+(same ELB as other `*.cbioportal.org` apps). cert-manager issues the TLS cert
+automatically once DNS resolves and the ACME challenge can reach Traefik. The Ingress
+uses `ingressClassName`/annotation `traefik` (the cluster's active controller — nginx is
+not deployed).
 
 ### Seed the dataset catalog
 
