@@ -332,6 +332,35 @@ locals {
         (var.LABEL_KEY) = "cbio-api"
       }
     }
+    # Nodegroup name kept <=12 chars: the module derives an IAM role name_prefix
+    # "userServiceRole-<name>-<hash>-" which AWS caps at 38. Workload taint/label
+    # below stay "cell-explorer" to match the Deployment's nodeSelector.
+    cellexplorer = {
+      instance_types = ["m7i.large", "m6i.large", "m5.large"]
+      capacity_type  = "SPOT"
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 2
+      # Single subnet/AZ so the EBS-backed PVC reattaches when a spot
+      # interruption reschedules the pod onto the other node.
+      subnet_ids = ["subnet-066aca23688737c91"]
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cell-explorer"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cell-explorer"
+      }
+      tags = {
+        cdsi-app   = "cell-explorer"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "hweej@mskcc.org"
+      }
+    }
   }
 
   karpenter_discovery_tag_value = var.CLUSTER_NAME
@@ -397,7 +426,7 @@ resource "kubernetes_storage_class_v1" "ebs-storage-class-default" {
   allow_volume_expansion = true
 
   parameters = {
-    type      = "gp3"
+    type = "gp3"
   }
 }
 

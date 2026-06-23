@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-explorer
+  namespace: cell-explorer
+  labels:
+    app: cell-explorer
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cell-explorer
+  template:
+    metadata:
+      labels:
+        app: cell-explorer
+    spec:
+      nodeSelector:
+        workload: cell-explorer
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cell-explorer"
+          effect: "NoSchedule"
+      containers:
+        - name: cell-explorer
+          image: ghcr.io/cbioportal/cell-explorer-py:0.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: cell-explorer-config
+            - secretRef:
+                name: cell-explorer-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          # Alembic migrations run before uvicorn serves /health; give a slow
+          # first-boot migration up to 5min before liveness/readiness apply.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cell-explorer-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-explorer
+  namespace: cell-explorer
+spec:
+  selector:
+    app: cell-explorer
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http
+  type: ClusterIP

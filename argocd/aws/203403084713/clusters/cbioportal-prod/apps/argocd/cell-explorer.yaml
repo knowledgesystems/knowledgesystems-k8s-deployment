@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cell-explorer
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+    path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cell-explorer
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  # Manual sync — we bring cell-explorer up one resource at a time and sync by
+  # hand; no automated/selfHeal/prune.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+  destination:
+    namespace: cell-explorer
+    server: https://kubernetes.default.svc
