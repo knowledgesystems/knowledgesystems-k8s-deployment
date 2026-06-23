@@ -29,7 +29,7 @@ spec:
     - kind: Rule
       match: Host(`keycloak.oncokb.org`)
       services:
-        - name: keycloak-http
+        - name: keycloak-v2-http
           port: 80
     - kind: Rule
       match: Host(`keycloakv2.oncokb.org`)

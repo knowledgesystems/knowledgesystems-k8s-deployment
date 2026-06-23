@@ -81,7 +81,7 @@ extraEnv: |
         name: oncokb-db-public-rds-admin
         key: DB_PASSWORD
   - name: KC_HOSTNAME
-    value: keycloakv2.oncokb.org
+    value: keycloak.oncokb.org
   - name: KC_LOG_LEVEL
     value: INFO
 
