@@ -120,6 +120,34 @@ data:
         disableBuilder: false
       assistants:
         disableBuilder: true
+      # BYOK custom endpoints. Paired with `*_API_KEY=user_provided`
+      # entries in apps/cbioagent-beta/values.yaml. The standard
+      # endpoints (anthropic / openAI / google / azureOpenAI) are
+      # registered by their env vars alone and don't need a yaml block.
+      # `apiKey: "user_provided"` is the hook that PR
+      # cbioportal/librechat#26 keys off to surface the per-provider
+      # BYOK input field under Settings → Data.
+      # `models.fetch: true` pulls the live model list from each
+      # provider's /models endpoint instead of pinning it here.
+      custom:
+        - name: "OpenRouter"
+          apiKey: "user_provided"
+          baseURL: "https://openrouter.ai/api/v1"
+          models:
+            default: ["openrouter/auto"]
+            fetch: true
+          titleConvo: true
+          titleModel: "openai/gpt-4o-mini"
+          modelDisplayLabel: "OpenRouter"
+        - name: "Fireworks"
+          apiKey: "user_provided"
+          baseURL: "https://api.fireworks.ai/inference/v1"
+          models:
+            default: ["accounts/fireworks/models/llama-v3p1-70b-instruct"]
+            fetch: true
+          titleConvo: true
+          titleModel: "accounts/fireworks/models/llama-v3p1-8b-instruct"
+          modelDisplayLabel: "Fireworks"
 
     fileConfig:
       endpoints:
