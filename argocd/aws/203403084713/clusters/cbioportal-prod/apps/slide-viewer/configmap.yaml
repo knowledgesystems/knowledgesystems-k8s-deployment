@@ -5,7 +5,7 @@ metadata:
   namespace: default
 data:
   # Dell ECS — Reef IMPACT slide bucket
-  REEF_ECS_ENDPOINT: "http://pmindecs.mskcc.org:9020"
+  AWS_ENDPOINT_URL: "http://pmindecs.mskcc.org:9020"
   REEF_S3_BUCKET: "mskmind-bkt"
   REEF_S3_PREFIX: "reef-slides"
 
