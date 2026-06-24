@@ -1,0 +1,39 @@
+# Keel watches container registries for tag content changes and rolls
+# the Deployments/StatefulSets annotated with `keel.sh/*` keys.
+#
+# Right now the only consumer is `cbioagent-librechat-beta`, which uses
+# the mutable `cbioportal/librechat:beta` tag — the build workflow on
+# cbioportal/librechat overwrites that tag on every push to the `beta`
+# branch, and Keel polls Docker Hub and rolls the beta Deployment when
+# the digest behind the tag changes.
+#
+# Prod (`cbioagent-librechat`) intentionally pins immutable
+# `v0.8.3-rc1-custom-vN` tags and is NOT annotated for Keel — promotion
+# from beta to prod stays a deliberate values.yaml bump + Argo sync.
+
+# No webhooks — public Docker Hub polling only. The default poll
+# interval is 1 minute, can be overridden per-Deployment via
+# `keel.sh/pollSchedule`.
+helmProvider:
+  enabled: false
+googleApplicationCredentials: ""
+notificationLevel: info
+
+# No external triggers; Keel only acts via Deployment annotations.
+webhookRelay:
+  enabled: false
+basicauth:
+  enabled: false
+
+rbac:
+  enabled: true
+serviceAccount:
+  create: true
+  name: keel
+
+# Cluster-wide watch so any annotated Deployment in any namespace works.
+# Cheap — Keel only polls images it sees annotations for.
+
+global:
+  imagePullSecrets:
+    - 'dockerhub-creds'

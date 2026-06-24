@@ -19,6 +19,15 @@ replicaCount: 1
 deploymentAnnotations:
   secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
   configmap.reloader.stakater.com/reload: "librechat-config-beta"
+  # Beta tracks the mutable `cbioportal/librechat:beta` tag — every push
+  # to the `beta` branch on cbioportal/librechat overwrites that tag.
+  # Keel polls Docker Hub and rolls this Deployment when the digest
+  # behind `:beta` changes. policy=force matches any digest update;
+  # trigger=poll uses the default schedule (1 min) — fast enough for
+  # beta iteration without hammering the registry.
+  keel.sh/policy: force
+  keel.sh/trigger: poll
+  keel.sh/match-tag: "true"
 
 global:
   librechat:
@@ -56,14 +65,12 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  # Beta runs ahead of prod to validate dep/lib bumps before promotion.
-  # v9 = v8 + merge of cBioPortal/LibreChat#14 (unified UI config), with
-  # the v6/v7 "Switch Agent" landing-page button and agent-selector
-  # tooltip header dropped (no longer needed now that cBioAgent ships a
-  # single unified agent). UI behaviors that used to live in code are
-  # now expressed via librechat.yaml (`interface.showSwitchAgent`,
-  # modelSpec `limitBadge` / `conversationStarterCategories`, etc.).
-  tag: "v0.8.3-rc1-custom-v9"
+  # Beta follows the `beta` branch on cbioportal/librechat. The build
+  # workflow on that repo rebuilds and overwrites this mutable tag on
+  # every push, and Keel (see deploymentAnnotations above) rolls this
+  # pod when the digest behind the tag changes. Prod stays pinned to
+  # immutable v0.8.3-rc1-custom-vN tags so beta drift can't reach it.
+  tag: "beta"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
