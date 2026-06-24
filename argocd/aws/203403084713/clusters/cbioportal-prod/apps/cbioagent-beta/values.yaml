@@ -33,6 +33,31 @@ global:
   librechat:
     existingSecretName: "librechat-credentials-env"
     existingSecretApiKey: OPENAI_API_KEY
+    # Direct env entries on the LibreChat container. These render as
+    # `env:` (not `envFrom:`) so they OVERRIDE same-key entries from
+    # `librechat-credentials-env` — the Secret is shared with prod, so
+    # this is how we flip BYOK behavior on beta only without touching
+    # the Secret. K8s precedence: direct `env:` > later `envFrom:` >
+    # earlier `envFrom:`.
+    #
+    # `*_API_KEY=user_provided` is the signal that PR cbioportal/librechat#26
+    # (Add BYOK provider key settings) looks for to enable the per-provider
+    # BYOK input field under Settings → Data. Without the env override
+    # users on beta would still inherit prod's static keys (or Bedrock).
+    env:
+      - name: ANTHROPIC_API_KEY
+        value: "user_provided"
+      - name: OPENAI_API_KEY
+        value: "user_provided"
+      - name: GOOGLE_KEY
+        value: "user_provided"
+      - name: AZURE_API_KEY
+        value: "user_provided"
+      # Replace the Secret's ENDPOINTS list (defaults to `bedrock,agents`)
+      # so the four standard BYOK endpoints plus the custom block defined
+      # in librechat-config-beta show up in the endpoint selector.
+      - name: ENDPOINTS
+        value: "bedrock,agents,anthropic,openAI,google,azureOpenAI,custom"
 
 librechat:
   existingSecretName: "librechat-credentials-env"
