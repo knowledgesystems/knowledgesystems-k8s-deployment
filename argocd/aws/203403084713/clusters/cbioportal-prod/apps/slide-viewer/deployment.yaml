@@ -38,20 +38,20 @@ spec:
             # Credentials from pre-existing Secret
             # Create with:
             #   kubectl create secret generic slide-viewer-secrets \
-            #     --from-literal=REEF_AWS_KEY=<key> \
-            #     --from-literal=REEF_AWS_SECRET=<secret> \
+            #     --from-literal=AWS_ACCESS_KEY_ID=<key> \
+            #     --from-literal=AWS_SECRET_ACCESS_KEY=<secret> \
             #     --from-literal=DATABRICKS_HOST=https://msk-mode-prod.cloud.databricks.com \
             #     --from-literal=DATABRICKS_TOKEN=<pat>
-            - name: REEF_AWS_KEY
+            - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: slide-viewer-secrets
-                  key: REEF_AWS_KEY
-            - name: REEF_AWS_SECRET
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: slide-viewer-secrets
-                  key: REEF_AWS_SECRET
+                  key: AWS_SECRET_ACCESS_KEY
             - name: DATABRICKS_HOST
               valueFrom:
                 secretKeyRef:
