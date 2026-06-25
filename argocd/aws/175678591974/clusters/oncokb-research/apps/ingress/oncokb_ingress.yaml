@@ -51,6 +51,12 @@ spec:
       services:
         - name: oncokb-public
           port: 9095
+          sticky:
+            cookie:
+              name: oncokb-public-session
+              httpOnly: true
+              secure: true
+              sameSite: lax
     - kind: Rule
       match: Host(`transcript.oncokb.org`)
       services:
