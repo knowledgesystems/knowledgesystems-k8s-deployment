@@ -8,14 +8,14 @@ metadata:
     tags.datadoghq.com/service: oncokb-public
   name: oncokb-public
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: oncokb-public
       version: "v1"
   strategy:
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 5
       maxUnavailable: 0
     type: RollingUpdate
   template:
@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: mskcc/oncokb-public:6.20.0
+          image: mskcc/oncokb-public:6.21.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -112,11 +112,11 @@ spec:
             failureThreshold: 10
           resources:
             requests:
-              memory: 5Gi
-              cpu: 2500m
+              memory: 1Gi
+              cpu: 500m
             limits:
-              memory: 10Gi
-              cpu: 10000m
+              memory: 2Gi
+              cpu: 2000m
           ports:
             - name: http
               containerPort: 9095
