@@ -37,6 +37,8 @@ spec:
               value: prod,no-liquibase
             - name: JAVA_OPTS
               value: "-Xmx1024m -Xms512m"
+            - name: APPLICATION_BASEURL
+              value: "https://beta.oncokb.org"
             - name: APPLICATION_API_PROXY_GERMLINE_URL
               value: "http://oncokb-core:8888"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
