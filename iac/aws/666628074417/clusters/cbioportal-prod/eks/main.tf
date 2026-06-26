@@ -62,9 +62,9 @@ locals {
     airflow = {
       instance_types = ["m5.large"]
       ami_type       = "BOTTLEROCKET_x86_64"
-      desired_size   = 1
+      desired_size   = 3
       min_size       = 1
-      max_size       = 1
+      max_size       = 3
       subnet_ids     = ["subnet-0917a96517f3dad1d"]
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
