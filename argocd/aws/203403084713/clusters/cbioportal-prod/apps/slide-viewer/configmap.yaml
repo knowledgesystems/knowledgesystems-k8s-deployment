@@ -12,6 +12,10 @@ data:
   # Databricks SQL warehouse
   DATABRICKS_WAREHOUSE_ID: "0b49b7d78734ad5c"
 
+  # Annotation API auth
+  KEYCLOAK_JWKS_URL: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/certs"
+  ANNOTATION_AUTH_ENABLED: "true"
+
   # Redis (in-cluster sidecar)
   REDIS_URL: "redis://slide-viewer-redis:6379"
 

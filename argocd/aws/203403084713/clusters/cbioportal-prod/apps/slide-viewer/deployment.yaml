@@ -41,7 +41,8 @@ spec:
             #     --from-literal=AWS_ACCESS_KEY_ID=<key> \
             #     --from-literal=AWS_SECRET_ACCESS_KEY=<secret> \
             #     --from-literal=DATABRICKS_HOST=https://msk-mode-prod.cloud.databricks.com \
-            #     --from-literal=DATABRICKS_TOKEN=<pat>
+            #     --from-literal=DATABRICKS_TOKEN=<pat> \
+            #     --from-literal=ANNOTATION_DATABASE_URL=postgresql://<user>:<password>@<host>:5432/cbioportal_annotations?sslmode=require
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -62,6 +63,11 @@ spec:
                 secretKeyRef:
                   name: slide-viewer-secrets
                   key: DATABRICKS_TOKEN
+            - name: ANNOTATION_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: ANNOTATION_DATABASE_URL
           resources:
             requests:
               memory: "2Gi"
