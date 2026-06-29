@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/tls-acme: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd
+    acme.cert-manager.io/http01-ingress-class: traefik
+  labels:
+    app.kubernetes.io/instance: containerized
+  name: containerized-ingress
+  namespace: default
+spec:
+  rules:
+    - host: containerized.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-containerized-blue
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - containerized.cbioportal.org
+      secretName: containerized-cbio-cert
