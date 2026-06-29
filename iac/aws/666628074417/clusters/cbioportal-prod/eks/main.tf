@@ -60,7 +60,7 @@ locals {
       }
     }
     airflow = {
-      instance_types = ["m5.large"]
+      instance_types = ["m5.2xlarge"]
       ami_type       = "BOTTLEROCKET_x86_64"
       desired_size   = 3
       min_size       = 1
