@@ -50,6 +50,10 @@ spec:
             - name: APPLICATION_REDIS_EXPIRATION
               value: "$(REDIS_EXPIRATION)"
             # Spring Session persistence (separate redis from the data cache above); see oncokb-public HttpSessionConfiguration
+            # Idle session timeout; must be long enough to cover the interactive MSK Ping login, otherwise the
+            # pre-auth session holding the OAuth2 authorization request expires mid-login (authorization_request_not_found).
+            - name: APPLICATION_SESSION_TIMEOUTSECONDS
+              value: "600"
             - name: APPLICATION_SESSION_REDIS_ENABLED
               value: "true"
             - name: APPLICATION_SESSION_REDIS_TYPE
