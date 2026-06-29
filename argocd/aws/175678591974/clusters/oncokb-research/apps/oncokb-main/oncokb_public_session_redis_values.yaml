@@ -1,6 +1,4 @@
-# Standalone Redis used to persist oncokb-public HTTP sessions (Spring Session), separate from the
-# data-cache redis-cluster. Mirrors the simple bitnami redis instance used by oncokb-curation, but is
-# pinned to the "main" workload nodes. Wired into deployments via APPLICATION_SESSION_REDIS_* env vars.
+# Standalone Redis for oncokb-public Spring Session, pinned to the "main" workload nodes.
 global:
   security:
     allowInsecureImages: true
@@ -21,9 +19,9 @@ auth:
 master:
   persistence:
     enabled: true
-    storageClass: efs-sc
+    storageClass: gp2
     accessModes:
-      - ReadWriteMany
+      - ReadWriteOnce
     size: 1Gi
   nodeSelector:
     workload: main
@@ -36,9 +34,9 @@ master:
 replica:
   persistence:
     enabled: true
-    storageClass: efs-sc
+    storageClass: gp2
     accessModes:
-      - ReadWriteMany
+      - ReadWriteOnce
     size: 1Gi
   nodeSelector:
     workload: main
