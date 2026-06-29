@@ -28,11 +28,13 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: mskcc/oncokb-public:6.17.0-keycloak-beta.4
+          image: mskcc/oncokb-public:6.17.0-keycloak-jdbc.0
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: prod,no-liquibase
+              value: prod
+            - name: SPRING_LIQUIBASE_ENABLED
+              value: "true"
             - name: APPLICATION_BASEURL
               value: "https://beta.oncokb.org"
             - name: APPLICATION_API_PROXY_GERMLINE_URL
@@ -49,19 +51,13 @@ spec:
               value: "$(REDIS_PASSWROD)"
             - name: APPLICATION_REDIS_EXPIRATION
               value: "$(REDIS_EXPIRATION)"
-            # Spring Session persistence (separate redis from the data cache above); see oncokb-public HttpSessionConfiguration
+            # Spring Session persistence uses the primary JDBC datasource; see oncokb-public HttpSessionConfiguration.
             # Idle session timeout; must be long enough to cover the interactive MSK Ping login, otherwise the
             # pre-auth session holding the OAuth2 authorization request expires mid-login (authorization_request_not_found).
             - name: APPLICATION_SESSION_TIMEOUTSECONDS
               value: "60"
-            - name: APPLICATION_SESSION_REDIS_ENABLED
-              value: "true"
-            - name: APPLICATION_SESSION_REDIS_TYPE
-              value: "$(SESSION_REDIS_TYPE)"
-            - name: APPLICATION_SESSION_REDIS_ADDRESS
-              value: "$(SESSION_REDIS_ADDRESS)"
-            - name: APPLICATION_SESSION_REDIS_PASSWORD
-              value: "$(SESSION_REDIS_PASSWORD)"
+            - name: APPLICATION_SESSION_CLEANUP_CRON
+              value: "0 * * * * *"
             - name: APPLICATION_DB_READ_ONLY
               value: "false"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
@@ -103,8 +99,6 @@ spec:
                 name: oncokb-research-sa
             - secretRef:
                 name: redis-cluster-beta
-            - secretRef:
-                name: oncokb-public-session-redis
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
