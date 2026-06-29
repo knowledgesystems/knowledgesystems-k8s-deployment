@@ -6,7 +6,7 @@ metadata:
     tags.datadoghq.com/service: oncokb-public
   name: oncokb-public-beta
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: oncokb-public-beta
