@@ -17,6 +17,11 @@ auth:
   existingSecretPasswordKey: REDIS_PASSWORD
 
 master:
+  # Required for Spring Session (Redisson): emit keyevent expired/del notifications so Redisson's listener
+  # deletes the (TTL-less) session map and prunes the spring:session:index:...PRINCIPAL... set when a
+  # session expires. Without this, expired sessions and their index entries leak permanently.
+  extraFlags:
+    - "--notify-keyspace-events Egx"
   persistence:
     enabled: true
     storageClass: gp2
@@ -32,6 +37,10 @@ master:
       effect: NoSchedule
 
 replica:
+  # See master.extraFlags above; replicas must emit the same keyevent notifications since Spring Session
+  # reads/cleanup can run against any node serving the data.
+  extraFlags:
+    - "--notify-keyspace-events Egx"
   persistence:
     enabled: true
     storageClass: gp2
