@@ -11,6 +11,14 @@ spec:
       targetRevision: HEAD
       directory:
         recurse: true
+      ref: k8s-repo
+    - repoURL: registry-1.docker.io/bitnamicharts
+      targetRevision: 20.8.0
+      chart: redis
+      helm:
+        releaseName: public-session-redis
+        valueFiles:
+          - $k8s-repo/argocd/aws/175678591974/clusters/oncokb-research/apps/oncokb-main/oncokb_public_session_redis_values.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc

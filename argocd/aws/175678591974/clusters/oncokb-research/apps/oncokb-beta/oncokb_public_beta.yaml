@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: mskcc/oncokb-public:6.17.0-keycloak-beta.0
+          image: mskcc/oncokb-public:6.17.0-keycloak-beta.1
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -49,6 +49,15 @@ spec:
               value: "$(REDIS_PASSWROD)"
             - name: APPLICATION_REDIS_EXPIRATION
               value: "$(REDIS_EXPIRATION)"
+            # Spring Session persistence (separate redis from the data cache above); see oncokb-public HttpSessionConfiguration
+            - name: APPLICATION_SESSION_REDIS_ENABLED
+              value: "true"
+            - name: APPLICATION_SESSION_REDIS_TYPE
+              value: "$(SESSION_REDIS_TYPE)"
+            - name: APPLICATION_SESSION_REDIS_ADDRESS
+              value: "$(SESSION_REDIS_ADDRESS)"
+            - name: APPLICATION_SESSION_REDIS_PASSWORD
+              value: "$(SESSION_REDIS_PASSWORD)"
             - name: APPLICATION_DB_READ_ONLY
               value: "false"
             - name: APPLICATION_SAMLAWS_SERVICEACCOUNTUSERNAME
@@ -91,6 +100,8 @@ spec:
             - secretRef:
                 name: redis-cluster-beta
             - secretRef:
+                name: oncokb-public-session-redis
+            - secretRef:
                 name: oncokb-db-public-rds-oncokb-public
           readinessProbe:
             httpGet:
@@ -111,10 +122,10 @@ spec:
           resources:
             requests:
               memory: 512Mi
-              cpu: 100m
-            limits:
-              memory: 1536Mi
               cpu: 500m
+            limits:
+              memory: 2536Mi
+              cpu: 1500m
           ports:
             - name: http
               containerPort: 9095
@@ -125,10 +136,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: beta
+          value: main
           effect: NoSchedule
       nodeSelector:
-        workload: beta
+        workload: main
       volumes:
         - name: recaptcha-credentials
           secret:
