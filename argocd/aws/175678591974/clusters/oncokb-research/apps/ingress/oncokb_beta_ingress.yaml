@@ -8,6 +8,8 @@ spec:
   routes:
     - kind: Rule
       match: Host(`beta.oncokb.org`)
+      middlewares:
+        - name: uablock-agentic-crawlers
       services:
         - name: oncokb-public-beta
           port: 9095

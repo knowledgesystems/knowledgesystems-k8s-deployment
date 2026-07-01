@@ -1,0 +1,34 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: uablock-agentic-crawlers
+  namespace: default
+spec:
+  plugin:
+    uablock:
+      regex:
+        # OpenAI crawler used to collect content that may be used to train generative AI foundation models.
+        - "(?i).*gptbot.*"
+
+        # Anthropic crawler used to collect web content that could contribute to Claude model training.
+        - "(?i).*claudebot.*"
+
+        # Anthropic legacy/broader crawler identifier; Anthropic now documents ClaudeBot as the training crawler.
+        - "(?i).*anthropic-ai.*"
+
+        # Google control token to opt out of use for Gemini apps / Vertex AI generative APIs.
+        # It is not normal Google Search indexing.
+        - "(?i).*google-extended.*"
+
+        # Apple control token to opt out of Apple using crawled content to train generative foundation models.
+        # It is not the normal Applebot search crawler.
+        - "(?i).*applebot-extended.*"
+
+        # Common Crawl crawler; Common Crawl publishes open web datasets widely used as AI/LLM training data.
+        # Source: Common Crawl / Mozilla discussion of Common Crawl as generative AI training data.
+        - "(?i).*ccbot.*"
+
+        # Amazon crawler; Amazon says it may be used to train Amazon AI models.
+        - "(?i).*amazonbot.*"
+      statusCode: 403
+      responseMessage: "Forbidden"
