@@ -31,12 +31,21 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: mskcc/oncokb-public:6.22.0
+          image: mskcc/oncokb-public:6.22.0-keycloak.0
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: prod,no-liquibase
+              value: prod
+            - name: SPRING_LIQUIBASE_ENABLED
+              value: "true"
             - name: JAVA_OPTS
               value: "-Xmx1024m -Xms512m"
+            # Spring Session persistence uses the primary JDBC datasource; see oncokb-public HttpSessionConfiguration.
+            # Idle session timeout; must be long enough to cover the interactive MSK Ping login, otherwise the
+            # pre-auth session holding the OAuth2 authorization request expires mid-login (authorization_request_not_found).
+            - name: APPLICATION_SESSION_TIMEOUTSECONDS
+              value: "60"
+            - name: APPLICATION_SESSION_CLEANUP_CRON
+              value: "0 * * * * *"
             - name: APPLICATION_BASEURL
               value: "https://www.oncokb.org"
             - name: APPLICATION_API_PROXY_GERMLINE_URL
