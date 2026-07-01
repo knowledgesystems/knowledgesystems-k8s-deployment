@@ -13,6 +13,8 @@ spec:
           port: 80
     - kind: Rule
       match: Host(`public.api.oncokb.org`)
+      middlewares:
+        - name: uablock-agentic-crawlers
       services:
         - name: oncokb-core-public
           port: 80
@@ -43,11 +45,15 @@ spec:
           port: 80
     - kind: Rule
       match: Host(`staging.oncokb.org`)
+      middlewares:
+        - name: uablock-agentic-crawlers
       services:
         - name: oncokb-public-staging
           port: 9095
     - kind: Rule
       match: Host(`www.oncokb.org`)
+      middlewares:
+        - name: uablock-agentic-crawlers
       services:
         - name: oncokb-public
           port: 9095
