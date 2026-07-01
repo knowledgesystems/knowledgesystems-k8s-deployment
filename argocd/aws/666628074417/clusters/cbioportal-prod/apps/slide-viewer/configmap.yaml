@@ -4,10 +4,8 @@ metadata:
   name: slide-viewer-config
   namespace: default
 data:
-  # Dell ECS — Reef IMPACT slide bucket
+  # Dell ECS endpoint; slide URIs come from Databricks metadata.
   AWS_ENDPOINT_URL: "http://pmindecs.mskcc.org:9020"
-  REEF_S3_BUCKET: "mskmind-bkt"
-  REEF_S3_PREFIX: "reef-slides"
 
   # Databricks SQL warehouse
   DATABRICKS_WAREHOUSE_ID: "0b49b7d78734ad5c"
@@ -15,9 +13,6 @@ data:
   # Annotation API auth
   KEYCLOAK_JWKS_URL: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/certs"
   ANNOTATION_AUTH_ENABLED: "true"
-
-  # Redis (in-cluster sidecar)
-  REDIS_URL: "redis://slide-viewer-redis:6379"
 
   # Cache settings
   TILE_CACHE_TTL: "0"       # 0 = no expiry (tiles are immutable)
@@ -28,5 +23,5 @@ data:
   TILE_SIZE: "256"
   JPEG_QUALITY: "85"
 
-  # CORS — restrict to known cBioPortal origins
-  CORS_ORIGINS: "https://cbioportal.org,https://www.cbioportal.org,https://genie.cbioportal.org"
+  # CORS — restrict to MSK cBioPortal origins that embed the viewer.
+  CORS_ORIGINS: "https://cbioportal.mskcc.org,https://triage.cbioportal.mskcc.org"
