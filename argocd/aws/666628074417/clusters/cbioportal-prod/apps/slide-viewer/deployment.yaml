@@ -6,7 +6,7 @@ metadata:
   labels:
     app: slide-viewer
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: slide-viewer
@@ -23,10 +23,12 @@ spec:
       nodeSelector:
         workload-class: x86-general
       terminationGracePeriodSeconds: 60
+      imagePullSecrets:
+        - name: dockerhub-creds
       containers:
         - name: slide-viewer
           # Image tag is updated by the CI/CD pipeline (docker-publish.yml)
-          image: 203403084713.dkr.ecr.us-east-1.amazonaws.com/cbioportal-slide-viewer:latest
+          image: cbioportal/cbioportal-slide-viewer:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -42,6 +44,7 @@ spec:
             #     --from-literal=AWS_SECRET_ACCESS_KEY=<secret> \
             #     --from-literal=DATABRICKS_HOST=https://msk-mode-prod.cloud.databricks.com \
             #     --from-literal=DATABRICKS_TOKEN=<pat> \
+            #     --from-literal=REDIS_URL=redis://:<password>@eks-msk-cbioportal-persistence-redis-master:6379/12 \
             #     --from-literal=ANNOTATION_DATABASE_URL=postgresql://<user>:<password>@<host>:5432/cbioportal_annotations?sslmode=require
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -63,6 +66,11 @@ spec:
                 secretKeyRef:
                   name: slide-viewer-secrets
                   key: DATABRICKS_TOKEN
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: REDIS_URL
             - name: ANNOTATION_DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -70,11 +78,11 @@ spec:
                   key: ANNOTATION_DATABASE_URL
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "500m"
+              memory: "1Gi"
+              cpu: "250m"
             limits:
-              memory: "8Gi"
-              cpu: "4"
+              memory: "4Gi"
+              cpu: "2"
           livenessProbe:
             httpGet:
               path: /health
@@ -91,3 +99,20 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-viewer
+  namespace: default
+  labels:
+    app: slide-viewer
+spec:
+  type: ClusterIP
+  selector:
+    app: slide-viewer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
