@@ -7,22 +7,13 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
-
-    # ── Timeouts ─────────────────────────────────────────────────────────────
-    # Tile requests can take up to 10 s for cold ECS reads; thumbnails are fast.
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
-
-    # ── Rate limiting ─────────────────────────────────────────────────────────
-    # Limits each client IP to 100 req/s sustained, bursting up to 500.
-    # Tile cache hits are cheap; the main concern is Databricks metadata spam.
     nginx.ingress.kubernetes.io/limit-rps: "100"
     nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
     nginx.ingress.kubernetes.io/limit-connections: "50"
-
-    # ── Security headers (appended inside the location block) ─────────────────
     nginx.ingress.kubernetes.io/configuration-snippet: |
       add_header X-Content-Type-Options "nosniff" always;
       add_header X-Frame-Options "SAMEORIGIN" always;
