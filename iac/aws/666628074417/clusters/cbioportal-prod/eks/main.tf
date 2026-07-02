@@ -325,6 +325,12 @@ resource "aws_eks_addon" "s3_mountpoint_addon" {
           operator = "Equal"
           value    = "cellxgene"
           effect   = "NoSchedule"
+        },
+        {
+          key      = "workload"
+          operator = "Equal"
+          value    = "airflow-importer-dag"
+          effect   = "NoSchedule"
         }
       ]
     }
