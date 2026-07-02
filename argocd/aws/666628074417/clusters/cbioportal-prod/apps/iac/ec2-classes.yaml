@@ -1,0 +1,15 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: airflow-importer-dag
+spec:
+  instanceProfile: "userServiceRole-KarpenterNode"
+  amiSelectorTerms:
+    - alias: bottlerocket@v1.56.0
+  # Pinned to the subnet holding the airflow EFS mount target so provisioned
+  # nodes can mount efs-pv-claim.
+  subnetSelectorTerms:
+    - id: "subnet-0917a96517f3dad1d"
+  securityGroupSelectorTerms:
+    - tags:
+        "karpenter.sh/discovery": "cbioportal-prod"
