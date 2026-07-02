@@ -1,6 +1,6 @@
 image:
-  tag: "8.2"
-  registry: "public.ecr.aws"
+  tag: "8.2.7"
+  registry: "203403084713.dkr.ecr.us-east-1.amazonaws.com"
   repository: "bitnami/mongodb"
 nodeSelector:
   workload: cbio-session
