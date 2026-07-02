@@ -93,7 +93,7 @@ clusterAgent:
   podAnnotations:
     container.apparmor.security.beta.kubernetes.io/cluster-agent: unconfined
   tokenExistingSecret: datadog
-  createPodDisruptionBudget: true
+  createPodDisruptionBudget: false
   enabled: true
   image:
     name: cluster-agent
