@@ -13,6 +13,11 @@ postgresql:
 registry:
   secretName: "dockerhub-creds"
 
+# IAM role for S3 Mountpoint CSI driver — allows DAG pods to mount hackathon-databricks bucket
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::666628074417:role/userServiceRoleHackathonS3Mountpoint"
+
 config:
   api:
     access_control_allow_headers: origin, content-type, accept
