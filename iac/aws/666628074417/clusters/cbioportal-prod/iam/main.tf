@@ -4,6 +4,7 @@ locals {
   cluster_name = var.cluster_name
   permissions_boundary_policy    = "AutomationOrUserServiceRolePermissions"
   cellxgene_s3_mountpoint_bucket = "cellxgene-data-msk"
+  hackathon_s3_mountpoint_bucket = "hackathon-databricks"
 }
 
 data "aws_caller_identity" "current" {}
@@ -89,4 +90,82 @@ resource "aws_iam_role" "userServiceRoleCellxgeneS3Mountpoint" {
 resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentCellxgeneS3Mountpoint" {
   policy_arn = aws_iam_policy.userServicePolicyCellxgeneS3Mountpoint.arn
   role       = aws_iam_role.userServiceRoleCellxgeneS3Mountpoint.name
+}
+
+# ── Hackathon S3 mountpoint ──────────────────────────────────────────
+resource "aws_iam_policy" "userServicePolicyHackathonS3Mountpoint" {
+  name        = "userServicePolicyHackathonS3Mountpoint"
+  path        = "/"
+  description = "Policy to allow S3 Mountpoint CSI cluster add-on to access the hackathon-databricks S3 bucket"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "MountpointFullBucketAccess",
+          "Effect" : "Allow",
+          "Action" : [
+            "s3:ListBucket"
+          ],
+          "Resource" : [
+            "arn:aws:s3:::${local.hackathon_s3_mountpoint_bucket}"
+          ]
+        },
+        {
+          "Sid" : "MountpointReadObjectAccess",
+          "Effect" : "Allow",
+          "Action" : [
+            "s3:GetObject"
+          ],
+          "Resource" : [
+            "arn:aws:s3:::${local.hackathon_s3_mountpoint_bucket}/*"
+          ]
+        }
+      ]
+    }
+  )
+
+  tags = {
+    cdsi-owner = "jamesko@mskcc.org"
+    cdsi-app   = "cmo-pipelines"
+    cdsi-team  = "data-visualization"
+  }
+}
+
+resource "aws_iam_role" "userServiceRoleHackathonS3Mountpoint" {
+  name = "userServiceRoleHackathonS3Mountpoint"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = "sts:AssumeRoleWithWebIdentity",
+          Principal = {
+            Federated = "arn:aws:iam::${local.account_id}:oidc-provider/${var.cluster_oidc_provider_arn}"
+          },
+          Condition = {
+            StringEquals = {
+              "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com"
+            }
+          }
+        }
+      ]
+    }
+  )
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+
+  tags = {
+    cdsi-owner = "jamesko@mskcc.org"
+    cdsi-app   = "cmo-pipelines"
+    cdsi-team  = "data-visualization"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentHackathonS3Mountpoint" {
+  policy_arn = aws_iam_policy.userServicePolicyHackathonS3Mountpoint.arn
+  role       = aws_iam_role.userServiceRoleHackathonS3Mountpoint.name
 }
