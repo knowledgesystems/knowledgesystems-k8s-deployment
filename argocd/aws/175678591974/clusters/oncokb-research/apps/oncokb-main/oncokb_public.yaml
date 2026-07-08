@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: mskcc/oncokb-public:6.22.0-keycloak.0
+          image: mskcc/oncokb-public:6.23.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
@@ -84,6 +84,8 @@ spec:
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
+            - name: APPLICATION_USAGELIQUIBASE_SCHEMA
+              value: "oncokb_metrics"
             - name: LOGGING_LEVEL_ROOT
               value: "INFO"
             - name: LOGGING_PATTERN_CONSOLE
