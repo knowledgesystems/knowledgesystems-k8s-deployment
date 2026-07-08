@@ -117,6 +117,20 @@ airflow:
       password: ${ONCOKB_DATABASE_PASSWORD}
       host: ${ONCOKB_DATABASE_HOST}
       port: 3306
+    - id: oncokb_public_db_readonly_conn_id
+      type: "mysql"
+      login: ${ONCOKB_DATABASE_USERNAME}
+      password: ${ONCOKB_DATABASE_PASSWORD}
+      host: ${ONCOKB_DATABASE_HOST}
+      schema: oncokb_public_beta
+      port: 3306
+    - id: oncokb_metrics_db_rw_conn_id
+      type: "mysql"
+      login: ${ONCOKB_DATABASE_USERNAME}
+      password: ${ONCOKB_DATABASE_PASSWORD}
+      host: ${ONCOKB_DATABASE_HOST}
+      schema: oncokb_metrics_beta
+      port: 3306
   connectionsTemplates:
     ONCOKB_REDIS_CLUSTER_PASSWORD:
       kind: secret
