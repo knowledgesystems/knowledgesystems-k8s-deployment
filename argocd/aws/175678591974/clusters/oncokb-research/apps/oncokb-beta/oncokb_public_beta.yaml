@@ -80,7 +80,7 @@ spec:
               value: "${DB_USERNAME}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
-            - name: APPLICATION_USAGE_LIQUIBASE_SCHEMA
+            - name: APPLICATION_USAGELIQUIBASE_SCHEMA
               value: "oncokb_metrics_beta"
             - name: LOGGING_LEVEL_ROOT
               value: "INFO"
