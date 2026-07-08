@@ -81,7 +81,7 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               value: "${DB_PASSWORD}"
             - name: APPLICATION_USAGE_LIQUIBASE_SCHEMA
-              value: "oncokb_metrics_beta"
+              value: "oncokb_metrics_beta_2"
             - name: LOGGING_LEVEL_ROOT
               value: "INFO"
             - name: LOGGING_PATTERN_CONSOLE
