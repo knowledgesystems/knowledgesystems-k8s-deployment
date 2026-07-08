@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-beta
-          image: mskcc/oncokb-public:6.17.0-keycloak-jdbc.0
+          image: mskcc/oncokb-public:6.23.0-beta.0
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -90,8 +90,6 @@ spec:
               value: "20"
             - name: APPLICATION_RATE_LIMIT_REFILL_PERIOD
               value: "5s"
-            - name: APPLICATION_FRONTEND_PAYWALL_ENABLED
-              value: "false"
           envFrom:
             - secretRef:
                 name: oncokb-public-beta
