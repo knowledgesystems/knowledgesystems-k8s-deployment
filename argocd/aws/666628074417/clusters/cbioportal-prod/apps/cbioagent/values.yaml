@@ -13,6 +13,8 @@ deploymentAnnotations:
 librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
+  configEnv:
+    DD_TRACE_PROPAGATION_STYLE: "tracecontext,datadog"
   imageVolume:
     accessModes: ReadWriteMany
     storageClassName: efs-sc
