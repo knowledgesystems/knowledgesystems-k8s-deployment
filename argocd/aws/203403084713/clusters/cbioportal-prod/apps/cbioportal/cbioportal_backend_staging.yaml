@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-staging
     tags.datadoghq.com/env: eks-public-staging
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.4
+    tags.datadoghq.com/version: 7.0.5
   name: cbioportal-backend-staging
 spec:
   progressDeadlineSeconds: 600
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-staging
         tags.datadoghq.com/env: eks-public-staging
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.4
+        tags.datadoghq.com/version: 7.0.5
     spec:
       containers:
         - args:

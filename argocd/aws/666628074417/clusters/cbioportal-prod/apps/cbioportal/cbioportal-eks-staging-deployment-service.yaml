@@ -5,7 +5,7 @@ metadata:
     run: eks-msk-staging
     tags.datadoghq.com/env: eks-msk-staging
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.4
+    tags.datadoghq.com/version: 7.0.5
   name: eks-msk-staging
 spec:
   progressDeadlineSeconds: 600
@@ -28,7 +28,7 @@ spec:
         run: eks-msk-staging
         tags.datadoghq.com/env: eks-msk-staging
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.4
+        tags.datadoghq.com/version: 7.0.5
     spec:
       containers:
       - args:
