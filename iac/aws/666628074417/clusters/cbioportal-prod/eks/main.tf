@@ -3,6 +3,10 @@ data "aws_caller_identity" "current" {}
 locals {
   # Confirm this policy exists in account 666628074417 before applying.
   permissions_boundary_policy = "AutomationOrUserServiceRolePermissions"
+  account_id                        = data.aws_caller_identity.current.account_id
+  karpenter_controller_role_name    = "userServiceRole-KarpenterController"
+  karpenter_node_role_name          = "userServiceRole-KarpenterNode"
+  karpenter_discovery_tag_value     = var.CLUSTER_NAME
 
   # Use locals for node groups to enforce required tags
   node_groups = {
@@ -301,7 +305,7 @@ module "eks_cluster" {
 
   # Tags the node security group so the Karpenter EC2NodeClass can discover it.
   node_security_group_tags = {
-    "karpenter.sh/discovery" = var.CLUSTER_NAME
+    "karpenter.sh/discovery" = local.karpenter_discovery_tag_value
   }
 
   # EKS Managed Node Groups
@@ -360,13 +364,13 @@ module "karpenter" {
   source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/karpenter?ref=v21.9.0"
   cluster_name = module.eks_cluster.cluster_name
 
-  iam_role_name                     = "userServiceRole-KarpenterController"
+  iam_role_name                     = local.karpenter_controller_role_name
   iam_role_use_name_prefix          = false
-  iam_role_permissions_boundary_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${local.permissions_boundary_policy}"
+  iam_role_permissions_boundary_arn = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
 
-  node_iam_role_name                 = "userServiceRole-KarpenterNode"
+  node_iam_role_name                 = local.karpenter_node_role_name
   node_iam_role_use_name_prefix      = false
-  node_iam_role_permissions_boundary = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${local.permissions_boundary_policy}"
+  node_iam_role_permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
 
   iam_policy_name            = "userServicePolicy-KarpenterController"
   iam_policy_use_name_prefix = false

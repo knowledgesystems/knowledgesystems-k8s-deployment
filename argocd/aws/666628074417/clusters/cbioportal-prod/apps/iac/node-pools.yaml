@@ -1,7 +1,7 @@
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
-  name: airflow-importer-dag
+  name: x86-general
 spec:
   template:
     metadata:
@@ -25,7 +25,7 @@ spec:
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
-        name: airflow-importer-dag
+        name: x86-standard
   limits:
     # One m5.2xlarge = 8 vCPU, so this caps the pool at a single node.
     cpu: "8"
