@@ -15,6 +15,9 @@ librechat:
     # values (beta.chat.cbioportal.org) with these prod URLs.
     DOMAIN_CLIENT: "https://chat.cbioportal.org"
     DOMAIN_SERVER: "https://chat.cbioportal.org"
+    # Propagate W3C traceparent + Datadog headers on every outgoing HTTP
+    # request so MCP tool calls appear as child spans under cbioagent traces.
+    DD_TRACE_PROPAGATION_STYLE: "tracecontext,datadog"
   imageVolume:
     accessModes: ReadWriteMany
     storageClassName: efs-sc

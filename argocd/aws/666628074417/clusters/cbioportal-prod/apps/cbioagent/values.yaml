@@ -9,6 +9,10 @@ global:
 librechat:
   existingSecretName: "librechat-credentials-env"
   existingConfigYaml: "librechat-config"
+  configEnv:
+    # Propagate W3C traceparent + Datadog headers on every outgoing HTTP
+    # request so MCP tool calls appear as child spans under cbioagent traces.
+    DD_TRACE_PROPAGATION_STYLE: "tracecontext,datadog"
   imageVolume:
     accessModes: ReadWriteMany
     storageClassName: efs-sc
