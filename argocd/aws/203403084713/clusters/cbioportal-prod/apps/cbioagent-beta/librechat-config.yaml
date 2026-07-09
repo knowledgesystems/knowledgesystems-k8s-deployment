@@ -103,14 +103,20 @@ data:
       cbioportal-database:
         type: streamable-http
         url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        headers:
+          x-user-id: "{{user.id}}"
       cbioportal-navigator:
         type: streamable-http
         url: http://cbioportal-navigator:80/mcp
         chatMenu: false
+        headers:
+          x-user-id: "{{user.id}}"
       cbioportal-navigator-beta:
         type: streamable-http
         url: http://cbioportal-navigator-beta:80/mcp
         chatMenu: false
+        headers:
+          x-user-id: "{{user.id}}"
 
     endpoints:
       agents:
