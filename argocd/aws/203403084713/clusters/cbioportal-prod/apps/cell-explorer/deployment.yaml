@@ -5,6 +5,9 @@ metadata:
   namespace: cell-explorer
   labels:
     app: cell-explorer
+  annotations:
+    # Restart when the aws creds (refreshed on a schedule) or app secrets change.
+    secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,cell-explorer-secrets"
 spec:
   replicas: 1
   strategy:
@@ -38,6 +41,11 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /app/data
+            # AWS credentials for Bedrock (account 490004633549); the container
+            # runs as root, so HOME=/root and the SDK reads /root/.aws/credentials.
+            - name: aws-creds
+              mountPath: /root/.aws
+              readOnly: true
           # Alembic migrations run before uvicorn serves /health; give a slow
           # first-boot migration up to 5min before liveness/readiness apply.
           startupProbe:
@@ -71,6 +79,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: cell-explorer-data
+        - name: aws-creds
+          secret:
+            secretName: k8s-aws-creds-manager
 ---
 apiVersion: v1
 kind: Service
