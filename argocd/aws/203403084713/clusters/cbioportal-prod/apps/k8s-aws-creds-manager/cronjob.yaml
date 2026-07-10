@@ -83,6 +83,12 @@ spec:
                     --from-file=credentials=$HOME/.aws/credentials \
                     --dry-run=client -o yaml | kubectl apply -f -
 
+                  # Mirror into the cell-explorer namespace — its pods can only
+                  # mount secrets from their own namespace
+                  kubectl create secret generic k8s-aws-creds-manager \
+                    --from-file=credentials=$HOME/.aws/credentials \
+                    --dry-run=client -o yaml | kubectl apply -n cell-explorer -f -
+
                   echo "Done. Credentials secret updated."
           nodeSelector:
             workload: cbioportal
