@@ -1,0 +1,26 @@
+# Lets the k8s-aws-creds-manager cronjob (its SA lives in the default namespace)
+# write the aws credentials Secret into this namespace, so cell-explorer pods can
+# mount it. Secret volumes only resolve within the pod's own namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: k8s-aws-creds-manager-secret-writer
+  namespace: cell-explorer
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: k8s-aws-creds-manager-secret-writer
+  namespace: cell-explorer
+subjects:
+  - kind: ServiceAccount
+    name: k8s-aws-creds-manager-pod-restarter
+    namespace: default
+roleRef:
+  kind: Role
+  name: k8s-aws-creds-manager-secret-writer
+  apiGroup: rbac.authorization.k8s.io
