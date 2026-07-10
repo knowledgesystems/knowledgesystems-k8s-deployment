@@ -4,7 +4,9 @@ locals {
   cluster_name = var.cluster_name
   permissions_boundary_policy    = "AutomationOrUserServiceRolePermissions"
   cellxgene_s3_mountpoint_bucket = "cellxgene-data-msk"
-  hackathon_s3_mountpoint_bucket = "hackathon-databricks"
+  # Cross-account (203403084713) Service Catalog bucket. Requires a matching
+  # bucket policy in 203403084713 naming this role as principal.
+  databricks_s3_mountpoint_bucket = "sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr"
 }
 
 data "aws_caller_identity" "current" {}
@@ -92,24 +94,24 @@ resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentCellxgeneS
   role       = aws_iam_role.userServiceRoleCellxgeneS3Mountpoint.name
 }
 
-# ── Hackathon S3 mountpoint ──────────────────────────────────────────
-resource "aws_iam_policy" "userServicePolicyHackathonS3Mountpoint" {
-  name        = "userServicePolicyHackathonS3Mountpoint"
+# ── Databricks S3 mountpoint ──────────────────────────────────────────
+resource "aws_iam_policy" "userServicePolicyDatabricksS3Mountpoint" {
+  name        = "userServicePolicyDatabricksS3Mountpoint"
   path        = "/"
-  description = "Policy to allow S3 Mountpoint CSI cluster add-on to access the hackathon-databricks S3 bucket"
+  description = "Policy to allow S3 Mountpoint CSI cluster add-on read-only access to the cross-account Databricks S3 bucket"
 
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
       "Statement" : [
         {
-          "Sid" : "MountpointFullBucketAccess",
+          "Sid" : "MountpointBucketList",
           "Effect" : "Allow",
           "Action" : [
             "s3:ListBucket"
           ],
           "Resource" : [
-            "arn:aws:s3:::${local.hackathon_s3_mountpoint_bucket}"
+            "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}"
           ]
         },
         {
@@ -119,7 +121,7 @@ resource "aws_iam_policy" "userServicePolicyHackathonS3Mountpoint" {
             "s3:GetObject"
           ],
           "Resource" : [
-            "arn:aws:s3:::${local.hackathon_s3_mountpoint_bucket}/*"
+            "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}/*"
           ]
         }
       ]
@@ -133,8 +135,8 @@ resource "aws_iam_policy" "userServicePolicyHackathonS3Mountpoint" {
   }
 }
 
-resource "aws_iam_role" "userServiceRoleHackathonS3Mountpoint" {
-  name = "userServiceRoleHackathonS3Mountpoint"
+resource "aws_iam_role" "userServiceRoleDatabricksS3Mountpoint" {
+  name = "userServiceRoleDatabricksS3Mountpoint"
 
   assume_role_policy = jsonencode(
     {
@@ -165,7 +167,7 @@ resource "aws_iam_role" "userServiceRoleHackathonS3Mountpoint" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentHackathonS3Mountpoint" {
-  policy_arn = aws_iam_policy.userServicePolicyHackathonS3Mountpoint.arn
-  role       = aws_iam_role.userServiceRoleHackathonS3Mountpoint.name
+resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentDatabricksS3Mountpoint" {
+  policy_arn = aws_iam_policy.userServicePolicyDatabricksS3Mountpoint.arn
+  role       = aws_iam_role.userServiceRoleDatabricksS3Mountpoint.name
 }

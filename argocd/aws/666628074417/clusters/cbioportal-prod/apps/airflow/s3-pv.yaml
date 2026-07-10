@@ -1,20 +1,20 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: hackathon-databricks-s3-pv
+  name: databricks-s3-pv
 spec:
   capacity:
     storage: 500Gi
   accessModes:
-    - ReadWriteMany
+    - ReadOnlyMany
   mountOptions:
-    - allow-delete
+    - read-only
     - region us-east-1
   claimRef:
     namespace: airflow
-    name: hackathon-databricks-s3-pvc
+    name: databricks-s3-pvc
   csi:
     driver: s3.csi.aws.com
-    volumeHandle: hackathon-databricks-s3-volume
+    volumeHandle: databricks-s3-volume
     volumeAttributes:
-      bucketName: 'hackathon-databricks'
+      bucketName: 'sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr'

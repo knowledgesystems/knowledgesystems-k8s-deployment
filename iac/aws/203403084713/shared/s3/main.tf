@@ -7,6 +7,12 @@ data "aws_iam_role" "github-lfs-lambda-role" {
 locals {
   datahub_bucket_name = one([for o in aws_servicecatalog_provisioned_product.cbioportal-datahub.outputs : o.value if o.key == "ContentBucket"])
   datahub_cf_dist_id  = one([for o in aws_servicecatalog_provisioned_product.cbioportal-datahub.outputs : o.value if o.key == "CloudFrontDistribution"])
+
+  # Service Catalog provisioned bucket read by the MSK (666628074417) airflow
+  # importer via the S3 Mountpoint CSI driver. The MSK-side IAM role is defined
+  # in iac/aws/666628074417/clusters/cbioportal-prod/iam/main.tf.
+  databricks_target_bucket_name = "sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr"
+  databricks_msk_csi_role_arn   = "arn:aws:iam::666628074417:role/userServiceRoleDatabricksS3Mountpoint"
 }
 
 resource "aws_servicecatalog_provisioned_product" "cBioPortal_Public_DB_Dump" {
@@ -134,6 +140,49 @@ resource "aws_s3_bucket_policy" "cbioportal-datahub-policy" {
         Condition = {
           StringNotEquals = {
             "aws:PrincipalArn" = data.aws_iam_role.github-lfs-lambda-role.arn
+          }
+        }
+      }
+    ]
+  })
+}
+
+# WARNING: a bucket policy is a single document per bucket. If AWS Service
+# Catalog (or Databricks) already manages a policy on this bucket, applying
+# this REPLACES it — merge in any existing statements before applying.
+resource "aws_s3_bucket_policy" "databricks-target-msk-csi-policy" {
+  bucket = local.databricks_target_bucket_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowMskAirflowCsiReadOnly"
+        Effect = "Allow"
+        Principal = {
+          AWS = local.databricks_msk_csi_role_arn
+        }
+        Action = [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::${local.databricks_target_bucket_name}",
+          "arn:aws:s3:::${local.databricks_target_bucket_name}/*"
+        ]
+      },
+      {
+        Sid       = "DenyInsecureTransport"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          "arn:aws:s3:::${local.databricks_target_bucket_name}",
+          "arn:aws:s3:::${local.databricks_target_bucket_name}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
           }
         }
       }

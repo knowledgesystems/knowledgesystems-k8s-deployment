@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: hackathon-databricks-s3-pvc
+  name: databricks-s3-pvc
   namespace: airflow
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadOnlyMany
   storageClassName: ""
   resources:
     requests:
       storage: 500Gi
-  volumeName: hackathon-databricks-s3-pv
+  volumeName: databricks-s3-pv
