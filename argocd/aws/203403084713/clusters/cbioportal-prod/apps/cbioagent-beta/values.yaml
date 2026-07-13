@@ -80,6 +80,7 @@ librechat:
     # so this has to go via the configenv ConfigMap.
     DOMAIN_CLIENT: "https://beta.chat.cbioportal.org"
     DOMAIN_SERVER: "https://beta.chat.cbioportal.org"
+    DD_TRACE_PROPAGATION_STYLE: "tracecontext,datadog"
   # Disable the chart-managed image PVC so we can mount the same PVC prod uses
   # (see volumes/volumeMounts below). Keeps beta image uploads visible in prod
   # and vice versa — both instances share one MongoDB + one storage volume.

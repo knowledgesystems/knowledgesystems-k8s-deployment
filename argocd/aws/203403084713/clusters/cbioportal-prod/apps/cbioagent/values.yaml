@@ -27,6 +27,7 @@ librechat:
     DD_LLMOBS_ML_APP: "cbioagent"
     DD_LLMOBS_AGENTLESS_ENABLED: "true"
     DD_SITE: "datadoghq.com"
+    DD_TRACE_PROPAGATION_STYLE: "tracecontext,datadog"
   imageVolume:
     accessModes: ReadWriteMany
     storageClassName: efs-sc
