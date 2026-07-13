@@ -260,7 +260,8 @@ locals {
 }
 
 module "eks_cluster" {
-  source       = "git::https://github.com/MSK-Staging/terraform-aws-hyc-eks.git?ref=4.0.0"
+  source  = "app.terraform.io/mskcc/hyc-eks/aws"
+  version = "4.0.0"
   cluster_name = var.CLUSTER_NAME
 
   # General EKS Config
