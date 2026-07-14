@@ -31,7 +31,7 @@ spec:
             secretKeyRef:
               name: genome-nexus-sentry-dsn
               key: dsn
-        image: genomenexus/gn-spring-boot:demo-oncokb-curated-gene
+        image: genomenexus/gn-spring-boot:2.1.5
         imagePullPolicy: Always
         command: [ "java" ]
         args: [
@@ -39,7 +39,7 @@ spec:
             # include shenandoah)
             "-Dvep.url=http://gn-vep-111.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Dcache.enabled=true",
-            "-Dgenomenexus.server.version=demo-oncokb-curated-gene",
+            "-Dgenomenexus.server.version=2.1.5",
             "-Dspring.mongodb.embedded.version=1.4",
             "-Xms100m",
             "-Xmx5g",
