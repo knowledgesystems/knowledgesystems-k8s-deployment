@@ -51,6 +51,13 @@ spec:
         - name: oncokb-public-staging
           port: 9095
     - kind: Rule
+      match: Host(`preview.oncokb.org`)
+      middlewares:
+        - name: uablock-agentic-crawlers
+      services:
+        - name: oncokb-public-preview
+          port: 9095
+    - kind: Rule
       match: Host(`www.oncokb.org`)
       middlewares:
         - name: uablock-agentic-crawlers

@@ -27,6 +27,7 @@ spec:
     - "keycloakv2.oncokb.org"
     - "beta.keycloak.oncokb.org"
     - "staging.oncokb.org"
+    - "preview.oncokb.org"
     - "www.oncokb.org"
     - "transcript.oncokb.org"
     - "airflow.oncokb.org"
