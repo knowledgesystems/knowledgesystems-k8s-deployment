@@ -251,7 +251,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-staging
-          image: cbioportal/cbioportal-dev:5d7d9879fa476b863ea114df81c2a8bd4c5f2570-web-shenandoah
+          image: cbioportal/cbioportal-dev:e8f4e74a59c65168de3a1e35d870f161bfc2c5e6-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
