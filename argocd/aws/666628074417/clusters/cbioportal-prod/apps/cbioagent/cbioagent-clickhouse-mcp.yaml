@@ -26,6 +26,16 @@ spec:
           ports:
             - containerPort: 8000
           env:
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: OTEL_SERVICE_NAME
+              value: "cbioportal-mcp"
+            - name: DD_LLMOBS_ML_APP
+              value: "cbioportal-mcp"
+            - name: DD_SITE
+              value: "datadoghq.com"
             # Mount FastMCP under the external sub-path so trailing-slash
             # redirects point to https://chat.cbioportal.aws.mskcc.org/db/mcp/
             # rather than /mcp/. Paired with the cbioagent-db-ingress
