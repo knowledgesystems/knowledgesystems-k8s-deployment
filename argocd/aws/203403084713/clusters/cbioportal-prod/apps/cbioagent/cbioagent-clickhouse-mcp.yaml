@@ -17,8 +17,6 @@ spec:
     metadata:
       labels:
         run: cbioagent-clickhouse-mcp
-      annotations:
-        kubectl.kubernetes.io/restartedAt: "2026-07-15"
     spec:
       containers:
         - name: cbioagent-clickhouse-mcp
