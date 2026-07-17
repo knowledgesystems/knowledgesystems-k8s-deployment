@@ -15,6 +15,6 @@ spec:
     name: databricks-s3-pvc
   csi:
     driver: s3.csi.aws.com
-    volumeHandle: databricks-s3-volume
+    volumeHandle: databricks-s3-sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr
     volumeAttributes:
       bucketName: 'sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr'

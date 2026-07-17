@@ -147,46 +147,56 @@ resource "aws_s3_bucket_policy" "cbioportal-datahub-policy" {
   })
 }
 
-# WARNING: a bucket policy is a single document per bucket. If AWS Service
-# Catalog (or Databricks) already manages a policy on this bucket, applying
-# this REPLACES it — merge in any existing statements before applying.
+
+# Read existing bucket policy so we can merge rather than replace
+data "aws_s3_bucket_policy" "databricks_target_existing" {
+  bucket = local.databricks_target_bucket_name
+}
+
+locals {
+  databricks_existing_policy_json = try(data.aws_s3_bucket_policy.databricks_target_existing.policy, "{}")
+  databricks_existing_policy      = try(jsondecode(local.databricks_existing_policy_json), { Version = "2012-10-17", Statement = [] })
+}
+
 resource "aws_s3_bucket_policy" "databricks-target-msk-csi-policy" {
   bucket = local.databricks_target_bucket_name
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowMskAirflowCsiReadOnly"
-        Effect = "Allow"
-        Principal = {
-          AWS = local.databricks_msk_csi_role_arn
-        }
-        Action = [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ]
-        Resource = [
-          "arn:aws:s3:::${local.databricks_target_bucket_name}",
-          "arn:aws:s3:::${local.databricks_target_bucket_name}/*"
-        ]
-      },
-      {
-        Sid       = "DenyInsecureTransport"
-        Effect    = "Deny"
-        Principal = "*"
-        Action    = "s3:*"
-        Resource = [
-          "arn:aws:s3:::${local.databricks_target_bucket_name}",
-          "arn:aws:s3:::${local.databricks_target_bucket_name}/*"
-        ]
-        Condition = {
-          Bool = {
-            "aws:SecureTransport" = "false"
+    Statement = concat(
+      local.databricks_existing_policy.Statement,
+      [
+        {
+          Sid    = "AllowMskAirflowCsiReadOnly"
+          Effect = "Allow"
+          Principal = {
+            AWS = local.databricks_msk_csi_role_arn
+          }
+          Action = [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ]
+          Resource = [
+            "arn:aws:s3:::${local.databricks_target_bucket_name}",
+            "arn:aws:s3:::${local.databricks_target_bucket_name}/*"
+          ]
+        },
+        {
+          Sid       = "DenyInsecureTransport"
+          Effect    = "Deny"
+          Principal = "*"
+          Action    = "s3:*"
+          Resource = [
+            "arn:aws:s3:::${local.databricks_target_bucket_name}",
+            "arn:aws:s3:::${local.databricks_target_bucket_name}/*"
+          ]
+          Condition = {
+            Bool = {
+              "aws:SecureTransport" = "false"
+            }
           }
         }
-      }
-    ]
+      ]
+    )
   })
 }
-

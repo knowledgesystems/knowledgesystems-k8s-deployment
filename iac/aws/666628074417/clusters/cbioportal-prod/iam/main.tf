@@ -71,7 +71,7 @@ resource "aws_iam_role" "userServiceRoleCellxgeneS3Mountpoint" {
           },
           Condition = {
             StringEquals = {
-              "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com"
+              "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com",
             }
           }
         }
@@ -150,7 +150,8 @@ resource "aws_iam_role" "userServiceRoleDatabricksS3Mountpoint" {
           },
           Condition = {
             StringEquals = {
-              "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com"
+              "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com",
+              "${var.cluster_oidc_provider_arn}:sub" = "system:serviceaccount:airflow:airflow-worker"
             }
           }
         }
