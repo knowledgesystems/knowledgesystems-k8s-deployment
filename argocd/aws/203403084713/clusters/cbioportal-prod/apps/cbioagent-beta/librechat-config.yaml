@@ -104,22 +104,22 @@ data:
         type: streamable-http
         url: http://cbioagent-clickhouse-mcp:80/db/mcp
         headers:
-          x-user-id: "{{user.id}}"
-          x-user-email: "{{user.email}}"
+          x-user-id: "{{LIBRECHAT_USER_ID}}"
+          x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
       cbioportal-navigator:
         type: streamable-http
         url: http://cbioportal-navigator:80/mcp
         chatMenu: false
         headers:
-          x-user-id: "{{user.id}}"
-          x-user-email: "{{user.email}}"
+          x-user-id: "{{LIBRECHAT_USER_ID}}"
+          x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
       cbioportal-navigator-beta:
         type: streamable-http
         url: http://cbioportal-navigator-beta:80/mcp
         chatMenu: false
         headers:
-          x-user-id: "{{user.id}}"
-          x-user-email: "{{user.email}}"
+          x-user-id: "{{LIBRECHAT_USER_ID}}"
+          x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
 
     endpoints:
       agents:
