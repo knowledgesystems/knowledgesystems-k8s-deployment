@@ -17,6 +17,10 @@ registry:
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "arn:aws:iam::666628074417:role/userServiceRoleDatabricksS3Mountpoint"
+workers:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::666628074417:role/userServiceRoleDatabricksS3Mountpoint"
 
 config:
   api:
