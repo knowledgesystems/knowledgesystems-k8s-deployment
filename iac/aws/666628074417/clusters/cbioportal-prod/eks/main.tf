@@ -398,3 +398,10 @@ resource "helm_release" "karpenter" {
     })
   ]
 }
+
+# Attach the Databricks S3 mountpoint policy to the Karpenter node role
+# so the s3 CSI driver can access the Databricks S3 bucket.
+resource "aws_iam_role_policy_attachment" "karpenter_node_s3_mountpoint" {
+  policy_arn = "arn:aws:iam::${local.account_id}:policy/userServicePolicyDatabricksS3Mountpoint"
+  role       = local.karpenter_node_role_name
+}
