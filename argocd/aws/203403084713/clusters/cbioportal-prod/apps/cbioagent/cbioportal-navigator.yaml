@@ -4,6 +4,14 @@ metadata:
   name: cbioportal-navigator
   labels:
     run: cbioportal-navigator
+  annotations:
+    # Keel polls ghcr for `:latest` and rolls this Deployment when the
+    # digest changes. Without this, `imagePullPolicy: Always` only pulls
+    # a new image on pod restart — a master push doesn't roll the pod on
+    # its own, so fixes can sit unshipped until something else evicts it.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
 spec:
   replicas: 1
   selector:
