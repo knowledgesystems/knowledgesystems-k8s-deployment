@@ -9,6 +9,14 @@ metadata:
     # changes — the daily clone cron flips that ConfigMap's
     # CLICKHOUSE_DATABASE on each successful build.
     configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
+    # Keel polls Docker Hub for `cbioportal/mcp:latest` and rolls the
+    # Deployment when the digest changes. Without this, `:latest` only
+    # gets re-pulled when the pod restarts for other reasons (daily clone
+    # via Reloader, evictions), so MCP-server fixes can lag by up to a
+    # day even though `imagePullPolicy: Always` is set.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
 spec:
   replicas: 1
   selector:
