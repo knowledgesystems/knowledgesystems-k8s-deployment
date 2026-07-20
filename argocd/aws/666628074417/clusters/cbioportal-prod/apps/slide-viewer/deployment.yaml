@@ -78,11 +78,14 @@ spec:
                   key: ANNOTATION_DATABASE_URL
           resources:
             requests:
-              memory: "1Gi"
+              memory: "3Gi"
               cpu: "250m"
             limits:
               memory: "4Gi"
               cpu: "2"
+          volumeMounts:
+            - name: slide-block-cache
+              mountPath: /cache/slide-blocks
           livenessProbe:
             httpGet:
               path: /health
@@ -99,6 +102,10 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+      volumes:
+        - name: slide-block-cache
+          emptyDir:
+            sizeLimit: 20Gi
 ---
 apiVersion: v1
 kind: Service
