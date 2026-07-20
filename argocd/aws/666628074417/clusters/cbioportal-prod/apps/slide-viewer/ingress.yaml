@@ -18,14 +18,7 @@ spec:
     - host: cbioportal.mskcc.org
       http:
         paths:
-          - path: /tiles
-            pathType: Prefix
-            backend:
-              service:
-                name: slide-viewer
-                port:
-                  number: 80
-          - path: /patient/P-
+          - path: /wsi
             pathType: Prefix
             backend:
               service:
