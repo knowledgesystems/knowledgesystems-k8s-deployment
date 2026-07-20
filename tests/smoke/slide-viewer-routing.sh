@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-: "${WSI_PATIENT_PATH:?Set WSI_PATIENT_PATH, for example /patient/P-0000678}"
-: "${WSI_TILE_PATH:?Set WSI_TILE_PATH, for example /tiles/<slide-id>/zxy/4/0/0}"
+: "${WSI_PATIENT_PATH:?Set WSI_PATIENT_PATH, for example /wsi/patient/P-0000678}"
+: "${WSI_TILE_PATH:?Set WSI_TILE_PATH, for example /wsi/tiles/<slide-id>/zxy/4/0/0}"
 
 BASE_URL="${CBIOPORTAL_URL:-https://cbioportal.mskcc.org}"
 BASE_URL="${BASE_URL%/}"
@@ -31,7 +31,7 @@ if [[ -n "${WSI_BEARER_TOKEN:-}" ]]; then
 fi
 
 for path in "$WSI_PATIENT_PATH" "$WSI_TILE_PATH"; do
-    if [[ "$path" != /patient/P-* && "$path" != /tiles/* ]]; then
+    if [[ "$path" != /wsi/patient/* && "$path" != /wsi/tiles/* ]]; then
         echo "Refusing unexpected WSI path: $path" >&2
         exit 2
     fi
