@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slide-viewer-config
+  namespace: default
+data:
+  # Dell ECS endpoint; slide URIs come from Databricks metadata.
+  AWS_ENDPOINT_URL: "http://pmindecs.mskcc.org:9020"
+
+  # Databricks SQL warehouse
+  DATABRICKS_WAREHOUSE_ID: "0b49b7d78734ad5c"
+
+  # Annotation API auth
+  KEYCLOAK_JWKS_URL: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/certs"
+  ANNOTATION_AUTH_ENABLED: "true"
+
+  # Cache settings
+  TILE_CACHE_TTL: "0"       # 0 = no expiry (tiles are immutable)
+  PATIENT_CACHE_TTL: "86400"  # 24 h
+  BLOCKCACHE_PATH: "/cache/slide-blocks"
+  BLOCKCACHE_BLOCK_SIZE: "8388608"
+
+  # Tile rendering
+  MAX_OPEN_SLIDES: "4"
+  TILE_SIZE: "256"
+  JPEG_QUALITY: "85"
+
+  # CORS — restrict to MSK cBioPortal origins that embed the viewer.
+  CORS_ORIGINS: "https://cbioportal.mskcc.org,https://triage.cbioportal.mskcc.org"
