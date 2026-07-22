@@ -331,7 +331,7 @@ module "iam" {
 
 resource "aws_eks_addon" "s3_mountpoint_addon" {
   addon_name                  = "aws-mountpoint-s3-csi-driver"
-  addon_version               = "v1.15.0-eksbuild.1"
+  addon_version               = "v2.7.0-eksbuild.1"
   cluster_name                = basename(module.eks_cluster.cluster_arn)
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
