@@ -270,6 +270,12 @@ spec:
               value: "true"
             - name: DD_TRACE_ANALYTICS_ENABLED
               value: "true"
+          env:
+            - name: WSI_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-wsi-auth
+                  key: WSI_AUTH_SECRET
           envFrom:
             - secretRef:
                 name: cbioportal-msk-green
