@@ -4,6 +4,7 @@ set -euo pipefail
 
 : "${WSI_PATIENT_PATH:?Set WSI_PATIENT_PATH, for example /wsi/patient/P-0000678}"
 : "${WSI_TILE_PATH:?Set WSI_TILE_PATH, for example /wsi/tiles/<slide-id>/zxy/4/0/0}"
+: "${WSI_BEARER_TOKEN:?Set WSI_BEARER_TOKEN to a short-lived cBioPortal WSI capability}"
 
 BASE_URL="${CBIOPORTAL_URL:-https://cbioportal.mskcc.org}"
 BASE_URL="${BASE_URL%/}"
@@ -13,6 +14,25 @@ if [[ "$HOSTNAME" != "cbioportal.mskcc.org" ]]; then
     echo "Refusing to test unexpected host: $HOSTNAME" >&2
     exit 2
 fi
+
+unauth_args=(
+    --silent
+    --show-error
+    --location
+    --max-redirs 0
+    --connect-timeout 10
+    --max-time 60
+    --output /dev/null
+    --write-out '%{http_code}\n'
+)
+
+for path in "$WSI_PATIENT_PATH" "$WSI_TILE_PATH"; do
+    status="$(curl "${unauth_args[@]}" "${BASE_URL}${path}")"
+    if [[ "$status" != "401" && "$status" != "403" ]]; then
+        echo "Unauthenticated WSI route was not rejected: ${path} (${status})" >&2
+        exit 1
+    fi
+done
 
 curl_args=(
     --fail
@@ -26,9 +46,7 @@ curl_args=(
     --write-out '%{http_code} %{url_effective}\n'
 )
 
-if [[ -n "${WSI_BEARER_TOKEN:-}" ]]; then
-    curl_args+=(--header "Authorization: Bearer ${WSI_BEARER_TOKEN}")
-fi
+curl_args+=(--header "Authorization: Bearer ${WSI_BEARER_TOKEN}")
 
 for path in "$WSI_PATIENT_PATH" "$WSI_TILE_PATH"; do
     if [[ "$path" != /wsi/patient/* && "$path" != /wsi/tiles/* ]]; then

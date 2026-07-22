@@ -20,6 +20,14 @@ spec:
       labels:
         app: slide-viewer
     spec:
+      # The tile server runs as appuser (uid/gid 1000).  fsGroup also makes
+      # the emptyDir block cache writable when it is mounted over the image.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       nodeSelector:
         workload-class: x86-general
       terminationGracePeriodSeconds: 60
@@ -27,9 +35,14 @@ spec:
         - name: dockerhub-creds
       containers:
         - name: slide-viewer
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           # Image tag is updated by the CI/CD pipeline (docker-publish.yml)
-          image: cbioportal/cbioportal-slide-viewer:latest
-          imagePullPolicy: Always
+          image: cbioportal/cbioportal-slide-viewer:wsi-auth-20260720
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -76,13 +89,22 @@ spec:
                 secretKeyRef:
                   name: slide-viewer-secrets
                   key: ANNOTATION_DATABASE_URL
+            - name: WSI_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-msk-blue
+                  key: WSI_AUTH_SECRET
+            - name: WSI_AUTH_REQUIRED
+              value: "true"
           resources:
             requests:
               memory: "3Gi"
               cpu: "250m"
+              ephemeral-storage: "1Gi"
             limits:
               memory: "4Gi"
               cpu: "2"
+              ephemeral-storage: "20Gi"
           volumeMounts:
             - name: slide-block-cache
               mountPath: /cache/slide-blocks
