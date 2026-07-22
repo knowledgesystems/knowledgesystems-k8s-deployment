@@ -10,10 +10,6 @@ data:
   # Databricks SQL warehouse
   DATABRICKS_WAREHOUSE_ID: "0b49b7d78734ad5c"
 
-  # Annotation API auth
-  KEYCLOAK_JWKS_URL: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/certs"
-  ANNOTATION_AUTH_ENABLED: "true"
-
   # Cache settings
   TILE_CACHE_TTL: "0"       # 0 = no expiry (tiles are immutable)
   PATIENT_CACHE_TTL: "86400"  # 24 h
