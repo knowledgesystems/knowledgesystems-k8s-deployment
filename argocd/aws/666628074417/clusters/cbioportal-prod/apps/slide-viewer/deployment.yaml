@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-viewer
+  namespace: default
+  labels:
+    app: slide-viewer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slide-viewer
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0   # zero-downtime: new pod must be Ready before old is removed
+  template:
+    metadata:
+      labels:
+        app: slide-viewer
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      nodeSelector:
+        workload: cbioportal
+      tolerations:
+        - effect: NoSchedule
+          key: workload
+          operator: Equal
+          value: cbioportal
+      terminationGracePeriodSeconds: 60
+      imagePullSecrets:
+        - name: dockerhub-creds
+      containers:
+        - name: slide-viewer
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          # Image tag is updated by the CI/CD pipeline (docker-publish.yml)
+          image: cbioportal/cbioportal-slide-viewer:wsi-auth-20260720
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: slide-viewer-config
+          env:
+            # Credentials from pre-existing Secret
+            # Create with:
+            #   kubectl create secret generic slide-viewer-secrets \
+            #     --from-literal=AWS_ACCESS_KEY_ID=<key> \
+            #     --from-literal=AWS_SECRET_ACCESS_KEY=<secret> \
+            #     --from-literal=DATABRICKS_HOST=https://msk-mode-prod.cloud.databricks.com \
+            #     --from-literal=DATABRICKS_TOKEN=<pat> \
+            #     --from-literal=REDIS_URL=redis://:<password>@eks-msk-cbioportal-persistence-redis-master:6379/12
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: DATABRICKS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: DATABRICKS_HOST
+            - name: DATABRICKS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: DATABRICKS_TOKEN
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: REDIS_URL
+            - name: WSI_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-wsi-auth
+                  key: WSI_AUTH_SECRET
+            - name: WSI_AUTH_REQUIRED
+              value: "true"
+          resources:
+            requests:
+              memory: "3Gi"
+              cpu: "250m"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+              ephemeral-storage: "20Gi"
+          volumeMounts:
+            - name: slide-block-cache
+              mountPath: /cache/slide-blocks
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: slide-block-cache
+          emptyDir:
+            sizeLimit: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-viewer
+  namespace: default
+  labels:
+    app: slide-viewer
+spec:
+  type: ClusterIP
+  selector:
+    app: slide-viewer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

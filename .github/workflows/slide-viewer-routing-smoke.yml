@@ -1,0 +1,27 @@
+name: Slide Viewer Routing Smoke Test
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - argocd-sync-completed
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  routing-smoke:
+    name: Verify MSK WSI routes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out deployment repository
+        uses: actions/checkout@v4
+
+      - name: Exercise production nginx routes
+        env:
+          WSI_PATIENT_PATH: ${{ secrets.WSI_PATIENT_PATH }}
+          WSI_TILE_PATH: ${{ secrets.WSI_TILE_PATH }}
+          WSI_BEARER_TOKEN: ${{ secrets.WSI_BEARER_TOKEN }}
+        run: tests/smoke/slide-viewer-routing.sh
