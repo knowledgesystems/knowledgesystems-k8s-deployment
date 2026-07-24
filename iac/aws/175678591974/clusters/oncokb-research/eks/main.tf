@@ -28,9 +28,9 @@ locals {
     curation = {
       instance_types = ["t4g.large"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 3
-      max_size       = 3
-      min_size       = 3
+      desired_size   = 4
+      max_size       = 4
+      min_size       = 4
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
