@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: genomenexus/gn-mongo:1.4-mutationassessor
+          image: genomenexus/gn-mongo:1.5-mutationassessor
           imagePullPolicy: Always
           ports:
             - containerPort: 27017
@@ -28,7 +28,7 @@ spec:
               protocol: TCP
           env:
             - name: COLLECTION_UPDATE_LIST
-              value: "ensembl.biomart_transcripts,ensembl.canonical_transcript_per_hgnc,oncokb.gene,version"
+              value: "ensembl.biomart_transcripts,ensembl.canonical_transcript_per_hgnc,oncokb.gene,hotspot.mutation,version"
             - name: MONGO_DB
               value: "annotator"
           volumeMounts:

@@ -42,7 +42,7 @@ spec:
             "-Dcache.enabled=true",
             "-Dreplace_old_hgnc_gene_symbol=true",
             "-Dgenomenexus.server.version=2.2.1",
-            "-Dspring.mongodb.embedded.version=1.4",
+            "-Dspring.mongodb.embedded.version=1.5",
             "-Xms500m",
             "-Xmx6g",
             "-XX:+UnlockExperimentalVMOptions",
