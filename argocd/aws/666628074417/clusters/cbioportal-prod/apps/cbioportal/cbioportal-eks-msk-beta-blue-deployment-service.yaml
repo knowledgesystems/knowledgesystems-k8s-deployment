@@ -104,6 +104,7 @@ spec:
             - --skin.right_logo=msk_logo_transparent_black.png
             - --skin.right_nav.show_testimonials=true
             - --skin.title=MSK cBioPortal
+            - --skin.home_page.show_unauthorized_studies=true
             - --installation_map_url=https://installationmap.netlify.app/
             - --app.name=mskcc-portal
             - --filter_groups_by_appname=false
