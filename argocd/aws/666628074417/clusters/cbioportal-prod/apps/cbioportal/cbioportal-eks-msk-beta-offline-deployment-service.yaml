@@ -8,7 +8,7 @@ metadata:
     run: eks-msk-beta-offline
   name: eks-msk-beta-offline
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       run: eks-msk-beta-offline
