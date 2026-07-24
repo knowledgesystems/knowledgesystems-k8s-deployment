@@ -39,7 +39,7 @@ spec:
                 name: oncokb-db-msk-prod-rds
             - secretRef:
                 name: oncokb-redis-cluster
-          image: mskcc/oncokb:6.8.0-germline-beta.1
+          image: mskcc/oncokb:6.8.0-germline-beta.2
           volumeMounts:
             - mountPath: /config/
               name: log4j-properties
