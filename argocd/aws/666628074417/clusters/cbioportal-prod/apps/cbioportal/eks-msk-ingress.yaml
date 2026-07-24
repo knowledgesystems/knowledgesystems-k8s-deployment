@@ -105,7 +105,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-msk-beta-offline
+                name: eks-msk-beta-blue
                 port:
                   number: 80
             path: /
@@ -115,7 +115,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-msk-beta-offline
+                name: eks-msk-beta-blue
                 port:
                   number: 80
             path: /
