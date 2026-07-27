@@ -47,7 +47,10 @@ spec:
                   ACCOUNT_COUNT=$(echo $SECRET_JSON | jq '.accounts | length')
                   echo "Refreshing credentials for $ACCOUNT_COUNT account(s)"
 
-                  # Loop over every account dynamically
+                  SUCCESS_COUNT=0
+                  FAIL_COUNT=0
+                  FAILED_PROFILES=""
+
                   for i in $(seq 0 $(($ACCOUNT_COUNT - 1))); do
                     PROFILE=$(echo $SECRET_JSON  | jq -r ".accounts[$i].profile")
                     USERNAME=$(echo $SECRET_JSON | jq -r ".accounts[$i].username")
@@ -72,11 +75,35 @@ spec:
                       --skip-prompt \
                       --profile=$PROFILE
 
+                    set +e
                     saml2aws login \
                       --profile=$PROFILE \
                       --force \
                       --skip-prompt
+                    LOGIN_EXIT=$?
+                    set -e
+
+                    if [ $LOGIN_EXIT -ne 0 ]; then
+                      echo "WARNING: Failed to login profile $PROFILE (exit code $LOGIN_EXIT)"
+                      FAIL_COUNT=$((FAIL_COUNT + 1))
+                      FAILED_PROFILES="$FAILED_PROFILES $PROFILE"
+                    else
+                      SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+                    fi
                   done
+
+                  echo "Login summary: $SUCCESS_COUNT succeeded, $FAIL_COUNT failed"
+
+                  if [ $SUCCESS_COUNT -eq 0 ]; then
+                    echo "ERROR: All $ACCOUNT_COUNT account(s) failed to authenticate."
+                    echo "Failed profiles:$FAILED_PROFILES"
+                    exit 1
+                  fi
+
+                  if [ $FAIL_COUNT -gt 0 ]; then
+                    echo "WARNING: $FAIL_COUNT account(s) failed:$FAILED_PROFILES"
+                    echo "Continuing with $SUCCESS_COUNT successful account(s)."
+                  fi
 
                   # Push the combined credentials file into a K8s Secret
                   kubectl create secret generic k8s-aws-creds-manager \
