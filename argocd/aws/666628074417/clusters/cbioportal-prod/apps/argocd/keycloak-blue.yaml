@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keycloak
+  name: keycloak-blue
   namespace: argocd
 spec:
   project: default
   sources:
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
-      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak-blue
       targetRevision: HEAD
       directory:
         recurse: true
@@ -22,10 +22,10 @@ spec:
       targetRevision: 11.0.1
       chart: keycloak
       helm:
-        releaseName: keycloak
+        releaseName: keycloak-blue
         valueFiles:
-          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak/values.yaml
-          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/keycloak-creds.yaml
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak-blue/values.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/keycloak-creds-blue.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
