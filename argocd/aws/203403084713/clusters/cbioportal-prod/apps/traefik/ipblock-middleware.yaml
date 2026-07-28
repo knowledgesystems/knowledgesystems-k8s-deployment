@@ -8,3 +8,6 @@ spec:
     ipblock:
       ipDenyList:
         - 14.139.32.2
+        # Huawei-Cloud-SG (PetalBot). Fetches robots.txt but ignores it; ~1,600/hr
+        # patient-page render fan-out. Datacenter range, no real users.
+        - 114.119.128.0/19
