@@ -87,6 +87,10 @@ gateway:
       namespacePolicy:
         from: All
 experimental:
+  plugins:
+    ipblock:
+      moduleName: "github.com/kvncrw/denyip"
+      version: "v1.1.0"
   localPlugins:
     uablock:
       type: localPath
