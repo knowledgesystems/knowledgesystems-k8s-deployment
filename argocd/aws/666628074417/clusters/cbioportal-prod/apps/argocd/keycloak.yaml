@@ -26,6 +26,14 @@ spec:
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak/values.yaml
           - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/keycloak-creds.yaml
+    - repoURL: https://codecentric.github.io/helm-charts
+      targetRevision: 11.0.1
+      chart: keycloak
+      helm:
+        releaseName: keycloak-blue
+        valueFiles:
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak-blue/values.yaml
+          - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/keycloak-creds-blue.yaml
   destination:
     namespace: default
     server: https://kubernetes.default.svc
