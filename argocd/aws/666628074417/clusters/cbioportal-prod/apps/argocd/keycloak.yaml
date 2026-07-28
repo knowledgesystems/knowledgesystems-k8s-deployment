@@ -34,6 +34,12 @@ spec:
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak-blue/values.yaml
           - $portal-configuration-repo/argocd/aws/666628074417/clusters/cbioportal-prod/helm/keycloak-creds-blue.yaml
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/keycloak-blue
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
   destination:
     namespace: default
     server: https://kubernetes.default.svc
