@@ -14,6 +14,7 @@ spec:
     - kind: Rule
       match: Host(`public.api.oncokb.org`)
       middlewares:
+        - name: ipblock
         - name: uablock-agentic-crawlers
       services:
         - name: oncokb-core-public
@@ -46,6 +47,7 @@ spec:
     - kind: Rule
       match: Host(`staging.oncokb.org`)
       middlewares:
+        - name: ipblock
         - name: uablock-agentic-crawlers
       services:
         - name: oncokb-public-staging
@@ -53,6 +55,7 @@ spec:
     - kind: Rule
       match: Host(`preview.oncokb.org`)
       middlewares:
+        - name: ipblock
         - name: uablock-agentic-crawlers
       services:
         - name: oncokb-public-preview
@@ -60,6 +63,7 @@ spec:
     - kind: Rule
       match: Host(`www.oncokb.org`)
       middlewares:
+        - name: ipblock
         - name: uablock-agentic-crawlers
       services:
         - name: oncokb-public
