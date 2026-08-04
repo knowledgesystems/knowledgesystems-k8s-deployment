@@ -58,17 +58,6 @@ global:
       # in librechat-config-beta show up in the endpoint selector.
       - name: ENDPOINTS
         value: "bedrock,agents,anthropic,openAI,google,azureOpenAI,custom"
-      # Beta lists BOTH Sonnet 4.5 and Sonnet 5 so users (and the
-      # cBioChatAgentBeta agent) can pick either. Sonnet 5 currently
-      # errors at invoke time — MSK org SCP `p-5neom9u0` blocks
-      # `anthropic.claude-sonnet-5` on 490004633549 and needs to be
-      # updated by MSK IT before Sonnet 5 is actually usable. Kept in the
-      # list so the switch is one agent-record update once the SCP lands.
-      # `global.` prefix picks the global inference profile (10% cheaper
-      # than `us.` regional/multi-region on Sonnet 4.5+, no residency
-      # guarantee).
-      - name: BEDROCK_AWS_MODELS
-        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,global.anthropic.claude-sonnet-5"
 
 librechat:
   existingSecretName: "librechat-credentials-env"
