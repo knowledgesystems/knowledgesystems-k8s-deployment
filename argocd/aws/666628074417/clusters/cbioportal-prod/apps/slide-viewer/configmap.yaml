@@ -25,8 +25,8 @@ data:
   REDIS_FAILURE_BACKOFF_SECONDS: "5"
 
   # Tile rendering
-  # Memory-bound starting point for a 4 GiB pod; increase only after RSS
-  # measurement under representative slide load.
+  # Conservative starting point for a 16 GiB pod; increase concurrency only
+  # after measuring RSS under representative slide load.
   MAX_OPEN_SLIDES: "1"
   MAX_IMAGE_OPERATIONS: "2"
   N_WORKERS: "2"
