@@ -29,6 +29,11 @@ spec:
         - name: oncokb-curation
           port: 9090
     - kind: Rule
+      match: Host(`agcc.oncokb.org`)
+      services:
+        - name: agentic-cancer-gene-classification
+          port: 8000
+    - kind: Rule
       match: Host(`keycloak.oncokb.org`)
       services:
         - name: keycloak-v2-http
