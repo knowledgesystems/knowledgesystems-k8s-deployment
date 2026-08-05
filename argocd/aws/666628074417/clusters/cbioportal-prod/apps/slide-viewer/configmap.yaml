@@ -11,13 +11,25 @@ data:
   DATABRICKS_WAREHOUSE_ID: "0b49b7d78734ad5c"
 
   # Cache settings
-  TILE_CACHE_TTL: "0"       # 0 = no expiry (tiles are immutable)
-  PATIENT_CACHE_TTL: "86400"  # 24 h
+  # Keep a finite TTL so Redis can evict tile entries under its volatile-ttl
+  # policy instead of allowing non-expiring tile keys to crowd out other data.
+  TILE_CACHE_TTL: "86400"
+  THUMBNAIL_CACHE_TTL: "86400"
+  METADATA_CACHE_TTL: "86400"
   BLOCKCACHE_PATH: "/cache/slide-blocks"
   BLOCKCACHE_BLOCK_SIZE: "8388608"
+  BLOCKCACHE_MAX_BYTES: "19327352832"  # 18 GiB of the 20 GiB emptyDir
+  BLOCKCACHE_PRUNE_INTERVAL_SECONDS: "60"
+  REDIS_CONNECT_TIMEOUT_SECONDS: "0.25"
+  REDIS_COMMAND_TIMEOUT_SECONDS: "0.25"
+  REDIS_FAILURE_BACKOFF_SECONDS: "5"
 
   # Tile rendering
-  MAX_OPEN_SLIDES: "4"
+  # Memory-bound starting point for a 4 GiB pod; increase only after RSS
+  # measurement under representative slide load.
+  MAX_OPEN_SLIDES: "1"
+  MAX_IMAGE_OPERATIONS: "2"
+  N_WORKERS: "2"
   TILE_SIZE: "256"
   JPEG_QUALITY: "85"
 
