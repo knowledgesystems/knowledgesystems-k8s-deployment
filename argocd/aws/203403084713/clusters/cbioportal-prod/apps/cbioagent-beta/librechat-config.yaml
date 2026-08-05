@@ -216,6 +216,13 @@ data:
             endpoint: "agents"
             agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
             temperature: 0
+            # Bedrock prompt caching. On the Agents endpoint the request
+            # body's model_parameters win; without this flag the ~40k-token
+            # system+tools context is re-billed as fresh input every turn.
+            # With it, subsequent turns within cache TTL cost 0.1× input
+            # rate. Beta canary before flipping the prod modelSpec on 203
+            # and the four MSK modelSpecs on 666.
+            promptCache: true
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
