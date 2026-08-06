@@ -5,6 +5,28 @@ The `iac` directory in the repo contains all Terraform configurations for managi
 1. **terrafrom**: Install the terraform CLI tool. The recommended way is to use [tfenv](https://github.com/tfutils/tfenv) to install and manage multiple versions of terraform as each cluster runs on a different version.
 2. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
 
+## Terraform Registry Authentication
+The EKS cluster modules are hosted on the [Terraform Registry](https://app.terraform.io). You must authenticate with the registry before running `terraform get` or `terraform init` on modules that reference it.
+
+### Getting Access
+1. Go to https://app.terraform.io/login.
+2. Click **Sign in with SSO**.
+3. Enter `mskcc` as the organization.
+4. Sign in with your MSKCC account.
+
+If you get an access or saml error, contact the **Digits team** to be added to the `mskcc` organization.
+
+### Generating an API Token
+Once logged in:
+1. Go to **Account Settings > Tokens**.
+3. Click **Create an API token** and copy the value.
+
+### Configuring the Local CLI
+```shell
+terraform login
+```
+When prompted, paste the API token you generated above. After this step, `terraform get` and `terraform init` will be able to pull modules from the registry.
+
 ## Module Structure
 Before you start working with Terraform, make sure you understand the [repo structure](../README.md) and the module structure. There are two types of terraform modules in this repo, shared modules and cluster specific modules. Shared modules contains services that are shared between clusters (such as s3), and cluster-specific modules contains services that handle resources within a cluster, such as IAM for cluster security groups and roles.
 
