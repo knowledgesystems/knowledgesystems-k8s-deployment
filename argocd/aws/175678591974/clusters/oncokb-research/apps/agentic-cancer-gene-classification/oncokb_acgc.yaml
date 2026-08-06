@@ -50,11 +50,11 @@ spec:
               value: "INFO"
           envFrom:
             - secretRef:
-                name: agcg-db
+                name: acgc-db
             - secretRef:
-                name: agcg-redis
+                name: acgc-redis
             - secretRef:
-                name: agcg
+                name: acgc
           readinessProbe:
             httpGet:
               path: /health
@@ -85,10 +85,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: agcg
+          value: acgc
           effect: NoSchedule
       nodeSelector:
-        workload: agcg
+        workload: acgc
 ---
 apiVersion: v1
 kind: Service
