@@ -85,10 +85,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: acgc
+          value: agcg
           effect: NoSchedule
       nodeSelector:
-        workload: acgc
+        workload: agcg
 ---
 apiVersion: v1
 kind: Service

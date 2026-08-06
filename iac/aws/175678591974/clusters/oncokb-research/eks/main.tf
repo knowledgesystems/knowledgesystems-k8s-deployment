@@ -47,7 +47,7 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
-    acgc = {
+    agcg = {
       instance_types = ["t4g.medium"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 1
@@ -56,15 +56,15 @@ locals {
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
-          value  = "acgc"
+          value  = "agcg"
           effect = var.TAINT_EFFECT
         }
       }
       labels = {
-        (var.LABEL_KEY) = "acgc"
+        (var.LABEL_KEY) = "agcg"
       }
       tags = {
-        cdsi-app   = "acgc"
+        cdsi-app   = "agcg"
         cdsi-team  = "oncokb"
         cdsi-owner = "luc2@mskcc.org"
       }
