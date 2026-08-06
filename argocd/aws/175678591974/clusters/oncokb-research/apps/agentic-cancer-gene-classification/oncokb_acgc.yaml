@@ -82,6 +82,8 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      # Matches the agcg node group's taint (see eks/main.tf) — that group
+      # is already live under this name, unlike the acgc secrets above.
       tolerations:
         - key: workload
           operator: Equal
