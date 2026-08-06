@@ -1,0 +1,39 @@
+﻿#  | CDSI K8s Documentation
+
+> Welcome to the documentation site for the Knowledge Systems Apps in CDSI at MSK. This site serves as the central resource for understanding, managing, and deploying the infrastructure and applications in the K8s repository.
+
+- [CDSI K8s Documentation](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/readme.md): CDSI K8s Documentation
+- [Infrastructure as Code (IaC)](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/readme.md): We are gradually adopting Terraform as our primary Infrastructure as Code (IAC) tool to provision and manage cloud resources in a scalable and consistent manner.
+- [Kubernetes Deployment with GitOps](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/kubernetes-deployment-with-gitops/readme.md): We are gradually moving towards an Argo CD managed Kubernetes workflow. The goal is to have all manifests for managing applications across multiple AWS accounts and clusters within the argocd directory in the repo.
+- [Essential Services](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/essential-services/readme.md): We use a lot of services that are essential to the functioning of our core apps. Here is a list of our current essential services:
+- [Apps](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/readme.md): There are a lot of apps deployed across our AWS accounts, including cBioPortal, GenomeNexus, and OncoKB. The main documentation for these apps is up to the individual teams.
+- [Troubleshooting](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/troubleshooting.md): This list is used to track issues and their remedies.
+
+## Infrastructure as Code (IaC)
+
+- [Terraform](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/terraform.md): The iac directory in the repo contains all Terraform configurations for managing the infrastructure across multiple AWS accounts and clusters.
+- [Resource Tagging](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/resource-tagging.md): Tagging resources is critical for tracking and analyzing our AWS costs. All required tag keys listed below are now configured as cost allocation tags in AWS, which means they directly enable cost reporting and analysis in AWS Cost Explorer.
+
+## Kubernetes Deployment with GitOps
+
+- [Argo CD](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/kubernetes-deployment-with-gitops/argocd.md): The argocd directory in the repo contains all our manifests for managing the kubernetes deployments across multiple AWS accounts and clusters. We follow the app-of-apps workflow to manage everything.
+
+## Essential Services
+
+- [Traefik](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/essential-services/traefik.md): We recently experienced issues with our nginx ingress controller that impacted service availability. See incident report. As a result, we are in the process of migrating to Traefik as our ingress controller.
+- [Keycloak](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/essential-services/keycloak.md): We use keycloak for authentication and authorization. For cBioPortal, keycloak is deployed in the public cluster and the internal cluster.
+- [Monitoring](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/essential-services/monitoring.md): We use Datadog and AWS CloudWatch for monitoring. For cBioPortal, datadog is deployed in multiple clusters and other AWS services are attached to AWS CloudWatch dashboard.
+
+## Tutorials
+
+- [IP Blocking](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/tutorials/ip-blocking.md): Due to certain regulations, we sometimes have to block access to our services for specific countries. This can be done by modifying the ingress helm values. The steps below shows how it was done for Genie instances of cBioPortal.
+
+## Apps
+
+- [Genome Nexus](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/genome-nexus.md): Genome Nexus MongoDB databases are backed by AWS EBS volumes that are managed independently of the Helm chart. This decoupling improves disaster recovery and ensures the underlying data persists safely across pod restarts, rolling upgrades, and node replacements.
+- [GitHub LFS](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/github-lfs.md): GitHub LFS for cBioPortal Datahub is backed by AWS infrastructure: an S3 bucket for object storage, a Lambda function (lfs-broker) that implements the Git LFS Batch API, and Secrets Manager for curator API key authentication.
+
+## Incidents Log
+
+- [Nginx-Ingress Timeout Failure](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/incidents-log/nginx-ingress-timeout-failure.md): Incident Date: 2026/02/12
+- [Mongodb Session Service Crash](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/incidents-log/mongodb-session-service-crash.md): Incident Date: 2023/05/24
