@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentic-cancer-gene-classification
+  labels:
+    run: agentic-cancer-gene-classification
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: agentic-cancer-gene-classification
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: agentic-cancer-gene-classification
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        run: agentic-cancer-gene-classification
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: agentic-cancer-gene-classification
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.24.2
+    spec:
+      imagePullSecrets:
+        - name: oncokb-dockerhub-creds
+      containers:
+        - name: agentic-cancer-gene-classification
+          image: oncokb/agentic-cancer-gene-classification:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: ANTHROPIC_SDK_PROVIDER
+              value: "bedrock"
+            - name: BEDROCK_AWS_DEFAULT_REGION
+              value: "us-east-1"
+            - name: BEDROCK_SYNTHESIS_MODEL
+              value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+            - name: BEDROCK_SYNTHESIS_FAST_MODEL
+              value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            - name: BEDROCK_SELECTION_MODEL
+              value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            - name: LOG_LEVEL
+              value: "INFO"
+            # oncokb-db-public-rds-admin supplies DB_URL/DB_USERNAME/DB_PASSWORD
+            # (the shared RDS instance's admin credentials); the app parses
+            # DB_URL directly. MYSQL_DATABASE isn't part of that secret since
+            # a JDBC URL identifies a server, not a specific database.
+            - name: MYSQL_DATABASE
+              value: "acgc"
+          envFrom:
+            - secretRef:
+                name: oncokb-db-public-rds-admin
+            - secretRef:
+                name: acgc-redis
+            - secretRef:
+                name: acgc
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 512Mi
+            limits:
+              memory: 1536Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      # Matches the agcg node group's taint (see eks/main.tf) — that group
+      # is already live under this name, unlike the acgc secrets above.
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: agcg
+          effect: NoSchedule
+      nodeSelector:
+        workload: agcg
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentic-cancer-gene-classification
+  labels:
+    run: agentic-cancer-gene-classification
+spec:
+  type: ClusterIP
+  selector:
+    run: agentic-cancer-gene-classification
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP
