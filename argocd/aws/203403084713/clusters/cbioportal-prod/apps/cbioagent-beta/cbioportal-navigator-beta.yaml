@@ -11,6 +11,14 @@ metadata:
   name: cbioportal-navigator-beta
   labels:
     run: cbioportal-navigator-beta
+  annotations:
+    # Keel polls ghcr for `:beta` and rolls this Deployment when the
+    # digest changes. Without this, `imagePullPolicy: Always` only pulls
+    # a new image on pod restart — a beta-branch push doesn't roll the
+    # pod on its own.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
 spec:
   replicas: 1
   selector:
