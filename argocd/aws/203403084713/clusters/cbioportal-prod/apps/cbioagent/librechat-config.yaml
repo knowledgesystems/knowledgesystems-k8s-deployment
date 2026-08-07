@@ -110,7 +110,8 @@ data:
     mcpServers:
       cbioportal-database:
         type: streamable-http
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        # Trailing slash avoids FastMCP's 307 that LibreChat v0.8.7+ blocks as SSRF.
+        url: http://cbioagent-clickhouse-mcp:80/db/mcp/
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
