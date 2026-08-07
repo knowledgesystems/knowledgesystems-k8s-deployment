@@ -37,7 +37,12 @@ image:
   registry: docker.io
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.8.3-rc1-custom-v9"
+  # v0.8.7-custom-v1: rebase of our v0.8.3-rc1-custom-v9 customizations
+  # onto upstream v0.8.7. Brings agents-lib 3.2.46 with Bedrock
+  # cachePoint wiring (unlocks Bedrock prompt caching — see
+  # model_parameters.promptCache: true on the prod agent records) +
+  # ~860 upstream commits worth of fixes. Beta soaked 2026-08-07.
+  tag: "v0.8.7-custom-v1"
 
 mongodb:
   enabled: false
