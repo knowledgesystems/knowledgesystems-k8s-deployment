@@ -278,7 +278,7 @@ spec:
             - secretRef:
                 name: cbioportal-public-green
           # Please change this in tandem with the public API backend image.
-          image: cbioportal/cbioportal:demo-robots-txt-web-shenandoah
+          image: cbioportal/cbioportal:master-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
