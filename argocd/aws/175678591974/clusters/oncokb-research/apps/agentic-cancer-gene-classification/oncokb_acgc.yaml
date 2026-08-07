@@ -48,9 +48,15 @@ spec:
               value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             - name: LOG_LEVEL
               value: "INFO"
+            # oncokb-db-public-rds-admin supplies DB_URL/DB_USERNAME/DB_PASSWORD
+            # (the shared RDS instance's admin credentials); the app parses
+            # DB_URL directly. MYSQL_DATABASE isn't part of that secret since
+            # a JDBC URL identifies a server, not a specific database.
+            - name: MYSQL_DATABASE
+              value: "acgc"
           envFrom:
             - secretRef:
-                name: acgc-db
+                name: oncokb-db-public-rds-admin
             - secretRef:
                 name: acgc-redis
             - secretRef:
