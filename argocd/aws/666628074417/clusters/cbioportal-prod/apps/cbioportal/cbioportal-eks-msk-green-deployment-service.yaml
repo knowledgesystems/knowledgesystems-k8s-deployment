@@ -270,7 +270,6 @@ spec:
               value: "true"
             - name: DD_TRACE_ANALYTICS_ENABLED
               value: "true"
-          env:
             - name: WSI_AUTH_SECRET
               valueFrom:
                 secretKeyRef:

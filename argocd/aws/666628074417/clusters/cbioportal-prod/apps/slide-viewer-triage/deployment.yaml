@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: slide-viewer
+  name: slide-viewer-triage
   namespace: default
   labels:
-    app: slide-viewer
+    app: slide-viewer-triage
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: slide-viewer
+      app: slide-viewer-triage
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 0   # zero-downtime: new pod must be Ready before old is removed
+      maxUnavailable: 0
   template:
     metadata:
       labels:
-        app: slide-viewer
+        app: slide-viewer-triage
     spec:
       securityContext:
         runAsNonRoot: true
@@ -27,12 +27,12 @@ spec:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
       nodeSelector:
-        workload: cbioportal
+        workload: cbio-triage
       tolerations:
         - effect: NoSchedule
           key: workload
           operator: Equal
-          value: cbioportal
+          value: cbio-triage
       terminationGracePeriodSeconds: 60
       imagePullSecrets:
         - name: dockerhub-creds
@@ -43,7 +43,6 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Update this tag only after publishing a compatible Docker Hub image.
           image: cbioportal/cbioportal-slide-viewer:4d58f8c2528737e2d548c8b20c6232bca7057eb3
           imagePullPolicy: IfNotPresent
           ports:
@@ -51,16 +50,8 @@ spec:
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: slide-viewer-config
+                name: slide-viewer-triage-config
           env:
-            # Credentials from pre-existing Secret
-            # Create with:
-            #   kubectl create secret generic slide-viewer-secrets \
-            #     --from-literal=AWS_ACCESS_KEY_ID=<key> \
-            #     --from-literal=AWS_SECRET_ACCESS_KEY=<secret> \
-            #     --from-literal=DATABRICKS_HOST=https://msk-mode-prod.cloud.databricks.com \
-            #     --from-literal=DATABRICKS_TOKEN=<pat> \
-            #     --from-literal=REDIS_URL=redis://:<password>@eks-msk-cbioportal-persistence-redis-master:6379/12
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -130,21 +121,4 @@ spec:
             sizeLimit: 20Gi
         - name: wsi-release
           persistentVolumeClaim:
-            claimName: slide-viewer-wsi-release
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: slide-viewer
-  namespace: default
-  labels:
-    app: slide-viewer
-spec:
-  type: ClusterIP
-  selector:
-    app: slide-viewer
-  ports:
-    - name: http
-      port: 80
-      targetPort: 8080
-      protocol: TCP
+            claimName: slide-viewer-triage-wsi-release

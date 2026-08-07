@@ -1,23 +1,20 @@
-name: Slide Viewer Routing Smoke Test
+name: Slide Viewer Triage Routing Smoke Test
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types:
-      - argocd-sync-completed
-  schedule:
-    - cron: '17 * * * *'
 
 permissions:
   contents: read
 
 jobs:
   routing-smoke:
-    name: Verify MSK WSI readiness and auth gating
+    name: Verify isolated triage WSI routes
     runs-on: ubuntu-latest
     steps:
       - name: Check out deployment repository
         uses: actions/checkout@v4
 
-      - name: Exercise production nginx routes
+      - name: Exercise triage beta nginx routes
+        env:
+          CBIOPORTAL_URL: https://triage-beta.cbioportal.aws.mskcc.org
         run: tests/smoke/slide-viewer-routing.sh
