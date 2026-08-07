@@ -9,10 +9,37 @@ spec:
   entryPoints:
     - websecure
   routes:
+    # Expensive bulk-data endpoints (browser UA): add per-IP rate limit
+    - match: >-
+        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && (PathRegexp(`^/api/studies/[^/]+/clinical-events`) || PathRegexp(`^/api/molecular-profiles/[^/]+/discrete-copy-number/fetch`))
+      kind: Rule
+      priority: 200
+      middlewares:
+        - name: ipblock
+          namespace: default
+        - name: ratelimit-heavy
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-green
+          port: 80
+    # Expensive bulk-data endpoints (non-browser): add per-IP rate limit
+    - match: >-
+        Host(`www.cbioportal.org`) && (PathRegexp(`^/api/studies/[^/]+/clinical-events`) || PathRegexp(`^/api/molecular-profiles/[^/]+/discrete-copy-number/fetch`))
+      kind: Rule
+      priority: 190
+      middlewares:
+        - name: ipblock
+          namespace: default
+        - name: ratelimit-heavy
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-api-green
+          port: 80
     # Browser traffic: User-Agent contains Mozilla
     - match: >-
         Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
       kind: Rule
+      priority: 100
       middlewares:
         - name: ipblock
           namespace: default
@@ -22,6 +49,7 @@ spec:
     # Non-browser traffic (catch-all)
     - match: Host(`www.cbioportal.org`)
       kind: Rule
+      priority: 50
       middlewares:
         - name: ipblock
           namespace: default
