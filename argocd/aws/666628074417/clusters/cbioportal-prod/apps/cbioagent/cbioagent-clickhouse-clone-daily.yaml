@@ -1,6 +1,7 @@
-# Daily mskimpact-only clone of the active MSK cBioPortal production
+# Daily study-filtered clone of the active MSK cBioPortal production
 # color into a ping-pong librechat buffer in ClickHouse, with LLM-prep
-# SQL applied. Pod runs fetch-sql → load-msk-sql → clone → patch-pointer;
+# SQL applied. STUDY_FILTER accepts a comma-separated list of study
+# identifiers (currently mskimpact and msktarget). Pod runs fetch-sql → load-msk-sql → clone → patch-pointer;
 # Reloader watches clickhouse-mcp-active and rolls the MCP when the
 # patch container flips the buffer pointer.
 #
@@ -143,7 +144,7 @@ spec:
                 - name: DST_PREFIX
                   value: "cbioportal_msk_librechat_"
                 - name: STUDY_FILTER
-                  value: "mskimpact"
+                  value: "mskimpact,msktarget"
               volumeMounts:
                 - mountPath: /workdir
                   name: workdir
