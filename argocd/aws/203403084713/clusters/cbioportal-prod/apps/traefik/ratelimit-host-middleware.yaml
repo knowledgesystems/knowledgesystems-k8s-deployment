@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit-host
+  namespace: default
+spec:
+  # Generous whole-host per-client-IP rate limit for secondary hosts
+  # (master/beta/staging) that share an annotation-based Ingress and so cannot
+  # path-scope a middleware. Set well above a normal page load (a study view
+  # fires many API calls) but far below bulk scraping. Tune as needed.
+  rateLimit:
+    average: 600 # ~600 requests / minute / client IP
+    period: 1m
+    burst: 100
