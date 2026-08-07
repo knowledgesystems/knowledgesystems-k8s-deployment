@@ -100,12 +100,14 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  # Beta follows the `beta` branch on cbioportal/librechat. The build
-  # workflow on that repo rebuilds and overwrites this mutable tag on
-  # every push, and Keel (see deploymentAnnotations above) rolls this
-  # pod when the digest behind the tag changes. Prod stays pinned to
-  # immutable v0.8.3-rc1-custom-vN tags so beta drift can't reach it.
-  tag: "beta"
+  # Beta pinned to the v0.8.7 rebase for validation. Built from the
+  # v0.8.7-custom-v1 branch on cbioportal/librechat (rebase of our
+  # v0.8.3-rc1-custom-v9 customizations on top of upstream v0.8.7 —
+  # brings agents-lib 3.2.46 with Bedrock cachePoint wiring, ~860
+  # upstream commits worth of fixes). Once soaked on beta we roll to
+  # prod under the same tag scheme. Keel still watches the tag digest;
+  # a re-push to v0.8.7-custom-v1 would still roll this pod.
+  tag: "v0.8.7-custom-v1"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
