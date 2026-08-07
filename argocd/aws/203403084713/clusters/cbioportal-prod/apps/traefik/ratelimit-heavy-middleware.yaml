@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit-heavy
+  namespace: default
+spec:
+  # Per-client-IP rate limit for the expensive bulk-data endpoints
+  # (study-wide clinical-events and discrete-copy-number/fetch). These
+  # materialize large result sets in JVM heap; unthrottled bulk scraping
+  # of them OOM-crash-loops the backend. Scoped to those paths via the
+  # cbioportal www IngressRoute so normal browsing is unaffected.
+  # Source is the real client IP (Traefik sees it directly). Tune as needed.
+  rateLimit:
+    average: 50 # sustained ~50 requests / minute / client IP
+    period: 1m
+    burst: 20 # allow short bursts (a study page fires several fetches)
