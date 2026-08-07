@@ -13,16 +13,6 @@ metadata:
   namespace: default
 spec:
   rules:
-    - host: master.cbioportal.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: cbioportal-backend-master-green
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
     - host: beta.cbioportal.org
       http:
         paths:
@@ -44,9 +34,6 @@ spec:
             path: /
             pathType: Prefix
   tls:
-    - hosts:
-        - master.cbioportal.org
-      secretName: master-cbio-cert
     - hosts:
         - beta.cbioportal.org
       secretName: cbioportal-beta-cert
