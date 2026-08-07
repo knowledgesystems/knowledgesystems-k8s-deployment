@@ -88,3 +88,34 @@ spec:
     - hosts:
         - mcp.cbioportal.org
       secretName: mcp-cbio-cert
+---
+# /db-mcp-apps — separate Ingress so its own rate-limit middleware only applies
+# here. Same host + same TLS secret; Traefik merges Ingress rules per
+# host. The path is NOT stripped — FastMCP is configured (via the
+# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp) to mount
+# itself at /db/mcp so trailing-slash redirects build correct URLs.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-cbioportal-db-mcp-apps-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: default-ratelimit-db@kubernetescrd
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  rules:
+    - host: mcp.cbioportal.org
+      http:
+        paths:
+          - path: /db-mcp-apps
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-apps
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - mcp.cbioportal.org
+      secretName: mcp-cbio-cert

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioagent-clickhouse-mcp-apps
+  labels:
+    run: cbioagent-clickhouse-mcp-apps
+  annotations:
+    # Reloader rolls this Deployment when the daily clone cron patches
+    # clickhouse-mcp-active.CLICKHOUSE_DATABASE on a successful build.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioagent-clickhouse-mcp-apps
+  template:
+    metadata:
+      labels:
+        run: cbioagent-clickhouse-mcp-apps
+    spec:
+      containers:
+        - name: cbioagent-clickhouse-mcp
+          image: cbioportal/mcp:mcp-apps
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            # Node-local Datadog agent IP exposed via Downward API.
+            # The telemetry module uses this to build the OTLP gRPC endpoint
+            # (http://<DD_AGENT_HOST>:4318) unless OTEL_EXPORTER_OTLP_ENDPOINT
+            # is set explicitly.
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: OTEL_SERVICE_NAME
+              value: "cbioportal-mcp-apps"
+            - name: DD_LLMOBS_ML_APP
+              value: "cbioportal-mcp-apps"
+            - name: DD_SITE
+              value: "datadoghq.com"
+            # Mount FastMCP under the external sub-path so trailing-slash
+            # redirects point to https://mcp.cbioportal.org/db/mcp/ rather
+            # than /mcp/. Paired with dropping the strip-db-prefix
+            # middleware on the mcp-cbioportal-db-ingress Ingress.
+            - name: CLICKHOUSE_MCP_HTTP_PATH
+              value: "/db-mcp-apps/mcp"
+            # Trust X-Forwarded-* from any in-cluster source so uvicorn's
+            # 307 trailing-slash redirect honors Traefik's
+            # X-Forwarded-Proto: https. Without this the Location
+            # downgrades to http:// and strict clients (Claude Desktop,
+            # etc.) refuse to follow. The listener is only reachable via
+            # in-cluster Services (Traefik on the public path,
+            # cbioagent-librechat on the internal path), so "*" is fine.
+            - name: CLICKHOUSE_MCP_FORWARDED_ALLOW_IPS
+              value: "*"
+          envFrom:
+            - secretRef:
+                name: clickhouse-mcp
+            # ConfigMap mounted AFTER the Secret so its CLICKHOUSE_DATABASE
+            # value wins (envFrom: last-writer-wins on key collisions). The
+            # cbioagent-clickhouse-clone-daily CronJob owns this ConfigMap
+            # and updates it when the production color flips, then rolls
+            # this Deployment.
+            - configMapRef:
+                name: clickhouse-mcp-active
+      nodeSelector:
+        workload: "cbioagent"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbioagent"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioagent-clickhouse-mcp-apps
+spec:
+  selector:
+    run: cbioagent-clickhouse-mcp-apps
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8000
+  type: ClusterIP
