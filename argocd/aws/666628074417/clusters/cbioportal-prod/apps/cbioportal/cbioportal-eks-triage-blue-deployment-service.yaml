@@ -7,10 +7,10 @@ metadata:
     run: eks-triage-blue
     tags.datadoghq.com/env: eks-triage
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: wsi-triage
+    tags.datadoghq.com/version: 7.0.5
   name: eks-triage-blue
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       run: eks-triage-blue
@@ -24,7 +24,7 @@ spec:
         run: eks-triage-blue
         tags.datadoghq.com/env: eks-triage
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: wsi-triage
+        tags.datadoghq.com/version: 7.0.5
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -53,12 +53,7 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
-            - name: WSI_AUTH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: cbioportal-wsi-auth
-                  key: WSI_AUTH_SECRET
-          image: cbioportal/cbioportal-dev:wsi-triage-def9ed61ec4598f4005c9f8cc8bb0c09acadb5ed-c39ea7f2daaef5c08ebf070dfc44de7a679a24fa
+          image: cbioportal/cbioportal:v7.0.5-web-shenandoah
           volumeMounts:
             - name: triage-eks-configmap-volume
               mountPath: /cbioportal/local.key
@@ -124,8 +119,8 @@ spec:
             "--dat.method=oauth2", "--dat.oauth2.clientId=triage-api-v6", "--dat.oauth2.clientSecret=$(DAT_OAUTH2_CLIENT_SECRET)", "--dat.oauth2.accessTokenUri=https://keycloak.cbioportal.mskcc.org/auth/realms/triage/protocol/openid-connect/token", "--dat.oauth2.jwkUrl=https://keycloak.cbioportal.mskcc.org/auth/realms/triage/protocol/openid-connect/certs", "--dat.oauth2.issuer=https://keycloak.cbioportal.mskcc.org/auth/realms/triage", "--dat.oauth2.userAuthorizationUri=https://keycloak.cbioportal.mskcc.org/auth/realms/triage/protocol/openid-connect/auth", "--dat.oauth2.redirectUri=https://triage.cbioportal.mskcc.org/api/data-access-token/oauth2", "--dat.oauth2.jwtRolesPath=realm_access::roles",
             # compress on client side
             "--enable_request_body_gzip_compression=true",
-            # WSI token and tile viewer settings
-            "--wsi.access-token-secret=$(WSI_AUTH_SECRET)", "--wsi.access-token-audience=cbioportal-wsi", "--wsi.access-token-ttl-seconds=300", "--msk.wsi.tile_server.url=https://triage-beta.cbioportal.aws.mskcc.org/wsi", "--msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)", "--server.compression.enabled=true", "--server.tomcat.connection-timeout=20000", "--server.tomcat.max-http-response-header-size=16384", "--server.max-http-request-header-size=16384", "--server.port=8888"]
+            # msk whole slide viewer
+            "--msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)", "--server.compression.enabled=true", "--server.tomcat.connection-timeout=20000", "--server.tomcat.max-http-response-header-size=16384", "--server.max-http-request-header-size=16384", "--server.port=8888"]
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
