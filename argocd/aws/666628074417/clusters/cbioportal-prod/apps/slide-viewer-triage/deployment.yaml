@@ -6,7 +6,9 @@ metadata:
   labels:
     app: slide-viewer-triage
 spec:
-  replicas: 1
+  # Keep the workload dormant until the private configuration, image digest,
+  # and release index are installed in the target cluster.
+  replicas: 0
   selector:
     matchLabels:
       app: slide-viewer-triage
@@ -122,3 +124,20 @@ spec:
         - name: wsi-release
           persistentVolumeClaim:
             claimName: slide-viewer-triage-wsi-release
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-viewer-triage
+  namespace: default
+  labels:
+    app: slide-viewer-triage
+spec:
+  selector:
+    app: slide-viewer-triage
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

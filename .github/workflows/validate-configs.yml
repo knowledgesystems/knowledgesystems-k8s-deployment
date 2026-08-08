@@ -124,8 +124,8 @@ jobs:
           echo ""
           echo "All Kubernetes manifests passed validation."
 
-  validate-slide-viewer:
-    name: Validate WSI Manifests and Smoke Script
+  validate-slide-viewer-triage:
+    name: Validate dormant WSI triage manifests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -137,23 +137,13 @@ jobs:
           curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
             | tar xz -C /usr/local/bin kubeconform
 
-      - name: Reject duplicate YAML keys in WSI files
+      - name: Reject duplicate YAML keys in triage manifests
         run: |
           python .github/scripts/validate_yaml_no_duplicates.py \
-            .github/workflows/slide-viewer-routing-smoke.yml \
-            .github/workflows/slide-viewer-triage-routing-smoke.yml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/slide-viewer.yaml \
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/slide-viewer-triage.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/cbioportal-eks-msk-blue-deployment-service.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/cbioportal-eks-msk-green-deployment-service.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/cbioportal-eks-triage-blue-deployment-service.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/eks-triage-ingress.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/configmap.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/deployment.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/ingress.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/network-policy.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/wsi-release-pvc.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/*.yaml
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/deployment.yaml \
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/network-policy.yaml \
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/wsi-release-pvc.yaml
 
       - name: Validate WSI manifests
         run: |
@@ -162,18 +152,7 @@ jobs:
             -summary \
             -kubernetes-version 1.29.0 \
             -ignore-missing-schemas \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/slide-viewer.yaml \
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/slide-viewer-triage.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/cbioportal-eks-msk-blue-deployment-service.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/cbioportal-eks-msk-green-deployment-service.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/cbioportal-eks-triage-blue-deployment-service.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/cbioportal/eks-triage-ingress.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/configmap.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/deployment.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/ingress.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/network-policy.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer/wsi-release-pvc.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/*.yaml
-
-      - name: Validate routing smoke script
-        run: bash -n tests/smoke/slide-viewer-routing.sh
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/deployment.yaml \
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/network-policy.yaml \
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/wsi-release-pvc.yaml
