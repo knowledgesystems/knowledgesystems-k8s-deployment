@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-viewer-triage
+  namespace: default
+  labels:
+    app: slide-viewer-triage
+spec:
+  # Keep the workload dormant until the private configuration, image digest,
+  # and release index are installed in the target cluster.
+  replicas: 0
+  selector:
+    matchLabels:
+      app: slide-viewer-triage
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: slide-viewer-triage
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      nodeSelector:
+        workload: cbio-triage
+      tolerations:
+        - effect: NoSchedule
+          key: workload
+          operator: Equal
+          value: cbio-triage
+      terminationGracePeriodSeconds: 60
+      imagePullSecrets:
+        - name: dockerhub-creds
+      containers:
+        - name: slide-viewer
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: cbioportal/cbioportal-slide-viewer:4d58f8c2528737e2d548c8b20c6232bca7057eb3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: slide-viewer-triage-config
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: DATABRICKS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: DATABRICKS_HOST
+            - name: DATABRICKS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: DATABRICKS_TOKEN
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: REDIS_URL
+            - name: WSI_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-wsi-auth
+                  key: WSI_AUTH_SECRET
+            - name: WSI_AUTH_REQUIRED
+              value: "true"
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "250m"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "16Gi"
+              cpu: "2"
+              ephemeral-storage: "20Gi"
+          volumeMounts:
+            - name: slide-block-cache
+              mountPath: /cache/slide-blocks
+            - name: wsi-release
+              mountPath: /var/lib/wsi
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: slide-block-cache
+          emptyDir:
+            sizeLimit: 20Gi
+        - name: wsi-release
+          persistentVolumeClaim:
+            claimName: slide-viewer-triage-wsi-release
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-viewer-triage
+  namespace: default
+  labels:
+    app: slide-viewer-triage
+spec:
+  selector:
+    app: slide-viewer-triage
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
