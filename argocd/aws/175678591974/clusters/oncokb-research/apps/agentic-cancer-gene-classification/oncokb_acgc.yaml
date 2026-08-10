@@ -54,11 +54,16 @@ spec:
             # a JDBC URL identifies a server, not a specific database.
             - name: MYSQL_DATABASE
               value: "acgc"
+            # redis-cluster supplies REDIS_PASSWORD (reused, same as
+            # oncokb-curation's own dedicated Redis instance) — no Sentinel,
+            # plain master/replica, so REDIS_URL just points at the master.
+            - name: REDIS_URL
+              value: "redis://:$(REDIS_PASSWORD)@acgc-redis-master:6379/0"
           envFrom:
             - secretRef:
                 name: oncokb-db-public-rds-admin
             - secretRef:
-                name: acgc-redis
+                name: redis-cluster
             - secretRef:
                 name: acgc
           readinessProbe:
