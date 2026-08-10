@@ -29,7 +29,7 @@ spec:
         - name: oncokb-curation
           port: 9090
     - kind: Rule
-      match: Host(`agcc.oncokb.org`)
+      match: Host(`acgc.oncokb.org`)
       services:
         - name: agentic-cancer-gene-classification
           port: 8000

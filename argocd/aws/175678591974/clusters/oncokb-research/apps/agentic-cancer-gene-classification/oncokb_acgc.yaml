@@ -23,7 +23,7 @@ spec:
         tags.datadoghq.com/service: agentic-cancer-gene-classification
         admission.datadoghq.com/enabled: "true"
       annotations:
-        admission.datadoghq.com/java-lib.version: v1.24.2
+        admission.datadoghq.com/python-lib.version: v3
     spec:
       serviceAccountName: agentic-cancer-gene-classification
       imagePullSecrets:
