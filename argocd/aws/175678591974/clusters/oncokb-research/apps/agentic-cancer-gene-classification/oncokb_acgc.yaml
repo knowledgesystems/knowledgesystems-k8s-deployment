@@ -25,6 +25,7 @@ spec:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
     spec:
+      serviceAccountName: agentic-cancer-gene-classification
       imagePullSecrets:
         - name: oncokb-dockerhub-creds
       containers:

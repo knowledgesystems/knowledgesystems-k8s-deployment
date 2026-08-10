@@ -290,3 +290,9 @@ module "eks_cluster" {
     })
   }
 }
+
+module "iam" {
+  source                    = "../iam"
+  cluster_oidc_provider_arn = module.eks_cluster.cluster_oidc_provider
+  cluster_name              = basename(module.eks_cluster.cluster_arn)
+}
