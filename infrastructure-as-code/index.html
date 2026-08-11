@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.839349663778">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.839803911081">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.6.0">
@@ -38,11 +38,11 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../resources/css/retype.css?v=4.6.0.839349663778" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=4.6.0.839803911081" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=4.6.0.839349663778" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=4.6.0.839803911081" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=4.6.0.839349663778" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=4.6.0.839803911081" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -162,6 +162,8 @@
 <p>We are gradually adopting <a href="https://www.terraform.io/">Terraform</a> as our primary Infrastructure as Code (IAC) tool to provision and manage cloud resources in a scalable and consistent manner. While some infrastructure is still managed manually or through other tools, we are actively migrating towards a fully Terraform-driven approach. Our goal is to standardize infrastructure management by leveraging Git as the source of truth.</p>
 <h2 id="terraform">Terraform</h2>
 <p>To improve resource tracking and management, we use Terraform to provision resources in AWS. The <a href="../#repo-structure">repo structure</a> is setup to mirror this AWS setup and uses submodules to organize resources across multiple accounts. See <a href="terraform/">Terraform</a> for documentation on how to set up and manage Terraform.</p>
+<h2 id="best-practices">Best Practices</h2>
+<p>See <a href="best-practices/">Best Practices</a> for conventions around compute, storage, secrets management, and general Terraform safety.</p>
 <h2 id="resource-tagging">Resource Tagging</h2>
 <p>Proper tagging of all cloud resources provisioned through Terraform is required. This enables better resource tracking, accountability, cost analysis. There is a set of tags that should be attached to all existing and new resources. See <a href="resource-tagging/">Resource Tagging</a> for further details.</p>
 

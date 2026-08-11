@@ -11,30 +11,30 @@
     <meta name="generator" content="Retype 4.6.0">
 
     <!-- Primary Meta Tags -->
-    <title>Genome Nexus | CDSI K8s Documentation</title>
-    <meta name="title" content="Genome Nexus | CDSI K8s Documentation">
-    <meta name="description" content="Genome Nexus MongoDB databases are backed by AWS EBS volumes that are managed independently of the Helm chart. This decoupling improves disaster recovery and ensures the underlying data persists safely across pod restarts, rolling upgrades, and node replacements.">
+    <title>Best Practices | CDSI K8s Documentation</title>
+    <meta name="title" content="Best Practices | CDSI K8s Documentation">
+    <meta name="description" content="This page documents infrastructure conventions and practices that help avoid common pitfalls.">
 
     <!-- Canonical -->
-    <link rel="canonical" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/genome-nexus/">
+    <link rel="canonical" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/best-practices/">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/sitemap.xml">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/genome-nexus/">
-    <meta property="og:title" content="Genome Nexus | CDSI K8s Documentation">
-    <meta property="og:description" content="Genome Nexus MongoDB databases are backed by AWS EBS volumes that are managed independently of the Helm chart. This decoupling improves disaster recovery and ensures the underlying data persists safely across pod restarts, rolling upgrades, and node replacements.">
+    <meta property="og:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/best-practices/">
+    <meta property="og:title" content="Best Practices | CDSI K8s Documentation">
+    <meta property="og:description" content="This page documents infrastructure conventions and practices that help avoid common pitfalls.">
     <meta property="og:site_name" content="CDSI K8s">
     <meta property="og:locale" content="en_US">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/genome-nexus/">
-    <meta name="twitter:title" content="Genome Nexus | CDSI K8s Documentation">
-    <meta name="twitter:description" content="Genome Nexus MongoDB databases are backed by AWS EBS volumes that are managed independently of the Helm chart. This decoupling improves disaster recovery and ensures the underlying data persists safely across pod restarts, rolling upgrades, and node replacements.">
+    <meta name="twitter:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/best-practices/">
+    <meta name="twitter:title" content="Best Practices | CDSI K8s Documentation">
+    <meta name="twitter:description" content="This page documents infrastructure conventions and practices that help avoid common pitfalls.">
 
     <!-- Alternate Markdown -->
-    <link rel="alternate" type="text/markdown" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/genome-nexus.md">
+    <link rel="alternate" type="text/markdown" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/best-practices.md">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
@@ -43,7 +43,6 @@
     <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.839803911081" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
     <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.839803911081" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=4.6.0.839803911081" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -159,67 +158,42 @@
                 <doc-page-actions></doc-page-actions>
 
                 <!-- Page content  -->
-<h1 id="genome-nexus">Genome Nexus</h1>
-<h2 id="mongodb-volume-management">MongoDB Volume Management</h2>
-<p>Genome Nexus MongoDB databases are backed by AWS EBS volumes that are managed independently of the Helm chart. This decoupling improves disaster recovery and ensures the underlying data persists safely across pod restarts, rolling upgrades, and node replacements.</p>
-<h3 id="how-its-set-up">How It&#x27;s Set Up</h3>
-<ol>
-<li>EBS volumes are provisioned via Terraform and are defined in the ec2 sub-module of the cluster:
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-none"><code v-pre class="language-none">iac/aws/203403084713/clusters/cbioportal-prod/ec2/main.tf</code></pre>
-</doc-codeblock></div>
-Each volume resource specifies the availability zone, size, type, and tags. All volumes have <code translate="no" v-pre>prevent_destroy = true</code> to guard against accidental deletion. Note: the ec2 module is a sub-module and must be applied via the eks root module — see the module structure guide <a href="../../infrastructure-as-code/terraform/">here</a>.</li>
-<li>Each volume is surfaced to Kubernetes via a manually-defined PV and PVC (rather than dynamic provisioning). These are managed in ArgoCD:
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-none"><code v-pre class="language-none">argocd/aws/203403084713/clusters/cbioportal-prod/apps/genome-nexus-database/pvc/</code></pre>
-</doc-codeblock></div>
-The PV references the EBS volume directly via its <code translate="no" v-pre>volumeHandle</code> (the AWS volume ID) and pins scheduling to the correct availability zone via <code translate="no" v-pre>nodeAffinity</code>. The <code translate="no" v-pre>persistentVolumeReclaimPolicy: Retain</code> ensures the volume is not deleted if the PVC is removed.</li>
-<li>The MongoDB Helm values set <code translate="no" v-pre>persistence.existingClaim</code> to the name of the PVC created above. This tells the chart to use the pre-existing volume rather than provisioning a new one:
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">persistence:
-  enabled: true
-  existingClaim: gn-mongodb-grch37-v1dot0-pvc</code></pre>
-</doc-codeblock></div>
-The <code translate="no" v-pre>nodeSelector</code> in the Helm values must also match the availability zone of the underlying EBS volume, since EBS volumes are AZ-scoped.</li>
-</ol>
-<h3 id="cloning-a-database-volume">Cloning a Database Volume</h3>
-<p>Sometimes you may need to clone a database (e.g., to seed a new environment or test a migration). The process uses an EBS snapshot as an intermediate step.</p>
-<h4 id="step-1-snapshot-the-source-volume">Step 1: Snapshot the source volume</h4>
-<p>In the AWS console, create a snapshot of the EBS volume you want to clone. No Terraform changes are needed for this step. Wait for the snapshot to reach the completed state before proceeding.</p>
-<h4 id="step-2-create-a-new-volume-from-the-snapshot">Step 2: Create a new volume from the snapshot</h4>
-<p>Add a new aws_ebs_volume resource using Terraform. Set snapshot_id to the ID of the snapshot from Step 1. The size must be greater than or equal to the size of the source volume. For example:</p>
-<div id="step-2-create-a-new-volume-from-the-snapshot-code-1" class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-hcl"><code v-pre class="language-hcl">resource &quot;aws_ebs_volume&quot; &quot;gn-mongo-v1dot0-mongodb-clone&quot; {
-    availability_zone = var.GENOMENEXUS_EBS_VOLUME_AZ
-    snapshot_id       = &quot;snap-0xxxxxxxxxxxxxxxxx&quot;
-    size              = 300
-    type              = &quot;gp3&quot;
-
-     tags = {
-       Name = &quot;gn-mongo-v1dot0-mongodb-clone&quot;
-       ...
-     }
-}</code></pre>
-</doc-codeblock></div>
-<p>Apply via the eks root module (make sure you have read the module structure guide before running Terraform for the first time).</p>
-<h4 id="step-3-wire-up-the-new-volume">Step 3: Wire up the new volume</h4>
-<p>Create a PV and PVC pointing to the new volume ID. Then, before referencing the PVC in a Helm release, be aware that MongoDB will enter recovery mode on first startup. This happens because the snapshot was taken from a live volume that still had file locks from the previous MongoDB instance. Recovery is non-destructive but can take several minutes. To prevent liveness and readiness probes from killing the pod before recovery finishes, temporarily disable them in the Helm values when first deploying:</p>
-<div id="step-3-wire-up-the-new-volume-code-1" class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-yaml"><code v-pre class="language-yaml">persistence:
-  existingClaim: &lt;your-new-pvc-name&gt;
-
-livenessProbe:
-  enabled: false
-readinessProbe:
-  enabled: false</code></pre>
-</doc-codeblock></div>
-<p>Once the pod is running, monitor the logs and wait for a message indicating MongoDB is ready to accept connections. After that, re-enable the probes by removing the <code translate="no" v-pre>livenessProbe</code> and <code translate="no" v-pre>readinessProbe</code> overrides from the Helm values and resyncing.</p>
-<h4 id="step-4-cleanup">Step 4: Cleanup</h4>
-<p>Once the snapshot is no longer needed:</p>
-<ol>
-<li>Remove the <code translate="no" v-pre>snapshot_id</code> field from the Terraform resource block. No need to apply.</li>
-<li>Delete the snapshot from the AWS console.</li>
-</ol>
+<h1 id="best-practices">Best Practices</h1>
+<p>This page documents infrastructure conventions and practices that help avoid common pitfalls.</p>
+<h2 id="terraform">Terraform</h2>
+<div class="flex mb-6">
+    <div class="shrink-0 w-1.5 rounded-tl-lg rounded-bl-lg bg-callout-danger"></div>
+    <div class="flex w-full py-4 border border-l-0 rounded-tr-lg rounded-br-lg doc-callout bg-callout-base-bg border-callout-base-border" role="alert">
+        <div class="flex items-center ml-4 h-7">
+            <svg xmlns="http://www.w3.org/2000/svg" class="block text-callout-danger" width="22" height="22" viewBox="0 0 24 24" role="presentation">
+                <g fill="currentColor"><g>
+                    <path d="M21.71 6.15L15.85.29c-.19-.18-.44-.29-.71-.29H6.86c-.27 0-.52.11-.71.29L.29 6.15c-.18.19-.29.44-.29.71v8.28c0 .27.11.52.29.71l5.86 5.86c.19.18.44.29.71.29h8.28c.27 0 .52-.11.71-.29l5.86-5.86a.99.99 0 00.29-.71V6.86c0-.27-.11-.52-.29-.71zM20 14.73L14.73 20H7.27L2 14.73V7.27L7.27 2h7.45L20 7.27v7.46z"></path>
+                    <path d="M11 12c.55 0 1-.45 1-1V7c0-.55-.45-1-1-1s-1 .45-1 1v4c0 .55.45 1 1 1zM11.01 14c-.56 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"></path>
+                </g></g>
+            </svg>
+        </div>
+        <div class="pr-5 ml-3 w-full">
+            <h5>Use Extreme Caution with Terraform Commands</h5>
+<p>Terraform can make irreversible changes to live infrastructure with a single command. Always run <code translate="no" v-pre>terraform plan</code> before <code translate="no" v-pre>terraform apply</code> and carefully review every proposed change. If you don&#x27;t understand a change or something looks unexpected, stop and ask before proceeding. A misunderstood plan can destroy or recreate critical resources.</p>
+        </div>
+    </div>
+</div>
+<h3 id="secrets-management">Secrets Management</h3>
+<p>Use Terraform only to <strong>create</strong> the AWS Secrets Manager resource (or SSM parameter). Never set the secret value through Terraform — doing so would persist the plaintext value in the <code translate="no" v-pre>.tfstate</code> file. After Terraform creates the resource, set the value manually using the AWS CLI.</p>
+<h2 id="compute">Compute</h2>
+<h3 id="prefer-managed-node-groups-over-standalone-ec2-instances">Prefer Managed Node Groups Over Standalone EC2 Instances</h3>
+<p>Avoid spinning up standalone EC2 instances. Instead, use a managed node group within an EKS cluster. Node groups are easier to scale, patch, and maintain, and they integrate with Kubernetes scheduling and lifecycle management out of the box.</p>
+<h3 id="prefer-spot-instances-for-non-critical-workloads">Prefer Spot Instances for Non-Critical Workloads</h3>
+<p>For development services or experimental workloads, use <strong>Spot</strong> capacity instead of On-Demand. Spot instances offer significant cost savings and are acceptable where brief downtime is tolerable.</p>
+<h2 id="storage">Storage</h2>
+<h3 id="prefer-efs-over-pvcs">Prefer EFS Over PVCs</h3>
+<p>Use EFS (Elastic File System) for persistent storage rather than EBS-backed PersistentVolumeClaims. PVCs are tied to a single Availability Zone, which means:</p>
+<ul>
+<li>They cannot be reused across AZs.</li>
+<li>Cluster upgrades that move workloads between AZs require recreating the PVC.</li>
+<li>Migrating data between AZs requires manual cloning or dump/restore.</li>
+</ul>
+<p>If a PVC must be used, ensure the data stored on it is <strong>discardable</strong> — treat it as ephemeral storage that can be recreated from source rather than relied upon as durable state.</p>
 
                 
                 <!-- Required only on API pages -->
@@ -227,7 +201,7 @@ readinessProbe:
             </div>
             <footer id="retype-content-footer" class="clear-both">
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-14">
-                    <a id="retype-edit-this-page" class="my-2.5 inline-flex items-center text-sm whitespace-nowrap text-body-link font-body-link hover:text-body-link-hover hover:underline" href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/docs/apps/genome-nexus.md" target="_blank" rel="noopener">
+                    <a id="retype-edit-this-page" class="my-2.5 inline-flex items-center text-sm whitespace-nowrap text-body-link font-body-link hover:text-body-link-hover hover:underline" href="https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/docs/infrastructure-as-code/best-practices.md" target="_blank" rel="noopener">
                         <svg class="mr-1.5" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" overflow="visible"><path d="M20 12c-.55 0-1 .45-1 1v7c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h7c.55 0 1-.45 1-1s-.45-1-1-1H4C2.35 3 1 4.35 1 6v14c0 1.65 1.35 3 3 3h14c1.65 0 3-1.35 3-3v-7c0-.55-.45-1-1-1z" /><path d="M22.21 1.79c-1.18-1.18-3.24-1.18-4.41 0l-9.5 9.5c-.13.13-.22.29-.26.46l-1 4c-.08.34.01.7.26.95.18.2.44.3.7.3.08 0 .16-.01.24-.03l4-1c.18-.04.34-.13.46-.26l9.5-9.5c1.22-1.22 1.22-3.2.01-4.42zm-1.42 3l-9.3 9.3-2.11.53.53-2.11 9.3-9.3c.42-.42 1.16-.42 1.59 0 .43.43.43 1.15-.01 1.58z" /><path fill="none" d="M0 0h24v24H0z" /></svg>
                         <span>Edit on GitHub</span>
                     </a>
@@ -235,20 +209,20 @@ readinessProbe:
             
                 <nav id="retype-nextprev" class="print:hidden flex mt-14">
                     <div class="w-1/2">
-                        <a class="px-5 py-4 h-full flex items-center break-normal font-medium text-body-link border border-base-border hover:border-base-border-hover rounded-l-lg transition-colors duration-150 relative hover:z-5" href="../../apps/">
+                        <a class="px-5 py-4 h-full flex items-center break-normal font-medium text-body-link border border-base-border hover:border-base-border-hover rounded-l-lg transition-colors duration-150 relative hover:z-5" href="../../infrastructure-as-code/resource-tagging/">
                             <svg xmlns="http://www.w3.org/2000/svg" class="mr-3" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" overflow="visible"><path d="M19 11H7.41l5.29-5.29a.996.996 0 10-1.41-1.41l-7 7a1 1 0 000 1.42l7 7a1.024 1.024 0 001.42-.01.996.996 0 000-1.41L7.41 13H19c.55 0 1-.45 1-1s-.45-1-1-1z" /><path fill="none" d="M0 0h24v24H0z" /></svg>
                             <span>
                                 <span class="block text-xs font-normal text-base-text-muted">Previous</span>
-                                <span class="block mt-1">Apps</span>
+                                <span class="block mt-1">Resource Tagging</span>
                             </span>
                         </a>
                     </div>
             
                     <div class="w-1/2">
-                        <a class="px-5 py-4 -mx-px h-full flex items-center justify-end break-normal font-medium text-body-link border border-base-border hover:border-base-border-hover rounded-r-lg transition-colors duration-150 relative hover:z-5" href="../../apps/github-lfs/">
+                        <a class="px-5 py-4 -mx-px h-full flex items-center justify-end break-normal font-medium text-body-link border border-base-border hover:border-base-border-hover rounded-r-lg transition-colors duration-150 relative hover:z-5" href="../../kubernetes-deployment-with-gitops/">
                             <span>
                                 <span class="block text-xs font-normal text-right text-base-text-muted">Next</span>
-                                <span class="block mt-1">Git​Hub LFS</span>
+                                <span class="block mt-1">Kubernetes Deployment with Git​Ops</span>
                             </span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="ml-3" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" overflow="visible"><path d="M19.92 12.38a1 1 0 00-.22-1.09l-7-7a.996.996 0 10-1.41 1.41l5.3 5.3H5c-.55 0-1 .45-1 1s.45 1 1 1h11.59l-5.29 5.29a.996.996 0 000 1.41c.19.2.44.3.7.3s.51-.1.71-.29l7-7c.09-.09.16-.21.21-.33z" /><path fill="none" d="M0 0h24v24H0z" /></svg>
                         </a>
@@ -292,6 +266,6 @@ readinessProbe:
 
     <div id="retype-overlay-target"></div>
 
-        <script data-cfasync="false">window.__DOCS__ = { "title": "Genome Nexus", level: 2, icon: "file", hasPrism: true, hasInstagram: false, hasMermaid: false, hasMath: false, tocDepth: 23, "md": "/apps/genome-nexus.md" }</script>
+        <script data-cfasync="false">window.__DOCS__ = { "title": "Best Practices", level: 2, icon: "file", hasPrism: false, hasInstagram: false, hasMermaid: false, hasMath: false, tocDepth: 23, "md": "/infrastructure-as-code/best-practices.md" }</script>
 </body>
 </html>

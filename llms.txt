@@ -13,6 +13,7 @@
 
 - [Terraform](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/terraform.md): The iac directory in the repo contains all Terraform configurations for managing the infrastructure across multiple AWS accounts and clusters.
 - [Resource Tagging](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/resource-tagging.md): Tagging resources is critical for tracking and analyzing our AWS costs. All required tag keys listed below are now configured as cost allocation tags in AWS, which means they directly enable cost reporting and analysis in AWS Cost Explorer.
+- [Best Practices](https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/infrastructure-as-code/best-practices.md): This page documents infrastructure conventions and practices that help avoid common pitfalls.
 
 ## Kubernetes Deployment with GitOps
 
