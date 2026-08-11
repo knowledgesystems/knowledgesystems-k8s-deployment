@@ -25,8 +25,11 @@ spec:
       annotations:
         admission.datadoghq.com/python-lib.version: v3
     spec:
-      imagePullSecrets:
-        - name: oncokb-dockerhub-creds
+      # No imagePullSecrets: the image is public, so no pull credential is
+      # needed. Left commented out below rather than removed, in case this
+      # repo's visibility changes later:
+      # imagePullSecrets:
+      #   - name: oncokb-dockerhub-creds
       #
       # No serviceAccountName/IRSA here: Bedrock lives in a separate AWS
       # account (490004633549, where the org's Bedrock credits are
