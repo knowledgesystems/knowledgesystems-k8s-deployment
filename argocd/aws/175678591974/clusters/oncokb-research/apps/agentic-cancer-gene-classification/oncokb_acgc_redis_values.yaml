@@ -1,0 +1,37 @@
+global:
+  security:
+    allowInsecureImages: true
+  imagePullSecrets:
+    - oncokb-dockerhub-creds
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/redis
+
+architecture: replication
+
+auth:
+  enabled: true
+  existingSecret: redis-cluster
+  existingSecretPasswordKey: REDIS_PASSWORD
+
+# gp2, not EFS: EFS's latency hurts AOF/RDB persistence (same reason
+# oncokb-curation's own redis-cluster avoids it). Each master/replica pod
+# gets its own dedicated volume, so ReadWriteOnce is sufficient — nothing
+# here needs to be shared across pods.
+master:
+  persistence:
+    enabled: true
+    storageClass: gp2
+    accessModes:
+      - ReadWriteOnce
+    size: 4Gi
+
+replica:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    storageClass: gp2
+    accessModes:
+      - ReadWriteOnce
+    size: 4Gi

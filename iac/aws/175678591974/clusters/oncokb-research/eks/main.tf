@@ -47,6 +47,11 @@ locals {
         cdsi-owner = "luc2@mskcc.org"
       }
     }
+    # Named agcg, not acgc — every other resource for this app (secrets,
+    # k8s manifest) uses acgc, matching the app's real name/acronym, but
+    # this node group is already live under agcg. Renaming the map key
+    # would make Terraform destroy and recreate it rather than update it
+    # in place, since eks_managed_node_groups is keyed by this name.
     agcg = {
       instance_types = ["t4g.medium"]
       ami_type       = "BOTTLEROCKET_ARM_64"
@@ -284,4 +289,10 @@ module "eks_cluster" {
       )
     })
   }
+}
+
+module "iam" {
+  source                    = "../iam"
+  cluster_oidc_provider_arn = module.eks_cluster.cluster_oidc_provider
+  cluster_name              = basename(module.eks_cluster.cluster_arn)
 }

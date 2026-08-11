@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentic-cancer-gene-classification
+  labels:
+    run: agentic-cancer-gene-classification
+    tags.datadoghq.com/env: eks-prod-oncokb
+    tags.datadoghq.com/service: agentic-cancer-gene-classification
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: agentic-cancer-gene-classification
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        run: agentic-cancer-gene-classification
+        tags.datadoghq.com/env: eks-prod-oncokb
+        tags.datadoghq.com/service: agentic-cancer-gene-classification
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/python-lib.version: v3
+    spec:
+      # No imagePullSecrets: CI publishes this image to GHCR (not Docker
+      # Hub, unlike every other app here), and the package is public, so
+      # no pull credential is needed.
+      #
+      # No serviceAccountName/IRSA here: Bedrock lives in a separate AWS
+      # account (490004633549, where the org's Bedrock credits are
+      # provisioned), which this cluster's account (175678591974) has no
+      # IAM trust relationship with. Auth instead comes from the mounted
+      # aws-creds Secret below — see oncokb_acgc_aws_creds_refresher.yaml,
+      # whose CronJob SAML-logs-in to 490004633549 every 6h, writes the
+      # resulting ~/.aws/credentials (profile "490004633549") into that
+      # Secret, and restarts this deployment so the new session is
+      # actually picked up (matches cell-explorer's identical setup).
+      containers:
+        - name: agentic-cancer-gene-classification
+          image: ghcr.io/oncokb/agentic-cancer-gene-classification:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: ANTHROPIC_SDK_PROVIDER
+              value: "bedrock"
+            - name: BEDROCK_AWS_DEFAULT_REGION
+              value: "us-east-1"
+            - name: AWS_PROFILE
+              value: "490004633549"
+            - name: BEDROCK_SYNTHESIS_MODEL
+              value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+            - name: BEDROCK_SYNTHESIS_FAST_MODEL
+              value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            - name: BEDROCK_SELECTION_MODEL
+              value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            - name: LOG_LEVEL
+              value: "INFO"
+            # oncokb-db-public-rds-admin supplies DB_URL/DB_USERNAME/DB_PASSWORD
+            # (the shared RDS instance's admin credentials); the app parses
+            # DB_URL directly. MYSQL_DATABASE isn't part of that secret since
+            # a JDBC URL identifies a server, not a specific database.
+            - name: MYSQL_DATABASE
+              value: "acgc"
+            # redis-cluster supplies REDIS_PASSWORD (reused, same as
+            # oncokb-curation's own dedicated Redis instance) — no Sentinel,
+            # plain master/replica, so REDIS_URL just points at the master.
+            - name: REDIS_URL
+              value: "redis://:$(REDIS_PASSWORD)@acgc-redis-master:6379/0"
+          envFrom:
+            - secretRef:
+                name: oncokb-db-public-rds-admin
+            - secretRef:
+                name: redis-cluster
+            - secretRef:
+                name: acgc
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 512Mi
+            limits:
+              memory: 1536Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            # Refreshed every 6h by acgc-aws-creds-manager-cronjob, which
+            # also restarts this deployment on each refresh so the new SAML
+            # session is actually picked up. See the Deployment-level
+            # comment on why this exists instead of IRSA. Non-root container
+            # (see Dockerfile's `useradd -m appuser`), so HOME is
+            # /home/appuser, not /root like cell-explorer's equivalent.
+            - name: aws-creds
+              mountPath: /home/appuser/.aws
+              readOnly: true
+      volumes:
+        - name: aws-creds
+          secret:
+            secretName: acgc-aws-creds
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      # Matches the agcg node group's taint (see eks/main.tf) — that group
+      # is already live under this name, unlike the acgc secrets above.
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: agcg
+          effect: NoSchedule
+      nodeSelector:
+        workload: agcg
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentic-cancer-gene-classification
+  labels:
+    run: agentic-cancer-gene-classification
+spec:
+  type: ClusterIP
+  selector:
+    run: agentic-cancer-gene-classification
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP
