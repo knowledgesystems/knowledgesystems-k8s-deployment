@@ -58,15 +58,11 @@ global:
       # in librechat-config-beta show up in the endpoint selector.
       - name: ENDPOINTS
         value: "bedrock,agents,anthropic,openAI,google,azureOpenAI,custom"
-      # Beta canaries Sonnet 4.6 while prod stays on 4.5. Both listed so
-      # LibreChat's client-side allowlist doesn't reject the Sonnet 4.5
-      # fallback if we need to swap the agent record back. Only `us.`
-      # inference profiles are usable on this account — data-residency
-      # policy blocks `global.` Anthropic profiles. Sonnet 5 is not in
-      # the list because it's not yet subscribed via AWS Marketplace on
-      # the Bedrock account.
+      # Beta canaries newer Bedrock models. `us.` prefix is required —
+      # data-residency policy blocks `global.` Anthropic profiles.
+      # Sonnet 5 is now subscribed on the Bedrock account and invokable.
       - name: BEDROCK_AWS_MODELS
-        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6"
+        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5"
 
 librechat:
   existingSecretName: "librechat-credentials-env"
