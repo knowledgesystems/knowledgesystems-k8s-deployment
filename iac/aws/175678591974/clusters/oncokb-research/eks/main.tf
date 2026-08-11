@@ -292,7 +292,13 @@ module "eks_cluster" {
 }
 
 module "iam" {
-  source                    = "../iam"
-  cluster_oidc_provider_arn = module.eks_cluster.cluster_oidc_provider
+  source = "../iam"
+  # module.eks_cluster.cluster_oidc_provider doesn't exist on this module
+  # version (4.0.0) — that name only appears (also incorrectly) in
+  # 203403084713's eks/main.tf; oidc_provider is what 4.0.0 actually
+  # exports (bare issuer hostname, matching what iam/'s trust-policy
+  # condition key expects — see 666628074417's eks/main.tf for the same
+  # correct usage).
+  cluster_oidc_provider_arn = module.eks_cluster.oidc_provider
   cluster_name              = basename(module.eks_cluster.cluster_arn)
 }
