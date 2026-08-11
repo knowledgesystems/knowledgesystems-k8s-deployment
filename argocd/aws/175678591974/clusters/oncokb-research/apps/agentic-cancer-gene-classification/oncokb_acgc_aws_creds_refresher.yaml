@@ -1,0 +1,136 @@
+# Refreshes the SAML-federated AWS credentials ACGC uses to call Bedrock,
+# which lives in a separate account (490004633549, where the org's Bedrock
+# credits are provisioned) that this cluster's account (175678591974) has
+# no IAM trust relationship with — no IRSA role can grant cross-account
+# access here, only the SAML identity actually recognized in that account
+# can. Single-account variant of the existing k8s-aws-creds-manager
+# pattern (argocd/aws/203403084713/.../k8s-aws-creds-manager), which
+# additionally supports multiple accounts for the internal cost dashboard;
+# ACGC only ever needs 490004633549.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: acgc-aws-creds-manager-pod-restarter
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::175678591974:role/userServiceRoleAcgcAwsCredsManager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: acgc-aws-creds-manager-pod-restarter-role
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: acgc-aws-creds-manager-pod-restarter-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: acgc-aws-creds-manager-pod-restarter
+    namespace: default
+roleRef:
+  kind: Role
+  name: acgc-aws-creds-manager-pod-restarter-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: acgc-aws-creds-manager-cronjob
+spec:
+  schedule: "0 */6 * * *"  # Every 6 hours; SAML session tokens last 8h
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: acgc-aws-creds-manager-pod-restarter
+          containers:
+            - name: saml2aws
+              image: public.ecr.aws/ubuntu/ubuntu:22.04_stable
+              env:
+                - name: DEBIAN_FRONTEND
+                  value: noninteractive
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  export HOME=/home/node
+                  mkdir -p $HOME/.aws
+
+                  # Install dependencies
+                  apt-get update -qq
+                  apt-get install -y wget jq awscli
+
+                  # Install kubectl
+                  KUBECTL_VERSION=$(wget -qO- https://dl.k8s.io/release/stable.txt)
+                  wget -q https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/arm64/kubectl
+                  chmod +x kubectl && mv kubectl /usr/local/bin/
+
+                  # Install saml2aws
+                  wget -O saml2aws.tar.gz https://github.com/Versent/saml2aws/releases/download/v2.36.18/saml2aws_2.36.18_linux_arm64.tar.gz
+                  tar -xzvf saml2aws.tar.gz
+                  mv saml2aws /usr/local/bin/ && chmod +x /usr/local/bin/saml2aws
+
+                  # Fetch SAML login creds from AWS Secrets Manager (single
+                  # account here, unlike k8s-aws-creds-manager's account list)
+                  SECRET_JSON=$(aws secretsmanager get-secret-value \
+                    --secret-id user-acgc-aws-creds-manager \
+                    --query SecretString \
+                    --output text)
+
+                  SAML2AWS_URL=$(echo $SECRET_JSON | jq -r '.saml2aws_url')
+                  PROFILE=$(echo $SECRET_JSON      | jq -r '.profile')
+                  USERNAME=$(echo $SECRET_JSON     | jq -r '.username')
+                  PASSWORD=$(echo $SECRET_JSON     | jq -r '.password')
+                  ROLE=$(echo $SECRET_JSON         | jq -r '.role')
+
+                  export SAML2AWS_USERNAME=$USERNAME
+                  export SAML2AWS_PASSWORD=$PASSWORD
+                  export SAML2AWS_ROLE=$ROLE
+
+                  saml2aws configure \
+                    --idp-provider=Ping \
+                    --mfa=Auto \
+                    --url=$SAML2AWS_URL \
+                    --aws-urn=urn:amazon:webservices \
+                    --session-duration=28800 \
+                    --skip-prompt \
+                    --profile=$PROFILE
+
+                  saml2aws login \
+                    --profile=$PROFILE \
+                    --force \
+                    --skip-prompt
+
+                  # Push the refreshed credentials file into a K8s Secret
+                  kubectl create secret generic acgc-aws-creds \
+                    --from-file=credentials=$HOME/.aws/credentials \
+                    --dry-run=client -o yaml | kubectl apply -f -
+
+                  # Some clusters auto-restart deployments on Secret change via
+                  # Stakater Reloader (see cell-explorer's
+                  # secret.reloader.stakater.com/reload annotation); this
+                  # cluster's Reloader status wasn't confirmed, so restart
+                  # explicitly here too — redundant if Reloader is present,
+                  # required if it isn't.
+                  kubectl rollout restart deployment agentic-cancer-gene-classification
+
+                  echo "Done. Credentials secret updated and deployment restarted."
+          nodeSelector:
+            workload: agcg
+          tolerations:
+            - key: workload
+              operator: Equal
+              value: agcg
+              effect: NoSchedule
+          restartPolicy: OnFailure
