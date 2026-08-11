@@ -9,9 +9,9 @@ spec:
   entryPoints:
     - websecure
   routes:
-    # Expensive bulk-data endpoints (browser UA): add per-IP rate limit
+    # Study-wide clinical-events (bulk/API only; the UI does not call this): per-IP rate limit
     - match: >-
-        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && (PathRegexp(`^/api/studies/[^/]+/clinical-events`) || PathRegexp(`^/api/molecular-profiles/[^/]+/discrete-copy-number/fetch`))
+        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`)
       kind: Rule
       priority: 200
       middlewares:
@@ -22,9 +22,9 @@ spec:
       services:
         - name: cbioportal-backend-public-green
           port: 80
-    # Expensive bulk-data endpoints (non-browser): add per-IP rate limit
+    # Study-wide clinical-events (non-browser): per-IP rate limit
     - match: >-
-        Host(`www.cbioportal.org`) && (PathRegexp(`^/api/studies/[^/]+/clinical-events`) || PathRegexp(`^/api/molecular-profiles/[^/]+/discrete-copy-number/fetch`))
+        Host(`www.cbioportal.org`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`)
       kind: Rule
       priority: 190
       middlewares:
