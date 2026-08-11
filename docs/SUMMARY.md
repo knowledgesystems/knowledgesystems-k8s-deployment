@@ -4,6 +4,7 @@
 * [Infrastructure as Code (IaC)](infrastructure-as-code/README.md)
   * [Terraform](infrastructure-as-code/terraform.md)
   * [Resource Tagging](infrastructure-as-code/resource-tagging.md)
+  * [Best Practices](infrastructure-as-code/best-practices.md)
 * [Kubernetes Deployment with GitOps](kubernetes-deployment-with-gitops/README.md)
   * [Argo CD](kubernetes-deployment-with-gitops/argocd.md)
 * [Essential Services](essential-services/README.md)
