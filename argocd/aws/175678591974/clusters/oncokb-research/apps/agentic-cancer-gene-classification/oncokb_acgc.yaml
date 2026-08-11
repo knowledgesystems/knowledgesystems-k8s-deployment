@@ -25,9 +25,8 @@ spec:
       annotations:
         admission.datadoghq.com/python-lib.version: v3
     spec:
-      # No imagePullSecrets: CI publishes this image to GHCR (not Docker
-      # Hub, unlike every other app here), and the package is public, so
-      # no pull credential is needed.
+      imagePullSecrets:
+        - name: oncokb-dockerhub-creds
       #
       # No serviceAccountName/IRSA here: Bedrock lives in a separate AWS
       # account (490004633549, where the org's Bedrock credits are
@@ -40,7 +39,7 @@ spec:
       # actually picked up (matches cell-explorer's identical setup).
       containers:
         - name: agentic-cancer-gene-classification
-          image: ghcr.io/oncokb/agentic-cancer-gene-classification:latest
+          image: oncokb/agentic-cancer-gene-classification:latest
           imagePullPolicy: Always
           ports:
             - name: http
