@@ -15,19 +15,23 @@ auth:
   existingSecret: redis-cluster
   existingSecretPasswordKey: REDIS_PASSWORD
 
+# gp2, not EFS: EFS's latency hurts AOF/RDB persistence (same reason
+# oncokb-curation's own redis-cluster avoids it). Each master/replica pod
+# gets its own dedicated volume, so ReadWriteOnce is sufficient — nothing
+# here needs to be shared across pods.
 master:
   persistence:
     enabled: true
-    storageClass: efs-sc
+    storageClass: gp2
     accessModes:
-      - ReadWriteMany
+      - ReadWriteOnce
     size: 4Gi
 
 replica:
   replicaCount: 2
   persistence:
     enabled: true
-    storageClass: efs-sc
+    storageClass: gp2
     accessModes:
-      - ReadWriteMany
+      - ReadWriteOnce
     size: 4Gi
