@@ -20,3 +20,16 @@ variable "AWS_DEFAULT_TAGS" {
     cdsi-team  = "oncokb"
   }
 }
+
+variable "ACGC_AWS_CREDS_MANAGER_VALUE" {
+  description = "JSON SAML login creds for ACGC's Bedrock credential refresher; supply only when rotating (bumping ACGC_AWS_CREDS_MANAGER_VERSION)"
+  type        = string
+  ephemeral   = true
+  default     = null
+}
+
+variable "ACGC_AWS_CREDS_MANAGER_VERSION" {
+  description = "Bump this to trigger a credential update for user-acgc-aws-creds-manager"
+  type        = number
+  default     = 1
+}

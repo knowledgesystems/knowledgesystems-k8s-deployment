@@ -1,5 +1,6 @@
 locals {
   account_id                  = data.aws_caller_identity.current.account_id
+  account_region              = var.aws_region
   permissions_boundary_policy = "AutomationOrUserServiceRolePermissions"
 }
 
@@ -10,26 +11,25 @@ data "aws_caller_identity" "current" {}
 # (175678591974) has no IAM trust relationship with resources over there,
 # so IRSA alone can't grant Bedrock access — only the SAML-federated
 # identity actually recognized in 490004633549 can (same mechanism
-# LibreChat/cbioagent/biomni/cell-explorer already use). This module
+# LibreChat/cbioagent/biomni/cell-explorer already use). This role
 # therefore grants IRSA access only to the thing that *is* same-account:
 # reading the SAML login secret out of Secrets Manager so the
 # acgc-aws-credentials-refresher CronJob can log in and write the
 # resulting temporary AWS credentials into a k8s Secret. Modeled on
 # knowledgesystems-k8s-deployment's existing k8s-aws-creds-manager
-# (argocd/aws/203403084713/.../k8s-aws-creds-manager), single-account
-# variant — ACGC only needs 490004633549, not the multi-account list that
-# pattern supports for the cost dashboard's use case.
-resource "aws_secretsmanager_secret" "acgcAwsCredsManager" {
-  name        = "user-acgc-aws-creds-manager"
-  description = "SAML login (saml2aws) creds for ACGC's Bedrock-account (490004633549) credential refresher. Value populated out-of-band, not by Terraform."
-
-  tags = {
-    cdsi-app   = "acgc"
-    cdsi-team  = "oncokb"
-    cdsi-owner = "luc2@mskcc.org"
-  }
-}
-
+# (iac/aws/203403084713/clusters/cbioportal-prod/iam — the IAM side —
+# and argocd/aws/203403084713/.../k8s-aws-creds-manager — the k8s side),
+# single-account variant since ACGC only ever needs 490004633549, not the
+# multi-account list that pattern supports for the cost dashboard's use
+# case.
+#
+# The secret itself (user-acgc-aws-creds-manager) is defined in the
+# shared account-wide secretsmanager module
+# (iac/aws/175678591974/shared/secretsmanager), not here — same
+# convention as user-k8s-aws-creds-manager, which lives in that
+# account's equivalent shared module rather than its cluster's iam/.
+# Referenced here by name pattern rather than a cross-module Terraform
+# reference, matching how userServicePolicyK8sAwsCredsManager does it.
 resource "aws_iam_policy" "userServicePolicyAcgcAwsCredsManager" {
   name        = "userServicePolicyAcgcAwsCredsManager"
   path        = "/"
@@ -42,7 +42,7 @@ resource "aws_iam_policy" "userServicePolicyAcgcAwsCredsManager" {
         Sid      = "ReadSamlLoginSecret"
         Effect   = "Allow"
         Action   = ["secretsmanager:GetSecretValue"]
-        Resource = [aws_secretsmanager_secret.acgcAwsCredsManager.arn]
+        Resource = ["arn:aws:secretsmanager:${local.account_region}:${local.account_id}:secret:user-acgc-aws-creds-manager*"]
       }
     ]
   })
