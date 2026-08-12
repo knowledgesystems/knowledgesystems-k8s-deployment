@@ -114,10 +114,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: beta
+          value: main
           effect: NoSchedule
       nodeSelector:
-        workload: beta
+        workload: main
 ---
 apiVersion: v1
 kind: Service
