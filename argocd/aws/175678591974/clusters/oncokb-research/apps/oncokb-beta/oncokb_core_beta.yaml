@@ -45,6 +45,18 @@ spec:
               name: log4j-properties
           command: ["java"]
           args:
+            - "-Xms500m"
+            - "-XX:+UseSerialGC"
+            - "-XX:MinHeapFreeRatio=20"
+            - "-XX:MaxHeapFreeRatio=40"
+            - "-XX:GCTimeRatio=4"
+            - "-XX:AdaptiveSizePolicyWeight=90"
+            - "-XX:+UnlockExperimentalVMOptions"
+            - "-XX:+UseCGroupMemoryLimitForHeap"
+            - "-XX:MaxRAMFraction=2"
+            - "-XX:+PrintFlagsFinal"
+            - "-XshowSettings:vm"
+            - "-XX:MaxRAM=2g"
             - "-Dapp.name=$(APP_NAME)"
             - "-Djdbc.driverClassName=com.mysql.jdbc.Driver"
             - "-Djdbc.url=$(DB_URL)/oncokb_core_beta?useUnicode=yes&characterEncoding=UTF-8&useSSL=false"
