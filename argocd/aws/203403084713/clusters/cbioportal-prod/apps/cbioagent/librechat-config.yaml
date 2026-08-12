@@ -139,11 +139,19 @@ data:
 
     balance:
       enabled: true
-      startBalance: 20000000
+      # 5M tokens/week ≈ $25/user/week ceiling under Sonnet 5 standard
+      # pricing (post-Sept 1), ~$8/user/week under promo. Observed peak
+      # single-user weekly spend historically was ~$22 (Gisetia, 2026-06),
+      # so this cap won't bite legitimate use but keeps a single runaway
+      # user from making a dent even at scale.
+      # NOTE: this only affects NEW users. Existing 458 users have their
+      # own refillAmount baked into balances collection docs — a one-time
+      # mongo updateMany is required alongside this deploy.
+      startBalance: 5000000
       autoRefillEnabled: true
       refillIntervalValue: 7
       refillIntervalUnit: "days"
-      refillAmount: 20000000
+      refillAmount: 5000000
 
     # Unified single-agent spec. The previous cBioDBAgent
     # (agent_4QP14nOYaCTkqK8E3Nopg) and cBioNavigator
