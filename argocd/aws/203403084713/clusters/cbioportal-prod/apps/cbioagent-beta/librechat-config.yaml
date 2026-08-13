@@ -15,6 +15,7 @@ data:
     mcpSettings:
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
+        - 'cbioagent-clickhouse-mcp-apps'
         - 'cbioportal-navigator'
         - 'cbioportal-navigator-beta'
 
@@ -102,8 +103,13 @@ data:
     mcpServers:
       cbioportal-database:
         type: streamable-http
-        # Trailing slash avoids FastMCP's 307 that LibreChat v0.8.7+ blocks as SSRF.
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp/
+        # Beta points at the mcp-apps image (feature/mcp-apps branch of
+        # cbioportal-mcp). Superset of the main MCP: all original SQL tools
+        # plus widget-returning tools (survival, oncoprint, lollipop,
+        # co-occurrence, generic charts) as ui:// resources rendered by
+        # LibreChat's MCP-UI pipeline. Trailing slash avoids FastMCP's 307
+        # that LibreChat v0.8.7+ blocks as SSRF.
+        url: http://cbioagent-clickhouse-mcp-apps:80/db-mcp-apps/mcp/
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
