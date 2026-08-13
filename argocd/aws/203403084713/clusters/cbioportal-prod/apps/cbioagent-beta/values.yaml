@@ -96,17 +96,14 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  # Beta tracks the v0.8.7-mcp-ui-meta feature branch tag on
-  # cbioportal/librechat — a superset of v0.8.7-custom-v1 that adds the
-  # MCP-Apps shim (packages/api/src/mcp/mcpAppsShim.ts + connection
-  # `_meta.ui.resourceUri` cache) so widgets from fastmcp>=3.3.1 MCP
-  # servers render inline. Needed to actually see the cbioportal-mcp
-  # feature/mcp-apps widgets (survival, oncoprint, lollipop, etc.) on
-  # beta. See cbioportal/librechat#35. Once soaked, cut a
-  # `v0.8.7-custom-v2` tag from the merged branch and move prod +
-  # beta over to it. Keel watches the tag digest, so re-pushing this
-  # branch (further iteration on the shim) auto-rolls beta.
-  tag: "v0.8.7-mcp-ui-meta"
+  # Beta pinned to the v0.8.7 rebase for validation. Built from the
+  # v0.8.7-custom-v1 branch on cbioportal/librechat (rebase of our
+  # v0.8.3-rc1-custom-v9 customizations on top of upstream v0.8.7 —
+  # brings agents-lib 3.2.46 with Bedrock cachePoint wiring, ~860
+  # upstream commits worth of fixes). Once soaked on beta we roll to
+  # prod under the same tag scheme. Keel still watches the tag digest;
+  # a re-push to v0.8.7-custom-v1 would still roll this pod.
+  tag: "v0.8.7-custom-v1"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
