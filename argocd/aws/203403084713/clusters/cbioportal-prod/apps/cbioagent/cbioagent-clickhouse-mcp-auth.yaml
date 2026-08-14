@@ -33,15 +33,17 @@ spec:
     spec:
       containers:
         - name: cbioagent-clickhouse-mcp
-          # Google OAuth variant of the DB MCP — cbioportal-mcp#107
-          # (feat/mcp-google-oauth branch). All the same SQL tools +
-          # study guides as the main MCP; adds FastMCP's GoogleProvider
-          # so direct MCP connectors (Claude Desktop, Claude Code,
-          # claude.ai) authenticate via Google before any tool call.
-          # Deliberately kept as its own Deployment: the internal
-          # `cbioagent-clickhouse-mcp` LibreChat talks to stays
-          # unauthenticated so we don't disturb existing traffic.
-          image: cbioportal/mcp:mcp-google-oauth
+          # Same image as the sibling `cbioagent-clickhouse-mcp`
+          # (LibreChat-facing) Deployment. The OAuth code from
+          # cbioportal-mcp#107 is inert unless CBIOPORTAL_MCP_GOOGLE_*
+          # env vars are set — this Deployment sets them (via the
+          # cbioportal-mcp-google-oauth Secret) and gets Google-OAuth
+          # auth; the sibling doesn't and stays header-trust. Tracking
+          # `:latest` (built from `main` on cbioportal/cbioportal-mcp)
+          # keeps both Deployments in lockstep on the same binary;
+          # Keel rolls both when the digest changes. Swap to a semver
+          # tag if we want prod pinning.
+          image: cbioportal/mcp:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
