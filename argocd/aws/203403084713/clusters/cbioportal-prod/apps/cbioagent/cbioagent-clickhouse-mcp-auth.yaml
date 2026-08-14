@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioagent-clickhouse-mcp-auth
+  labels:
+    run: cbioagent-clickhouse-mcp-auth
+  annotations:
+    # Reloader rolls this Deployment when the daily clone cron patches
+    # clickhouse-mcp-active.CLICKHOUSE_DATABASE on a successful build,
+    # and when the Google OAuth client credentials rotate.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
+    secret.reloader.stakater.com/reload: "cbioportal-mcp-google-oauth"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioagent-clickhouse-mcp-auth
+  template:
+    metadata:
+      labels:
+        run: cbioagent-clickhouse-mcp-auth
+    spec:
+      containers:
+        - name: cbioagent-clickhouse-mcp
+          # Google OAuth variant of the DB MCP — cbioportal-mcp#107
+          # (feat/mcp-google-oauth branch). All the same SQL tools +
+          # study guides as the main MCP; adds FastMCP's GoogleProvider
+          # so direct MCP connectors (Claude Desktop, Claude Code,
+          # claude.ai) authenticate via Google before any tool call.
+          # Deliberately kept as its own Deployment: the internal
+          # `cbioagent-clickhouse-mcp` LibreChat talks to stays
+          # unauthenticated so we don't disturb existing traffic.
+          image: cbioportal/mcp:mcp-google-oauth
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            # Node-local Datadog agent IP exposed via Downward API.
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: OTEL_SERVICE_NAME
+              value: "cbioportal-mcp-auth"
+            - name: DD_LLMOBS_ML_APP
+              value: "cbioportal-mcp-auth"
+            - name: DD_SITE
+              value: "datadoghq.com"
+            # Mount FastMCP under the external sub-path so trailing-slash
+            # redirects point to https://mcp.cbioportal.org/db-auth/mcp/
+            # rather than /mcp/. Paired with NOT stripping /db-auth on
+            # the mcp-cbioportal-db-auth-ingress Ingress.
+            - name: CLICKHOUSE_MCP_HTTP_PATH
+              value: "/db-auth/mcp"
+            # Trust X-Forwarded-* from any in-cluster source so uvicorn's
+            # 307 trailing-slash redirect honors Traefik's
+            # X-Forwarded-Proto: https. Same reasoning as the sibling
+            # unauthenticated MCP Deployments.
+            - name: CLICKHOUSE_MCP_FORWARDED_ALLOW_IPS
+              value: "*"
+          envFrom:
+            - secretRef:
+                name: clickhouse-mcp
+            # Google OAuth client — the presence of all three
+            # CBIOPORTAL_MCP_GOOGLE_* env vars flips the server into
+            # authenticated mode (see cbioportal-mcp auth.py). Lives in
+            # portal-configuration since it holds secrets.
+            - secretRef:
+                name: cbioportal-mcp-google-oauth
+            # ConfigMap mounted AFTER the Secrets so its CLICKHOUSE_DATABASE
+            # value wins (envFrom: last-writer-wins on key collisions). The
+            # cbioagent-clickhouse-clone-daily CronJob owns this ConfigMap
+            # and updates it when the production color flips, then rolls
+            # this Deployment.
+            - configMapRef:
+                name: clickhouse-mcp-active
+      nodeSelector:
+        workload: "cbioagent"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbioagent"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioagent-clickhouse-mcp-auth
+spec:
+  selector:
+    run: cbioagent-clickhouse-mcp-auth
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8000
+  type: ClusterIP

@@ -89,6 +89,38 @@ spec:
         - mcp.cbioportal.org
       secretName: mcp-cbio-cert
 ---
+# /db-auth — Google-OAuth-protected variant of /db, backed by
+# cbioagent-clickhouse-mcp-auth. Same host + same TLS secret. The
+# path is NOT stripped — FastMCP is configured (via the
+# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp-auth)
+# to mount itself at /db-auth/mcp so trailing-slash redirects and the
+# GoogleProvider callback URL (/db-auth/auth/callback) build correctly.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-cbioportal-db-auth-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: default-ratelimit-db@kubernetescrd
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  rules:
+    - host: mcp.cbioportal.org
+      http:
+        paths:
+          - path: /db-auth
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - mcp.cbioportal.org
+      secretName: mcp-cbio-cert
+---
 # /db-mcp-apps — separate Ingress so its own rate-limit middleware only applies
 # here. Same host + same TLS secret; Traefik merges Ingress rules per
 # host. The path is NOT stripped — FastMCP is configured (via the
