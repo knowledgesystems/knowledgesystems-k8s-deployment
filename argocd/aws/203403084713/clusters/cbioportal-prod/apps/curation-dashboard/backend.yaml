@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curation-dashboard-backend
+  namespace: default
+  labels:
+    app: curation-dashboard-backend
+  annotations:
+    secret.reloader.stakater.com/reload: "curation-dashboard-backend-secrets"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: curation-dashboard-backend
+  template:
+    metadata:
+      labels:
+        app: curation-dashboard-backend
+    spec:
+      nodeSelector:
+        workload: curation
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "curation"
+          effect: "NoSchedule"
+      containers:
+        - name: backend
+          image: cbioportal/curation-dashboard:latest-backend
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5001
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: curation-dashboard-backend-secrets
+          volumeMounts:
+            - name: pg-ca
+              mountPath: /etc/ssl/pg
+              readOnly: true
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: pg-ca
+          secret:
+            secretName: curation-dashboard-pg-ca
+            defaultMode: 0444
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: curation-dashboard-backend
+  namespace: default
+  labels:
+    app: curation-dashboard-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: curation-dashboard-backend
+  ports:
+    - port: 5001
+      targetPort: http
+      protocol: TCP
+      name: http

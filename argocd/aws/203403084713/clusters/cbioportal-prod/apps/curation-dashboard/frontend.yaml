@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curation-dashboard-frontend
+  namespace: default
+  labels:
+    app: curation-dashboard-frontend
+  annotations:
+    secret.reloader.stakater.com/reload: "curation-dashboard-frontend-secrets"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: curation-dashboard-frontend
+  template:
+    metadata:
+      labels:
+        app: curation-dashboard-frontend
+    spec:
+      nodeSelector:
+        workload: curation
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "curation"
+          effect: "NoSchedule"
+      containers:
+        - name: frontend
+          image: cbioportal/curation-dashboard:latest-frontend
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: curation-dashboard-frontend-secrets
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: curation-dashboard-frontend
+  namespace: default
+  labels:
+    app: curation-dashboard-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: curation-dashboard-frontend
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
