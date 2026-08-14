@@ -57,12 +57,15 @@ spec:
               value: "cbioportal-mcp-auth"
             - name: DD_SITE
               value: "datadoghq.com"
-            # Mount FastMCP under the external sub-path so trailing-slash
-            # redirects point to https://mcp.cbioportal.org/db-auth/mcp/
-            # rather than /mcp/. Paired with NOT stripping /db-auth on
-            # the mcp-cbioportal-db-auth-ingress Ingress.
+            # Mount FastMCP at /db/mcp so this Deployment IS the public
+            # /db/mcp endpoint on mcp.cbioportal.org — public MCP is
+            # OAuth-gated by default. LibreChat continues to reach the
+            # header-trust `cbioagent-clickhouse-mcp` Deployment via the
+            # in-cluster ClusterIP Service (never touches the public
+            # ingress), so it's unaffected. Paired with NOT stripping
+            # /db on the mcp-cbioportal-db-ingress Ingress.
             - name: CLICKHOUSE_MCP_HTTP_PATH
-              value: "/db-auth/mcp"
+              value: "/db/mcp"
             # Trust X-Forwarded-* from any in-cluster source so uvicorn's
             # 307 trailing-slash redirect honors Traefik's
             # X-Forwarded-Proto: https. Same reasoning as the sibling
