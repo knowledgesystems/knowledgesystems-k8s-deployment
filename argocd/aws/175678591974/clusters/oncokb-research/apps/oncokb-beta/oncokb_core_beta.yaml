@@ -64,7 +64,7 @@ spec:
             - "-Djdbc.password=$(DB_PASSWORD)"
             - "-Dgenomenexus.api=https://www.genomenexus.org/"
             - "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)"
-            - "-Doncokb_transcript.url=https://transcript.oncokb.org"
+            - "-Doncokb_transcript.url=https://beta.transcript.oncokb.org"
             - "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)"
             - "-Dredis.enable=false"
             - "-Dswagger_url=https://beta.oncokb.org"
