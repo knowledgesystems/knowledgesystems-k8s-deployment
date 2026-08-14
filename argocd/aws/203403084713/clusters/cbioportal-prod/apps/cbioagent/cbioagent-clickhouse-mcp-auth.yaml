@@ -10,6 +10,17 @@ metadata:
     # and when the Google OAuth client credentials rotate.
     configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
     secret.reloader.stakater.com/reload: "cbioportal-mcp-google-oauth"
+    # Track the mutable `cbioportal/mcp:mcp-google-oauth` tag — every
+    # push to the `mcp-google-oauth` branch on cbioportal/cbioportal-mcp
+    # (or explicit `workflow_dispatch` builds against it) overwrites that
+    # tag digest. Keel polls Docker Hub and rolls this Deployment when
+    # the digest behind the tag changes. Same pattern beta LibreChat uses;
+    # fine here because this Deployment is on a feature branch we're
+    # actively iterating on. Swap to a versioned tag when we cut a
+    # release.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
 spec:
   replicas: 1
   selector:
