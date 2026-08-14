@@ -1,0 +1,12 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ipblock
+  namespace: default
+spec:
+  plugin:
+    ipblock:
+      ipDenyList:
+        # Huawei-Cloud-SG (PetalBot). Fetches robots.txt but ignores it; crawls
+        # www.oncokb.org unthrottled. Datacenter range, no real users.
+        - 114.119.128.0/19
