@@ -63,6 +63,13 @@ spec:
             periodSeconds: 30
             failureThreshold: 3
           securityContext:
+            # Must be numeric. The image declares `USER node`, and the kubelet
+            # cannot resolve a username to a UID to prove it is non-root, so
+            # runAsNonRoot on its own fails the pod with
+            # "image has non-numeric user (node), cannot verify user is non-root".
+            # 1000:1000 is the `node` user in node:20-alpine.
+            runAsUser: 1000
+            runAsGroup: 1000
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             capabilities:
