@@ -116,6 +116,70 @@ spec:
                 name: cbioagent-clickhouse-mcp-auth
                 port:
                   number: 80
+          # FastMCP's GoogleProvider registers all OAuth endpoints at
+          # the base_url ORIGIN, not under the MCP mount path — so the
+          # OAuth-plane routes below all live at root and need Ingress
+          # to forward them into the same Deployment. Enumerated
+          # against a probe FastMCP+GoogleProvider instance:
+          #   /.well-known/oauth-authorization-server (AS metadata)
+          #   /.well-known/oauth-protected-resource/... (resource metadata; suffix depends on mount path)
+          #   /authorize     (auth code request)
+          #   /token         (token exchange)
+          #   /register      (Dynamic Client Registration for MCP clients)
+          #   /consent       (host consent screen)
+          #   /auth/callback (Google -> us callback; MUST match the URI
+          #                  registered in Google Cloud Console for this client)
+          # These paths are otherwise unused on mcp.cbioportal.org — no
+          # other service on this host consumes them today.
+          - path: /.well-known/oauth-authorization-server
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+          - path: /.well-known/oauth-protected-resource
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+          - path: /authorize
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+          - path: /token
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+          - path: /register
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+          - path: /consent
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+          - path: /auth/callback
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
   tls:
     - hosts:
         - mcp.cbioportal.org
