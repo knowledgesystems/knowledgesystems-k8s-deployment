@@ -9,6 +9,7 @@ spec:
     - kind: Rule
       match: Host(`beta.oncokb.org`)
       middlewares:
+        - name: ipblock
         - name: uablock-agentic-crawlers
       services:
         - name: oncokb-public-beta
