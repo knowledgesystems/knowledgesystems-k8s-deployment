@@ -58,11 +58,31 @@ spec:
         - mcp.cbioportal.org
       secretName: mcp-cbio-cert
 ---
-# /db — separate Ingress so its own rate-limit middleware only applies
-# here. Same host + same TLS secret; Traefik merges Ingress rules per
-# host. The path is NOT stripped — FastMCP is configured (via the
-# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp) to mount
-# itself at /db/mcp so trailing-slash redirects build correct URLs.
+# /db — the public MCP entry point on mcp.cbioportal.org, now
+# Google-OAuth-gated by pointing at cbioagent-clickhouse-mcp-auth
+# (was cbioagent-clickhouse-mcp). LibreChat is unaffected: it dials
+# the unauthenticated `cbioagent-clickhouse-mcp` Deployment directly
+# over the in-cluster ClusterIP Service and never touches this Ingress.
+#
+# The /db path is NOT stripped — FastMCP is configured (via the
+# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp-auth)
+# to mount itself at /db/mcp so trailing-slash redirects and internal
+# routing build correct URLs.
+#
+# Also carries the root-level OAuth-plane routes that FastMCP's
+# GoogleProvider registers at the base_url ORIGIN (not under the MCP
+# mount path). Enumerated against a probe FastMCP+GoogleProvider
+# instance:
+#   /.well-known/oauth-authorization-server (AS metadata)
+#   /.well-known/oauth-protected-resource/... (resource metadata; suffix depends on mount path)
+#   /authorize     (auth code request)
+#   /token         (token exchange)
+#   /register      (Dynamic Client Registration for MCP clients)
+#   /consent       (host consent screen)
+#   /auth/callback (Google -> us callback; MUST match the URI
+#                  registered in Google Cloud Console for this client)
+# These paths are otherwise unused on mcp.cbioportal.org — no other
+# service on this host consumes them today.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -81,56 +101,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: cbioagent-clickhouse-mcp
-                port:
-                  number: 80
-  tls:
-    - hosts:
-        - mcp.cbioportal.org
-      secretName: mcp-cbio-cert
----
-# /db-auth — Google-OAuth-protected variant of /db, backed by
-# cbioagent-clickhouse-mcp-auth. Same host + same TLS secret. The
-# path is NOT stripped — FastMCP is configured (via the
-# CLICKHOUSE_MCP_HTTP_PATH env var on cbioagent-clickhouse-mcp-auth)
-# to mount itself at /db-auth/mcp so trailing-slash redirects and the
-# GoogleProvider callback URL (/db-auth/auth/callback) build correctly.
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: mcp-cbioportal-db-auth-ingress
-  annotations:
-    kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/router.middlewares: default-ratelimit-db@kubernetescrd
-  labels:
-    app.kubernetes.io/instance: cbioagent
-spec:
-  rules:
-    - host: mcp.cbioportal.org
-      http:
-        paths:
-          - path: /db-auth
-            pathType: Prefix
-            backend:
-              service:
                 name: cbioagent-clickhouse-mcp-auth
                 port:
                   number: 80
-          # FastMCP's GoogleProvider registers all OAuth endpoints at
-          # the base_url ORIGIN, not under the MCP mount path — so the
-          # OAuth-plane routes below all live at root and need Ingress
-          # to forward them into the same Deployment. Enumerated
-          # against a probe FastMCP+GoogleProvider instance:
-          #   /.well-known/oauth-authorization-server (AS metadata)
-          #   /.well-known/oauth-protected-resource/... (resource metadata; suffix depends on mount path)
-          #   /authorize     (auth code request)
-          #   /token         (token exchange)
-          #   /register      (Dynamic Client Registration for MCP clients)
-          #   /consent       (host consent screen)
-          #   /auth/callback (Google -> us callback; MUST match the URI
-          #                  registered in Google Cloud Console for this client)
-          # These paths are otherwise unused on mcp.cbioportal.org — no
-          # other service on this host consumes them today.
           - path: /.well-known/oauth-authorization-server
             pathType: Prefix
             backend:
