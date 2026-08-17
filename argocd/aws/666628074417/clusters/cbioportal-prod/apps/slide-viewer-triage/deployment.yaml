@@ -6,9 +6,7 @@ metadata:
   labels:
     app: slide-viewer-triage
 spec:
-  # Keep the workload dormant until the private configuration, image digest,
-  # and release index are installed in the target cluster.
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: slide-viewer-triage
@@ -21,6 +19,9 @@ spec:
     metadata:
       labels:
         app: slide-viewer-triage
+      annotations:
+        configmap.reloader.stakater.com/reload: slide-viewer-triage-config
+        secret.reloader.stakater.com/reload: slide-viewer-secrets,cbioportal-wsi-auth
     spec:
       securityContext:
         runAsNonRoot: true
@@ -39,13 +40,13 @@ spec:
       imagePullSecrets:
         - name: dockerhub-creds
       containers:
-        - name: slide-viewer
+        - name: tile-server
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-          image: cbioportal/cbioportal-slide-viewer:4d58f8c2528737e2d548c8b20c6232bca7057eb3
+          image: cbioportal/cbioportal-tile-server:c602272a5c0d872d76d7a36940cc9ec14e28a8db
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -64,16 +65,6 @@ spec:
                 secretKeyRef:
                   name: slide-viewer-secrets
                   key: AWS_SECRET_ACCESS_KEY
-            - name: DATABRICKS_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: slide-viewer-secrets
-                  key: DATABRICKS_HOST
-            - name: DATABRICKS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: slide-viewer-secrets
-                  key: DATABRICKS_TOKEN
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
@@ -84,13 +75,11 @@ spec:
                 secretKeyRef:
                   name: cbioportal-wsi-auth
                   key: WSI_AUTH_SECRET
-            - name: WSI_AUTH_REQUIRED
-              value: "true"
           resources:
             requests:
               memory: "4Gi"
               cpu: "250m"
-              ephemeral-storage: "1Gi"
+              ephemeral-storage: "2Gi"
             limits:
               memory: "16Gi"
               cpu: "2"
@@ -98,9 +87,15 @@ spec:
           volumeMounts:
             - name: slide-block-cache
               mountPath: /cache/slide-blocks
-            - name: wsi-release
-              mountPath: /var/lib/wsi
-              readOnly: true
+            - name: prometheus-cache
+              mountPath: /cache/prometheus
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /health
@@ -120,10 +115,10 @@ spec:
       volumes:
         - name: slide-block-cache
           emptyDir:
-            sizeLimit: 20Gi
-        - name: wsi-release
-          persistentVolumeClaim:
-            claimName: slide-viewer-triage-wsi-release
+            sizeLimit: 16Gi
+        - name: prometheus-cache
+          emptyDir:
+            sizeLimit: 256Mi
 
 ---
 apiVersion: v1
