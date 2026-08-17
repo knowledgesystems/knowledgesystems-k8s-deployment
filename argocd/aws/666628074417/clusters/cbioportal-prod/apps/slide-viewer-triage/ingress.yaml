@@ -19,8 +19,29 @@ spec:
     - host: triage-beta.cbioportal.aws.mskcc.org
       http:
         paths:
-          - path: /wsi
+          - path: /wsi/tiles
             pathType: Prefix
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+          - path: /wsi/thumbnails
+            pathType: Prefix
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+          - path: /wsi/health
+            pathType: Exact
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+          - path: /wsi/ready
+            pathType: Exact
             backend:
               service:
                 name: slide-viewer-triage

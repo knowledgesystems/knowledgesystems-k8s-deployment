@@ -6,7 +6,7 @@ metadata:
   labels:
     app: slide-viewer-triage
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: slide-viewer-triage
@@ -22,6 +22,8 @@ spec:
       annotations:
         configmap.reloader.stakater.com/reload: slide-viewer-triage-config
         secret.reloader.stakater.com/reload: slide-viewer-secrets,cbioportal-wsi-auth
+        ad.datadoghq.com/tile-server.checks: >-
+          {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
     spec:
       securityContext:
         runAsNonRoot: true
@@ -46,6 +48,8 @@ spec:
             capabilities:
               drop:
                 - ALL
+          # Replace with the immutable digest published from the coordinated
+          # tile-server change set before promoting this deployment.
           image: cbioportal/cbioportal-tile-server:c602272a5c0d872d76d7a36940cc9ec14e28a8db
           imagePullPolicy: IfNotPresent
           ports:
@@ -78,7 +82,7 @@ spec:
           resources:
             requests:
               memory: "4Gi"
-              cpu: "250m"
+              cpu: "500m"
               ephemeral-storage: "2Gi"
             limits:
               memory: "16Gi"
