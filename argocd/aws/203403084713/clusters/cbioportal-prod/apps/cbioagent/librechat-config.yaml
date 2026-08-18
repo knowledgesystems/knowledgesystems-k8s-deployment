@@ -110,8 +110,14 @@ data:
     mcpServers:
       cbioportal-database:
         type: streamable-http
-        # Trailing slash avoids FastMCP's 307 that LibreChat v0.8.7+ blocks as SSRF.
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp/
+        # No trailing slash — the FastMCP 3.3.1 in cbioportal/mcp:latest
+        # (from cbioportal-mcp#107) mounts /db/mcp WITHOUT trailing slash
+        # as canonical. Requests to /db/mcp/ get a 307 back to /db/mcp,
+        # which LibreChat v0.8.7 fails to follow across the ClusterIP
+        # hop — pod log shows a wall of 307 -> 406 -> 404 retries and
+        # the tool call ultimately fails. Same fix as MSK-side (see
+        # portal-configuration#52).
+        url: http://cbioagent-clickhouse-mcp:80/db/mcp
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
