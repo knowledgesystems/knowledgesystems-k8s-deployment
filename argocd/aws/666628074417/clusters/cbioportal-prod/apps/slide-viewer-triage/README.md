@@ -22,6 +22,12 @@ eviction policy, and alerts for evictions, memory pressure, and unavailable
 connections. Redis is an optimization; a Redis outage must leave the service
 authorized and bounded by the ingress and image-operation controls.
 
+Before promotion, record the live Redis service/CIDR, ECS endpoint/CIDR, and
+cluster DNS labels. The current policy intentionally remains ingress-only
+until those destinations are verified; the promotion gate is to add
+default-deny egress with only DNS, Redis port 6379, and ECS port 9020 allowed.
+Do not broaden the policy to `0.0.0.0/0` as a substitute for that inventory.
+
 ## Monitoring
 
 Datadog scrapes `/metrics` through the pod IP using OpenMetrics. The public
@@ -35,8 +41,10 @@ time, 429/503 rates, pod restarts, memory, and block-cache volume usage.
 
 ## Release procedure
 
-1. Build and publish the tile-server image from the coordinated tile-server
-   change set, then update the immutable image digest in `deployment.yaml`.
+1. Build and publish the tile-server image, then replace the tag in
+   `deployment.yaml` with the exact immutable `image@sha256:<digest>` reference
+   before promotion. The deployment is not promotion-ready while it contains
+   only a tag.
 2. Build the green ClickHouse database with the WSI access projection and
    import the complete `meta_wsi.txt`/`data_wsi.txt` snapshots.
 3. Verify WSI row counts, `can_serve_tiles`, projection materialization, and

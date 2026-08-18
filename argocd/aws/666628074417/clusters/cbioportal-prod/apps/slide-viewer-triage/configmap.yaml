@@ -8,6 +8,7 @@ data:
   WSI_AUTH_AUDIENCE: "cbioportal-wsi"
   WSI_AUTH_MAX_TTL: "300"
   WSI_ALLOWED_SOURCE_SCHEMES: "s3"
+  WSI_ALLOW_FILE_SOURCES: "false"
   CORS_ORIGINS: "https://triage-beta.cbioportal.aws.mskcc.org"
   CACHE_MISS_RATE_LIMIT_PER_MINUTE: "120"
   CACHE_MISS_LOCK_TTL_SECONDS: "120"
