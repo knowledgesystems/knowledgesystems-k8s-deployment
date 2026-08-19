@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-beta-blue
     tags.datadoghq.com/env: eks-public-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.4
+    tags.datadoghq.com/version: 7.1.0
   name: cbioportal-backend-public-beta-blue
 spec:
   progressDeadlineSeconds: 600
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-public-beta-blue
         tags.datadoghq.com/env: eks-public-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.4
+        tags.datadoghq.com/version: 7.1.0
     spec:
       containers:
         - args:
@@ -232,7 +232,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-blue
-          image: cbioportal/cbioportal:v7.0.0-rc.9-web-shenandoah
+          image: cbioportal/cbioportal:v7.1.0-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
