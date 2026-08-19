@@ -100,6 +100,6 @@ postgresql:
   enabled: false
 image:
   repository: quay.io/keycloak/keycloak
-  tag: 11.0.0
+  tag: 13.0.1
 imagePullSecrets:
   - name: dockerhub-creds
