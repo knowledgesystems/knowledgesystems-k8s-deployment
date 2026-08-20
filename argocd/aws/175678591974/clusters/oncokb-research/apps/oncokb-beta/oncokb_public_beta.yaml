@@ -132,10 +132,10 @@ spec:
       tolerations:
         - key: workload
           operator: Equal
-          value: main
+          value: beta
           effect: NoSchedule
       nodeSelector:
-        workload: main
+        workload: beta
       volumes:
         - name: recaptcha-credentials
           secret:
