@@ -278,12 +278,12 @@ locals {
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
-          value  = "r7g.large"
+          value  = "tile-viewer"
           effect = var.TAINT_EFFECT
         }
       }
       labels = {
-        (var.LABEL_KEY) = "r7g.large"
+        (var.LABEL_KEY) = "tile-viewer"
       }
     }
   }
