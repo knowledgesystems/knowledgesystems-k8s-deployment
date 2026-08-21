@@ -236,8 +236,6 @@ spec:
         - --patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID
         # *** msk specific settings ***
         - --msk_entity_translation_enabled=true
-        # msk whole slide viewer
-        - --msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)
         # darwin
         - --darwin.auth_url=$(DARWIN_AUTH_URL)
         - --darwin.response_url=$(DARWIN_RESPONSE_URL)

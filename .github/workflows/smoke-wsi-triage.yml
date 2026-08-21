@@ -1,0 +1,29 @@
+name: Smoke test WSI triage route
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Base URL including /wsi
+        required: true
+        default: https://triage-beta.cbioportal.aws.mskcc.org/wsi
+        type: string
+      origin:
+        description: Browser origin used for the CORS preflight
+        required: true
+        default: https://triage-beta.cbioportal.aws.mskcc.org
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run WSI routing smoke
+        env:
+          CBIOPORTAL_WSI_URL: ${{ inputs.url }}
+          CBIOPORTAL_WSI_ORIGIN: ${{ inputs.origin }}
+        run: bash .github/scripts/smoke_wsi_triage.sh

@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-viewer-triage
+  namespace: default
+  labels:
+    app: slide-viewer-triage
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: slide-viewer-triage
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: slide-viewer-triage
+      annotations:
+        ad.datadoghq.com/tile-server.checks: >-
+          {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      nodeSelector:
+        workload: tile-viewer
+      tolerations:
+        - effect: NoSchedule
+          key: workload
+          operator: Equal
+          value: tile-viewer
+      terminationGracePeriodSeconds: 60
+      imagePullSecrets:
+        - name: dockerhub-creds
+      containers:
+        - name: tile-server
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          # Release v0.1.0 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:v0.1.0@sha256:6950a87cf8a8ed588a17bcd9f71b0155b4162cd9645bfe3f566c9bf6f0f08088
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: slide-viewer-triage-config
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: REDIS_URL
+            - name: WSI_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-wsi-auth
+                  key: WSI_AUTH_SECRET
+          resources:
+            limits:
+              memory: "16Gi"
+          volumeMounts:
+            - name: slide-block-cache
+              mountPath: /cache/slide-blocks
+            - name: prometheus-cache
+              mountPath: /cache/prometheus
+            - name: tmp
+              mountPath: /tmp
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: slide-block-cache
+          emptyDir:
+            sizeLimit: 16Gi
+        - name: prometheus-cache
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-viewer-triage
+  namespace: default
+  labels:
+    app: slide-viewer-triage
+spec:
+  selector:
+    app: slide-viewer-triage
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
