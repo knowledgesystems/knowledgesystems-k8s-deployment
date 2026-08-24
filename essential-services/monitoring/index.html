@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.840903647782">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.840904830772">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.6.0">
@@ -38,11 +38,11 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=4.6.0.840903647782" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=4.6.0.840904830772" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.840903647782" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.840904830772" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.840903647782" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.840904830772" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -161,12 +161,12 @@
 <h1 id="monitoring">Monitoring</h1>
 <p>We use Datadog and AWS CloudWatch for monitoring. For cBioPortal, datadog is deployed in multiple clusters and other AWS services are attached to AWS CloudWatch dashboard. Tables below shows bookmarks for common dashboards.</p>
 <h2 id="datadog-dashboards">Datadog Dashboards</h2>
-<retype-table copy-text="| Name    | URL                     | Description            |
-|------------|-----------------------------|--------------------|
-| Kubernetes Compute Overview   | [Link](https://app.datadoghq.com/orchestration/explorer/node?query=kube_cluster_name%3Acbioportal-prod%20OR%20kube_cluster_name%3Acbioportal-prod-a9438edd%20OR%20kube_cluster_name%3Acbioportal-prod-a9438edd&amp;explorer-na-groups=false&amp;groups=label%23eks.amazonaws.com%2Fnodegroup&amp;pod-explorer-cols=name%2Cstatus%2Ccluster%2Cnamespace%2Cnode%2Cage%2Cready%2Crestarts%2Ccpu_usage_limits%2Cmemory_usage_limits&amp;ptfu=false)             | List of all node groups in our public/private clusters, together with other metrics such as usage, traces, profiles         |
-| API Traces/Logs - Public Portal (cbioportal.org)  | [Link](https://app.datadoghq.com/apm/traces?query=service%3Acbioportal%20env%3Aeks-public%20-status%3Aok%20%40http.status_code%3A%5B400%20TO%20600%5D%20-%40http.status_code%3A429%20-%40http.status_code%3A404&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=core_service%2Ccore_resource_name%2Clog_duration%2Clog_http.method%2Clog_http.status_code&amp;fromUser=false&amp;historicalData=true&amp;messageDisplay=inline&amp;sort=desc&amp;spanType=all&amp;storage=hot&amp;view=spans&amp;start=1755786818134&amp;end=1756391618134&amp;paused=false)       | Traces/logs for the public portal deployed at cbioportal.org |
-| API Traces/Logs - Genie Public/Private | [Link](https://app.datadoghq.com/apm/traces?query=service%3Acbioportal%20%28env%3Aeks-genie-public%20OR%20env%3Aeks-genie-private%29%20-status%3Aok%20%40http.status_code%3A%5B401%20TO%20520%5D&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=core_service%2Ccore_resource_name%2Clog_duration%2Clog_http.method%2Clog_http.status_code&amp;fromUser=false&amp;historicalData=true&amp;messageDisplay=inline&amp;sort=desc&amp;spanType=all&amp;storage=hot&amp;view=spans&amp;start=1755786879059&amp;end=1756391679059&amp;paused=false) | Traces/logs for the genie public and private portals  |
-| Endpoint Stats - Public Portal (cbioportal.org) | [Link](https://app.datadoghq.com/software?env=eks-public&amp;fromUser=false&amp;hostGroup=%2A&amp;selectedComponent=endpoint&amp;start=1746553729059&amp;end=1747158529059) | API Endpoint Stats for the public portal deployed at cbioportal.org  |">
+<retype-table copy-text="| Name | URL | Description |
+|------|-----|-------------|
+| Kubernetes Compute Overview | [Link][dd-k8s-compute] | List of all node groups in our public/private clusters, together with other metrics such as usage, traces, profiles |
+| API Traces/Logs - Public Portal (cbioportal.org) | [Link][dd-traces-public] | Traces/logs for the public portal deployed at cbioportal.org |
+| API Traces/Logs - Genie Public/Private | [Link][dd-traces-genie] | Traces/logs for the genie public and private portals |
+| Endpoint Stats - Public Portal (cbioportal.org) | [Link][dd-endpoint-stats-public] | API Endpoint Stats for the public portal deployed at cbioportal.org |">
 <div class="table-wrapper scrollbar overflow-hidden">
 <table class="compact">
 <thead>
@@ -202,9 +202,9 @@
 </div>
 </retype-table>
 <h2 id="aws-cloudwatch-dashboards">AWS CloudWatch Dashboards</h2>
-<retype-table copy-text="| Name    | URL                     | Description            |
-|------------|-----------------------------|--------------------|
-| cBioPortal   | [Link](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards/dashboard/cBioPortal)             | Custom CloudWatch Dashboard prepared for cBioPortal         |">
+<retype-table copy-text="| Name | URL | Description |
+|------|-----|-------------|
+| cBioPortal | [Link][cw-cbioportal] | Custom CloudWatch Dashboard prepared for cBioPortal |">
 <div class="table-wrapper scrollbar overflow-hidden">
 <table class="compact">
 <thead>
