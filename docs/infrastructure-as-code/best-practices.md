@@ -11,6 +11,28 @@ Terraform can make irreversible changes to live infrastructure with a single com
 ### Secrets Management
 Use Terraform only to **create** the AWS Secrets Manager resource (or SSM parameter). Never set the secret value through Terraform — doing so would persist the plaintext value in the `.tfstate` file. After Terraform creates the resource, set the value manually using the AWS CLI.
 
+## IAM
+
+Every IAM role and policy we create — via Terraform or the console — must:
+
+1. Have a name prefixed with `user`.
+2. Have the `AutomationOrUserServiceRolePermissions` permissions boundary attached (roles only; policies just need the prefix).
+
+Creating a role that violates either rule fails with `AccessDenied`.
+
+The naming convention in use is `userServiceRole<Purpose>` for roles and `userServicePolicy<Purpose>` for policies, e.g. `userServiceRoleCellxgeneS3Mountpoint`.
+
+In Terraform:
+
+```hcl
+resource "aws_iam_role" "userServiceRoleExample" {
+  name                 = "userServiceRoleExample"
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/AutomationOrUserServiceRolePermissions"
+
+  # ...
+}
+```
+
 ## Compute
 
 ### Prefer Managed Node Groups Over Standalone EC2 Instances
