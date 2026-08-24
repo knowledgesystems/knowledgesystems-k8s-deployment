@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.840904830772">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.840905458332">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.6.0">
@@ -38,12 +38,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=4.6.0.840904830772" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=4.6.0.840905458332" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.840904830772" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.840905458332" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.840904830772" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=4.6.0.840904830772" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.840905458332" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=4.6.0.840905458332" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -189,8 +189,9 @@
 </ol>
 <p>Creating a role that violates either rule fails with <code translate="no" v-pre>AccessDenied</code>.</p>
 <p>The naming convention in use is <code translate="no" v-pre>userServiceRole&lt;Purpose&gt;</code> for roles and <code translate="no" v-pre>userServicePolicy&lt;Purpose&gt;</code> for policies, e.g. <code translate="no" v-pre>userServiceRoleCellxgeneS3Mountpoint</code>.</p>
-<p>In Terraform:</p>
-<div id="iam-code-1" class="codeblock-wrapper"><doc-codeblock>
+<p>Terraform is the preferred way to create these. Use the console only for one-offs, and port them back to Terraform when you can.</p>
+<h3 id="terraform-1">Terraform</h3>
+<div id="terraform-1-code-1" class="codeblock-wrapper"><doc-codeblock>
 <pre translate="no" class="language-hcl"><code v-pre class="language-hcl">resource &quot;aws_iam_role&quot; &quot;userServiceRoleExample&quot; {
   name                 = &quot;userServiceRoleExample&quot;
   permissions_boundary = &quot;arn:aws:iam::${local.account_id}:policy/AutomationOrUserServiceRolePermissions&quot;
@@ -198,6 +199,16 @@
   # ...
 }</code></pre>
 </doc-codeblock></div>
+<h3 id="aws-console">AWS Console</h3>
+<p>To create a role:</p>
+<ol>
+<li><strong>IAM → Roles → Create role</strong>, then pick the trusted entity as usual.</li>
+<li>On the <strong>Add permissions</strong> step, expand <strong>Set permissions boundary</strong> and choose <em>Use a permissions boundary to control the maximum role permissions</em>.</li>
+<li>Select <code translate="no" v-pre>AutomationOrUserServiceRolePermissions</code> from the policy list.</li>
+<li>On the final step, set <strong>Role name</strong> to <code translate="no" v-pre>userServiceRole&lt;Purpose&gt;</code> and create.</li>
+</ol>
+<p>To create a policy, go to <strong>IAM → Policies → Create policy</strong> and name it <code translate="no" v-pre>userServicePolicy&lt;Purpose&gt;</code>. No boundary is needed.</p>
+<p>The boundary cannot be added after the fact through the create flow — if you miss step 2, open the role and use <strong>Permissions boundary → Set permissions boundary</strong>.</p>
 <h2 id="compute">Compute</h2>
 <h3 id="prefer-managed-node-groups-over-standalone-ec2-instances">Prefer Managed Node Groups Over Standalone EC2 Instances</h3>
 <p>Avoid spinning up standalone EC2 instances. Instead, use a managed node group within an EKS cluster. Node groups are easier to scale, patch, and maintain, and they integrate with Kubernetes scheduling and lifecycle management out of the box.</p>
