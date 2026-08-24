@@ -6,12 +6,12 @@ on:
       url:
         description: Base URL including /wsi
         required: true
-        default: https://triage-beta.cbioportal.aws.mskcc.org/wsi
+        default: https://beta.cbioportal.mskcc.org/wsi
         type: string
       origin:
         description: Browser origin used for the CORS preflight
         required: true
-        default: https://triage-beta.cbioportal.aws.mskcc.org
+        default: https://beta.cbioportal.mskcc.org
         type: string
 
 permissions:

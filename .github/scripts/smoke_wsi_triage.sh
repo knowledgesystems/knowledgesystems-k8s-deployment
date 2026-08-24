@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_url="${CBIOPORTAL_WSI_URL:-https://triage-beta.cbioportal.aws.mskcc.org/wsi}"
-origin="${CBIOPORTAL_WSI_ORIGIN:-https://triage-beta.cbioportal.aws.mskcc.org}"
+base_url="${CBIOPORTAL_WSI_URL:-https://beta.cbioportal.mskcc.org/wsi}"
+origin="${CBIOPORTAL_WSI_ORIGIN:-https://beta.cbioportal.mskcc.org}"
 source_url="s3://example.invalid/slide.svs"
 tile_path="${base_url%/}/tiles/zxy/0/0/0"
 
