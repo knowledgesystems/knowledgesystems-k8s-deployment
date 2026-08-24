@@ -22,7 +22,9 @@ Creating a role that violates either rule fails with `AccessDenied`.
 
 The naming convention in use is `userServiceRole<Purpose>` for roles and `userServicePolicy<Purpose>` for policies, e.g. `userServiceRoleCellxgeneS3Mountpoint`.
 
-In Terraform:
+Terraform is the preferred way to create these. Use the console only for one-offs, and port them back to Terraform when you can.
+
+### Terraform
 
 ```hcl
 resource "aws_iam_role" "userServiceRoleExample" {
@@ -32,6 +34,19 @@ resource "aws_iam_role" "userServiceRoleExample" {
   # ...
 }
 ```
+
+### AWS Console
+
+To create a role:
+
+1. **IAM → Roles → Create role**, then pick the trusted entity as usual.
+2. On the **Add permissions** step, expand **Set permissions boundary** and choose *Use a permissions boundary to control the maximum role permissions*.
+3. Select `AutomationOrUserServiceRolePermissions` from the policy list.
+4. On the final step, set **Role name** to `userServiceRole<Purpose>` and create.
+
+To create a policy, go to **IAM → Policies → Create policy** and name it `userServicePolicy<Purpose>`. No boundary is needed.
+
+The boundary cannot be added after the fact through the create flow — if you miss step 2, open the role and use **Permissions boundary → Set permissions boundary**.
 
 ## Compute
 
