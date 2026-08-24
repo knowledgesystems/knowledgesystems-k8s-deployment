@@ -6,7 +6,7 @@ metadata:
   labels:
     app: slide-viewer-triage
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: slide-viewer-triage
@@ -80,9 +80,6 @@ spec:
                 secretKeyRef:
                   name: cbioportal-wsi-auth
                   key: WSI_AUTH_SECRET
-          resources:
-            limits:
-              memory: "16Gi"
           volumeMounts:
             - name: slide-block-cache
               mountPath: /cache/slide-blocks
