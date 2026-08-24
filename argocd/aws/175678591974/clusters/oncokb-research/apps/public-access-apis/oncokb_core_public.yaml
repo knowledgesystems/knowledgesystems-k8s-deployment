@@ -32,7 +32,7 @@ spec:
             name: oncokb-core-log4j-properties
       containers:
         - name: oncokb-core-public
-          image: mskcc/oncokb:6.9.1.beta.0-no-frontend-no-frontend
+          image: mskcc/oncokb:6.9.0-no-frontend
           imagePullPolicy: Always
           envFrom:
             - secretRef:
