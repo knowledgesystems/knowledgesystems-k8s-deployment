@@ -111,7 +111,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=*
+            - --security.cors.allowed-origins=https://deploy-preview-5608.preview.cbioportal.org
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
@@ -239,6 +239,8 @@ spec:
             - --server.tomcat.connection-timeout=20000
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
+            - --server.servlet.session.cookie.same-site=none
+            - --server.servlet.session.cookie.secure=true
             - --server.port=8888
           command:
             - java
@@ -261,7 +263,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal-dev:f9dbb2273472bb42cc9d5d4f8ef0f8a624633f2a-web-shenandoah
+          image: cbioportal/cbioportal-dev:99000102ef654ea10f41207d3a7c774eea7280db-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
