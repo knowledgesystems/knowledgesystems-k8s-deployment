@@ -6,7 +6,7 @@ metadata:
   labels:
     app: slide-viewer-triage
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: slide-viewer-triage
@@ -37,13 +37,6 @@ spec:
           key: workload
           operator: Equal
           value: tile-viewer
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: slide-viewer-triage
       terminationGracePeriodSeconds: 60
       imagePullSecrets:
         - name: dockerhub-creds
@@ -60,13 +53,6 @@ spec:
           # Release v0.1.0 is pinned to its immutable multi-architecture digest.
           image: cbioportal/cbioportal-tile-server:v0.1.0@sha256:6950a87cf8a8ed588a17bcd9f71b0155b4162cd9645bfe3f566c9bf6f0f08088
           imagePullPolicy: Always
-          resources:
-            requests:
-              cpu: "2"
-              memory: 4Gi
-            limits:
-              cpu: "4"
-              memory: 8Gi
           ports:
             - containerPort: 8080
               protocol: TCP
