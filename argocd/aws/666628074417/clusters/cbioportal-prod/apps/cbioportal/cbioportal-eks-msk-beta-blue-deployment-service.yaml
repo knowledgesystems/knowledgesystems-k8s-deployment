@@ -211,6 +211,10 @@ spec:
             - --spring.profiles.active=clickhouse
             # compress on client side
             - --enable_request_body_gzip_compression=true
+            - --wsi.access-token-secret=$(WSI_AUTH_SECRET)
+            - --wsi.access-token-audience=cbioportal-wsi
+            - --wsi.access-token-ttl-seconds=300
+            - --wsi.local-auth-bypass=false
             - --enable_study_tags=false
             - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
             - --patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID
@@ -248,10 +252,15 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
+            - name: WSI_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-wsi-auth
+                  key: WSI_AUTH_SECRET
           envFrom:
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal:v7.1.0-web-shenandoah
+          image: cbioportal/cbioportal-dev:f9dbb2273472bb42cc9d5d4f8ef0f8a624633f2a-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
