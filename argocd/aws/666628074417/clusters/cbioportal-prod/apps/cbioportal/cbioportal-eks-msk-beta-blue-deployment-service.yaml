@@ -26,7 +26,7 @@ spec:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
         # Force the beta portal pod to reload the credentialed preview CORS setting.
-        portal-cors-revision: "2026-08-25-beta-preview-cors-v2"
+        portal-cors-revision: "2026-08-25-beta-preview-cors-v3"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-blue
@@ -113,7 +113,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://deploy-preview-5608.preview.cbioportal.org
+            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://deploy-preview-5608.preview.cbioportal.org,https://deploy-preview-5608--cbioportalfrontend.netlify.app
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
