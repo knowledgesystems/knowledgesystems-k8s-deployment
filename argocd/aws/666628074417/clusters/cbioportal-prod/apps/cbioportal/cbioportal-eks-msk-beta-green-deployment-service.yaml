@@ -115,11 +115,11 @@ spec:
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
-            - --spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+            - --spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
-            - --spring.datasource.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.username=$(DB_USER)
-            - --spring.datasource.password=$(DB_PASSWORD)
+            - --spring.datasource.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.username=$(DB_CLICKHOUSE_USER)
+            - --spring.datasource.password=$(DB_CLICKHOUSE_PASSWORD)
             - --tomcat.catalina.scope=runtime
             - --show.transcript_dropdown=true
             - --show.civic=$(SHOW_CIVIC)
