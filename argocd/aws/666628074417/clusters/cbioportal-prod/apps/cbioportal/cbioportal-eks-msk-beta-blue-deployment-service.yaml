@@ -215,6 +215,7 @@ spec:
             - --wsi.access-token-audience=cbioportal-wsi
             - --wsi.access-token-ttl-seconds=300
             - --wsi.local-auth-bypass=false
+            - --msk.wsi.tile_server.url=https://beta.cbioportal.mskcc.org/wsi
             - --enable_study_tags=false
             - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
             - --patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID
