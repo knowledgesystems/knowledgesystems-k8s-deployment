@@ -21,7 +21,7 @@ spec:
         app: slide-viewer-triage
       annotations:
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
-        slide-viewer-config-revision: "2026-08-25-netlify-preview-cors"
+        slide-viewer-config-revision: "2026-08-25-netlify-preview-cors-v2"
         ad.datadoghq.com/tile-server.checks: >-
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
     spec:
@@ -62,6 +62,10 @@ spec:
             - configMapRef:
                 name: slide-viewer-triage-config
           env:
+            # Keep beta preview CORS explicit on the workload. The ConfigMap
+            # remains the shared source of the other tile-server settings.
+            - name: CORS_ORIGINS
+              value: "https://beta.cbioportal.mskcc.org,https://deploy-preview-5608.preview.cbioportal.org"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
