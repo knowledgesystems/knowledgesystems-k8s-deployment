@@ -62,6 +62,8 @@ spec:
             - configMapRef:
                 name: slide-viewer-triage-config
           env:
+            - name: CACHE_MISS_RATE_LIMIT_PER_MINUTE
+              value: "600"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
