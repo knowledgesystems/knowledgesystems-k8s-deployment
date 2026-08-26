@@ -25,6 +25,8 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
+        # Force the beta portal pod to reload the credentialed preview CORS setting.
+        portal-cors-revision: "2026-08-25-beta-preview-cors-v3"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-blue
@@ -111,7 +113,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=*
+            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://deploy-preview-5608.preview.cbioportal.org,https://deploy-preview-5608--cbioportalfrontend.netlify.app
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
@@ -215,6 +217,7 @@ spec:
             - --wsi.access-token-audience=cbioportal-wsi
             - --wsi.access-token-ttl-seconds=300
             - --wsi.local-auth-bypass=false
+            - --msk.wsi.tile_server.url=https://beta.cbioportal.mskcc.org/wsi
             - --enable_study_tags=false
             - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
             - --patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID
@@ -238,6 +241,8 @@ spec:
             - --server.tomcat.connection-timeout=20000
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
+            - --server.servlet.session.cookie.same-site=none
+            - --server.servlet.session.cookie.secure=true
             - --server.port=8888
           command:
             - java
@@ -260,7 +265,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal-dev:f9dbb2273472bb42cc9d5d4f8ef0f8a624633f2a-web-shenandoah
+          image: cbioportal/cbioportal-dev:9cd8302621df06d59c94f69915e70bec87036024-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
