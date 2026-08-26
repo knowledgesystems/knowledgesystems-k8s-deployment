@@ -52,8 +52,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Release v0.1.0 is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:v0.1.0@sha256:6950a87cf8a8ed588a17bcd9f71b0155b4162cd9645bfe3f566c9bf6f0f08088
+          # Header-source fix c992bcc is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:75ee97458f5d65f24e4705ede2c01b3d48f0ce5f2199609c5dc12ad2e76f682e
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
