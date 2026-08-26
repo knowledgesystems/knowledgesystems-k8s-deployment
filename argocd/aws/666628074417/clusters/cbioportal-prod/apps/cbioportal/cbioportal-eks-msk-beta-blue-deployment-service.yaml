@@ -265,7 +265,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal-dev:158998ef8a2c27abbbf38c3e29ccca43b1a123ed-web-shenandoah
+          image: cbioportal/cbioportal-dev:be75ad85306abeb6f49fca6e8fe5e7139725d6d4-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
