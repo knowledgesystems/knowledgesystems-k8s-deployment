@@ -143,7 +143,8 @@ jobs:
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/slide-viewer-triage.yaml \
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/deployment.yaml \
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/ingress.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/network-policy.yaml
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/network-policy.yaml \
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/pdb.yaml
 
       - name: Validate WSI manifests
         run: |
@@ -155,7 +156,8 @@ jobs:
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/argocd/slide-viewer-triage.yaml \
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/deployment.yaml \
             argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/ingress.yaml \
-            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/network-policy.yaml
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/network-policy.yaml \
+            argocd/aws/666628074417/clusters/cbioportal-prod/apps/slide-viewer-triage/pdb.yaml
 
       - name: Check WSI routing smoke script
         run: bash -n .github/scripts/smoke_wsi_triage.sh
