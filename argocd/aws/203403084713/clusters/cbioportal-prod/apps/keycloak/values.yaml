@@ -96,7 +96,7 @@ extraVolumes: |
     emptyDir: {}
 nodeSelector:
   workload: keycloak
-replicaCount: 2
+replicas: 2
 postgresql:
   enabled: false
 image:
