@@ -101,7 +101,7 @@ tolerations:
     operator: Equal
     value: keycloak
     effect: NoSchedule
-replicas: 2
+replicas: 1
 postgresql:
   enabled: false
 image:
