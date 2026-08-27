@@ -52,8 +52,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main 374f564 is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:6f2d6a2316212dc7d03f6c68728b13a70f101a25d9bd08e89e982d6a78851677
+          # PNA CORS fix dd3ec52 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:a3c1db0703058e748e0c62b6901e369a03165519de62e490583263d9ab8d07ec
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
