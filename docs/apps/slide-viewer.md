@@ -6,19 +6,23 @@ source URL and short-lived capability from the backend.
 
 ## Development capacity controls
 
-- The deployment starts with two fixed replicas and two Gunicorn workers per
-  pod. Autoscaling and disruption budgets are intentionally omitted while the
+- The checked-in deployment runs one replica. Gunicorn worker count and the
+  remaining runtime settings come from the private ConfigMap/environment.
+  Autoscaling and disruption budgets are intentionally omitted while the
   service is in development.
-- The container has a 16 GiB memory limit. CPU, ephemeral-storage, and memory
-  requests are intentionally unset until load testing establishes realistic
+- The checked-in container manifest has no CPU, ephemeral-storage, or memory
+  request/limit. Add those only after load testing establishes realistic
   values.
 - Pods select and tolerate `workload=tile-viewer`. That node group is managed
   outside this repository and must exist before the Argo Application is synced.
 - `MAX_IMAGE_OPERATIONS=1` bounds blocking tile/thumbnail work per worker.
 - `CACHE_MISS_RATE_LIMIT_PER_MINUTE` is a shared Redis sliding-window limit
-  for extraction leaders only. Redis cache hits are not application-rate-
-  limited.
+  for extraction leaders per capability subject and source. Redis cache hits
+  are not application-rate-limited.
 - Redis locks coalesce identical cache misses across workers and replicas.
+- Cold-read guardrails use a renewable 120-second distributed lock lease, a
+  60-second follower wait, and a 180-second Gunicorn worker timeout. These values do
+  not increase worker, image-operation, or open-slide concurrency.
 - Ingress retains a 100 requests/second limit, burst multiplier 5, and a
   50-connection limit per client.
 

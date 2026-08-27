@@ -52,8 +52,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Header-source fix c992bcc is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:75ee97458f5d65f24e4705ede2c01b3d48f0ce5f2199609c5dc12ad2e76f682e
+          # Main 374f564 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:6f2d6a2316212dc7d03f6c68728b13a70f101a25d9bd08e89e982d6a78851677
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -64,6 +64,14 @@ spec:
           env:
             - name: CACHE_MISS_RATE_LIMIT_PER_MINUTE
               value: "2400"
+            - name: CACHE_MISS_LOCK_TTL_SECONDS
+              value: "120"
+            - name: CACHE_MISS_WAIT_TIMEOUT_SECONDS
+              value: "60"
+            - name: GUNICORN_TIMEOUT
+              value: "180"
+            - name: CORS_ORIGINS
+              value: "https://beta.cbioportal.mskcc.org,https://deploy-preview-5608.preview.cbioportal.org,https://deploy-preview-5608--cbioportalfrontend.netlify.app"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
