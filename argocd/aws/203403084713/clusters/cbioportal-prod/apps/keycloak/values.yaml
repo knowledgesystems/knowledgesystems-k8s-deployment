@@ -96,6 +96,11 @@ extraVolumes: |
     emptyDir: {}
 nodeSelector:
   workload: keycloak
+tolerations:
+  - key: workload
+    operator: Equal
+    value: keycloak
+    effect: NoSchedule
 replicas: 2
 postgresql:
   enabled: false
