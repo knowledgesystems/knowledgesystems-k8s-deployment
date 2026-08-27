@@ -75,6 +75,10 @@ agents:
       operator: Equal
       value: cbioagent-db
       effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: keycloak
+      effect: NoSchedule
 clusterAgent:
 #  confd:
 #    nginx_ingress_controller.yaml: |-

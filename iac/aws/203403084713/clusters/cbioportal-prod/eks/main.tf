@@ -378,6 +378,23 @@ locals {
         (var.LABEL_KEY) = "curation"
       }
     }
+    keycloak = {
+      instance_types = ["t3.medium"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "keycloak"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "keycloak"
+      }
+    }
   }
 
   karpenter_discovery_tag_value = var.CLUSTER_NAME

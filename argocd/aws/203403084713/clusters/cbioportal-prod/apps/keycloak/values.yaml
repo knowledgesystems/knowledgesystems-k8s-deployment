@@ -95,7 +95,8 @@ extraVolumes: |
   - name: keycloak12-sclc-theme
     emptyDir: {}
 nodeSelector:
-  workload-class: x86-general
+  workload: keycloak
+replicaCount: 2
 postgresql:
   enabled: false
 image:
