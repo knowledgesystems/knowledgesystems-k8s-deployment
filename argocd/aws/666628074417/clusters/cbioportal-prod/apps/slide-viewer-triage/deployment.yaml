@@ -21,7 +21,7 @@ spec:
         app: slide-viewer-triage
       annotations:
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
-        slide-viewer-config-revision: "2026-08-27-production-thumbnail-manifest"
+        slide-viewer-config-revision: "2026-08-27-16m-decode-policy"
         ad.datadoghq.com/tile-server.checks: >-
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
     spec:
@@ -52,9 +52,14 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # PNA CORS fix dd3ec52 is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:a3c1db0703058e748e0c62b6901e369a03165519de62e490583263d9ab8d07ec
+          # Main b16cc21 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:39e5eeda8fbde984e28519b29816fff3b67a532eca4c903a8f63ab66cddbe79d
           imagePullPolicy: Always
+          resources:
+            requests:
+              memory: 8Gi
+            limits:
+              memory: 16Gi
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -62,12 +67,10 @@ spec:
             - configMapRef:
                 name: slide-viewer-triage-config
           env:
-            - name: CACHE_MISS_RATE_LIMIT_PER_MINUTE
-              value: "2400"
             - name: CACHE_MISS_LOCK_TTL_SECONDS
               value: "120"
             - name: CACHE_MISS_WAIT_TIMEOUT_SECONDS
-              value: "60"
+              value: "90"
             - name: GUNICORN_TIMEOUT
               value: "180"
             - name: CORS_ORIGINS
