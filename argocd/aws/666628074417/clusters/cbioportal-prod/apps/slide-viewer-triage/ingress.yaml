@@ -13,6 +13,8 @@ metadata:
     nginx.ingress.kubernetes.io/limit-rps: "100"
     nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
     nginx.ingress.kubernetes.io/limit-connections: "50"
+    # Keep a slide's cold-open cache and SlideCache affinity on one pod.
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$http_x_wsi_source"
 spec:
   ingressClassName: nginx
   rules:

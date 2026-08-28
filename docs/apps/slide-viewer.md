@@ -6,13 +6,12 @@ source URL and short-lived capability from the backend.
 
 ## Development capacity controls
 
-- The checked-in deployment runs one replica. Gunicorn worker count and the
+- The beta canary runs two replicas with a disruption budget that keeps one
+  pod available during voluntary maintenance. Gunicorn worker count and the
   remaining runtime settings come from the private ConfigMap/environment.
-  Autoscaling and disruption budgets are intentionally omitted while the
-  service is in development.
-- The checked-in container manifest has no CPU, ephemeral-storage, or memory
-  request/limit. Add those only after load testing establishes realistic
-  values.
+- The checked-in container manifest reserves 8Gi and caps memory at 16Gi per
+  pod. CPU and ephemeral-storage requests/limits remain unset until sustained
+  production load establishes realistic values.
 - Pods select and tolerate `workload=tile-viewer`. That node group is managed
   outside this repository and must exist before the Argo Application is synced.
 - `MAX_IMAGE_OPERATIONS=1` bounds blocking tile/thumbnail work per worker.
@@ -21,10 +20,13 @@ source URL and short-lived capability from the backend.
   are not application-rate-limited.
 - Redis locks coalesce identical cache misses across workers and replicas.
 - Cold-read guardrails use a renewable 120-second distributed lock lease, a
-  60-second follower wait, and a 180-second Gunicorn worker timeout. These values do
-  not increase worker, image-operation, or open-slide concurrency.
+  30-second follower wait, a 2-second image-operation queue bound, and a
+  60-second Gunicorn worker timeout. ECS slide opens use bounded client
+  connect/read timeouts and retries. These values do not increase worker,
+  image-operation, or open-slide concurrency.
 - Ingress retains a 100 requests/second limit, burst multiplier 5, and a
-  50-connection limit per client.
+  50-connection limit per client. Requests carrying `X-WSI-Source` are hashed
+  to keep a slide's cold-open cache on one pod.
 
 The Redis instance used by `REDIS_URL` must have bounded memory, an LRU/LFU
 eviction policy, and alerts for evictions, memory pressure, and unavailable

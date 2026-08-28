@@ -6,7 +6,7 @@ metadata:
   labels:
     app: slide-viewer-triage
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: slide-viewer-triage
@@ -21,7 +21,7 @@ spec:
         app: slide-viewer-triage
       annotations:
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
-        slide-viewer-config-revision: "2026-08-27-16m-decode-policy"
+        slide-viewer-config-revision: "2026-08-27-cold-open-guardrails"
         ad.datadoghq.com/tile-server.checks: >-
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
     spec:
@@ -39,6 +39,13 @@ spec:
           key: workload
           operator: Equal
           value: tile-viewer
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: slide-viewer-triage
       terminationGracePeriodSeconds: 60
       imagePullSecrets:
         - name: dockerhub-creds
@@ -52,8 +59,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main b16cc21 is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:39e5eeda8fbde984e28519b29816fff3b67a532eca4c903a8f63ab66cddbe79d
+          # Main 42f0ded is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:c49ef9b1b8a56ead982c100615d91c2af872f651632e7f777127c561b8da581e
           imagePullPolicy: Always
           resources:
             requests:
@@ -70,9 +77,9 @@ spec:
             - name: CACHE_MISS_LOCK_TTL_SECONDS
               value: "120"
             - name: CACHE_MISS_WAIT_TIMEOUT_SECONDS
-              value: "90"
+              value: "30"
             - name: GUNICORN_TIMEOUT
-              value: "180"
+              value: "60"
             - name: CORS_ORIGINS
               value: "https://beta.cbioportal.mskcc.org,https://deploy-preview-5608.preview.cbioportal.org,https://deploy-preview-5608--cbioportalfrontend.netlify.app"
             - name: AWS_ACCESS_KEY_ID
