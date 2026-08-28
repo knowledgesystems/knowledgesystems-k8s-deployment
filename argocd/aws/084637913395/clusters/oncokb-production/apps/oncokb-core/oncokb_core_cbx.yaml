@@ -48,7 +48,7 @@ spec:
             [
               "-Dapp.name=$(APP_NAME)",
               "-Djdbc.driverClassName=com.mysql.jdbc.Driver",
-              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v7_4?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
+              "-Djdbc.url=jdbc:mysql://$(DB_HOST):$(DB_PORT)/oncokb_core_v7_5?useUnicode=yes&characterEncoding=UTF-8&useSSL=false",
               "-Djdbc.username=$(DB_USERNAME)",
               "-Djdbc.password=$(DB_PASSWORD)",
               "-Doncokb_data.access_token=$(ONCOKBDEV_PRIVATE_ACCESS_TOKEN)",
