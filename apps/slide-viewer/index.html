@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.840905458332">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.841196814622">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.6.0">
@@ -38,11 +38,11 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=4.6.0.840905458332" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=4.6.0.841196814622" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.840905458332" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.841196814622" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.840905458332" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.841196814622" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -165,14 +165,14 @@ source URL and short-lived capability from the backend.</p>
 <h2 id="development-capacity-controls">Development capacity controls</h2>
 <ul>
 <li>
-<p>The deployment starts with two fixed replicas and two Gunicorn workers per
-pod. Autoscaling and disruption budgets are intentionally omitted while the
-service is in development.</p>
+<p>The beta canary runs two replicas with a disruption budget that keeps one
+pod available during voluntary maintenance. Gunicorn worker count and the
+remaining runtime settings come from the private ConfigMap/environment.</p>
 </li>
 <li>
-<p>The container has a 16 GiB memory limit. CPU, ephemeral-storage, and memory
-requests are intentionally unset until load testing establishes realistic
-values.</p>
+<p>The checked-in container manifest reserves 8Gi and caps memory at 16Gi per
+pod. CPU and ephemeral-storage requests/limits remain unset until sustained
+production load establishes realistic values.</p>
 </li>
 <li>
 <p>Pods select and tolerate <code translate="no" v-pre>workload=tile-viewer</code>. That node group is managed
@@ -183,15 +183,23 @@ outside this repository and must exist before the Argo Application is synced.</p
 </li>
 <li>
 <p><code translate="no" v-pre>CACHE_MISS_RATE_LIMIT_PER_MINUTE</code> is a shared Redis sliding-window limit
-for extraction leaders only. Redis cache hits are not application-rate-
-limited.</p>
+for extraction leaders per capability subject and source. Redis cache hits
+are not application-rate-limited.</p>
 </li>
 <li>
 <p>Redis locks coalesce identical cache misses across workers and replicas.</p>
 </li>
 <li>
+<p>Cold-read guardrails use a renewable 120-second distributed lock lease, a
+30-second follower wait, a 2-second image-operation queue bound, and a
+60-second Gunicorn worker timeout. ECS slide opens use bounded client
+connect/read timeouts and retries. These values do not increase worker,
+image-operation, or open-slide concurrency.</p>
+</li>
+<li>
 <p>Ingress retains a 100 requests/second limit, burst multiplier 5, and a
-50-connection limit per client.</p>
+50-connection limit per client. Requests carrying <code translate="no" v-pre>X-WSI-Source</code> are hashed
+to keep a slide&#x27;s cold-open cache on one pod.</p>
 </li>
 </ul>
 <p>The Redis instance used by <code translate="no" v-pre>REDIS_URL</code> must have bounded memory, an LRU/LFU
