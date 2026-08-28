@@ -59,8 +59,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main 42f0ded is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:c49ef9b1b8a56ead982c100615d91c2af872f651632e7f777127c561b8da581e
+          # Main c9ab6fe is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:627d7057287828f1c3308f176606e37dd7b29ffee7890c3bc2fb93a0cf38cf04
           imagePullPolicy: Always
           resources:
             requests:
