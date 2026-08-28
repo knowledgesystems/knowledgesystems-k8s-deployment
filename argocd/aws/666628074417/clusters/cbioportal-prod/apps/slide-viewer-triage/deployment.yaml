@@ -21,7 +21,7 @@ spec:
         app: slide-viewer-triage
       annotations:
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
-        slide-viewer-config-revision: "2026-08-28-cold-tile-cache-reset"
+        slide-viewer-config-revision: "2026-08-28-wsi-cache-repair"
         ad.datadoghq.com/tile-server.checks: >-
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
     spec:
@@ -59,8 +59,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main 464f29e is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:6e8ae75a8f9db62c3f925ab592974e7d90e2c969a35370e881f1ba5c82d58528
+          # Main 8188881 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:2a371191ea1ad169ca1514790b14ab98c71a704c2ff08d67ebc7eff6986a0abd
           imagePullPolicy: Always
           resources:
             requests:
