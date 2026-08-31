@@ -22,7 +22,7 @@ spec:
       annotations:
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
         # Force a clean beta block cache after source-region tile failures.
-        slide-viewer-cache-revision: "2026-08-31-block-cache-reset"
+        slide-viewer-cache-revision: "2026-08-31-native-overview-cache-recovery"
         slide-viewer-config-revision: "2026-08-28-wsi-cache-repair-config"
         ad.datadoghq.com/tile-server.checks: >-
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
@@ -61,8 +61,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main 8188881 is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:2a371191ea1ad169ca1514790b14ab98c71a704c2ff08d67ebc7eff6986a0abd
+          # Main 8843009 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:216729fb295ed3e912b4f9905de59b2aabd8bca702f921f994f33b58d2fff822
           imagePullPolicy: Always
           resources:
             requests:
