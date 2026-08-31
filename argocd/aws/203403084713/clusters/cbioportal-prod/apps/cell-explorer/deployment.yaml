@@ -8,6 +8,11 @@ metadata:
   annotations:
     # Restart when the aws creds (refreshed on a schedule) or app secrets change.
     secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,cell-explorer-secrets"
+    # Config is injected with envFrom, which Kubernetes reads only at container
+    # start — a ConfigMap edit alone changes nothing until something restarts
+    # the pod. Without this, a config change and an image bump applied in the
+    # wrong order leave both merged and neither in effect.
+    configmap.reloader.stakater.com/reload: "cell-explorer-config"
 spec:
   replicas: 1
   strategy:
