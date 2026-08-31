@@ -25,6 +25,8 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
+        # Keep both beta release colors on the credentialed preview CORS revision.
+        portal-cors-revision: "2026-08-25-beta-preview-cors-v3"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-green
@@ -261,7 +263,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-msk-beta-green
-          image: cbioportal/cbioportal-dev:f9dbb2273472bb42cc9d5d4f8ef0f8a624633f2a-web-shenandoah
+          image: cbioportal/cbioportal-dev:9cd8302621df06d59c94f69915e70bec87036024-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
