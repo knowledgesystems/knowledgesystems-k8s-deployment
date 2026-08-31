@@ -21,6 +21,8 @@ spec:
         app: slide-viewer-triage
       annotations:
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
+        # Force a clean beta block cache after source-region tile failures.
+        slide-viewer-cache-revision: "2026-08-31-block-cache-reset"
         slide-viewer-config-revision: "2026-08-28-wsi-cache-repair-config"
         ad.datadoghq.com/tile-server.checks: >-
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
