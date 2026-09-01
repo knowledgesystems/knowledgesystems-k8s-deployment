@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   annotations:
     argocd.argoproj.io/tracking-id: cbioportal:apps/Deployment:default/eks-msk-beta-blue
+    # Reload the inactive color too, so a signing-key rotation cannot leave
+    # blue issuing capabilities with a stale shared secret.
+    secret.reloader.stakater.com/reload: "cbioportal-wsi-auth"
   labels:
     run: eks-msk-beta-blue
     tags.datadoghq.com/env: eks-msk-beta

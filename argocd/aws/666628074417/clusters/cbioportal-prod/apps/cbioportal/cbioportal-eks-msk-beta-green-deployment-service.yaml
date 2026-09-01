@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   annotations:
     argocd.argoproj.io/tracking-id: cbioportal:apps/Deployment:default/eks-msk-beta-green
+    # Keep both beta colors on the same WSI signing-key revision.
+    secret.reloader.stakater.com/reload: "cbioportal-wsi-auth"
   labels:
     run: eks-msk-beta-green
     tags.datadoghq.com/env: eks-msk-beta

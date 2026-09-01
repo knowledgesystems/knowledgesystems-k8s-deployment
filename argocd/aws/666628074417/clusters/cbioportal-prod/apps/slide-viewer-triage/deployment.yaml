@@ -5,6 +5,12 @@ metadata:
   namespace: default
   labels:
     app: slide-viewer-triage
+  annotations:
+    # Secret values supplied through envFrom/valueFrom are captured when a
+    # pod starts. Reloader makes portal-configuration Secret changes replace
+    # both beta tile-server pods automatically.
+    secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-auth"
+    configmap.reloader.stakater.com/reload: "slide-viewer-triage-config"
 spec:
   replicas: 2
   selector:
@@ -61,8 +67,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main 8843009 is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:216729fb295ed3e912b4f9905de59b2aabd8bca702f921f994f33b58d2fff822
+          # Main 2266b1d is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:cfc404f70253a047e760e55951afd5e6c6ebb68e192217356527a1b2db5732d9
           imagePullPolicy: Always
           resources:
             requests:
@@ -104,6 +110,12 @@ spec:
                 secretKeyRef:
                   name: cbioportal-wsi-auth
                   key: WSI_AUTH_SECRET
+            - name: WSI_AUTH_PREVIOUS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-wsi-auth
+                  key: WSI_AUTH_PREVIOUS_SECRET
+                  optional: true
           volumeMounts:
             - name: slide-block-cache
               mountPath: /cache/slide-blocks
