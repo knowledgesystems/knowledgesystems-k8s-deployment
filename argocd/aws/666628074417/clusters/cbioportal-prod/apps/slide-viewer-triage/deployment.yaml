@@ -34,6 +34,11 @@ spec:
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
     spec:
       automountServiceAccountToken: false
+      # ECS is reachable from the worker-node network but not from the pod
+      # CIDR in this beta VPC. Keep the tile reader on the node network until
+      # the CNI/TGW egress path is repaired.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
