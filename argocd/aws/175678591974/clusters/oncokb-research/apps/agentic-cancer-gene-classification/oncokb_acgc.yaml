@@ -86,6 +86,8 @@ spec:
                 name: redis-cluster
             - secretRef:
                 name: acgc
+            - secretRef:
+                name: oncokb-github
           readinessProbe:
             httpGet:
               path: /health
