@@ -277,7 +277,7 @@ spec:
             - secretRef:
                 name: cbioportal-containerized-green
           # Please change this in tandem with the public API backend image.
-          image: cbioportal/cbioportal:v7.0.6-web-shenandoah
+          image: cbioportal/cbioportal:v7.1.1-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5

@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-api-blue
     tags.datadoghq.com/env: eks-public-api
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.1.0
+    tags.datadoghq.com/version: 7.1.1
   name: cbioportal-backend-public-api-blue
 spec:
   progressDeadlineSeconds: 600
@@ -28,7 +28,7 @@ spec:
         run: cbioportal-backend-public-api-blue
         tags.datadoghq.com/env: eks-public-api
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.1.0
+        tags.datadoghq.com/version: 7.1.1
     spec:
       containers:
         - args:
@@ -275,7 +275,7 @@ spec:
             - secretRef:
                 name: cbioportal-public-blue
           # Please change this in tandem with the website backend image.
-          image: cbioportal/cbioportal:v7.1.0-web-shenandoah
+          image: cbioportal/cbioportal:v7.1.1-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
