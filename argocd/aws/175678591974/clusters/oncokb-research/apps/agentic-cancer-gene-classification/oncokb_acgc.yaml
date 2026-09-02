@@ -63,11 +63,21 @@ spec:
               value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             - name: LOG_LEVEL
               value: "INFO"
-            # Repo curator feedback issues get filed against. GITHUB_TOKEN
-            # (the filing bot's PAT) is not app config, so it lives in the
-            # acgc Secret (envFrom below) instead of here.
+            # Repo curator feedback issues get filed against.
+            # ONCOKBDEV_PRIVATE_ACCESS_TOKEN (the filing bot's PAT) is not app
+            # config, so it comes from the shared oncokb-github Secret
+            # (envFrom below) instead of here.
             - name: GITHUB_REPO
               value: "oncokb/agentic-cancer-gene-classification"
+            # DogStatsD product metrics (usage + cache hit-rate dashboards).
+            # DATADOG_STATSD_HOST/PORT are deliberately left unset — the app
+            # then falls through to DogStatsd's own DD_DOGSTATSD_URL env var
+            # detection, which resolves to the Unix socket the Datadog
+            # admission controller already injects for APM tracing above.
+            - name: DATADOG_METRICS_ENABLED
+              value: "true"
+            - name: DATADOG_METRICS_NAMESPACE
+              value: "acgc"
             # oncokb-db-public-rds-admin supplies DB_URL/DB_USERNAME/DB_PASSWORD
             # (the shared RDS instance's admin credentials); the app parses
             # DB_URL directly. MYSQL_DATABASE isn't part of that secret since
