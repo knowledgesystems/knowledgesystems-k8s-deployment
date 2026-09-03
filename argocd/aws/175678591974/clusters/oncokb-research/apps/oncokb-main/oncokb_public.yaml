@@ -94,6 +94,21 @@ spec:
               value: "7"
             - name: APPLICATION_RATE_LIMIT_REFILL_PERIOD
               value: "1s"
+            - name: APPLICATION_SENDGRID_ENABLED
+              value: "true"
+            - name: APPLICATION_SENDGRID_APIKEY
+              value: "${SENDGRID_APIKEY}"
+            - name: APPLICATION_SENDGRID_BASEURL
+              value: "${SENDGRID_BASEURL}"
+            - name: APPLICATION_SENDGRID_BULKEMAILTYPES_DEVELOPERS_ASMGROUPID
+              value: "${SENDGRID_BULKEMAILTYPES_DEVELOPERS_ASMGROUPID}"
+            - name: APPLICATION_SENDGRID_BULKEMAILTYPES_SCIENTIFICNEWS_ASMGROUPID
+              value: "${SENDGRID_BULKEMAILTYPES_SCIENTIFICNEWS_ASMGROUPID}"
+            - name: APPLICATION_SENDGRID_NEWSTEMPLATE
+              value: "${SENDGRID_NEWSTEMPLATE}"
+            - name: APPLICATION_SENDGRID_NEWSTEMPLATENOUNSUBSCRIBE
+              value: "${SENDGRID_NEWSTEMPLATENOUNSUBSCRIBE}"
+
           envFrom:
             - secretRef:
                 name: oncokb-public
@@ -105,6 +120,8 @@ spec:
                 name: redis-cluster
             - secretRef:
                 name: oncokb-db-public-rds-oncokb-public
+            - secretRef:
+                name: oncokb-sendgrid
           readinessProbe:
             httpGet:
               path: /
