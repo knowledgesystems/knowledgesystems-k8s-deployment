@@ -12,7 +12,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
     nginx.ingress.kubernetes.io/limit-rps: "100"
     nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
-    nginx.ingress.kubernetes.io/limit-connections: "50"
+    # Allow approximately six browser connections for each of 50 concurrent
+    # users behind one NAT address. The tile server still bounds expensive
+    # image work independently with MAX_IMAGE_OPERATIONS.
+    nginx.ingress.kubernetes.io/limit-connections: "300"
     # Keep a slide's cold-open cache and SlideCache affinity on one pod.
     nginx.ingress.kubernetes.io/upstream-hash-by: "$http_x_wsi_source"
 spec:
