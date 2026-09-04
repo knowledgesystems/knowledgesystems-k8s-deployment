@@ -28,7 +28,8 @@ source URL and short-lived capability from the backend.
   connect/read timeouts and retries. These values do not increase worker,
   image-operation, or open-slide concurrency.
 - Ingress retains a 100 requests/second limit, burst multiplier 5, and a
-  50-connection limit per client. Requests carrying `X-WSI-Source` are hashed
+  300-connection limit per client (six browser connections for 50 users behind
+  one NAT address). Requests carrying `X-WSI-Source` are hashed
   to keep a slide's cold-open cache on one pod.
 
 The Redis instance used by `REDIS_URL` must have bounded memory, an LRU/LFU
