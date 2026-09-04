@@ -4,9 +4,9 @@ metadata:
   name: slide-viewer-triage
   namespace: default
 spec:
-  # Two replicas are the steady-state floor; preserve one available pod
-  # during voluntary disruption or node maintenance.
-  minAvailable: 1
+  # Beta intentionally permits its only pod to be voluntarily disrupted;
+  # availability is not a production requirement for this environment.
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: slide-viewer-triage
