@@ -8,11 +8,11 @@ metadata:
   annotations:
     # Secret values supplied through envFrom/valueFrom are captured when a
     # pod starts. Reloader makes portal-configuration Secret changes replace
-    # both beta tile-server pods automatically.
+    # all beta tile-server pods automatically.
     secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-auth"
     configmap.reloader.stakater.com/reload: "slide-viewer-triage-config"
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: slide-viewer-triage
@@ -29,7 +29,7 @@ spec:
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
         # Force a clean beta block cache after source-region tile failures.
         slide-viewer-cache-revision: "2026-08-31-native-overview-cache-recovery"
-        slide-viewer-config-revision: "2026-09-01-thumbnail-prewarm-key"
+        slide-viewer-config-revision: "2026-09-04-cold-open-capacity"
         ad.datadoghq.com/tile-server.checks: >-
           {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
     spec:
