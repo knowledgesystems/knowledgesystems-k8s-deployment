@@ -6,17 +6,19 @@ source URL and short-lived capability from the backend.
 
 ## Development capacity controls
 
-- The beta canary runs four replicas with a disruption budget that keeps
-  three pods available during voluntary maintenance. Gunicorn worker count
-  and the remaining runtime settings come from the private ConfigMap/
-  environment.
+- Beta runs two warm replicas with a disruption budget that keeps one pod
+  available during voluntary maintenance. The dedicated node group keeps a
+  two-node steady-state floor and a four-node ceiling; scale to the ceiling
+  manually for an announced load event until workload autoscaling is added.
+  Gunicorn worker count and the remaining runtime settings come from the
+  private ConfigMap/environment.
 - The checked-in container manifest reserves 8Gi and caps memory at 16Gi per
   pod. CPU and ephemeral-storage requests/limits remain unset until sustained
   production load establishes realistic values.
 - Pods select and tolerate `workload=tile-viewer`. That node group is managed
   outside this repository and must exist before the Argo Application is synced.
 - `MAX_IMAGE_OPERATIONS=2` bounds blocking tile/thumbnail work per worker;
-  four replicas and two Gunicorn workers provide sixteen bounded image
+  two replicas and two Gunicorn workers provide eight bounded image
   operation slots across beta.
 - `CACHE_MISS_RATE_LIMIT_PER_MINUTE` is a shared Redis sliding-window limit
   for extraction leaders per capability subject and source. Redis cache hits
