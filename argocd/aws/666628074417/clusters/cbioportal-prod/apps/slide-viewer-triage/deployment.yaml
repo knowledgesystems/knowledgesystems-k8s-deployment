@@ -12,7 +12,10 @@ metadata:
     secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-auth"
     configmap.reloader.stakater.com/reload: "slide-viewer-triage-config"
 spec:
-  replicas: 4
+  # Observed beta peak is six concurrent users. Keep two warm replicas for
+  # cross-AZ availability; scale out manually to the four-node ceiling for
+  # an announced load event until workload autoscaling is added.
+  replicas: 2
   selector:
     matchLabels:
       app: slide-viewer-triage
