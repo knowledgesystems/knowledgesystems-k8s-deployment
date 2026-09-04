@@ -4,7 +4,7 @@ metadata:
   name: slide-viewer-triage
   namespace: default
 spec:
-  minAvailable: 1
+  minAvailable: 3
   selector:
     matchLabels:
       app: slide-viewer-triage
