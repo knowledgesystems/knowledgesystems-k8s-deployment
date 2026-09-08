@@ -60,10 +60,14 @@ time, 429/503 rates, pod restarts, memory, and block-cache volume usage.
 
 ## Release procedure
 
-1. Build and publish the tile-server image, then replace the tag in the
-   deployment with the exact immutable `image@sha256:<digest>` reference
-   before promotion. The deployment is not promotion-ready while it contains
-   only a tag.
+The `wsi-serving-policy` ConfigMap is the shared non-secret artifact policy for
+MSK beta and the shared tile service. The portal importer and tile service must
+receive the same values; a release that only allows one source root is not a
+complete WSI release.
+
+1. Build and publish the backend and tile-server images, then replace their
+   tags in the deployment with exact immutable `image@sha256:<digest>`
+   references before promotion.
 2. Build the green ClickHouse database with the WSI access projection and
    import the complete `meta_wsi.txt`/`data_wsi.txt` snapshots.
 3. Verify WSI row counts, `can_serve_tiles`, projection materialization, and
