@@ -266,6 +266,8 @@ spec:
                   name: cbioportal-wsi-auth
                   key: WSI_AUTH_SECRET
           envFrom:
+            - configMapRef:
+                name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-blue
           image: cbioportal/cbioportal-dev:9cd8302621df06d59c94f69915e70bec87036024-web-shenandoah
