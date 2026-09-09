@@ -223,7 +223,7 @@ spec:
             #- --server.tomcat.port=8888
             - --server.max-http-request-header-size=16384
             - --show.civic=true
-            - --springdoc.api-docs.version=openapi_3_0
+            #- --springdoc.api-docs.version=openapi_3_0
             # DATADOG SETTINGS
             - -Ddd.profiling.allocation.enabled=true
             - -Ddd.profiling.heap.enabled=true
