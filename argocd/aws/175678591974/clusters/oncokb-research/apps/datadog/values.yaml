@@ -43,6 +43,17 @@ agents:
       operator: Equal
       value: test
       effect: NoSchedule
+    # Named agcg, not acgc, matching the eks_managed_node_groups map key in
+    # iac/aws/175678591974/clusters/oncokb-research/eks/main.tf (kept as agcg
+    # there specifically so Terraform doesn't destroy/recreate the live node
+    # group) — this is the dedicated node for
+    # apps/agentic-cancer-gene-classification. Without this, the DaemonSet
+    # can't schedule onto that node at all, so neither APM traces nor
+    # DogStatsD product metrics from that app ever reach an agent.
+    - key: workload
+      operator: Equal
+      value: agcg
+      effect: NoSchedule
 clusterAgent:
   admissionController:
     enabled: true
