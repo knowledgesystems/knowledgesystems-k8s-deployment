@@ -32,7 +32,7 @@ spec:
             name: oncokb-core-log4j-properties
       containers:
         - name: oncokb-core-demo
-          image: mskcc/oncokb:6.10.0-no-frontend
+          image: mskcc/oncokb:6.11.0-no-frontend
           imagePullPolicy: Always
           envFrom:
             - secretRef:
@@ -62,6 +62,7 @@ spec:
             - "-Djdbc.username=$(DB_USERNAME)"
             - "-Djdbc.password=$(DB_PASSWORD)"
             - "-Dgenomenexus.api=https://www.genomenexus.org/"
+            - "-Doncokb_transcript.token=$(ONCOKB_TRANSCRIPT_TOKEN)"
             - "-Dshow_sitemaps=false"
             - "-Dswagger_description=This website is for demonstration purpose. Only information of BRAF, TP53 and ROS1 are available."
             - "-Dswagger_url=https://demo.oncokb.org"
