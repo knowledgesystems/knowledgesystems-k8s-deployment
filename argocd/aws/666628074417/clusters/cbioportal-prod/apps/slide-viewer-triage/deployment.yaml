@@ -90,6 +90,8 @@ spec:
               protocol: TCP
           envFrom:
             - configMapRef:
+                name: wsi-serving-policy
+            - configMapRef:
                 name: slide-viewer-triage-config
           env:
             - name: CACHE_MISS_LOCK_TTL_SECONDS
