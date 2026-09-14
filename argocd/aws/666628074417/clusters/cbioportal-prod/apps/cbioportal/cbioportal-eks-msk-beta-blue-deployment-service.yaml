@@ -30,6 +30,8 @@ spec:
         admission.datadoghq.com/java-lib.version: v1.24.2
         # Force the beta portal pod to reload the credentialed preview CORS setting.
         portal-cors-revision: "2026-08-25-beta-preview-cors-v3"
+        # Force the beta portal pod to reload the credentialed preview CORS setting.
+        portal-cors-revision: "2026-08-25-beta-preview-cors-v3"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-blue
@@ -265,12 +267,16 @@ spec:
                 secretKeyRef:
                   name: cbioportal-wsi-auth
                   key: WSI_AUTH_SECRET
+            - name: WSI_ALLOWED_SOURCE_PREFIXES
+              value: "s3://mskmind-bkt/reef-slides/"
+            - name: WSI_ALLOWED_THUMBNAIL_PREFIXES
+              value: "s3://mskmind-bkt/wsi-thumbnails/"
           envFrom:
             - configMapRef:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal-dev:e21471b8a0a3febb7296c0d454b2cfa346a741ff-web-shenandoah
+          image: cbioportal/cbioportal-dev:37af42f08fbfe493d6ff7a832e6a70e4580bc894-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
