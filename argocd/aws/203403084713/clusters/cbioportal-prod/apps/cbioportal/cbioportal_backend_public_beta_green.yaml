@@ -8,6 +8,8 @@ metadata:
     tags.datadoghq.com/service: cbioportal
     tags.datadoghq.com/version: 6.3.4
   name: cbioportal-backend-public-beta-green
+  annotations:
+    secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,cbioportal-chat-sidebar"
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -74,7 +76,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            - --frontend.url=https://deploy-preview-5702.preview.cbioportal.org
             - --enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -97,7 +99,7 @@ spec:
             # connecting over dbcp
             - --dbconnector=dbcp
             # Authentication settings
-            - --authenticate=optional_oauth2
+            - --authenticate=oauth2
             - --authorization=false
             - --security.method_authorization_enabled=false
             - --always_show_study_group=PUBLIC
@@ -218,6 +220,8 @@ spec:
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
             - --show.civic=true
+            # Experimental chat sidebar feature
+            - --chat.sidebar.url=http://cbioportal-chat-sidebar:4000
           command:
             - java
           env:
