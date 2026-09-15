@@ -101,7 +101,7 @@ spec:
             - name: GUNICORN_TIMEOUT
               value: "60"
             - name: CORS_ORIGINS
-              value: "https://beta.cbioportal.mskcc.org,https://deploy-preview-5608.preview.cbioportal.org,https://deploy-preview-5608--cbioportalfrontend.netlify.app"
+              value: "https://beta.cbioportal.mskcc.org,https://6aa8bf256dfcb5000872a8e9--cbioportalfrontend.netlify.app,https://deploy-preview-5608.preview.cbioportal.org,https://deploy-preview-5608--cbioportalfrontend.netlify.app"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
