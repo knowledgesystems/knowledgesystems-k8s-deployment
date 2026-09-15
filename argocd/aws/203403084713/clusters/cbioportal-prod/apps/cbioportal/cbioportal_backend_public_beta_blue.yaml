@@ -232,7 +232,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-blue
-          image: cbioportal/cbioportal:v7.1.1-web-shenandoah
+          image: cbioportal/cbioportal:demo-sidebar-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
