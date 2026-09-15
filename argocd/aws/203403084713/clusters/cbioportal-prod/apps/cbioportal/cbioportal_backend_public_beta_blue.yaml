@@ -222,6 +222,7 @@ spec:
             - --show.civic=true
             # Experimental chat sidebar feature
             - --chat.sidebar.url=http://cbioportal-chat-sidebar:4000
+            - --chat.sidebar.allowed_users=nasirz1@mskcc.org,debruiji@mskcc.org,lismana@mskcc.org
           command:
             - java
           env:
