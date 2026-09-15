@@ -9,7 +9,7 @@ metadata:
     tags.datadoghq.com/version: 7.1.1
   name: cbioportal-backend-public-beta-blue
   annotations:
-    secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,cbioportal-chat-sidebar"
+    secret.reloader.stakater.com/reload: "cbioportal-public-blue"
 spec:
   progressDeadlineSeconds: 600
   replicas: 0
