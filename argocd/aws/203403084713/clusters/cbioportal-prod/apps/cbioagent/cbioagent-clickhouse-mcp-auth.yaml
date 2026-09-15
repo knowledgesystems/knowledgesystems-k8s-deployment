@@ -7,9 +7,10 @@ metadata:
   annotations:
     # Reloader rolls this Deployment when the daily clone cron patches
     # clickhouse-mcp-active.CLICKHOUSE_DATABASE on a successful build,
-    # and when the Google OAuth client credentials rotate.
+    # when the Google OAuth client credentials rotate, and when the
+    # session Redis password (cbioportal-public-blue) rotates.
     configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
-    secret.reloader.stakater.com/reload: "cbioportal-mcp-google-oauth"
+    secret.reloader.stakater.com/reload: "cbioportal-mcp-google-oauth,cbioportal-public-blue"
     # Track the mutable `cbioportal/mcp:mcp-google-oauth` tag — every
     # push to the `mcp-google-oauth` branch on cbioportal/cbioportal-mcp
     # (or explicit `workflow_dispatch` builds against it) overwrites that
@@ -74,6 +75,33 @@ spec:
             # unauthenticated MCP Deployments.
             - name: CLICKHOUSE_MCP_FORWARDED_ALLOW_IPS
               value: "*"
+            # Reused from the cBioPortal webapp's own Spring session Redis
+            # (cbioportal-public-blue), not a dedicated instance.
+            - name: REDIS_SESSION_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-blue
+                  key: REDIS_SESSION_HOST
+            - name: REDIS_SESSION_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-blue
+                  key: REDIS_SESSION_PORT
+            - name: REDIS_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-blue
+                  key: REDIS_SESSION_PASSWORD
+            # cbioportal-mcp's own OAuth client/token storage (see
+            # cbioportal-mcp#131) — without this, OAuth state lives on the
+            # pod's ephemeral disk and every restart invalidates every
+            # session. Database 1: database 0 on this instance is Spring's
+            # own session store, 1-15 are unclaimed. Deliberately not the
+            # persistence-cache Redis (cbioportal-public-persistence-redis-master)
+            # — that one sets --redis.clear_on_startup=true, which would
+            # reproduce this exact bug.
+            - name: REDIS_URL
+              value: "redis://:$(REDIS_SESSION_PASSWORD)@$(REDIS_SESSION_HOST):$(REDIS_SESSION_PORT)/1"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
