@@ -48,6 +48,10 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 20
             failureThreshold: 5
+          volumeMounts:
+            - mountPath: /home/node/.aws
+              name: aws-creds
+              readOnly: true
       terminationGracePeriodSeconds: 120
       nodeSelector:
         workload: cbio-dev
@@ -56,6 +60,10 @@ spec:
           key: workload
           operator: Equal
           value: cbio-dev
+      volumes:
+        - name: aws-creds
+          secret:
+            secretName: k8s-aws-creds-manager
 ---
 apiVersion: v1
 kind: Service
