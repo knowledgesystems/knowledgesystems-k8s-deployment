@@ -10,7 +10,7 @@ metadata:
     # pod starts. Reloader makes portal-configuration Secret changes replace
     # all beta tile-server pods automatically.
     secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-auth"
-    configmap.reloader.stakater.com/reload: "slide-viewer-triage-config"
+    configmap.reloader.stakater.com/reload: "slide-viewer-triage-config,wsi-serving-policy"
 spec:
   # Beta accepts node/pod downtime. Keep one warm replica for the observed
   # low concurrency; scale out manually to the four-node ceiling for an
@@ -31,6 +31,7 @@ spec:
       labels:
         app: slide-viewer-triage
       annotations:
+        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260915-1"
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
         # Force a clean beta block cache after source-region tile failures.
         slide-viewer-cache-revision: "2026-08-31-native-overview-cache-recovery"
@@ -77,8 +78,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main 2266b1d is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:cfc404f70253a047e760e55951afd5e6c6ebb68e192217356527a1b2db5732d9
+          # Main d406b94 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:main@sha256:e7fcf8bd1e906ef74db10dd8c8d5065af9880161ebf727fc875b86350ba71da5
           imagePullPolicy: Always
           resources:
             requests:
@@ -101,7 +102,13 @@ spec:
             - name: GUNICORN_TIMEOUT
               value: "60"
             - name: CORS_ORIGINS
-              value: "https://beta.cbioportal.mskcc.org,https://6aa8bf256dfcb5000872a8e9--cbioportalfrontend.netlify.app,https://deploy-preview-5608.preview.cbioportal.org,https://deploy-preview-5608--cbioportalfrontend.netlify.app"
+              value: "https://beta.cbioportal.mskcc.org,https://6aa9da9bab342000078e6da8--cbioportalfrontend.netlify.app"
+            - name: WSI_RELEASE_ID
+              value: "beta-wsi-v2-20260915-1"
+            - name: IMAGE_GIT_SHA
+              value: "d406b94a8bcc692907b55e2eeffd05ce5759a1fa"
+            - name: WSI_SERVING_CONTRACT_VERSION
+              value: "wsi-serving-v2"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:

@@ -18,35 +18,20 @@ metadata:
     nginx.ingress.kubernetes.io/limit-connections: "300"
     # Keep a slide's cold-open cache and SlideCache affinity on one pod.
     nginx.ingress.kubernetes.io/upstream-hash-by: "$http_x_wsi_source"
+    # The browser uses a same-origin /wsi route while the FastAPI application
+    # owns root-level /tiles, /thumbnails, /health, and /ready paths.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
     - host: beta.cbioportal.mskcc.org
       http:
         paths:
-          - path: /wsi/tiles
-            pathType: Prefix
-            backend:
-              service:
-                name: slide-viewer-triage
-                port:
-                  number: 80
-          - path: /wsi/thumbnails
-            pathType: Prefix
-            backend:
-              service:
-                name: slide-viewer-triage
-                port:
-                  number: 80
-          - path: /wsi/health
-            pathType: Exact
-            backend:
-              service:
-                name: slide-viewer-triage
-                port:
-                  number: 80
-          - path: /wsi/ready
-            pathType: Exact
+          # Keep the allowlist explicit: do not expose metrics, OpenAPI, or
+          # any future application route through the public ingress.
+          - path: /wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?|health|ready)$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: slide-viewer-triage

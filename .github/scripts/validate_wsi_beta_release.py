@@ -1,0 +1,225 @@
+#!/usr/bin/env python3
+"""Reject mutable or internally inconsistent beta WSI component manifests."""
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
+from urllib.parse import urlparse
+
+from ruamel.yaml import YAML
+
+
+ROOT = Path(__file__).resolve().parents[2]
+APP_ROOT = ROOT / "argocd/aws/666628074417/clusters/cbioportal-prod/apps"
+PORTAL_ROOT = APP_ROOT / "cbioportal"
+BLUE = PORTAL_ROOT / "cbioportal-eks-msk-beta-blue-deployment-service.yaml"
+GREEN = PORTAL_ROOT / "cbioportal-eks-msk-beta-green-deployment-service.yaml"
+TILE = APP_ROOT / "slide-viewer-triage/deployment.yaml"
+POLICY = APP_ROOT / "slide-viewer-triage/wsi-serving-policy.yaml"
+INGRESS = APP_ROOT / "slide-viewer-triage/ingress.yaml"
+SMOKE_WORKFLOW = ROOT / ".github/workflows/smoke-wsi-triage.yml"
+APPROVED_SOURCE_PREFIXES = {
+    "s3://pathology/",
+    "s3://mskmind-bkt/",
+    "s3://ocra/",
+}
+IMMUTABLE_FRONTEND_HOST = re.compile(
+    r"^[0-9a-f]{24}--cbioportalfrontend\.netlify\.app$"
+)
+BACKEND_IMAGE = re.compile(
+    r"^cbioportal/cbioportal-dev:([0-9a-f]{40})-web-shenandoah@sha256:[0-9a-f]{64}$"
+)
+TILE_IMAGE = re.compile(r"^cbioportal/cbioportal-tile-server:main@sha256:[0-9a-f]{64}$")
+
+
+def documents(path: Path):
+    return list(YAML(typ="safe").load_all(path.read_text(encoding="utf-8")))
+
+
+def deployment(path: Path) -> dict:
+    for document in documents(path):
+        if document and document.get("kind") == "Deployment":
+            return document
+    raise AssertionError(f"{path} has no Deployment")
+
+
+def container(document: dict, name: str | None = None) -> dict:
+    values = document["spec"]["template"]["spec"]["containers"]
+    if name is None:
+        if len(values) != 1:
+            raise AssertionError("expected one portal container")
+        return values[0]
+    return next(value for value in values if value["name"] == name)
+
+
+def env_map(value: dict) -> dict[str, str]:
+    return {
+        item["name"]: item.get("value", "")
+        for item in value.get("env", [])
+        if isinstance(item, dict) and "name" in item
+    }
+
+
+def comma_separated_values(value: str) -> set[str]:
+    return {item.strip() for item in value.split(",") if item.strip()}
+
+
+def portal_identity(path: Path) -> tuple[str, str, str]:
+    document = deployment(path)
+    pod = document["spec"]["template"]
+    release_id = (
+        pod.get("metadata", {})
+        .get("annotations", {})
+        .get("wsi.cbioportal.org/release-id", "")
+    )
+    value = container(document)
+    image = value["image"]
+    backend_image_match = BACKEND_IMAGE.fullmatch(image)
+    if backend_image_match is None:
+        raise AssertionError(
+            f"{path.name} backend image is not an immutable cBioPortal web image"
+        )
+    args = value.get("args", [])
+    runtime_identity = {
+        argument.split("=", 1)[0]: argument.split("=", 1)[1]
+        for argument in args
+        if isinstance(argument, str)
+        and argument.startswith("--wsi.")
+        and "=" in argument
+    }
+    expected_identity = {
+        "--wsi.release-id": release_id,
+        "--wsi.backend-git-sha": backend_image_match.group(1),
+        "--wsi.serving-contract-version": "wsi-serving-v2",
+    }
+    if any(
+        runtime_identity.get(key) != expected
+        for key, expected in expected_identity.items()
+    ):
+        raise AssertionError(
+            f"{path.name} backend runtime identity differs from its pod annotation or image"
+        )
+    tile_server_url = next(
+        (
+            argument.split("=", 1)[1]
+            for argument in args
+            if argument.startswith("--msk.wsi.tile_server.url=")
+        ),
+        "",
+    )
+    if tile_server_url != "https://beta.cbioportal.mskcc.org/wsi":
+        raise AssertionError(
+            f"{path.name} does not use the beta same-origin WSI ingress route"
+        )
+    frontend = next(
+        (arg.split("=", 1)[1] for arg in args if arg.startswith("--frontend.url=")), ""
+    )
+    parsed = urlparse(frontend)
+    if (
+        parsed.scheme != "https"
+        or parsed.path not in ("", "/")
+        or parsed.params
+        or parsed.query
+        or parsed.fragment
+        or IMMUTABLE_FRONTEND_HOST.fullmatch(parsed.netloc) is None
+    ):
+        raise AssertionError(
+            f"{path.name} frontend URL is not an immutable Netlify artifact"
+        )
+    cors = next(
+        (
+            arg.split("=", 1)[1]
+            for arg in args
+            if arg.startswith("--security.cors.allowed-origins=")
+        ),
+        "",
+    )
+    frontend_origin = f"{parsed.scheme}://{parsed.netloc}"
+    cors_origins = comma_separated_values(cors)
+    if (
+        any("deploy-preview" in origin for origin in cors_origins)
+        or frontend_origin not in cors_origins
+    ):
+        raise AssertionError(f"{path.name} CORS does not match its immutable frontend")
+    environment = env_map(value)
+    for duplicate in ("WSI_ALLOWED_SOURCE_PREFIXES", "WSI_ALLOWED_THUMBNAIL_PREFIXES"):
+        if duplicate in environment:
+            raise AssertionError(
+                f"{path.name} overrides shared policy variable {duplicate}"
+            )
+    config_maps = {
+        entry.get("configMapRef", {}).get("name")
+        for entry in value.get("envFrom", [])
+        if isinstance(entry, dict)
+    }
+    if "wsi-serving-policy" not in config_maps:
+        raise AssertionError(f"{path.name} does not consume wsi-serving-policy")
+    if not release_id:
+        raise AssertionError(f"{path.name} has no release identity")
+    return release_id, frontend, image
+
+
+blue = portal_identity(BLUE)
+green = portal_identity(GREEN)
+if blue != green:
+    raise AssertionError(
+        "beta blue and green do not pin the same WSI component release"
+    )
+
+tile_document = deployment(TILE)
+tile_pod = tile_document["spec"]["template"]
+tile_release = (
+    tile_pod.get("metadata", {})
+    .get("annotations", {})
+    .get("wsi.cbioportal.org/release-id", "")
+)
+tile_container = container(tile_document, "tile-server")
+if tile_release != blue[0]:
+    raise AssertionError("portal and tile server release identities differ")
+if TILE_IMAGE.fullmatch(tile_container["image"]) is None:
+    raise AssertionError("tile-server image is not an immutable cBioPortal tile image")
+tile_env = env_map(tile_container)
+if tile_env.get("WSI_RELEASE_ID") != blue[0]:
+    raise AssertionError("tile-server runtime release identity differs")
+if tile_env.get("WSI_SERVING_CONTRACT_VERSION") != "wsi-serving-v2":
+    raise AssertionError("tile-server does not declare wsi-serving-v2")
+if not re.fullmatch(r"[0-9a-f]{40}", tile_env.get("IMAGE_GIT_SHA", "")):
+    raise AssertionError("tile-server does not declare a full immutable git SHA")
+tile_cors_origins = comma_separated_values(tile_env.get("CORS_ORIGINS", ""))
+frontend_origin = blue[1].rstrip("/")
+if any("deploy-preview" in origin for origin in tile_cors_origins):
+    raise AssertionError("tile-server CORS contains a mutable preview alias")
+if frontend_origin not in tile_cors_origins:
+    raise AssertionError("tile-server CORS does not allow the pinned frontend origin")
+
+policy = documents(POLICY)[0]["data"]
+if set(policy["WSI_ALLOWED_SOURCE_PREFIXES"].split(",")) != APPROVED_SOURCE_PREFIXES:
+    raise AssertionError("WSI source policy does not contain the approved bucket roots")
+if policy["WSI_ALLOWED_THUMBNAIL_PREFIXES"] != "s3://mskmind-bkt/wsi-thumbnails/":
+    raise AssertionError("WSI thumbnail policy is not the approved publication root")
+
+ingress = documents(INGRESS)[0]
+ingress_annotations = ingress["metadata"]["annotations"]
+if ingress_annotations.get("nginx.ingress.kubernetes.io/use-regex") != "true":
+    raise AssertionError("WSI ingress does not enable its prefix-stripping regex")
+if ingress_annotations.get("nginx.ingress.kubernetes.io/rewrite-target") != "/$2":
+    raise AssertionError("WSI ingress does not strip the public /wsi prefix")
+ingress_paths = ingress["spec"]["rules"][0]["http"]["paths"]
+expected_ingress_path = "/wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?|health|ready)$"
+if len(ingress_paths) != 1 or ingress_paths[0].get("path") != expected_ingress_path:
+    raise AssertionError("WSI ingress exposes an unexpected application route set")
+if ingress_paths[0].get("pathType") != "ImplementationSpecific":
+    raise AssertionError(
+        "WSI ingress regex does not use ImplementationSpecific path type"
+    )
+
+smoke_inputs = documents(SMOKE_WORKFLOW)[0]["on"]["workflow_dispatch"]["inputs"]
+if smoke_inputs["release_id"]["default"] != blue[0]:
+    raise AssertionError("post-deploy smoke default release differs from the manifests")
+if smoke_inputs["tile_git_sha"]["default"] != tile_env["IMAGE_GIT_SHA"]:
+    raise AssertionError(
+        "post-deploy smoke default tile SHA differs from the manifests"
+    )
+
+print(f"immutable beta WSI component release validated: {blue[0]}")
