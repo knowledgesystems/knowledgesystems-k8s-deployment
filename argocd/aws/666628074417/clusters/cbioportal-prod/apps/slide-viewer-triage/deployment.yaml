@@ -31,7 +31,7 @@ spec:
       labels:
         app: slide-viewer-triage
       annotations:
-        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-1"
+        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-2"
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
         # Force a clean beta block cache after source-region tile failures.
         slide-viewer-cache-revision: "2026-08-31-native-overview-cache-recovery"
@@ -80,7 +80,7 @@ spec:
                 - ALL
           # Keep the channel tag for operator familiarity; the digest is the
           # immutable release identity validated by CI.
-          image: cbioportal/cbioportal-tile-server:main@sha256:e7fcf8bd1e906ef74db10dd8c8d5065af9880161ebf727fc875b86350ba71da5
+          image: cbioportal/cbioportal-tile-server:main@sha256:0638d904f004bc0cd2f678869ccc7dab8ec4e092c0b30f9872cb1095b4942197
           imagePullPolicy: Always
           resources:
             requests:
@@ -105,9 +105,9 @@ spec:
             - name: CORS_ORIGINS
               value: "https://beta.cbioportal.mskcc.org,https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app"
             - name: WSI_RELEASE_ID
-              value: "beta-wsi-v2-20260916-1"
+              value: "beta-wsi-v2-20260916-2"
             - name: IMAGE_GIT_SHA
-              value: "d406b94a8bcc692907b55e2eeffd05ce5759a1fa"
+              value: "082c3f77ec7eb091bc4a17b96d89cf6d1618d73c"
             - name: WSI_SERVING_CONTRACT_VERSION
               value: "wsi-serving-v3"
             - name: AWS_ACCESS_KEY_ID
