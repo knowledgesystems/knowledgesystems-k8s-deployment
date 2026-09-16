@@ -222,6 +222,7 @@ spec:
             - --show.civic=true
             # Experimental chat sidebar feature
             - --chat.sidebar.url=http://cbioportal-chat-sidebar:4000
+            - --chat.sidebar.allowed_domains=$(CHAT_SIDEBAR_ALLOWED_DOMAINS)
             - --chat.sidebar.allowed_users=$(CHAT_SIDEBAR_ALLOWED_USERS)
           command:
             - java
