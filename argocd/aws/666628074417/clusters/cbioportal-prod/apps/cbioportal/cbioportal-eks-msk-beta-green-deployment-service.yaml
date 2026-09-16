@@ -28,6 +28,7 @@ spec:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
         wsi.cbioportal.org/release-id: "beta-wsi-v2-20260915-1"
+        wsi.cbioportal.org/frontend-git-sha: "e2d568056ffda022443999cd39ec8a47e5246358"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-green
@@ -86,7 +87,7 @@ spec:
             # /enable remote debug
             - --frontend.url=https://6aa9da9bab342000078e6da8--cbioportalfrontend.netlify.app/
             - --wsi.release-id=beta-wsi-v2-20260915-1
-            - --wsi.backend-git-sha=68b137a36b3bf8fb911f73925f9491b01b9a3ae5
+            - --wsi.backend-git-sha=e4d0750386890188d18889d2bbf2b1ca0175f6be
             - --wsi.serving-contract-version=wsi-serving-v2
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -269,7 +270,7 @@ spec:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-green
-          image: cbioportal/cbioportal-dev:68b137a36b3bf8fb911f73925f9491b01b9a3ae5-web-shenandoah@sha256:8c0e0c909eef850e631b07cf3a9b13f87d9074237697a1b620c1be7c831731a7
+          image: cbioportal/cbioportal-dev:e4d0750386890188d18889d2bbf2b1ca0175f6be-web-shenandoah@sha256:7929f81457173e972edc5f3f446931d0baf4cc54a24e22832fbbe9dde8fcb300
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20

@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import quote, urljoin, urlparse
+from urllib.request import Request, urlopen
 
 from ruamel.yaml import YAML
 
@@ -28,9 +30,11 @@ IMMUTABLE_FRONTEND_HOST = re.compile(
     r"^[0-9a-f]{24}--cbioportalfrontend\.netlify\.app$"
 )
 BACKEND_IMAGE = re.compile(
-    r"^cbioportal/cbioportal-dev:([0-9a-f]{40})-web-shenandoah@sha256:[0-9a-f]{64}$"
+    r"^cbioportal/cbioportal-dev:([0-9a-f]{40})-web-shenandoah@(sha256:[0-9a-f]{64})$"
 )
-TILE_IMAGE = re.compile(r"^cbioportal/cbioportal-tile-server:main@sha256:[0-9a-f]{64}$")
+TILE_IMAGE = re.compile(
+    r"^cbioportal/cbioportal-tile-server:main@(sha256:[0-9a-f]{64})$"
+)
 
 
 def documents(path: Path):
@@ -65,14 +69,14 @@ def comma_separated_values(value: str) -> set[str]:
     return {item.strip() for item in value.split(",") if item.strip()}
 
 
-def portal_identity(path: Path) -> tuple[str, str, str]:
+def portal_identity(path: Path) -> tuple[str, str, str, str]:
     document = deployment(path)
     pod = document["spec"]["template"]
-    release_id = (
-        pod.get("metadata", {})
-        .get("annotations", {})
-        .get("wsi.cbioportal.org/release-id", "")
-    )
+    annotations = pod.get("metadata", {}).get("annotations", {})
+    release_id = annotations.get("wsi.cbioportal.org/release-id", "")
+    frontend_git_sha = annotations.get("wsi.cbioportal.org/frontend-git-sha", "")
+    if re.fullmatch(r"[0-9a-f]{40}", frontend_git_sha) is None:
+        raise AssertionError(f"{path.name} has no immutable frontend Git SHA")
     value = container(document)
     image = value["image"]
     backend_image_match = BACKEND_IMAGE.fullmatch(image)
@@ -157,7 +161,50 @@ def portal_identity(path: Path) -> tuple[str, str, str]:
         raise AssertionError(f"{path.name} does not consume wsi-serving-policy")
     if not release_id:
         raise AssertionError(f"{path.name} has no release identity")
-    return release_id, frontend, image
+    return release_id, frontend, frontend_git_sha, image
+
+
+def assert_frontend_artifact(identity: tuple[str, str, str, str]) -> None:
+    _, frontend, frontend_git_sha, _ = identity
+    bundle_url = urljoin(frontend, "reactapp/main.app.js")
+    request = Request(
+        bundle_url, headers={"User-Agent": "cbioportal-release-validator/1"}
+    )
+    needle = frontend_git_sha.encode("ascii")
+    overlap = b""
+    with urlopen(request, timeout=60) as response:
+        if response.status != 200:
+            raise AssertionError(
+                f"immutable frontend bundle returned HTTP {response.status}"
+            )
+        while chunk := response.read(1024 * 1024):
+            candidate = overlap + chunk
+            if needle in candidate:
+                return
+            overlap = candidate[-(len(needle) - 1) :]
+    raise AssertionError(
+        f"immutable frontend artifact does not contain {frontend_git_sha}"
+    )
+
+
+def assert_docker_artifact(repository: str, tag: str, digest: str) -> None:
+    tag_url = f"https://hub.docker.com/v2/repositories/{repository}/tags/{quote(tag, safe='')}"
+    request = Request(tag_url, headers={"User-Agent": "cbioportal-release-validator/1"})
+    with urlopen(request, timeout=60) as response:
+        artifact = json.load(response)
+    if artifact.get("digest") != digest:
+        raise AssertionError(
+            f"Docker Hub digest for {repository}:{tag} does not match {digest}"
+        )
+    platforms = {
+        (image.get("os"), image.get("architecture"))
+        for image in artifact.get("images", [])
+    }
+    required_platforms = {("linux", "amd64"), ("linux", "arm64")}
+    if not required_platforms.issubset(platforms):
+        raise AssertionError(
+            f"Docker artifact {repository}:{tag} is missing a required platform"
+        )
 
 
 blue = portal_identity(BLUE)
@@ -166,6 +213,14 @@ if blue != green:
     raise AssertionError(
         "beta blue and green do not pin the same WSI component release"
     )
+assert_frontend_artifact(blue)
+backend_match = BACKEND_IMAGE.fullmatch(blue[3])
+assert backend_match is not None
+assert_docker_artifact(
+    "cbioportal/cbioportal-dev",
+    f"{backend_match.group(1)}-web-shenandoah",
+    backend_match.group(2),
+)
 
 tile_document = deployment(TILE)
 tile_pod = tile_document["spec"]["template"]
@@ -177,8 +232,10 @@ tile_release = (
 tile_container = container(tile_document, "tile-server")
 if tile_release != blue[0]:
     raise AssertionError("portal and tile server release identities differ")
-if TILE_IMAGE.fullmatch(tile_container["image"]) is None:
+tile_match = TILE_IMAGE.fullmatch(tile_container["image"])
+if tile_match is None:
     raise AssertionError("tile-server image is not an immutable cBioPortal tile image")
+assert_docker_artifact("cbioportal/cbioportal-tile-server", "main", tile_match.group(1))
 tile_env = env_map(tile_container)
 if tile_env.get("WSI_RELEASE_ID") != blue[0]:
     raise AssertionError("tile-server runtime release identity differs")
