@@ -28,7 +28,7 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-3"
+        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-4"
         wsi.cbioportal.org/frontend-git-sha: "ca327132101fcce80732b53b098083a9e273344b"
       labels:
         admission.datadoghq.com/enabled: "true"
@@ -41,7 +41,7 @@ spec:
         - args:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             - -Xms100m
-            - -Xmx4g
+            - -Xmx3g
             - -XX:+UnlockExperimentalVMOptions
             - -XX:+UseShenandoahGC
             - -XX:ShenandoahUncommitDelay=1000
@@ -87,7 +87,7 @@ spec:
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
             - --frontend.url=https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app/
-            - --wsi.release-id=beta-wsi-v2-20260916-3
+            - --wsi.release-id=beta-wsi-v2-20260916-4
             - --wsi.backend-git-sha=e56f407b2d31b45a6b1a314c5152be61b4954ae0
             - --wsi.serving-contract-version=wsi-serving-v3
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
