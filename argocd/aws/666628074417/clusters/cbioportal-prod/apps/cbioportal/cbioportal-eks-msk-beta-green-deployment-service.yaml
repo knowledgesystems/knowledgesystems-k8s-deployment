@@ -27,8 +27,8 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-4"
-        wsi.cbioportal.org/frontend-git-sha: "ca327132101fcce80732b53b098083a9e273344b"
+        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-5"
+        wsi.cbioportal.org/frontend-git-sha: "18c02c85343623d4407cf9931265c66786061791"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-green
@@ -85,8 +85,8 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app/
-            - --wsi.release-id=beta-wsi-v2-20260916-4
+            - --frontend.url=https://6aaadbf05928b80008bcffd2--cbioportalfrontend.netlify.app/
+            - --wsi.release-id=beta-wsi-v2-20260916-5
             - --wsi.backend-git-sha=e56f407b2d31b45a6b1a314c5152be61b4954ae0
             - --wsi.serving-contract-version=wsi-serving-v3
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
@@ -118,7 +118,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app
+            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6aaadbf05928b80008bcffd2--cbioportalfrontend.netlify.app
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
