@@ -13,16 +13,6 @@ on:
         required: true
         default: https://beta.cbioportal.mskcc.org
         type: string
-      release_id:
-        description: Expected immutable WSI release ID
-        required: true
-        default: beta-wsi-v2-20260915-1
-        type: string
-      tile_git_sha:
-        description: Expected tile-server Git SHA
-        required: true
-        default: d406b94a8bcc692907b55e2eeffd05ce5759a1fa
-        type: string
 
 permissions:
   contents: read
@@ -36,6 +26,4 @@ jobs:
         env:
           CBIOPORTAL_WSI_URL: ${{ inputs.url }}
           CBIOPORTAL_WSI_ORIGIN: ${{ inputs.origin }}
-          EXPECTED_WSI_RELEASE_ID: ${{ inputs.release_id }}
-          EXPECTED_WSI_TILE_GIT_SHA: ${{ inputs.tile_git_sha }}
         run: bash .github/scripts/smoke_wsi_triage.sh

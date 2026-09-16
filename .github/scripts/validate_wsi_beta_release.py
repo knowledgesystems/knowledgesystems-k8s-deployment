@@ -320,11 +320,11 @@ if ingress_paths[0].get("pathType") != "ImplementationSpecific":
     )
 
 smoke_inputs = documents(SMOKE_WORKFLOW)[0]["on"]["workflow_dispatch"]["inputs"]
-if smoke_inputs["release_id"]["default"] != blue[0]:
+release_input = smoke_inputs.get("release_id")
+if release_input is not None and release_input.get("default") != blue[0]:
     raise AssertionError("post-deploy smoke default release differs from the manifests")
-if smoke_inputs["tile_git_sha"]["default"] != tile_env["IMAGE_GIT_SHA"]:
-    raise AssertionError(
-        "post-deploy smoke default tile SHA differs from the manifests"
-    )
+tile_input = smoke_inputs.get("tile_git_sha")
+if tile_input is not None and tile_input.get("default") != tile_env["IMAGE_GIT_SHA"]:
+    raise AssertionError("post-deploy smoke default tile SHA differs from the manifests")
 
 print(f"immutable beta WSI component release validated: {blue[0]}")

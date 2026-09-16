@@ -31,7 +31,7 @@ spec:
       labels:
         app: slide-viewer-triage
       annotations:
-        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260915-1"
+        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-1"
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
         # Force a clean beta block cache after source-region tile failures.
         slide-viewer-cache-revision: "2026-08-31-native-overview-cache-recovery"
@@ -103,9 +103,9 @@ spec:
             - name: GUNICORN_TIMEOUT
               value: "60"
             - name: CORS_ORIGINS
-              value: "https://beta.cbioportal.mskcc.org,https://6aa9da9bab342000078e6da8--cbioportalfrontend.netlify.app"
+              value: "https://beta.cbioportal.mskcc.org,https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app"
             - name: WSI_RELEASE_ID
-              value: "beta-wsi-v2-20260915-1"
+              value: "beta-wsi-v2-20260916-1"
             - name: IMAGE_GIT_SHA
               value: "d406b94a8bcc692907b55e2eeffd05ce5759a1fa"
             - name: WSI_SERVING_CONTRACT_VERSION
