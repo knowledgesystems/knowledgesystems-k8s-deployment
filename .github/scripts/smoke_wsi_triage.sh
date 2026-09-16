@@ -6,12 +6,32 @@ origin="${CBIOPORTAL_WSI_ORIGIN:-https://beta.cbioportal.mskcc.org}"
 source_url="s3://example.invalid/slide.svs"
 tile_path="${base_url%/}/tiles/zxy/0/0/0"
 
-status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-  "${base_url%/}/ready")"
-test "$status" = 200 || {
-  echo "expected /ready to return 200, got $status" >&2
-  exit 1
-}
+ready_payload="$(curl --fail --silent --show-error "${base_url%/}/ready")"
+jq --exit-status \
+  '.status == "ok"
+   and .auth_required == true
+   and .auth_contract_version == 2
+   and .serving_contract_version == "wsi-serving-v3"' \
+  <<<"$ready_payload" >/dev/null || {
+    echo "unexpected WSI readiness contract: $ready_payload" >&2
+    exit 1
+  }
+
+if [[ -n "${EXPECTED_WSI_RELEASE_ID:-}" ]]; then
+  jq --exit-status --arg expected "$EXPECTED_WSI_RELEASE_ID" \
+    '.release_id == $expected' <<<"$ready_payload" >/dev/null || {
+      echo "WSI release ID does not match $EXPECTED_WSI_RELEASE_ID: $ready_payload" >&2
+      exit 1
+    }
+fi
+
+if [[ -n "${EXPECTED_WSI_TILE_GIT_SHA:-}" ]]; then
+  jq --exit-status --arg expected "$EXPECTED_WSI_TILE_GIT_SHA" \
+    '.image_git_sha == $expected' <<<"$ready_payload" >/dev/null || {
+      echo "WSI tile Git SHA does not match $EXPECTED_WSI_TILE_GIT_SHA: $ready_payload" >&2
+      exit 1
+    }
+fi
 
 status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
   "$tile_path")"
