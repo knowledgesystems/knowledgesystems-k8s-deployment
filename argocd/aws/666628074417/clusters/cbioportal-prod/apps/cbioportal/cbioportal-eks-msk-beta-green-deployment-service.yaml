@@ -88,7 +88,7 @@ spec:
             - --frontend.url=https://6aa9da9bab342000078e6da8--cbioportalfrontend.netlify.app/
             - --wsi.release-id=beta-wsi-v2-20260915-1
             - --wsi.backend-git-sha=e4d0750386890188d18889d2bbf2b1ca0175f6be
-            - --wsi.serving-contract-version=wsi-serving-v2
+            - --wsi.serving-contract-version=wsi-serving-v3
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
             - --default_cross_cancer_study_list=mskimpact

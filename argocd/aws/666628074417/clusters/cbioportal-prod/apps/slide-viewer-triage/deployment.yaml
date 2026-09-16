@@ -78,7 +78,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main d406b94 is pinned to its immutable multi-architecture digest.
+          # Keep the channel tag for operator familiarity; the digest is the
+          # immutable release identity validated by CI.
           image: cbioportal/cbioportal-tile-server:main@sha256:e7fcf8bd1e906ef74db10dd8c8d5065af9880161ebf727fc875b86350ba71da5
           imagePullPolicy: Always
           resources:
@@ -108,7 +109,7 @@ spec:
             - name: IMAGE_GIT_SHA
               value: "d406b94a8bcc692907b55e2eeffd05ce5759a1fa"
             - name: WSI_SERVING_CONTRACT_VERSION
-              value: "wsi-serving-v2"
+              value: "wsi-serving-v3"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:

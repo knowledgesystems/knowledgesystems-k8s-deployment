@@ -11,7 +11,7 @@ jq --exit-status \
   '.status == "ok"
    and .auth_required == true
    and .auth_contract_version == 2
-   and .serving_contract_version == "wsi-serving-v2"' \
+   and .serving_contract_version == "wsi-serving-v3"' \
   <<<"$ready_payload" >/dev/null || {
     echo "unexpected WSI readiness contract: $ready_payload" >&2
     exit 1

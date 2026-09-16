@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, urlencode, urljoin, urlparse
 from urllib.request import Request, urlopen
 
 from ruamel.yaml import YAML
@@ -33,7 +33,7 @@ BACKEND_IMAGE = re.compile(
     r"^cbioportal/cbioportal-dev:([0-9a-f]{40})-web-shenandoah@(sha256:[0-9a-f]{64})$"
 )
 TILE_IMAGE = re.compile(
-    r"^cbioportal/cbioportal-tile-server:main@(sha256:[0-9a-f]{64})$"
+    r"^cbioportal/cbioportal-tile-server:([A-Za-z0-9_.-]+)@(sha256:[0-9a-f]{64})$"
 )
 
 
@@ -95,7 +95,7 @@ def portal_identity(path: Path) -> tuple[str, str, str, str]:
     expected_identity = {
         "--wsi.release-id": release_id,
         "--wsi.backend-git-sha": backend_image_match.group(1),
-        "--wsi.serving-contract-version": "wsi-serving-v2",
+        "--wsi.serving-contract-version": "wsi-serving-v3",
     }
     if any(
         runtime_identity.get(key) != expected
@@ -207,6 +207,54 @@ def assert_docker_artifact(repository: str, tag: str, digest: str) -> None:
         )
 
 
+def assert_docker_digest(repository: str, digest: str) -> None:
+    """Validate the immutable manifest without resolving a mutable tag.
+
+    A deployment may retain a human-readable tag next to ``@sha256`` for
+    operability, but release validation must never compare that tag with the
+    current registry head.  Branch tags move and would make an unchanged
+    blue/green release fail on the next run.
+    """
+    token_request = Request(
+        "https://auth.docker.io/token?"
+        + urlencode({"service": "registry.docker.io", "scope": f"repository:{repository}:pull"}),
+        headers={"User-Agent": "cbioportal-release-validator/1"},
+    )
+    with urlopen(token_request, timeout=60) as response:
+        token_payload = json.load(response)
+    token = token_payload.get("token") or token_payload.get("access_token")
+    if not isinstance(token, str) or not token:
+        raise AssertionError(f"Docker registry did not return a pull token for {repository}")
+    manifest_request = Request(
+        f"https://registry-1.docker.io/v2/{repository}/manifests/{digest}",
+        headers={
+            "Accept": (
+                "application/vnd.docker.distribution.manifest.list.v2+json,"
+                "application/vnd.docker.distribution.manifest.v2+json"
+            ),
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "cbioportal-release-validator/1",
+        },
+    )
+    with urlopen(manifest_request, timeout=60) as response:
+        actual_digest = response.headers.get("Docker-Content-Digest", digest)
+        if actual_digest != digest:
+            raise AssertionError(
+                f"Docker registry digest for {repository} does not match {digest}"
+            )
+        manifest = json.load(response)
+    platforms = {
+        (item.get("platform", {}).get("os"), item.get("platform", {}).get("architecture"))
+        for item in manifest.get("manifests", [])
+        if isinstance(item, dict) and isinstance(item.get("platform"), dict)
+    }
+    required_platforms = {("linux", "amd64"), ("linux", "arm64")}
+    if not required_platforms.issubset(platforms):
+        raise AssertionError(
+            f"Docker digest {repository}@{digest} is missing a required platform"
+        )
+
+
 blue = portal_identity(BLUE)
 green = portal_identity(GREEN)
 if blue != green:
@@ -235,12 +283,12 @@ if tile_release != blue[0]:
 tile_match = TILE_IMAGE.fullmatch(tile_container["image"])
 if tile_match is None:
     raise AssertionError("tile-server image is not an immutable cBioPortal tile image")
-assert_docker_artifact("cbioportal/cbioportal-tile-server", "main", tile_match.group(1))
+assert_docker_digest("cbioportal/cbioportal-tile-server", tile_match.group(2))
 tile_env = env_map(tile_container)
 if tile_env.get("WSI_RELEASE_ID") != blue[0]:
     raise AssertionError("tile-server runtime release identity differs")
-if tile_env.get("WSI_SERVING_CONTRACT_VERSION") != "wsi-serving-v2":
-    raise AssertionError("tile-server does not declare wsi-serving-v2")
+if tile_env.get("WSI_SERVING_CONTRACT_VERSION") != "wsi-serving-v3":
+    raise AssertionError("tile-server does not declare wsi-serving-v3")
 if not re.fullmatch(r"[0-9a-f]{40}", tile_env.get("IMAGE_GIT_SHA", "")):
     raise AssertionError("tile-server does not declare a full immutable git SHA")
 tile_cors_origins = comma_separated_values(tile_env.get("CORS_ORIGINS", ""))
