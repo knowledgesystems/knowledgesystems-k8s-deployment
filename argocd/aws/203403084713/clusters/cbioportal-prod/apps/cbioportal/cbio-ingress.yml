@@ -63,3 +63,6 @@ spec:
     - hosts:
         - staging.cbioportal.org
       secretName: staging-cbioportal-cert
+    - hosts:
+        - webinar.cbioportal.org
+      secretName: webinar-cbioportal-cert
