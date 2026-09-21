@@ -52,3 +52,17 @@ spec:
                 name: slide-viewer-triage
                 port:
                   number: 80
+          - path: /wsi/annotations
+            pathType: Prefix
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+          - path: /wsi/agent
+            pathType: Prefix
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80

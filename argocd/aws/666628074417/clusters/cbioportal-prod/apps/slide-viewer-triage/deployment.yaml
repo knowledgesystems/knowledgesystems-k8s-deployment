@@ -126,6 +126,18 @@ spec:
                   name: cbioportal-wsi-auth
                   key: WSI_AUTH_PREVIOUS_SECRET
                   optional: true
+            # Shared annotation state is required in deployed environments;
+            # the value is supplied by portal-configuration's Lakebase secret.
+            - name: ANNOTATION_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: ANNOTATION_DATABASE_URL
+            - name: ANNOTATION_AUTH_ENABLED
+              value: "true"
+            # The agent is a separate child rollout and stays disabled here.
+            - name: WSI_AGENT_ENABLED
+              value: "false"
           volumeMounts:
             - name: slide-block-cache
               mountPath: /cache/slide-blocks
