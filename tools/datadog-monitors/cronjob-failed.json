@@ -1,0 +1,16 @@
+{
+  "name": "[k8s] CronJob failed — {{kube_cronjob.name}} ({{kube_cluster_name.name}})",
+  "type": "query alert",
+  "query": "max(last_15m):max:kubernetes_state.job.completion.failed{*} by {kube_cluster_name,kube_namespace,kube_cronjob} >= 1",
+  "message": ":x: **{{kube_cronjob.name}}** failed in `{{kube_cluster_name.name}}` / `{{kube_namespace.name}}`.\n\n{{#is_alert}}@slack-ks-alerts{{/is_alert}}\n{{#is_recovery}}:white_check_mark: {{kube_cronjob.name}} recovered.{{/is_recovery}}",
+  "tags": ["team:knowledgesystems", "service:cronjob"],
+  "options": {
+    "thresholds": { "critical": 1 },
+    "notify_no_data": false,
+    "renotify_interval": 0,
+    "require_full_window": false,
+    "new_group_delay": 300,
+    "timeout_h": 12,
+    "include_tags": true
+  }
+}
