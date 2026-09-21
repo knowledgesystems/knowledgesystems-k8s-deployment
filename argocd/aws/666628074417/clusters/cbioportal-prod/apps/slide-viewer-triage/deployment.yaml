@@ -77,8 +77,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Main 2266b1d is pinned to its immutable multi-architecture digest.
-          image: cbioportal/cbioportal-tile-server:main@sha256:cfc404f70253a047e760e55951afd5e6c6ebb68e192217356527a1b2db5732d9
+          # Annotation parent 1f71752 is pinned to its immutable multi-architecture digest.
+          image: cbioportal/cbioportal-tile-server:sha-1f71752660b78ae5aa4bc41b878d56543fe2ed90@sha256:b2ca5188415b44426aa8dd75015b936695bcb841835e6a81b6207097eee951cb
           imagePullPolicy: Always
           resources:
             requests:
