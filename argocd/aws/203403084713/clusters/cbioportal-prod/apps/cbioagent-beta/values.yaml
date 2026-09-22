@@ -62,7 +62,7 @@ global:
       # data-residency policy blocks `global.` Anthropic profiles.
       # Sonnet 5 is now subscribed on the Bedrock account and invokable.
       - name: BEDROCK_AWS_MODELS
-        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5"
+        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5,us.anthropic.claude-haiku-4-5-20251001-v1:0"
 
 librechat:
   existingSecretName: "librechat-credentials-env"
