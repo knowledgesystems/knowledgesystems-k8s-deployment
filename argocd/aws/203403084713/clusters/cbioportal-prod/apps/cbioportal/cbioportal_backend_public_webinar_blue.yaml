@@ -316,7 +316,7 @@ spec:
               name: cbioportal-frontend-config-volume
       dnsPolicy: ClusterFirst
       nodeSelector:
-        workload: cbio-dev
+        workload: cbioportal
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
@@ -325,7 +325,7 @@ spec:
         - effect: NoSchedule
           key: workload
           operator: Equal
-          value: cbio-dev
+          value: cbioportal
       volumes:
         - configMap:
             defaultMode: 420
