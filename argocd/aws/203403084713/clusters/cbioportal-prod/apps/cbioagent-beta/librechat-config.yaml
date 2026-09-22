@@ -102,8 +102,10 @@ data:
     mcpServers:
       cbioportal-database:
         type: streamable-http
-        # Trailing slash avoids FastMCP's 307 that LibreChat v0.8.7+ blocks as SSRF.
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp/
+        # No trailing slash: FastMCP 307-redirects the trailing-slash form to
+        # this one, and LibreChat blocks following that redirect as SSRF.
+        # Same fix as MSK-side (see portal-configuration#52).
+        url: http://cbioagent-clickhouse-mcp:80/db/mcp
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
