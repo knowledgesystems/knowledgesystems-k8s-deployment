@@ -1,8 +1,8 @@
 {
-  "name": "[k8s] CronJob has not succeeded recently (hourly tier)",
+  "name": "[k8s] CronJob not scheduled recently (hourly tier)",
   "type": "query alert",
-  "query": "max(last_2h):max:kubernetes_state.cronjob.duration_since_last_successful{kube_cluster_name:cbioportal-* AND kube_cronjob IN (k8s-aws-creds-manager-cronjob,aws-credentials-refresher)} by {kube_cluster_name,kube_cronjob} > 28800",
-  "message": ":warning: **{{kube_cronjob.name}}** in `{{kube_cluster_name.name}}` has not completed successfully in over 8 hours. These refresh AWS credentials — pods start failing auth once the current credentials expire.\n\n@slack-cBioPortal-cronjob-status",
+  "query": "max(last_2h):max:kubernetes_state.cronjob.duration_since_last_schedule{kube_cluster_name:cbioportal-* AND kube_cronjob IN (k8s-aws-creds-manager-cronjob,aws-credentials-refresher)} by {kube_cluster_name,kube_cronjob} > 28800",
+  "message": ":warning: **{{kube_cronjob.name}}** in `{{kube_cluster_name.name}}` has not been scheduled in over 8 hours. These refresh AWS credentials — pods start failing auth once the current credentials expire.\n\n@slack-cBioPortal-cronjob-status",
   "tags": [
     "team:knowledgesystems",
     "service:cronjob"

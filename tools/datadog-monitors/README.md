@@ -32,14 +32,17 @@ To update an existing monitor, `PUT` the same body to `/api/v1/monitor/<id>`.
 
 | File | Catches |
 |---|---|
-| `cronjob-failed.json` | Any CronJob's Job run failed — bad exit code, OOMKill, image pull error, `activeDeadlineSeconds` exceeded |
-| `cronjob-missed-run-frequent.json` | An AWS credential refresher stopped succeeding |
-| `cronjob-missed-run-daily.json` | The daily ClickHouse clone stopped succeeding |
-| `cronjob-missed-run-weekly.json` | The weekly public DB dump stopped succeeding |
+| `cronjob-failed.json` | A Job run failed — bad exit code, OOMKill, image pull error, `activeDeadlineSeconds` exceeded |
+| `cronjob-missed-run-frequent.json` | An AWS credential refresher stopped being scheduled |
+| `cronjob-missed-run-daily.json` | The daily ClickHouse clone stopped being scheduled |
+| `cronjob-missed-run-weekly.json` | The weekly public DB dump stopped being scheduled |
 
 The `missed-run` monitors matter more than the failure monitor: a CronJob that is
 suspended, deleted, or never scheduled emits no failure metric at all, so
 `cronjob-failed.json` alone would stay silent.
+
+The two split cleanly: `cronjob-failed` covers "it ran and broke", the `missed-run`
+tiers cover "it never ran".
 
 `cronjob-failed.json` picks up any new CronJob automatically. The `missed-run` monitors
 name theirs explicitly, because the threshold has to match each job's cadence — adding
@@ -55,16 +58,39 @@ own CronJobs and are deliberately excluded.
 The queries use the functional `AND` / `IN` syntax rather than comma-separated filters,
 because Datadog rejects symbolic boolean syntax (`,`, `!`) mixed with `IN`.
 
+`cronjob-failed.json` also filters on `kube_cronjob:*`. `kubernetes_state.job.*` is
+tagged with `kube_job` **or** `kube_cronjob` — a one-off Job carries no `kube_cronjob`
+tag, so without that filter every standalone Job in the cluster reports under an empty
+group and any old failed one holds the monitor in ALERT permanently.
+
 These monitors watch the cluster, not this repo, so they also cover CronJobs defined
 elsewhere — `cbioportal-public-db-dump-weekly` is managed from `portal-configuration`
 but still alerts here.
+
+## Agent version constraint
+
+The clusters pin agent **7.52.0**. `kubernetes_state.cronjob.duration_since_last_successful`
+— the metric that would express "has not *succeeded* recently" — only exists from agent
+**7.68.0**, so the `missed-run` monitors use
+`kubernetes_state.cronjob.duration_since_last_schedule` instead. That measures time
+since the CronJob controller last *created* a Job, not since one last succeeded.
+
+The practical difference: a CronJob that runs on time but fails every time satisfies
+these monitors. `cronjob-failed.json` is what catches that case. Upgrading the agent
+past 7.68.0 would let the `missed-run` tiers switch to the stricter metric, and the
+thresholds would carry over unchanged.
 
 ## Known behaviour
 
 `kubernetes_state.job.completion.failed` is a gauge on a Job object, and these CronJobs
 set `failedJobsHistoryLimit: 1`, so the failed Job lingers and the monitor stays in
-ALERT until that object is garbage collected. `timeout_h: 12` in `cronjob-failed.json`
-force-resolves it so the next failure alerts again.
+ALERT until that object is garbage collected — including for a failure from weeks ago.
+`timeout_h: 12` in `cronjob-failed.json` force-resolves it so the next failure alerts
+again.
+
+`find-failed-jobs.sh` lists the Job objects currently holding the monitor in ALERT, with
+their age and owning CronJob. Deleting a stale one clears it:
+`kubectl -n <ns> delete job <name>`.
 
 Kubernetes only observes a container's exit code. A script that swallows an error — no
 `set -e`, or a pipeline whose last command succeeds — exits 0, and no monitor here can

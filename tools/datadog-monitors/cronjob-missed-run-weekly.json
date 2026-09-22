@@ -1,8 +1,8 @@
 {
-  "name": "[k8s] CronJob has not succeeded recently (weekly tier)",
+  "name": "[k8s] CronJob not scheduled recently (weekly tier)",
   "type": "query alert",
-  "query": "max(last_1d):max:kubernetes_state.cronjob.duration_since_last_successful{kube_cluster_name:cbioportal-* AND kube_cronjob IN (cbioportal-public-db-dump-weekly)} by {kube_cluster_name,kube_cronjob} > 691200",
-  "message": ":warning: **{{kube_cronjob.name}}** in `{{kube_cluster_name.name}}` has not completed successfully in over 8 days. The weekly public DB dump feeds the download page — a stale dump is user-visible.\n\n@slack-cBioPortal-cronjob-status",
+  "query": "max(last_1d):max:kubernetes_state.cronjob.duration_since_last_schedule{kube_cluster_name:cbioportal-* AND kube_cronjob IN (cbioportal-public-db-dump-weekly)} by {kube_cluster_name,kube_cronjob} > 691200",
+  "message": ":warning: **{{kube_cronjob.name}}** in `{{kube_cluster_name.name}}` has not been scheduled in over 8 days. The weekly public DB dump feeds the download page — a stale dump is user-visible.\n\n@slack-cBioPortal-cronjob-status",
   "tags": [
     "team:knowledgesystems",
     "service:cronjob"

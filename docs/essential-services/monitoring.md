@@ -42,16 +42,22 @@ applied with the Datadog API — see the README there. All of them notify
 {.compact}
 | Monitor | Catches |
 |---|---|
-| `cronjob-failed` | Any CronJob's Job run failed — bad exit code, OOMKill, image pull error, deadline exceeded |
-| `cronjob-missed-run-frequent` | An AWS credential refresher stopped succeeding |
-| `cronjob-missed-run-daily` | The daily ClickHouse clone stopped succeeding |
-| `cronjob-missed-run-weekly` | The weekly public DB dump stopped succeeding |
+| `cronjob-failed` | A Job run failed — bad exit code, OOMKill, image pull error, deadline exceeded |
+| `cronjob-missed-run-frequent` | An AWS credential refresher stopped being scheduled |
+| `cronjob-missed-run-daily` | The daily ClickHouse clone stopped being scheduled |
+| `cronjob-missed-run-weekly` | The weekly public DB dump stopped being scheduled |
 
-The `missed-run` monitors matter more than the failure monitor: a CronJob that is
-suspended, deleted, or never scheduled emits no failure metric at all.
+The two split cleanly: `cronjob-failed` covers "it ran and broke", the `missed-run`
+tiers cover "it never ran" — a CronJob that is suspended or deleted emits no failure
+metric at all, so the failure monitor alone would stay silent.
 
 Every query is scoped to `kube_cluster_name:cbioportal-*`. The OncoKB clusters run
 their own CronJobs and are deliberately out of scope.
+
+> [!NOTE]
+> The `missed-run` monitors track time since the CronJob was last *scheduled*, not
+> since it last *succeeded*. The stricter metric needs agent 7.68.0 and the clusters
+> pin 7.52.0. See the README in `tools/datadog-monitors/`.
 
 [dd-cronjob-monitors]: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/tree/master/tools/datadog-monitors
 
