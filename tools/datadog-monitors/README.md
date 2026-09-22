@@ -1,8 +1,8 @@
 # Datadog CronJob monitors
 
-Alerting for the CronJobs running in the Knowledge Systems clusters. Datadog monitors
-live in the Datadog account rather than the cluster, so Argo does not apply these —
-create or update them with the Datadog API:
+Alerting for the CronJobs running in the `cbioportal-*` clusters. Datadog monitors live
+in the Datadog account rather than the cluster, so Argo does not apply these — create or
+update them with the Datadog API:
 
 ```sh
 export DD_API_KEY=... DD_APP_KEY=...
@@ -19,39 +19,45 @@ To update an existing monitor, `PUT` the same body to `/api/v1/monitor/<id>`.
 
 ## Prerequisites
 
-- The `@slack-ks-alerts` handle in each `message` is a placeholder. Replace it with the
-  real channel handle from the Datadog Slack integration before the first POST.
+- All four notify to `@slack-cBioPortal-cronjob-status`. The Datadog Slack integration
+  must be installed and that channel connected, or the handle silently resolves to
+  nothing.
 - No cluster-side change is needed. The Datadog Helm chart pinned in
   `apps/argocd/datadog.yaml` (3.109.2) defaults `datadog.kubeStateMetricsCore.enabled`
-  to true, none of the `apps/datadog/values.yaml` files override it, and every cluster
-  running a CronJob sets `clusterAgent.enabled: true` — so `kubernetes_state.job.*` and
+  to true, none of the `apps/datadog/values.yaml` files override it, and both cbioportal
+  clusters set `clusterAgent.enabled: true` — so `kubernetes_state.job.*` and
   `kubernetes_state.cronjob.*` are already being collected.
 
 ## What each monitor covers
 
 | File | Catches |
 |---|---|
-| `cronjob-failed.json` | A Job run failed, in any cluster — bad exit code, OOMKill, image pull error, `activeDeadlineSeconds` exceeded |
-| `cronjob-missed-run-frequent.json` | A 6-hourly AWS credential refresher stopped succeeding |
-| `cronjob-missed-run-daily.json` | A daily CronJob stopped succeeding |
+| `cronjob-failed.json` | Any CronJob's Job run failed — bad exit code, OOMKill, image pull error, `activeDeadlineSeconds` exceeded |
+| `cronjob-missed-run-frequent.json` | An AWS credential refresher stopped succeeding |
+| `cronjob-missed-run-daily.json` | The daily ClickHouse clone stopped succeeding |
 | `cronjob-missed-run-weekly.json` | The weekly public DB dump stopped succeeding |
 
 The `missed-run` monitors matter more than the failure monitor: a CronJob that is
 suspended, deleted, or never scheduled emits no failure metric at all, so
 `cronjob-failed.json` alone would stay silent.
 
-The `missed-run` monitors name CronJobs explicitly, because the threshold has to match
-each job's cadence. Adding a CronJob to a cluster means adding its name to the matching
-tier here.
+`cronjob-failed.json` picks up any new CronJob automatically. The `missed-run` monitors
+name theirs explicitly, because the threshold has to match each job's cadence — adding
+a CronJob means adding its name to the matching tier here.
 
 ## Scope
+
+Every query is scoped to `kube_cluster_name:cbioportal-*`, which covers
+`cbioportal-prod-a9438edd` (203403084713) and `cbioportal-prod-6acc6d70` (666628074417).
+The OncoKB clusters (`oncokb-research-444e139c`, `oncokb-production-3dfc6ef2`) run their
+own CronJobs and are deliberately excluded.
+
+The queries use the functional `AND` / `IN` syntax rather than comma-separated filters,
+because Datadog rejects symbolic boolean syntax (`,`, `!`) mixed with `IN`.
 
 These monitors watch the cluster, not this repo, so they also cover CronJobs defined
 elsewhere — `cbioportal-public-db-dump-weekly` is managed from `portal-configuration`
 but still alerts here.
-
-Clusters `397229547211` (cbioportal-dev) and `762447640649` (oncokb-dev) have no
-Datadog deployment, so nothing running there is covered.
 
 ## Known behaviour
 

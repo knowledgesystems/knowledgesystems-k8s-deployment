@@ -1,11 +1,17 @@
 {
   "name": "[k8s] CronJob has not succeeded recently (daily tier)",
   "type": "query alert",
-  "query": "max(last_4h):max:kubernetes_state.cronjob.duration_since_last_successful{kube_cronjob IN (cbioagent-clickhouse-clone-daily,oncokb-data-save-and-restart,oncokb-cronjob-public-daily-cronjob,oncokb-cronjob-daily-backup-token-stats)} by {kube_cluster_name,kube_cronjob} > 108000",
-  "message": ":warning: **{{kube_cronjob.name}}** in `{{kube_cluster_name.name}}` has not completed successfully in over 30 hours. It may have stopped being scheduled entirely — check the CronJob for `suspend: true` or a missed schedule.\n\n@slack-ks-alerts",
-  "tags": ["team:knowledgesystems", "service:cronjob"],
+  "query": "max(last_4h):max:kubernetes_state.cronjob.duration_since_last_successful{kube_cluster_name:cbioportal-* AND kube_cronjob IN (cbioagent-clickhouse-clone-daily)} by {kube_cluster_name,kube_cronjob} > 108000",
+  "message": ":warning: **{{kube_cronjob.name}}** in `{{kube_cluster_name.name}}` has not completed successfully in over 30 hours. It may have stopped being scheduled entirely — check the CronJob for `suspend: true` or a missed schedule.\n\n@slack-cBioPortal-cronjob-status",
+  "tags": [
+    "team:knowledgesystems",
+    "service:cronjob"
+  ],
   "options": {
-    "thresholds": { "critical": 108000, "warning": 93600 },
+    "thresholds": {
+      "critical": 108000,
+      "warning": 93600
+    },
     "notify_no_data": true,
     "no_data_timeframe": 360,
     "renotify_interval": 0,

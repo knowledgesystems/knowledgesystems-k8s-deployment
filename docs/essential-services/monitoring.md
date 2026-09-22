@@ -32,22 +32,26 @@ Notifications cannot see them.
 
 No cluster-side change is needed for the metrics. The pinned Datadog Helm chart
 defaults `datadog.kubeStateMetricsCore.enabled` to true, no `values.yaml` overrides it,
-and every cluster running a CronJob enables the Cluster Agent, so
-`kubernetes_state.job.*` and `kubernetes_state.cronjob.*` are already collected.
+and both cbioportal clusters enable the Cluster Agent, so `kubernetes_state.job.*` and
+`kubernetes_state.cronjob.*` are already collected.
 
 Monitor definitions live in [`tools/datadog-monitors/`][dd-cronjob-monitors] and are
-applied with the Datadog API — see the README there.
+applied with the Datadog API — see the README there. All of them notify
+`@slack-cBioPortal-cronjob-status`.
 
 {.compact}
 | Monitor | Catches |
 |---|---|
-| `cronjob-failed` | A Job run failed anywhere — bad exit code, OOMKill, image pull error, deadline exceeded |
-| `cronjob-missed-run-frequent` | A 6-hourly AWS credential refresher stopped succeeding |
-| `cronjob-missed-run-daily` | A daily CronJob stopped succeeding |
+| `cronjob-failed` | Any CronJob's Job run failed — bad exit code, OOMKill, image pull error, deadline exceeded |
+| `cronjob-missed-run-frequent` | An AWS credential refresher stopped succeeding |
+| `cronjob-missed-run-daily` | The daily ClickHouse clone stopped succeeding |
 | `cronjob-missed-run-weekly` | The weekly public DB dump stopped succeeding |
 
 The `missed-run` monitors matter more than the failure monitor: a CronJob that is
 suspended, deleted, or never scheduled emits no failure metric at all.
+
+Every query is scoped to `kube_cluster_name:cbioportal-*`. The OncoKB clusters run
+their own CronJobs and are deliberately out of scope.
 
 [dd-cronjob-monitors]: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/tree/master/tools/datadog-monitors
 
