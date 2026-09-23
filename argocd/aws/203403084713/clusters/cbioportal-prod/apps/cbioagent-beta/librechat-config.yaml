@@ -182,12 +182,17 @@ data:
       list:
         # Same agent offered under two models. cbioportal/librechat
         # v0.8.7-custom-v2+ runs the agent with preset.model when the spec's
-        # agent_id matches; the Sonnet spec reuses this one via YAML merge.
+        # agent_id matches, and specs with `modelOption` for the same agent
+        # are shown as a model picker in the chat input instead of in the
+        # header selector. The Sonnet spec reuses this one via YAML merge.
         - &betaSpec
           name: "cBioPortalChatBeta"
-          label: "cBioPortalChat · Haiku 4.5"
+          label: "cBioPortalChat - Explore cBioPortal data and links"
           default: true
-          description: "Fast answers. Explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
+          description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
+          modelOption:
+            label: "Haiku 4.5"
+            description: "Fast answers for most questions"
           placeholder: "How can I help you explore cBioPortal?"
           iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
           showIconInHeader: true
@@ -236,9 +241,10 @@ data:
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
         - <<: *betaSpec
           name: "cBioPortalChatBetaSonnet"
-          label: "cBioPortalChat · Sonnet 5"
           default: false
-          description: "Deeper reasoning for complex, multi-step analyses. Slower and uses more of your token limit."
+          modelOption:
+            label: "Sonnet 5"
+            description: "Deeper reasoning for complex analyses. Uses more of your limit."
           preset:
             <<: *betaPreset
             model: "us.anthropic.claude-sonnet-5"
