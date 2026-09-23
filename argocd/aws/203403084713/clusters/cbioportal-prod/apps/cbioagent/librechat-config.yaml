@@ -172,10 +172,19 @@ data:
       enforce: false
       prioritize: true
       list:
-        - name: "cBioPortalChat"
+        # Same agent offered under two models. cbioportal/librechat
+        # v0.8.7-custom-v2+ runs the agent with preset.model when the spec's
+        # agent_id matches, and specs with `modelOption` for the same agent
+        # are shown as a model picker in the chat input. The Sonnet spec
+        # reuses this one via YAML merge.
+        - &prodSpec
+          name: "cBioPortalChat"
           label: "cBioPortalChat - Explore cBioPortal data and links"
           default: true
           description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
+          modelOption:
+            label: "Haiku 4.5"
+            description: "Fast answers for most questions"
           placeholder: "How can I help you explore cBioPortal?"
           iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
           showIconInHeader: true
@@ -207,10 +216,20 @@ data:
                 - "Show me TP53 mutation frequency across all cancer types."
                 - "What are the most mutated genes in lung cancer?"
                 - "Compare low grade glioma by molecular subtype."
-          preset:
+          preset: &prodPreset
             endpoint: "agents"
             agent_id: "agent_9ZXhcwLIsROBQX0u4JS5F"
+            model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             temperature: 0
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
+        - <<: *prodSpec
+          name: "cBioPortalChatSonnet"
+          default: false
+          modelOption:
+            label: "Sonnet 5"
+            description: "Deeper reasoning for complex analyses. Uses more of your limit."
+          preset:
+            <<: *prodPreset
+            model: "us.anthropic.claude-sonnet-5"

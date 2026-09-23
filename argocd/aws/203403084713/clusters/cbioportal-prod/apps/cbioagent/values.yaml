@@ -3,6 +3,12 @@ global:
   librechat:
     existingSecretName: "librechat-credentials-env"
     existingSecretApiKey: OPENAI_API_KEY
+    # Direct `env:` entries override same-key entries from the
+    # librechat-credentials-env Secret (shared with beta). Haiku 4.5 backs
+    # the default modelSpec; `us.` prefix is required by data-residency policy.
+    env:
+      - name: BEDROCK_AWS_MODELS
+        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5,us.anthropic.claude-haiku-4-5-20251001-v1:0"
 
 deploymentAnnotations:
   secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
@@ -42,7 +48,9 @@ image:
   # cachePoint wiring (unlocks Bedrock prompt caching — see
   # model_parameters.promptCache: true on the prod agent records) +
   # ~860 upstream commits worth of fixes. Beta soaked 2026-08-07.
-  tag: "v0.8.7-custom-v1"
+  # v0.8.7-custom-v2: per-modelSpec model for one agent (Haiku 4.5 default /
+  # Sonnet 5 picker in the chat input) and per-response stats popover.
+  tag: "v0.8.7-custom-v2"
 
 mongodb:
   enabled: false
