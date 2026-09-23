@@ -103,7 +103,9 @@ image:
   # upstream commits worth of fixes). Once soaked on beta we roll to
   # prod under the same tag scheme. Keel still watches the tag digest;
   # a re-push to v0.8.7-custom-v1 would still roll this pod.
-  tag: "v0.8.7-custom-v1"
+  # custom-v2 adds per-modelSpec model selection for a single agent
+  # (Haiku 4.5 default / Sonnet 5 toggle in librechat-config.yaml).
+  tag: "v0.8.7-custom-v2"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
