@@ -96,16 +96,14 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  # Beta pinned to the v0.8.7 rebase for validation. Built from the
-  # v0.8.7-custom-v1 branch on cbioportal/librechat (rebase of our
-  # v0.8.3-rc1-custom-v9 customizations on top of upstream v0.8.7 —
-  # brings agents-lib 3.2.46 with Bedrock cachePoint wiring, ~860
-  # upstream commits worth of fixes). Once soaked on beta we roll to
-  # prod under the same tag scheme. Keel still watches the tag digest;
-  # a re-push to v0.8.7-custom-v1 would still roll this pod.
-  # custom-v2 adds per-modelSpec model selection for a single agent
-  # (Haiku 4.5 default / Sonnet 5 toggle in librechat-config.yaml).
-  tag: "v0.8.7-custom-v2"
+  # Built from the v0.8.7-custom-v3 branch on cbioportal/librechat: our
+  # customizations on upstream v0.8.7, including per-modelSpec model
+  # selection for a single agent (Haiku 4.5 default / Sonnet 5 picker in
+  # librechat-config.yaml), a `spec` field on the Agents API
+  # (/api/agents/v1/chat/completions) to pick that model per request, and
+  # cache token counts in the API's `usage`. Keel watches the tag digest,
+  # so a re-push to that branch rolls this pod.
+  tag: "v0.8.7-custom-v3"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
