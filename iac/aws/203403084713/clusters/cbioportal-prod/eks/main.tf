@@ -315,7 +315,7 @@ locals {
       }
     }
     cbio-api = {
-      instance_types = ["t4g.large"]
+      instance_types = ["t4g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       max_size       = 2
