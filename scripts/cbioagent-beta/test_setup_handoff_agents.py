@@ -48,10 +48,11 @@ Always provide a URL, even when not asked.
   followed by what the view shows.
 
   Keep each link on its own line.
-- **Both:** the table, then one sentence of context.
+- **Both:** Query results first, then URL(s).
 
 ## Strict Constraints
 Never invent study IDs.
+Cite the REST API base URL for code questions.
 """
 
 DB_TOOL = "sys__all__sys_mcp_cbioportal-database"
@@ -95,6 +96,13 @@ class StripNavigationTest(unittest.TestCase):
             "## Strict Constraints",
         ):
             self.assertIn(kept, stripped)
+
+    def test_removed_items_in_document_order(self):
+        section = "## Capability Selection\nRun Query, then Navigate, by default. Call navigate_to_study_view after every data answer.\n"
+        reordered = BASE_INSTRUCTIONS.replace(section, "") + "\n" + section
+        _, removed = m.strip_navigation(reordered)
+        self.assertEqual(removed[-1], "## Capability Selection")
+        self.assertTrue(removed[-2].startswith("item '- **Navigation only:**"))
 
     def test_missing_heading_fails(self):
         with self.assertRaisesRegex(ValueError, "Link First"):
@@ -184,6 +192,7 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertIn("## Query Workflow", data["instructions"])
         self.assertIn("You have only Query", data_md)
         self.assertIn("including the site root", data_md)
+        self.assertIn("https://www.cbioportal.org/api", data_md)
 
         self.assertEqual(nav["model"], m.SONNET)
         self.assertEqual(nav["tools"], [DB_TOOL, NAV_TOOL])
@@ -212,14 +221,33 @@ class SetupHandoffAgentsTest(unittest.TestCase):
             self.assertIn(heading, out)
         stripped, _ = m.strip_navigation(BASE_INSTRUCTIONS)
         self.assertIn(f"{len(BASE_INSTRUCTIONS.strip())} -> {len(stripped)} chars", out)
-        self.assertIn("still mentions Navigate (neutralized by data.md): 3. Surface study IDs for Navigate", out)
+        mentions = [ln.split("(data.md overrides): ", 1)[1] for ln in out.splitlines() if "data.md overrides" in ln]
+        self.assertEqual(
+            mentions,
+            [
+                "You have two capabilities: Query (data answers) and Navigate (links into cBioPortal).",
+                "3. Surface study IDs for Navigate. Pass them to Navigate Step 1.",
+                "- **Both:** Query results first, then URL(s).",
+                "Cite the REST API base URL for code questions.",
+            ],
+        )
+        removed_lines = [ln.strip() for ln in out.splitlines() if ln.startswith("  - ")]
+        self.assertEqual(
+            removed_lines,
+            [
+                "- ## Capability Selection",
+                "- ## Navigate Workflow",
+                "- ### Navigation Tools",
+                "- ### Link First",
+                "- item '- **Navigation only:** one line per link from navigate_to_pa'",
+            ],
+        )
         self.assertNotIn("removed from the unified prompt", run(self.db))
 
-    def test_managed_diff_unsets_removed_tenant(self):
-        desired = {"id": m.DATA_ID, "name": "n"}
-        self.assertEqual(m.managed_diff({"name": "n", "tenantId": "t1"}, desired), ({}, ["tenantId"]))
-        self.assertEqual(m.managed_diff({"name": "n", "tenantId": None}, desired), ({}, []))
-        self.assertEqual(m.managed_diff({"name": "n"}, {**desired, "tenantId": "t2"}), ({"tenantId": "t2"}, []))
+    def test_managed_diff_reports_only_changed_fields(self):
+        desired = {"id": m.DATA_ID, "name": "n", "model": m.HAIKU}
+        self.assertEqual(m.managed_diff({"name": "n", "model": m.HAIKU}, desired), {})
+        self.assertEqual(m.managed_diff({"name": "old", "model": m.HAIKU, "extra": 1}, desired), {"name": "n"})
 
     def test_explicit_null_tenant_is_unchanged(self):
         run(self.db)

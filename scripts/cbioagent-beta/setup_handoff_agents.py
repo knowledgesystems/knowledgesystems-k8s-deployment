@@ -44,6 +44,8 @@ NAV_SECTIONS = ("Capability Selection", "Navigate Workflow", "Link First")
 NAV_BRANCH_MARKER = "Navigation only:"
 NAV_TOOL_MARKERS = ("navigate_to_", "resolve_and_route", "get_studyviewfilter_options")
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
+# Lines left in the data agent's prompt that touch navigation or links; listed in the dry run for review.
+LINK_KEYWORDS = re.compile(r"navigate|link|url|cbioportal\.org", re.IGNORECASE)
 
 MANAGED_FIELDS = (
     "name",
@@ -94,7 +96,7 @@ def strip_navigation(instructions):
         for start, level in matches:
             end = next((i for i, lvl, _ in headings if i > start and lvl <= level), len(lines))
             drop.update(range(start, end))
-    removed = [lines[i].strip() for i, _, _ in headings if i in drop]
+    removed = [(i, lines[i].strip()) for i, _, _ in headings if i in drop]
 
     for start, line in enumerate(lines):
         if NAV_BRANCH_MARKER not in line or start in drop:
@@ -111,7 +113,7 @@ def strip_navigation(instructions):
                     break
             end += 1
         drop.update(range(start, end))
-        removed.append(f"item {line.strip()[:60]!r}")
+        removed.append((start, f"item {line.strip()[:60]!r}"))
 
     stripped = "\n".join(line for i, line in enumerate(lines) if i not in drop)
     stripped = re.sub(r"\n{3,}", "\n\n", stripped).strip()
@@ -119,7 +121,7 @@ def strip_navigation(instructions):
     leftovers = sorted({m for m in NAV_TOOL_MARKERS if m in stripped})
     if leftovers:
         raise ValueError(f"navigator tool names still present after stripping: {', '.join(leftovers)}")
-    return stripped, removed
+    return stripped, [text for _, text in sorted(removed)]
 
 
 def mcp_server_names(tools):
@@ -231,7 +233,7 @@ def build_agents(source):
         "base_chars": len(base_instructions),
         "stripped_chars": len(data_base),
         "data_chars": len(agents[1]["instructions"]),
-        "navigate_mentions": [ln.strip() for ln in data_base.splitlines() if "Navigate" in ln],
+        "link_mentions": [ln.strip() for ln in data_base.splitlines() if LINK_KEYWORDS.search(ln)],
     }
     return agents, report
 
@@ -244,8 +246,8 @@ def print_strip_report(report):
         f"  {report['base_chars']} -> {report['stripped_chars']} chars after stripping, "
         f"{report['data_chars']} with data.md"
     )
-    for line in report["navigate_mentions"]:
-        print(f"  still mentions Navigate (neutralized by data.md): {line[:100]}")
+    for line in report["link_mentions"]:
+        print(f"  still mentions navigation/links (data.md overrides): {line[:100]}")
 
 
 def agent_filter(agent_id, tenant_id):
@@ -258,20 +260,13 @@ def managed_values(desired):
 
 
 def managed_diff(existing, desired):
-    """Return ($set fields, $unset fields) that make `existing` match `desired`.
+    """Return the managed fields whose value in `existing` differs from `desired`.
 
-    Fields absent from `desired` (only tenantId can be) are compared as None and unset.
+    `existing` was found by {id, tenantId}, so its tenantId always matches. When the source agent's
+    tenantId changes, the agents are recreated under the new tenant; old copies are reported by
+    warn_other_tenants, not modified.
     """
-    to_set, to_unset = {}, []
-    for k in MANAGED_FIELDS:
-        want = desired.get(k)
-        if existing.get(k) == want:
-            continue
-        if want is None:
-            to_unset.append(k)
-        else:
-            to_set[k] = want
-    return to_set, to_unset
+    return {k: v for k, v in managed_values(desired).items() if existing.get(k) != v}
 
 
 def version_snapshot(desired, now):
@@ -301,16 +296,16 @@ def upsert_agent(db, desired, dry_run):
             return None
         return db.agents.insert_one(doc).inserted_id
 
-    to_set, to_unset = managed_diff(existing, desired)
-    if not to_set and not to_unset:
+    changed = managed_diff(existing, desired)
+    if not changed:
         print(f"unchanged {desired['id']}")
         return existing["_id"]
-    print(f"update {desired['id']}: {', '.join(sorted([*to_set, *to_unset]))}")
+    print(f"update {desired['id']}: {', '.join(sorted(changed))}")
     if not dry_run:
-        update = {"$set": {**to_set, "updatedAt": now}, "$push": {"versions": version_snapshot(desired, now)}}
-        if to_unset:
-            update["$unset"] = {k: "" for k in to_unset}
-        db.agents.update_one({"_id": existing["_id"]}, update)
+        db.agents.update_one(
+            {"_id": existing["_id"]},
+            {"$set": {**changed, "updatedAt": now}, "$push": {"versions": version_snapshot(desired, now)}},
+        )
     return existing["_id"]
 
 

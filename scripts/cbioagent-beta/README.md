@@ -15,7 +15,7 @@ Navigation goes to Sonnet because the benchmark shows it passes navigation quest
 - **data:** the unified prompt with its navigation parts removed, followed by [`prompts/data.md`](prompts/data.md) last, so the override wins. The removed parts are the `Capability Selection`, `Navigate Workflow` and `Link First` sections (each through its subsections) and the `Navigation only:` response branch; they are listed in `NAV_SECTIONS` / `NAV_BRANCH_MARKER` in the script. The script stops without writing anything if any of them is missing, or if `navigate_to_`, `resolve_and_route` or `get_studyviewfilter_options` survives the strip. When the unified prompt is restructured, update those constants and re-run. `data.md` also tells the data agent:
   - it has only the Query capability, so any step that feeds Navigate doesn't apply;
   - it has no navigator tools;
-  - it must never output any cbioportal.org URL, including the site root, except the "no studies match, browse the site" fallback;
+  - it must never output any cbioportal.org URL, including the site root. The two exceptions are the "no studies match, browse the site" fallback and the REST API base URL (`https://www.cbioportal.org/api`) for code-usage questions;
   - it must never copy a `url` from `list_studies`;
   - it should send link requests back through the router in a new message.
 
@@ -62,7 +62,7 @@ export MONGO_URI='mongodb://<user>:<pass>@localhost:27017/cBioAgent?authSource=a
    create agent_cbiobeta_data (us.anthropic.claude-haiku-4-5-20251001-v1:0, <n> tools, 0 edges)
    create agent_cbiobeta_navigation (us.anthropic.claude-sonnet-5, <n> tools, 0 edges)
    ```
-   A different line, such as `update ...` on a first run, or an exit mentioning `NAV_SECTIONS`, means stop and investigate. The dry run also prints what was removed from the data agent's copy of the unified prompt: each heading, the `Navigation only:` item, and the character counts. It then lists any remaining lines that mention Navigate, which `data.md` neutralizes. Read them to confirm nothing else still sends the data agent toward navigation. A `note: ... not touched` line means a copy of a managed id exists under a different tenantId; it's left alone.
+   A different line, such as `update ...` on a first run, or an exit mentioning `NAV_SECTIONS`, means stop and investigate. The dry run also prints what was removed from the data agent's copy of the unified prompt: each heading, the `Navigation only:` item, and the character counts. It then lists every remaining line that mentions navigate, link, url or cbioportal.org (case-insensitive), which `data.md` overrides. Read them to confirm nothing else still sends the data agent toward navigation. A `note: ... not touched` line means a copy of a managed id exists under a different tenantId; it's left alone.
 3. Apply: `./setup_handoff_agents.py`. Re-running is safe; unchanged agents print `unchanged`.
 
 After changing a file in `prompts/`, or the unified agent's instructions or tools, re-run steps 1–3 to update the three agents.
