@@ -62,13 +62,15 @@ The clone job's `DROP_QUERY_CACHE` env var is `"false"`. Set it to `"true"` only
 
 1. Confirm `docker manifest inspect cbioportal/mcp:beta` succeeds (built by cbioportal-mcp#158). This gates both the merge and the sync. Until it does, both the MCP pod and the clone's `fetch-sql` step fail to pull.
 2. Apply the grants above.
-3. Manually sync the `cbioagent-beta` Argo Application the first time **without prune**, with someone watching the sync. Check the diff first: it should only add the beta MCP, the clone job objects and the pointer ConfigMap, and modify `librechat-config-beta`. The beta MCP starts pointing at `cbioportal_public_librechat_beta_blue`, which doesn't exist yet, so beta database queries fail until step 4 finishes.
+3. Manually sync the `cbioagent-beta` Argo Application the first time **without prune**, with someone watching the sync. Check the diff first: it should only add the beta MCP, the clone job objects and the pointer ConfigMap, and modify `librechat-config-beta`. The beta MCP starts pointing at the seed `cbioportal_public_librechat_beta_blue`, which doesn't exist yet, so beta database queries fail until step 4 publishes a buffer. That's expected.
 4. Build the first buffer once instead of waiting for the schedule:
    ```sh
    kubectl -n default create job --from=cronjob/cbioagent-clickhouse-clone-daily-beta clone-beta-manual-$(date +%s)
    kubectl -n default logs -f job/<that job> --all-containers
    ```
-   The first run sees the seed buffer doesn't exist and builds into it (`bootstrapping into it` in the log).
+   The job always builds the color the pointer does *not* name, so the first run builds `cbioportal_public_librechat_beta_green` (the log says `does not exist yet (first run)`). It patches the pointer only after the whole build succeeds; a failed run leaves the pointer and the live buffer untouched.
+
+   Until the second run also builds `beta_blue`, an Argo sync that resets the pointer to its seed would point the MCP at a missing database. Re-run the job to recover.
 5. Verify the pointer and the MCP:
    ```sh
    kubectl -n default get configmap clickhouse-mcp-active-beta -o jsonpath='{.data.CLICKHOUSE_DATABASE}'

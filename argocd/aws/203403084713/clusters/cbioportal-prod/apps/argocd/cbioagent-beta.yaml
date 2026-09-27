@@ -18,13 +18,13 @@ spec:
         releaseName: cbioagent-beta
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent-beta/values.yaml
-  # Manual sync only. RespectIgnoreDifferences + ServerSideApply let the
-  # beta clone cron's patch on clickhouse-mcp-active-beta survive a sync
-  # (same pairing as cbioagent.yaml).
+  # Manual sync only. RespectIgnoreDifferences keeps the beta clone cron's
+  # patch on clickhouse-mcp-active-beta across a sync; that ConfigMap opts
+  # into ServerSideApply with its own sync-options annotation, so the rest
+  # of the app keeps client-side apply.
   syncPolicy:
     syncOptions:
       - RespectIgnoreDifferences=true
-      - ServerSideApply=true
   destination:
     namespace: default
     server: https://kubernetes.default.svc

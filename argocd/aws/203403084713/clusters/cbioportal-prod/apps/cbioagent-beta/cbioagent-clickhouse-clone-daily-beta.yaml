@@ -2,7 +2,9 @@
 # the active cBioPortal production color into a beta-only ping-pong buffer
 # (cbioportal_public_librechat_beta_{blue,green}), with LLM-prep SQL from the
 # `cbioportal/mcp:beta` image applied. Pod runs fetch-sql → clone →
-# patch-pointer; Reloader watches clickhouse-mcp-active-beta and rolls
+# patch-pointer. clone.sh always rebuilds the color the pointer doesn't name,
+# and patch-pointer runs only if clone.sh succeeds, so the MCP never reads a
+# half-built database. Reloader watches clickhouse-mcp-active-beta and rolls
 # cbioagent-clickhouse-mcp-beta when patch-pointer flips it.
 #
 # Isolation boundary: the Kubernetes objects are beta-named, the RBAC can only
@@ -11,20 +13,26 @@
 # from the image and run with the shared clickhouse-librechat-admin
 # credentials, scoped only by --database. A preflight scan aborts the job if
 # any file uses database-level DDL, a USE statement, a cross-database
-# EXCHANGE/RENAME, or names a prod database. That scan is a denylist, not a
-# sandbox: a file that evades it still runs with admin rights.
+# EXCHANGE/RENAME, or names a prod database; it matches after stripping
+# comments and string literals. That scan is a denylist, not a sandbox: a
+# file that evades it still runs with admin rights.
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: clickhouse-mcp-active-beta
   namespace: default
+  annotations:
+    # Server-side apply for this object only, so Argo builds the patch from
+    # managed fields and skips the ignored /data/CLICKHOUSE_DATABASE.
+    argocd.argoproj.io/sync-options: ServerSideApply=true
 data:
-  # Initial seed. When the pointed-at buffer doesn't exist, clone.sh builds
-  # into it instead of the other color, so the first run fills beta_blue and
-  # later runs ping-pong. If a sync ever resets this value over the cron's
-  # patch, the MCP reads beta_blue (present after the first run, at most one
-  # build old) and the next run flips again.
+  # Initial seed. clone.sh always builds the color the pointer does not
+  # name and patches the pointer only after a full build, so the first run
+  # builds beta_green; until it succeeds the MCP points at a missing
+  # database and beta database queries fail. If a sync ever resets this
+  # value over the cron's patch, the MCP reads beta_blue: missing until the
+  # second run, then at most one build old.
   CLICKHOUSE_DATABASE: cbioportal_public_librechat_beta_blue
 ---
 apiVersion: v1
@@ -77,6 +85,47 @@ data:
         fi
       done
     }
+    # Single-value query. Aborts on a client error instead of treating empty
+    # output as an answer (a pipe into tr would hide the exit status).
+    ch_scalar() {
+      _out=$(clickhouse client $CH_FLAGS --query "$1") || {
+        log "FAIL: clickhouse exited $? for: $1" >&2; return 1; }
+      printf '%s' "$_out" | tr -d '[:space:]'
+    }
+    # Prints the file as one lowercase line per ';'-separated statement,
+    # with comments removed, string literals emptied, identifier quotes
+    # dropped, whitespace collapsed and no spaces around '.'. Prints
+    # __unterminated__ if the file ends inside a string or comment.
+    normalize_sql() {
+      awk '
+        { n = length($0); i = 1; out = ""
+          while (i <= n) {
+            c = substr($0, i, 1); d = substr($0, i, 2)
+            if (st == 0) {
+              if (d == "--") { st = 4; break }
+              if (d == "/*") { st = 5; out = out " "; i += 2; continue }
+              if (c == "\047") { st = 1; out = out "\047" }
+              else if (c == "\"") st = 2
+              else if (c == "`") st = 3
+              else out = out c
+            } else if (st == 1) {
+              if (c == "\\") { i += 2; continue }
+              if (c == "\047") {
+                if (substr($0, i + 1, 1) == "\047") { i += 2; continue }
+                st = 0; out = out "\047"
+              }
+            } else if (st == 2) { if (c == "\"") st = 0; else out = out c }
+            else if (st == 3) { if (c == "`") st = 0; else out = out c }
+            else if (st == 5 && d == "*/") { st = 0; i += 2; continue }
+            i++
+          }
+          if (st == 4) st = 0
+          printf "%s ", out
+        }
+        END { print ""; if (st != 0) print ";__unterminated__" }
+      ' "$1" | tr 'A-Z' 'a-z' | tr -s '[:space:]' ' ' \
+        | sed 's/ *\. */./g' | tr ';' '\n' | sed 's/^ *//'
+    }
     apply_sql() {
       for f in "$@"; do
         log "  → ${f#${SQL_DIR}/}"
@@ -97,21 +146,23 @@ data:
       FINAL_SQL=$(list_sql "${SQL_DIR}"/final/*.sql)
     fi
     # The files run with admin credentials scoped only by --database, so
-    # refuse any that could reach outside the target buffer. Matching is
-    # case-insensitive and fails closed (a hit in a comment also aborts).
-    #   Raw lines: database-level DDL, or any prod name (the prod LLM
-    #   buffers, or the cBioPortal source colors).
-    #   Statements (-- comments stripped, split on ';'): a bare USE <db>, and
-    #   EXCHANGE/RENAME with a db-qualified operand. Unqualified
+    # refuse any that could reach outside the target buffer. Fails closed:
+    #   Raw lines (so names hidden in strings or comments count too):
+    #   database-level DDL, or any prod name (the prod LLM buffers or the
+    #   cBioPortal source colors).
+    #   Normalized statements (normalize_sql): the same, plus any USE and
+    #   any EXCHANGE/RENAME with a db-qualified operand. Unqualified
     #   EXCHANGE TABLES a AND b stays inside --database and is allowed.
-    FORBIDDEN_LINE='(drop|rename|attach|detach|undrop|truncate)[[:space:]]+database|cbioportal_public_librechat_(blue|green)|cbioportal_public_(blue|green)'
-    FORBIDDEN_STMT='^[[:space:]]*use[[:space:]]+[[:alnum:]_`"]+[[:space:]]*$|(exchange[[:space:]]+(tables|dictionaries)|rename[[:space:]]+(table|dictionary))[^.;]*[[:alnum:]_`"]\.[[:alnum:]_`"]'
+    PROD_NAMES='cbioportal_public_librechat_(blue|green)|cbioportal_public_(blue|green)'
+    DB_DDL='(drop|rename|attach|detach|undrop|truncate)[[:space:]]+database'
+    FORBIDDEN_LINE="${DB_DDL}|${PROD_NAMES}"
+    FORBIDDEN_STMT="(^| )${DB_DDL}( |\$)|^use( |\$)|^(exchange|rename) .*[[:alnum:]_]\.[[:alnum:]_]|__unterminated__|${PROD_NAMES}"
     ALL_SQL="$PORTABLE_SQL $PORTAL_SQL $FINAL_SQL"
     BAD=0
     for f in $ALL_SQL; do
       HITS=$( { grep -Ein "$FORBIDDEN_LINE" "$f" || true
-                sed 's/--.*$//' "$f" | tr '\n' ' ' | tr ';' '\n' \
-                  | grep -Ei "$FORBIDDEN_STMT" | sed 's/^/stmt:/' || true; } )
+                normalize_sql "$f" | grep -E "$FORBIDDEN_STMT" \
+                  | sed 's/^/stmt: /' || true; } )
       if [ -n "$HITS" ]; then
         BAD=1
         log "FAIL: forbidden SQL in ${f#${SQL_DIR}/}:"
@@ -122,7 +173,7 @@ data:
     log "preflight ok: $(echo $ALL_SQL | wc -w | tr -d ' ') SQL files"
 
     # 1) Production color.
-    PROD_COLOR=$(clickhouse client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'" | tr -d '[:space:]')
+    PROD_COLOR=$(ch_scalar "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'") || exit 1
     if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
       log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
     fi
@@ -130,23 +181,25 @@ data:
     log "production color=$PROD_COLOR, source=$SRC_DB"
 
     # 2) Active beta buffer (read from the ConfigMap mounted at /active).
-    #    Falls through to bootstrap mode if value is unrecognised. If the
-    #    pointer names a beta buffer that doesn't exist yet (first run
-    #    after the seed), build into that buffer so the MCP isn't left
-    #    pointing at a missing database; nothing can be reading it.
+    #    Always build the other color, so the database the MCP reads is
+    #    never dropped or half-built; patch-pointer publishes the new one
+    #    only after this script succeeds. An unrecognised pointer value
+    #    builds blue. If the active buffer doesn't exist (first run), the
+    #    MCP keeps failing until this build is published.
     ACTIVE_DB="$(cat /active/CLICKHOUSE_DATABASE 2>/dev/null || echo '')"
     case "$ACTIVE_DB" in
-      "${DST_PREFIX}blue")  ACTIVE_COLOR="blue";  TARGET_COLOR="green" ;;
-      "${DST_PREFIX}green") ACTIVE_COLOR="green"; TARGET_COLOR="blue"  ;;
-      *) log "active='${ACTIVE_DB}' — bootstrapping into ${DST_PREFIX}blue"
-         ACTIVE_COLOR=""; TARGET_COLOR="blue" ;;
+      "${DST_PREFIX}blue")  TARGET_COLOR="green" ;;
+      "${DST_PREFIX}green") TARGET_COLOR="blue"  ;;
+      *) log "active='${ACTIVE_DB}' is not a beta buffer"
+         ACTIVE_DB=""; TARGET_COLOR="blue" ;;
     esac
-    if [ -n "$ACTIVE_COLOR" ]; then
-      ACTIVE_EXISTS=$(clickhouse client $CH_FLAGS --query "EXISTS DATABASE ${ACTIVE_DB}" | tr -d '[:space:]')
-      if [ "$ACTIVE_EXISTS" != "1" ]; then
-        log "active=${ACTIVE_DB} does not exist — bootstrapping into it"
-        TARGET_COLOR="$ACTIVE_COLOR"
-      fi
+    if [ -n "$ACTIVE_DB" ]; then
+      ACTIVE_EXISTS=$(ch_scalar "EXISTS DATABASE ${ACTIVE_DB}") || exit 1
+      case "$ACTIVE_EXISTS" in
+        1) ;;
+        0) log "active=${ACTIVE_DB} does not exist yet (first run); beta MCP queries fail until this build is published" ;;
+        *) log "FAIL: EXISTS DATABASE ${ACTIVE_DB} returned '${ACTIVE_EXISTS}'"; exit 1 ;;
+      esac
     fi
     DST_DB="${DST_PREFIX}${TARGET_COLOR}"
     case "$DST_DB" in
@@ -180,8 +233,8 @@ data:
       i=$((i+1))
       log "  [$i/$N] $t"
       clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
-      SRC_ROWS=$(clickhouse client $CH_FLAGS --query "SELECT count() FROM ${SRC_DB}.${t}" | tr -d '[:space:]')
-      DST_ROWS=$(clickhouse client $CH_FLAGS --query "SELECT count() FROM ${DST_DB}.${t}" | tr -d '[:space:]')
+      SRC_ROWS=$(ch_scalar "SELECT count() FROM ${SRC_DB}.${t}") || exit 1
+      DST_ROWS=$(ch_scalar "SELECT count() FROM ${DST_DB}.${t}") || exit 1
       if [ -z "$SRC_ROWS" ] || [ "$SRC_ROWS" != "$DST_ROWS" ]; then
         log "FAIL: ${t} has ${DST_ROWS:-?} rows in ${DST_DB}, ${SRC_ROWS:-?} in ${SRC_DB}"
         exit 1
