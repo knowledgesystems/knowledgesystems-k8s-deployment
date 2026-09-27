@@ -47,8 +47,6 @@ spec:
               value: cbioportal-navigator
             - name: OTEL_SERVICE_NAME
               value: cbioportal-navigator
-            - name: DD_VERSION
-              value: latest
       nodeSelector:
         workload: "cbioagent"
       tolerations:
