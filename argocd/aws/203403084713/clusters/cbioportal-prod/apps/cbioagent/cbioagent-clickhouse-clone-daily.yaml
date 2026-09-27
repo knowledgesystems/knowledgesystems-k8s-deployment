@@ -119,14 +119,12 @@ data:
     #    (CBIOPORTAL_MCP_QUERY_CACHE_ENABLED, cbioportal-mcp#152) is not
     #    invalidated by the buffer swap, so an entry cached while reading
     #    the old buffer could otherwise be served after the MCP moves to
-    #    ${DST_DB}. The cache is per replica: try every replica of the
-    #    'default' cluster, then this one. Best effort — a failure here
-    #    must not block the daily refresh; stale entries still expire
-    #    within the MCP's TTL cap (1h).
-    if clickhouse client $CH_FLAGS --query "SYSTEM DROP QUERY CACHE ON CLUSTER 'default'" >/dev/null 2>&1; then
-      log "dropped query cache on cluster 'default'"
-    elif clickhouse client $CH_FLAGS --query "SYSTEM DROP QUERY CACHE"; then
-      log "dropped query cache on the connected replica"
+    #    ${DST_DB}. Best effort — a failure here must not block the daily
+    #    refresh. Pods still on the old buffer can re-cache results until
+    #    the switch completes, so the stale window is (switch latency + up
+    #    to 1h, the MCP's TTL cap).
+    if clickhouse client $CH_FLAGS --query "SYSTEM DROP QUERY CACHE"; then
+      log "dropped query cache"
     else
       log "WARN: SYSTEM DROP QUERY CACHE failed; cached results expire within the MCP TTL"
     fi
