@@ -231,14 +231,20 @@ data:
             agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             thinking: false
-            maxOutputTokens: 4096
+            # Per model call; with adaptive thinking (Sonnet) the thinking
+            # and the answer share this budget, so keep headroom to avoid
+            # truncated answers and malformed tool-call JSON.
+            maxOutputTokens: 8192
             temperature: 0
-            # Bedrock prompt caching. On the Agents endpoint the request
-            # body's model_parameters win; without this flag the ~40k-token
-            # system+tools context is re-billed as fresh input every turn.
-            # With it, subsequent turns within cache TTL cost 0.1× input
-            # rate. Beta canary before flipping the prod modelSpec on 203
-            # and the four MSK modelSpecs on 666.
+            # NOTE: on LibreChat v0.8.7-custom-v3 the Agents endpoint's
+            # compactAgentsSchema strips preset keys, so this flag is not
+            # what enables caching. Bedrock prompt caching is on because
+            # LibreChat defaults promptCache to true for model IDs
+            # containing "claude" (packages/data-provider/src/bedrock.ts
+            # :497-504). Likewise thinking/effort/maxOutputTokens in these
+            # presets take effect only once the LibreChat patch
+            # (polly/spec-agent-params, PR to cBioPortal/LibreChat) ships
+            # in a new image tag.
             promptCache: true
             modelLabel: "cBioPortalChat"
             greeting: |
