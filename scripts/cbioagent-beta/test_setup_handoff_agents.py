@@ -21,7 +21,7 @@ import setup_handoff_agents as m
 BASE_INSTRUCTIONS = """# cBioPortalChat
 
 ## Overview
-You answer questions about cBioPortal data and build links into cBioPortal.
+You have two capabilities: Query (data answers) and Navigate (links into cBioPortal).
 
 ## Capability Selection
 Run Query, then Navigate, by default. Call navigate_to_study_view after every data answer.
@@ -29,6 +29,7 @@ Run Query, then Navigate, by default. Call navigate_to_study_view after every da
 ## Query Workflow
 1. Call list_studies to find candidate studies.
 2. Use run_query for counts and frequencies.
+3. Surface study IDs for Navigate. Pass them to Navigate Step 1.
 
 ## Navigate Workflow
 Call resolve_and_route first, then get_studyviewfilter_options when filtering.
@@ -74,7 +75,11 @@ def snapshot(db):
 
 class StripNavigationTest(unittest.TestCase):
     def test_removes_navigation_sections_and_branch(self):
-        stripped = m.strip_navigation(BASE_INSTRUCTIONS)
+        stripped, removed = m.strip_navigation(BASE_INSTRUCTIONS)
+        self.assertEqual(
+            removed[:4], ["## Capability Selection", "## Navigate Workflow", "### Navigation Tools", "### Link First"]
+        )
+        self.assertTrue(removed[4].startswith("item '- **Navigation only:**"))
         for heading in ("## Capability Selection", "## Navigate Workflow", "### Navigation Tools", "### Link First"):
             self.assertNotIn(heading, stripped)
         self.assertNotIn("Navigation only:", stripped)
@@ -177,6 +182,8 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         for heading in ("Capability Selection", "Navigate Workflow", "Link First", "Navigation only:"):
             self.assertNotIn(heading, data["instructions"])
         self.assertIn("## Query Workflow", data["instructions"])
+        self.assertIn("You have only Query", data_md)
+        self.assertIn("including the site root", data_md)
 
         self.assertEqual(nav["model"], m.SONNET)
         self.assertEqual(nav["tools"], [DB_TOOL, NAV_TOOL])
@@ -198,6 +205,43 @@ class SetupHandoffAgentsTest(unittest.TestCase):
             self.assertEqual(len(a["versions"]), 1)
             self.assertNotIn("author", a["versions"][0])
             self.assertEqual(a["versions"][0]["model_parameters"], a["model_parameters"])
+
+    def test_dry_run_prints_strip_report(self):
+        out = run(self.db, "--dry-run")
+        for heading in ("## Capability Selection", "## Navigate Workflow", "### Link First", "Navigation only:"):
+            self.assertIn(heading, out)
+        stripped, _ = m.strip_navigation(BASE_INSTRUCTIONS)
+        self.assertIn(f"{len(BASE_INSTRUCTIONS.strip())} -> {len(stripped)} chars", out)
+        self.assertIn("still mentions Navigate (neutralized by data.md): 3. Surface study IDs for Navigate", out)
+        self.assertNotIn("removed from the unified prompt", run(self.db))
+
+    def test_managed_diff_unsets_removed_tenant(self):
+        desired = {"id": m.DATA_ID, "name": "n"}
+        self.assertEqual(m.managed_diff({"name": "n", "tenantId": "t1"}, desired), ({}, ["tenantId"]))
+        self.assertEqual(m.managed_diff({"name": "n", "tenantId": None}, desired), ({}, []))
+        self.assertEqual(m.managed_diff({"name": "n"}, {**desired, "tenantId": "t2"}), ({"tenantId": "t2"}, []))
+
+    def test_explicit_null_tenant_is_unchanged(self):
+        run(self.db)
+        self.db.agents.update_many({"id": {"$in": list(m.MANAGED_IDS)}}, {"$set": {"tenantId": None}})
+        self.assertEqual(run(self.db).count("unchanged "), 3)
+
+    def test_tenant_change_leaves_old_copies_reported(self):
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tenantId": "t1"}})
+        run(self.db)
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$unset": {"tenantId": ""}})
+        out = run(self.db)
+        self.assertEqual(out.count("\ncreate "), 3)
+        self.assertEqual(out.count("tenantId='t1'; not touched"), 3)
+        self.assertEqual(self.db.agents.count_documents({"id": {"$in": list(m.MANAGED_IDS)}, "tenantId": "t1"}), 3)
+
+    def test_delete_requires_source_agent(self):
+        run(self.db)
+        before = snapshot(self.db)
+        with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+            run(self.db, "--delete", "--source-agent", "agent_missing")
+        self.assertIn("agent_missing not found", str(ctx.exception.code))
+        self.assertEqual(snapshot(self.db), before)
 
     def test_rerun_is_idempotent(self):
         run(self.db)

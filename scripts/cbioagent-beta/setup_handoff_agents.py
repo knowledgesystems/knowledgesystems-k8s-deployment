@@ -77,7 +77,10 @@ def is_block_start(line, indent):
 
 
 def strip_navigation(instructions):
-    """Return `instructions` without the NAV_SECTIONS sections and the NAV_BRANCH_MARKER item."""
+    """Remove the NAV_SECTIONS sections and the NAV_BRANCH_MARKER item from `instructions`.
+
+    Returns (stripped text, headings/items removed).
+    """
     if NAV_BRANCH_MARKER not in instructions:
         raise ValueError(f"marker {NAV_BRANCH_MARKER!r} not found")
     lines = instructions.splitlines()
@@ -91,6 +94,7 @@ def strip_navigation(instructions):
         for start, level in matches:
             end = next((i for i, lvl, _ in headings if i > start and lvl <= level), len(lines))
             drop.update(range(start, end))
+    removed = [lines[i].strip() for i, _, _ in headings if i in drop]
 
     for start, line in enumerate(lines):
         if NAV_BRANCH_MARKER not in line or start in drop:
@@ -107,13 +111,15 @@ def strip_navigation(instructions):
                     break
             end += 1
         drop.update(range(start, end))
+        removed.append(f"item {line.strip()[:60]!r}")
 
     stripped = "\n".join(line for i, line in enumerate(lines) if i not in drop)
     stripped = re.sub(r"\n{3,}", "\n\n", stripped).strip()
+    # Checked here, before data.md is appended: data.md names these tools to forbid them.
     leftovers = sorted({m for m in NAV_TOOL_MARKERS if m in stripped})
     if leftovers:
         raise ValueError(f"navigator tool names still present after stripping: {', '.join(leftovers)}")
-    return stripped
+    return stripped, removed
 
 
 def mcp_server_names(tools):
@@ -135,7 +141,7 @@ def build_agents(source):
     if "<<" in router_prompt:
         sys.exit("prompts/router.md has an unreplaced <<PLACEHOLDER>>")
     try:
-        data_base = strip_navigation(base_instructions)
+        data_base, removed = strip_navigation(base_instructions)
     except ValueError as err:
         sys.exit(
             f"cannot build the data agent's instructions from {source['id']}: {err}. "
@@ -200,9 +206,10 @@ def build_agents(source):
             "description": "Builds cBioPortal links and study-view navigation.",
             "instructions": f"{read_prompt('navigation')}\n\n{base_instructions}".strip(),
             "model": SONNET,
-            # No temperature: Anthropic's API rejects temperature/top_p/top_k on Sonnet 5 with a 400
-            # (sampling parameters are removed on that model), and this LibreChat version does not
-            # drop them for Sonnet 5 before calling Bedrock.
+            # No temperature. Anthropic's API rejects temperature/top_p/top_k on Sonnet 5 with a 400
+            # (sampling parameters are removed on that model), and with thinking enabled it also
+            # rejects any temperature other than 1 on every model. This LibreChat version drops
+            # neither for Sonnet 5 before calling Bedrock, so the key must stay absent.
             "model_parameters": {
                 "model": SONNET,
                 "thinking": True,
@@ -219,7 +226,26 @@ def build_agents(source):
         agent["mcpServerNames"] = mcp_server_names(agent["tools"])
         if source.get("tenantId") is not None:
             agent["tenantId"] = source["tenantId"]
-    return agents
+    report = {
+        "removed": removed,
+        "base_chars": len(base_instructions),
+        "stripped_chars": len(data_base),
+        "data_chars": len(agents[1]["instructions"]),
+        "navigate_mentions": [ln.strip() for ln in data_base.splitlines() if "Navigate" in ln],
+    }
+    return agents, report
+
+
+def print_strip_report(report):
+    print("data agent instructions, removed from the unified prompt:")
+    for entry in report["removed"]:
+        print(f"  - {entry}")
+    print(
+        f"  {report['base_chars']} -> {report['stripped_chars']} chars after stripping, "
+        f"{report['data_chars']} with data.md"
+    )
+    for line in report["navigate_mentions"]:
+        print(f"  still mentions Navigate (neutralized by data.md): {line[:100]}")
 
 
 def agent_filter(agent_id, tenant_id):
@@ -229,6 +255,23 @@ def agent_filter(agent_id, tenant_id):
 
 def managed_values(desired):
     return {k: desired[k] for k in MANAGED_FIELDS if k in desired}
+
+
+def managed_diff(existing, desired):
+    """Return ($set fields, $unset fields) that make `existing` match `desired`.
+
+    Fields absent from `desired` (only tenantId can be) are compared as None and unset.
+    """
+    to_set, to_unset = {}, []
+    for k in MANAGED_FIELDS:
+        want = desired.get(k)
+        if existing.get(k) == want:
+            continue
+        if want is None:
+            to_unset.append(k)
+        else:
+            to_set[k] = want
+    return to_set, to_unset
 
 
 def version_snapshot(desired, now):
@@ -258,20 +301,27 @@ def upsert_agent(db, desired, dry_run):
             return None
         return db.agents.insert_one(doc).inserted_id
 
-    changed = {k: v for k, v in managed_values(desired).items() if existing.get(k) != v}
-    if not changed:
+    to_set, to_unset = managed_diff(existing, desired)
+    if not to_set and not to_unset:
         print(f"unchanged {desired['id']}")
         return existing["_id"]
-    print(f"update {desired['id']}: {', '.join(sorted(changed))}")
+    print(f"update {desired['id']}: {', '.join(sorted([*to_set, *to_unset]))}")
     if not dry_run:
-        db.agents.update_one(
-            {"_id": existing["_id"]},
-            {
-                "$set": {**changed, "updatedAt": now},
-                "$push": {"versions": version_snapshot(desired, now)},
-            },
-        )
+        update = {"$set": {**to_set, "updatedAt": now}, "$push": {"versions": version_snapshot(desired, now)}}
+        if to_unset:
+            update["$unset"] = {k: "" for k in to_unset}
+        db.agents.update_one({"_id": existing["_id"]}, update)
     return existing["_id"]
+
+
+def warn_other_tenants(db, tenant_id):
+    """Report managed ids under another tenant: left behind if the source agent's tenantId changed."""
+    for doc in db.agents.find({"id": {"$in": list(MANAGED_IDS)}}, {"id": 1, "tenantId": 1}):
+        if doc.get("tenantId") != tenant_id:
+            print(
+                f"note: {doc['id']} also exists with tenantId={doc.get('tenantId')!r}; not touched. "
+                "If it is stale, remove it by hand."
+            )
 
 
 def acl_key(entry):
@@ -361,15 +411,21 @@ def main():
     print(f"database {db.name}{' (dry run)' if args.dry_run else ''}")
 
     source = db.agents.find_one({"id": args.source_agent})
-    if args.delete:
-        delete_agents(db, source.get("tenantId") if source else None, args.dry_run)
-        return
     if source is None:
+        # --delete needs it too: its tenantId scopes which copies of the managed ids are removed.
         sys.exit(f"source agent {args.source_agent} not found in {db.name}.agents")
+    tenant_id = source.get("tenantId")
+    if args.delete:
+        delete_agents(db, tenant_id, args.dry_run)
+        return
 
-    for desired in build_agents(source):
+    agents, report = build_agents(source)
+    if args.dry_run:
+        print_strip_report(report)
+    for desired in agents:
         oid = upsert_agent(db, desired, args.dry_run)
         sync_acl(db, source["_id"], desired["id"], oid, args.dry_run)
+    warn_other_tenants(db, tenant_id)
 
 
 if __name__ == "__main__":
