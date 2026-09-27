@@ -179,8 +179,10 @@ data:
     # agent_cbiobeta_navigation (Sonnet 5, links and study-view navigation).
     # Those agent records are created by
     # scripts/cbioagent-beta/setup_handoff_agents.py, which must run before
-    # this spec points at them. preset.model and the preset parameters apply
-    # to the router only; each handoff target uses its own agent record.
+    # this spec points at them. Of the preset, only `model` reaches an agent
+    # (the router); generation parameters (thinking, max output tokens,
+    # temperature, promptCache) come from each agent record's
+    # model_parameters, which the script sets.
     modelSpecs:
       enforce: false
       prioritize: true
@@ -225,9 +227,6 @@ data:
             agent_id: "agent_cbiobeta_router"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             temperature: 0
-            # Bedrock prompt caching for the router. The data and navigation
-            # agents set promptCache in their own model_parameters, since
-            # handoff targets don't inherit the preset.
             promptCache: true
             modelLabel: "cBioPortalChat"
             greeting: |

@@ -4,7 +4,7 @@ Beta cBioPortalChat routes each question through LibreChat's built-in agent hand
 
 ```
 cBioPortalChatBeta modelSpec
-  -> agent_cbiobeta_router      Haiku 4.5, no MCP tools, maxTokens 256
+  -> agent_cbiobeta_router      Haiku 4.5, no MCP tools, thinking off, maxOutputTokens 256
        -> agent_cbiobeta_navigation  Sonnet 5, all tools of the unified agent  (links, study view, plots, cohorts)
        -> agent_cbiobeta_data        Haiku 4.5, cbioportal-database MCP only    (text / table answers)
 ```
@@ -15,7 +15,16 @@ Navigation goes to Sonnet because the benchmark shows it passes navigation quest
 
 - Handoffs are the `edges` array on the router's agent record (`{from, to, edgeType: "handoff", description}`). LibreChat gives the router one tool per edge, `lc_transfer_to_<agent id>`, with `description` as the tool description. No `librechat.yaml` change is needed: edge discovery isn't gated by an `agents.capabilities` entry (only the deprecated `agent_ids` chain uses `chain`), and beta sets no `capabilities` list, so it gets the defaults anyway.
 - A handoff target must exist, and the user must have VIEW on it through `aclentries`. On the Agents API (`/api/agents/v1/...`) that is `remoteAgent` VIEW. The script gives each new agent the same `aclentries` rows as the unified agent.
-- The target receives the whole message history, including tool calls and results from earlier turns. The transfer call itself is filtered out. It runs with its **own** tools, instructions and `model_parameters`. Only the router picks up the modelSpec preset (model, temperature, promptCache), so each specialist sets `promptCache: true` on its own record.
+- The target receives the whole message history, including tool calls and results from earlier turns. The transfer call itself is filtered out. It runs with its **own** tools, instructions and `model_parameters`.
+- Of the modelSpec preset, only `model` reaches an agent (the router), through the fork's spec override. `compactAgentsSchema` strips `temperature`, `promptCache`, `thinking`, `effort` and max-token settings. So the script sets every generation parameter in each record's `model_parameters`. Key names match `bedrockInputParser` at `7430a52`:
+
+  | Agent | `model_parameters` |
+  |---|---|
+  | router | Haiku 4.5, `thinking: false`, `maxOutputTokens: 256`, `temperature: 0` |
+  | data | Haiku 4.5, `thinking: false`, `maxOutputTokens: 8192`, `temperature: 0`, `promptCache: true` |
+  | navigation | Sonnet 5, `thinking: true` + `effort: "low"` (adaptive), `maxOutputTokens: 8192`, `promptCache: true` |
+
+  `thinking: false` is required on Haiku 4.5: when `thinking` is unset, the Bedrock parser turns it on with a 2000-token budget. Navigation has no `temperature`, because Sonnet 5 rejects sampling parameters with a 400 and this parser only strips them for Opus 4.7+ and Mythos-class models.
 - Every turn starts at the router again, so each question is routed on its own. A follow-up such as "now give me the link" goes to navigation.
 
 ## Latency and prompt caching

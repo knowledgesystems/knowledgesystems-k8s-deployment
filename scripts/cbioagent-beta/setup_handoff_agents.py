@@ -101,8 +101,9 @@ def build_agents(source):
             "description": "Classifies each question and hands off to the data or navigation agent.",
             "instructions": router_prompt,
             "model": HAIKU,
-            # The router only emits one argument-free tool call.
-            "model_parameters": {"model": HAIKU, "temperature": 0, "maxTokens": 256},
+            # The router only emits one argument-free tool call. Bedrock Haiku 4.5 thinks with a
+            # 2000-token budget unless `thinking` is explicitly false.
+            "model_parameters": {"model": HAIKU, "thinking": False, "maxOutputTokens": 256, "temperature": 0},
             "tools": [],
             "edges": edges,
         },
@@ -112,7 +113,13 @@ def build_agents(source):
             "description": "Answers data questions with the cbioportal-database MCP.",
             "instructions": f"{read_prompt('data')}\n\n{base_instructions}".strip(),
             "model": HAIKU,
-            "model_parameters": {"model": HAIKU, "temperature": 0, "promptCache": True},
+            "model_parameters": {
+                "model": HAIKU,
+                "thinking": False,
+                "maxOutputTokens": 8192,
+                "temperature": 0,
+                "promptCache": True,
+            },
             "tools": db_tools,
             "edges": [],
         },
@@ -122,7 +129,15 @@ def build_agents(source):
             "description": "Builds cBioPortal links and study-view navigation.",
             "instructions": f"{read_prompt('navigation')}\n\n{base_instructions}".strip(),
             "model": SONNET,
-            "model_parameters": {"model": SONNET, "temperature": 0, "promptCache": True},
+            # Sonnet 5 rejects sampling parameters (temperature/top_p/top_k) with a 400, and
+            # LibreChat's Bedrock parser only strips them for Opus 4.7+ and Mythos-class models.
+            "model_parameters": {
+                "model": SONNET,
+                "thinking": True,
+                "effort": "low",
+                "maxOutputTokens": 8192,
+                "promptCache": True,
+            },
             "tools": source_tools,
             "edges": [],
         },
