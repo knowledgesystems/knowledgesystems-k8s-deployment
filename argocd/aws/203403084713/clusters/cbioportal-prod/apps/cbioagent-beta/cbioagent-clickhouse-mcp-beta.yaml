@@ -1,7 +1,7 @@
 # Beta variant of the ClickHouse MCP server (cbioagent-clickhouse-mcp).
 # Built from the `beta` branch of cBioPortal/cbioportal-mcp, published as
-# `cbioportal/mcp:beta`, so MCP changes merged to `beta` never touch the
-# prod MCP (which tracks `:latest`).
+# `cbioportal/mcp:beta`, so MCP server changes merged to `beta` don't reach
+# the prod MCP (which tracks `:latest`).
 #
 # Reads its own ping-pong buffer (cbioportal_public_librechat_beta_{blue,green})
 # via the clickhouse-mcp-active-beta ConfigMap, which
@@ -66,9 +66,9 @@ spec:
               value: "*"
             # Opt-in ClickHouse query cache pilot (cbioportal-mcp#152) is
             # left OFF by default. To pilot it on beta, uncomment below.
-            # The beta clone job drops the query cache before each buffer
-            # flip, so cached results can't outlive the swap by more than
-            # the MCP's TTL cap.
+            # If you do, also set DROP_QUERY_CACHE=true on the beta clone job
+            # so the cache is dropped before each buffer flip (that drop is
+            # server-wide and empties prod's cache too).
             # - name: CBIOPORTAL_MCP_QUERY_CACHE_ENABLED
             #   value: "true"
           envFrom:

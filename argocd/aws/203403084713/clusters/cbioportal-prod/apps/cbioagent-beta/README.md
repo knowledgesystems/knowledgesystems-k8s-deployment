@@ -1,5 +1,7 @@
 # cbioagent-beta
 
+> **Hard prerequisite:** don't merge or sync the beta ClickHouse MCP / clone job until `docker manifest inspect cbioportal/mcp:beta` succeeds. The tag is published by cbioportal-mcp#158; until then the MCP pod and the clone's `fetch-sql` step can't pull.
+
 Beta LibreChat instance at **https://beta.chat.cbioportal.org**, used to test new agent variants (e.g. `cBioDBAgentBeta`, `cBioNavigatorBeta`) and LibreChat changes before promoting to prod.
 
 ## Shared backend
@@ -28,13 +30,15 @@ This is wired up by disabling every sub-chart (`mongodb`, `meilisearch`, `librec
 | [`librechat-config.yaml`](./librechat-config.yaml) | `librechat-config-beta` ConfigMap — mounted by the pod at `/app/librechat.yaml`. Contains the `modelSpecs` list (beta agents only), MCP server wiring, and welcome/greeting copy. |
 | [`ingress.yaml`](./ingress.yaml) | `cbioagent-beta-ingress` → `beta.chat.cbioportal.org`, backed by the `cbioagent-librechat-beta` Service. |
 | [`cbioagent-clickhouse-mcp-beta.yaml`](./cbioagent-clickhouse-mcp-beta.yaml) | Deployment/Service `cbioagent-clickhouse-mcp-beta` (in-cluster only). Image `cbioportal/mcp:beta`, rolled by Keel on new digests and by Reloader when `clickhouse-mcp-active-beta` changes. Datadog service / LLM Obs app `cbioportal-mcp-beta`. |
-| [`cbioagent-clickhouse-clone-daily-beta.yaml`](./cbioagent-clickhouse-clone-daily-beta.yaml) | CronJob `cbioagent-clickhouse-clone-daily-beta` (15:00 UTC, two hours after prod's), the `clickhouse-mcp-active-beta` pointer ConfigMap, and its own ServiceAccount/Role/RoleBinding (can patch only the beta pointer). Clones the production color into the idle `cbioportal_public_librechat_beta_*` buffer, applies the SQL from `cbioportal/mcp:beta` (portable → portal-specific → final), drops the query cache, then flips the pointer. |
+| [`cbioagent-clickhouse-clone-daily-beta.yaml`](./cbioagent-clickhouse-clone-daily-beta.yaml) | CronJob `cbioagent-clickhouse-clone-daily-beta` (16:00 UTC, three hours after prod's), the `clickhouse-mcp-active-beta` pointer ConfigMap, and its own ServiceAccount/Role/RoleBinding (can patch only the beta pointer). Clones the production color into the idle `cbioportal_public_librechat_beta_*` buffer, checks each cloned table's row count against the source, applies the SQL from `cbioportal/mcp:beta` (portable → portal-specific → final; final is skipped when the image has no `sql/final/`), then flips the pointer. Aborts before touching ClickHouse if any shipped SQL file uses database-level DDL, `USE`, cross-database `EXCHANGE`/`RENAME`, or names a prod database. |
 
 The corresponding ArgoCD Application is at [`../argocd/cbioagent-beta.yaml`](../argocd/cbioagent-beta.yaml) and mirrors the prod `cbioagent` app's dual-source pattern (raw manifests from this repo + the helm chart from `danny-avila/LibreChat`).
 
 ## ClickHouse MCP (beta)
 
-`cbioportal/cbioportal-mcp` PRs merged to its `beta` branch publish `cbioportal/mcp:beta`. Both the beta MCP pod and the beta clone's `fetch-sql` step use that tag, so schema/SQL changes and server changes land in beta's buffers and beta's MCP only; prod (`:latest`, `cbioportal_public_librechat_{blue,green}`) is untouched.
+`cbioportal/cbioportal-mcp` PRs merged to its `beta` branch publish `cbioportal/mcp:beta`. Both the beta MCP pod and the beta clone's `fetch-sql` step use that tag, so schema/SQL changes and server changes land in beta's buffers and beta's MCP, not prod's (`:latest`, `cbioportal_public_librechat_{blue,green}`).
+
+This isolation has limits. The clone runs the image's SQL with the same ClickHouse admin credentials prod's clone uses, scoped only by `--database`. The clone job's preflight denylist catches the obvious ways out (`DROP`/`RENAME`/`ATTACH`/`DETACH` `DATABASE`, `USE`, db-qualified `EXCHANGE`/`RENAME TABLE`, any `cbioportal_public_librechat_{blue,green}` or `cbioportal_public_{blue,green}` name), but it's a text scan, not a sandbox. Review SQL changes on the `beta` branch as if they could reach prod. Both clones also share the ClickHouse server's CPU and memory.
 
 ### ClickHouse admin prerequisite (one-time)
 
@@ -48,13 +52,17 @@ GRANT dictGet ON cbioportal_public_librechat_beta_blue.*  TO llm_user;
 GRANT dictGet ON cbioportal_public_librechat_beta_green.* TO llm_user;
 ```
 
-Mirror whatever else prod's `llm_user` holds on the prod buffers (`SHOW GRANTS FOR llm_user`). The admin user also needs `SYSTEM DROP QUERY CACHE`; without it the clone logs a WARN and continues. The query cache is server-wide, so the beta drop also empties prod's cache (cold cache, never stale results).
+Mirror whatever else prod's `llm_user` holds on the prod buffers (`SHOW GRANTS FOR llm_user`).
+
+### Query cache (off by default)
+
+The clone job's `DROP_QUERY_CACHE` env var is `"false"`. Set it to `"true"` only while piloting `CBIOPORTAL_MCP_QUERY_CACHE_ENABLED` on the beta MCP: the swap doesn't invalidate cached results, so the job then runs `SYSTEM DROP QUERY CACHE` before the flip. That cache is server-wide, so the drop also empties prod's cache (prod gets cold-cache latency, not wrong results). The admin user needs the `SYSTEM DROP QUERY CACHE` privilege; without it the job logs a WARN and continues.
 
 ### Rollout order
 
-1. Make sure `cbioportal/mcp:beta` exists on Docker Hub (the MCP repo's `beta` branch has been built at least once). Until it does, both the MCP pod and the clone's `fetch-sql` step fail to pull.
+1. Confirm `docker manifest inspect cbioportal/mcp:beta` succeeds (built by cbioportal-mcp#158). This gates both the merge and the sync. Until it does, both the MCP pod and the clone's `fetch-sql` step fail to pull.
 2. Apply the grants above.
-3. Manually sync the `cbioagent-beta` Argo Application. The beta MCP starts pointing at `cbioportal_public_librechat_beta_blue`, which doesn't exist yet, so beta database queries fail until step 4 finishes.
+3. Manually sync the `cbioagent-beta` Argo Application the first time **without prune**, with someone watching the sync. Check the diff first: it should only add the beta MCP, the clone job objects and the pointer ConfigMap, and modify `librechat-config-beta`. The beta MCP starts pointing at `cbioportal_public_librechat_beta_blue`, which doesn't exist yet, so beta database queries fail until step 4 finishes.
 4. Build the first buffer once instead of waiting for the schedule:
    ```sh
    kubectl -n default create job --from=cronjob/cbioagent-clickhouse-clone-daily-beta clone-beta-manual-$(date +%s)
