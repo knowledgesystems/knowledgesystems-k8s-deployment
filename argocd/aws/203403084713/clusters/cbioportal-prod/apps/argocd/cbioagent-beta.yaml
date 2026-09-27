@@ -18,6 +18,23 @@ spec:
         releaseName: cbioagent-beta
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent-beta/values.yaml
+  # Manual sync only. RespectIgnoreDifferences + ServerSideApply let the
+  # beta clone cron's patch on clickhouse-mcp-active-beta survive a sync
+  # (same pairing as cbioagent.yaml).
+  syncPolicy:
+    syncOptions:
+      - RespectIgnoreDifferences=true
+      - ServerSideApply=true
   destination:
     namespace: default
     server: https://kubernetes.default.svc
+  # cbioagent-clickhouse-clone-daily-beta owns the live value of
+  # data.CLICKHOUSE_DATABASE. `group` is omitted (defaults to the core API
+  # group): an explicit `group: ""` is stripped on apply and the matcher
+  # doesn't fire.
+  ignoreDifferences:
+    - kind: ConfigMap
+      name: clickhouse-mcp-active-beta
+      namespace: default
+      jsonPointers:
+        - /data/CLICKHOUSE_DATABASE

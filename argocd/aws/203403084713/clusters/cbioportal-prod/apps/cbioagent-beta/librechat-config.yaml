@@ -15,6 +15,7 @@ data:
     mcpSettings:
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
+        - 'cbioagent-clickhouse-mcp-beta'
         - 'cbioportal-navigator'
         - 'cbioportal-navigator-beta'
 
@@ -105,7 +106,9 @@ data:
         # No trailing slash: FastMCP 307-redirects the trailing-slash form to
         # this one, and LibreChat blocks following that redirect as SSRF.
         # Same fix as MSK-side (see portal-configuration#52).
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        # Beta-only MCP (cbioportal/mcp:beta, beta ClickHouse buffers); see
+        # cbioagent-clickhouse-mcp-beta.yaml.
+        url: http://cbioagent-clickhouse-mcp-beta:80/db/mcp
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"

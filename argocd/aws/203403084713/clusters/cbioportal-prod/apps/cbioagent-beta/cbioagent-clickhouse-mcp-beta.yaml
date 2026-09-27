@@ -1,0 +1,103 @@
+# Beta variant of the ClickHouse MCP server (cbioagent-clickhouse-mcp).
+# Built from the `beta` branch of cBioPortal/cbioportal-mcp, published as
+# `cbioportal/mcp:beta`, so MCP changes merged to `beta` never touch the
+# prod MCP (which tracks `:latest`).
+#
+# Reads its own ping-pong buffer (cbioportal_public_librechat_beta_{blue,green})
+# via the clickhouse-mcp-active-beta ConfigMap, which
+# cbioagent-clickhouse-clone-daily-beta owns. Only the beta LibreChat instance
+# (beta.chat.cbioportal.org) talks to this Service; it has no public Ingress.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioagent-clickhouse-mcp-beta
+  labels:
+    run: cbioagent-clickhouse-mcp-beta
+  annotations:
+    # Reloader rolls this Deployment when the beta daily clone cron patches
+    # clickhouse-mcp-active-beta.CLICKHOUSE_DATABASE on a successful build.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active-beta"
+    # Keel polls Docker Hub for `cbioportal/mcp:beta` and rolls the
+    # Deployment when the digest changes, so a merge to the MCP repo's
+    # `beta` branch reaches this pod without waiting for a restart.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioagent-clickhouse-mcp-beta
+  template:
+    metadata:
+      labels:
+        run: cbioagent-clickhouse-mcp-beta
+    spec:
+      containers:
+        - name: cbioagent-clickhouse-mcp-beta
+          image: cbioportal/mcp:beta
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            # Node-local Datadog agent IP exposed via Downward API.
+            # The telemetry module uses this to build the OTLP gRPC endpoint
+            # (http://<DD_AGENT_HOST>:4318) unless OTEL_EXPORTER_OTLP_ENDPOINT
+            # is set explicitly.
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            # Separate service / ML app so beta traffic doesn't mix into
+            # the prod cbioportal-mcp dashboards and LLM Obs.
+            - name: OTEL_SERVICE_NAME
+              value: "cbioportal-mcp-beta"
+            - name: DD_LLMOBS_ML_APP
+              value: "cbioportal-mcp-beta"
+            - name: DD_SITE
+              value: "datadoghq.com"
+            # Same sub-path as prod so the beta LibreChat URL keeps the
+            # /db/mcp shape (no trailing slash; see librechat-config.yaml).
+            - name: CLICKHOUSE_MCP_HTTP_PATH
+              value: "/db/mcp"
+            # Trust X-Forwarded-* from any in-cluster source (see the prod
+            # manifest). Only reachable via this in-cluster Service.
+            - name: CLICKHOUSE_MCP_FORWARDED_ALLOW_IPS
+              value: "*"
+            # Opt-in ClickHouse query cache pilot (cbioportal-mcp#152) is
+            # left OFF by default. To pilot it on beta, uncomment below.
+            # The beta clone job drops the query cache before each buffer
+            # flip, so cached results can't outlive the swap by more than
+            # the MCP's TTL cap.
+            # - name: CBIOPORTAL_MCP_QUERY_CACHE_ENABLED
+            #   value: "true"
+          envFrom:
+            # Same ClickHouse credentials (llm_user) as prod.
+            - secretRef:
+                name: clickhouse-mcp
+            # ConfigMap mounted AFTER the Secret so its CLICKHOUSE_DATABASE
+            # value wins (envFrom: last-writer-wins on key collisions). The
+            # cbioagent-clickhouse-clone-daily-beta CronJob owns this
+            # ConfigMap and patches it after each successful build.
+            - configMapRef:
+                name: clickhouse-mcp-active-beta
+      nodeSelector:
+        workload: "cbioagent"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbioagent"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioagent-clickhouse-mcp-beta
+spec:
+  selector:
+    run: cbioagent-clickhouse-mcp-beta
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8000
+  type: ClusterIP
