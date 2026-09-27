@@ -12,6 +12,7 @@ never written. Safe to re-run: unchanged agents are left alone.
 import argparse
 import datetime
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -36,6 +37,14 @@ TRANSFER_PREFIX = "lc_transfer_to_"
 
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 
+# Sections of the unified agent's instructions that drive navigation. The data agent has no
+# navigator tools, so they are removed from its copy; a missing heading or a navigator tool
+# name left afterwards is a hard error rather than a silently mis-instructed agent.
+NAV_SECTIONS = ("Capability Selection", "Navigate Workflow", "Link First")
+NAV_BRANCH_MARKER = "Navigation only:"
+NAV_TOOL_MARKERS = ("navigate_to_", "resolve_and_route", "get_studyviewfilter_options")
+HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
+
 MANAGED_FIELDS = (
     "name",
     "description",
@@ -48,11 +57,63 @@ MANAGED_FIELDS = (
     "edges",
     "author",
     "category",
+    "tenantId",
 )
 
 
 def read_prompt(name):
     return (PROMPTS_DIR / f"{name}.md").read_text().strip()
+
+
+def indent_of(line):
+    return len(line) - len(line.lstrip())
+
+
+def is_block_start(line, indent):
+    stripped = line.lstrip()
+    return indent_of(line) <= indent and (
+        HEADING.match(stripped) is not None or re.match(r"(?:[-*+]|\d+[.)]|\*\*)\s*", stripped) is not None
+    )
+
+
+def strip_navigation(instructions):
+    """Return `instructions` without the NAV_SECTIONS sections and the NAV_BRANCH_MARKER item."""
+    if NAV_BRANCH_MARKER not in instructions:
+        raise ValueError(f"marker {NAV_BRANCH_MARKER!r} not found")
+    lines = instructions.splitlines()
+    drop = set()
+
+    headings = [(i, len(m.group(1)), m.group(2)) for i, line in enumerate(lines) if (m := HEADING.match(line))]
+    for title in NAV_SECTIONS:
+        matches = [(i, level) for i, level, text in headings if text == title]
+        if not matches:
+            raise ValueError(f"heading {title!r} not found")
+        for start, level in matches:
+            end = next((i for i, lvl, _ in headings if i > start and lvl <= level), len(lines))
+            drop.update(range(start, end))
+
+    for start, line in enumerate(lines):
+        if NAV_BRANCH_MARKER not in line or start in drop:
+            continue
+        indent = indent_of(line)
+        end = start + 1
+        while end < len(lines):
+            nxt = lines[end]
+            if nxt.strip() and is_block_start(nxt, indent):
+                break
+            if not nxt.strip():
+                following = next((ln for ln in lines[end + 1 :] if ln.strip()), None)
+                if following is None or indent_of(following) <= indent:
+                    break
+            end += 1
+        drop.update(range(start, end))
+
+    stripped = "\n".join(line for i, line in enumerate(lines) if i not in drop)
+    stripped = re.sub(r"\n{3,}", "\n\n", stripped).strip()
+    leftovers = sorted({m for m in NAV_TOOL_MARKERS if m in stripped})
+    if leftovers:
+        raise ValueError(f"navigator tool names still present after stripping: {', '.join(leftovers)}")
+    return stripped
 
 
 def mcp_server_names(tools):
@@ -71,6 +132,15 @@ def build_agents(source):
         .replace("<<NAV_TOOL>>", TRANSFER_PREFIX + NAV_ID)
         .replace("<<DATA_TOOL>>", TRANSFER_PREFIX + DATA_ID)
     )
+    if "<<" in router_prompt:
+        sys.exit("prompts/router.md has an unreplaced <<PLACEHOLDER>>")
+    try:
+        data_base = strip_navigation(base_instructions)
+    except ValueError as err:
+        sys.exit(
+            f"cannot build the data agent's instructions from {source['id']}: {err}. "
+            "Update NAV_SECTIONS / NAV_BRANCH_MARKER in this script to match the unified agent's current prompt."
+        )
     edges = [
         {
             "from": ROUTER_ID,
@@ -111,7 +181,8 @@ def build_agents(source):
             "id": DATA_ID,
             "name": "cBioPortalChat Data (beta)",
             "description": "Answers data questions with the cbioportal-database MCP.",
-            "instructions": f"{read_prompt('data')}\n\n{base_instructions}".strip(),
+            # The data.md override goes last so it wins over anything left in the shared prompt.
+            "instructions": f"{data_base}\n\n{read_prompt('data')}".strip(),
             "model": HAIKU,
             "model_parameters": {
                 "model": HAIKU,
@@ -129,8 +200,9 @@ def build_agents(source):
             "description": "Builds cBioPortal links and study-view navigation.",
             "instructions": f"{read_prompt('navigation')}\n\n{base_instructions}".strip(),
             "model": SONNET,
-            # Sonnet 5 rejects sampling parameters (temperature/top_p/top_k) with a 400, and
-            # LibreChat's Bedrock parser only strips them for Opus 4.7+ and Mythos-class models.
+            # No temperature: Anthropic's API rejects temperature/top_p/top_k on Sonnet 5 with a 400
+            # (sampling parameters are removed on that model), and this LibreChat version does not
+            # drop them for Sonnet 5 before calling Bedrock.
             "model_parameters": {
                 "model": SONNET,
                 "thinking": True,
@@ -150,17 +222,27 @@ def build_agents(source):
     return agents
 
 
-def version_snapshot(fields, now):
-    snapshot = {k: v for k, v in fields.items() if k != "author"}
+def agent_filter(agent_id, tenant_id):
+    # {"tenantId": None} also matches documents with no tenantId field.
+    return {"id": agent_id, "tenantId": tenant_id}
+
+
+def managed_values(desired):
+    return {k: desired[k] for k in MANAGED_FIELDS if k in desired}
+
+
+def version_snapshot(desired, now):
+    snapshot = {"id": desired["id"], **managed_values(desired)}
+    del snapshot["author"]
     snapshot.update(createdAt=now, updatedAt=now)
     return snapshot
 
 
 def upsert_agent(db, desired, dry_run):
     now = datetime.datetime.now(datetime.timezone.utc)
-    existing = db.agents.find_one({"id": desired["id"]})
+    existing = db.agents.find_one(agent_filter(desired["id"], desired.get("tenantId")))
     if existing is None:
-        doc = dict(desired)
+        doc = {"id": desired["id"], **managed_values(desired)}
         doc.update(
             conversation_starters=[],
             tool_resources={},
@@ -176,7 +258,7 @@ def upsert_agent(db, desired, dry_run):
             return None
         return db.agents.insert_one(doc).inserted_id
 
-    changed = {k: desired[k] for k in MANAGED_FIELDS if existing.get(k) != desired[k]}
+    changed = {k: v for k, v in managed_values(desired).items() if existing.get(k) != v}
     if not changed:
         print(f"unchanged {desired['id']}")
         return existing["_id"]
@@ -186,7 +268,7 @@ def upsert_agent(db, desired, dry_run):
             {"_id": existing["_id"]},
             {
                 "$set": {**changed, "updatedAt": now},
-                "$push": {"versions": version_snapshot({k: desired[k] for k in MANAGED_FIELDS}, now)},
+                "$push": {"versions": version_snapshot(desired, now)},
             },
         )
     return existing["_id"]
@@ -241,9 +323,9 @@ def sync_acl(db, source_oid, agent_id, agent_oid, dry_run):
                 db.aclentries.delete_one({"_id": row["_id"]})
 
 
-def delete_agents(db, dry_run):
+def delete_agents(db, tenant_id, dry_run):
     for agent_id in MANAGED_IDS:
-        existing = db.agents.find_one({"id": agent_id}, {"_id": 1})
+        existing = db.agents.find_one(agent_filter(agent_id, tenant_id), {"_id": 1})
         if existing is None:
             print(f"absent {agent_id}")
             continue
@@ -278,11 +360,10 @@ def main():
     db = client[args.db] if args.db else client.get_default_database(DEFAULT_DB)
     print(f"database {db.name}{' (dry run)' if args.dry_run else ''}")
 
-    if args.delete:
-        delete_agents(db, args.dry_run)
-        return
-
     source = db.agents.find_one({"id": args.source_agent})
+    if args.delete:
+        delete_agents(db, source.get("tenantId") if source else None, args.dry_run)
+        return
     if source is None:
         sys.exit(f"source agent {args.source_agent} not found in {db.name}.agents")
 

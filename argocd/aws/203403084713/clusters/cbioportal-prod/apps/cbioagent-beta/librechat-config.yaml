@@ -179,10 +179,10 @@ data:
     # agent_cbiobeta_navigation (Sonnet 5, links and study-view navigation).
     # Those agent records are created by
     # scripts/cbioagent-beta/setup_handoff_agents.py, which must run before
-    # this spec points at them. Of the preset, only `model` reaches an agent
-    # (the router); generation parameters (thinking, max output tokens,
-    # temperature, promptCache) come from each agent record's
-    # model_parameters, which the script sets.
+    # this spec points at them. Of the preset's generation settings, only
+    # `model` reaches an agent (the router); thinking, max output tokens,
+    # temperature and promptCache are set in each agent record's
+    # model_parameters by the script, so they are not repeated here.
     modelSpecs:
       enforce: false
       prioritize: true
@@ -226,8 +226,6 @@ data:
             endpoint: "agents"
             agent_id: "agent_cbiobeta_router"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-            temperature: 0
-            promptCache: true
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>

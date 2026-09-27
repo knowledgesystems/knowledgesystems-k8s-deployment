@@ -9,7 +9,10 @@ cBioPortalChatBeta modelSpec
        -> agent_cbiobeta_data        Haiku 4.5, cbioportal-database MCP only    (text / table answers)
 ```
 
-Navigation goes to Sonnet because the benchmark shows it passes navigation questions that Haiku fails. The models score the same on database and analysis questions, so the cheaper Haiku handles those. A question that needs a data lookup **and** a link or view goes to navigation, and so does any question the router is unsure about. The routing rules are in [`prompts/router.md`](prompts/router.md). The specialists' instructions are [`prompts/data.md`](prompts/data.md) or [`prompts/navigation.md`](prompts/navigation.md), followed by the unified beta agent's (`agent_OHVSJI9Gd6gwsDnFSL-Xl`) current instructions.
+Navigation goes to Sonnet because the benchmark shows it passes navigation questions that Haiku fails. The models score the same on database and analysis questions, so the cheaper Haiku handles those. A question that needs a data lookup **and** a link or view goes to navigation, and so does any question the router is unsure about. The routing rules are in [`prompts/router.md`](prompts/router.md). The specialists are built from the unified beta agent's (`agent_OHVSJI9Gd6gwsDnFSL-Xl`) current instructions:
+
+- **navigation:** [`prompts/navigation.md`](prompts/navigation.md), followed by the full unified prompt.
+- **data:** the unified prompt with its navigation parts removed, followed by [`prompts/data.md`](prompts/data.md) last, so the override wins. The removed parts are the `Capability Selection`, `Navigate Workflow` and `Link First` sections (each through its subsections) and the `Navigation only:` response branch; they are listed in `NAV_SECTIONS` / `NAV_BRANCH_MARKER` in the script. The script stops without writing anything if any of them is missing, or if `navigate_to_`, `resolve_and_route` or `get_studyviewfilter_options` survives the strip. When the unified prompt is restructured, update those constants and re-run. `data.md` also tells the data agent it has no navigator tools, must never build or output cBioPortal view URLs or copy a `url` from `list_studies`, and should send link requests back through the router in a new message.
 
 ## How the handoff works (LibreChat `v0.8.7-custom-v3`, `@librechat/agents` 3.2.46)
 
@@ -24,8 +27,9 @@ Navigation goes to Sonnet because the benchmark shows it passes navigation quest
   | data | Haiku 4.5, `thinking: false`, `maxOutputTokens: 8192`, `temperature: 0`, `promptCache: true` |
   | navigation | Sonnet 5, `thinking: true` + `effort: "low"` (adaptive), `maxOutputTokens: 8192`, `promptCache: true` |
 
-  `thinking: false` is required on Haiku 4.5: when `thinking` is unset, the Bedrock parser turns it on with a 2000-token budget. Navigation has no `temperature`, because Sonnet 5 rejects sampling parameters with a 400 and this parser only strips them for Opus 4.7+ and Mythos-class models.
+  `thinking: false` is required on Haiku 4.5: when `thinking` is unset, the Bedrock parser turns it on with a 2000-token budget. Navigation has no `temperature`, because Anthropic's API rejects `temperature`/`top_p`/`top_k` on Sonnet 5 with a 400 (sampling parameters are removed on that model), and this LibreChat version doesn't drop them for Sonnet 5.
 - Every turn starts at the router again, so each question is routed on its own. A follow-up such as "now give me the link" goes to navigation.
+- **Existing conversations bypass the router.** A conversation stores the `agent_id` it started with, so beta conversations created before the switch keep running on the unified agent. Only new chats use the router. Start a new chat when testing.
 
 ## Latency and prompt caching
 
@@ -36,18 +40,44 @@ Navigation goes to Sonnet because the benchmark shows it passes navigation quest
 
 MongoDB is shared with prod. The script writes only `agent_cbiobeta_router`, `agent_cbiobeta_data`, `agent_cbiobeta_navigation` and their `aclentries` rows. It reads the unified beta agent and never writes it. Prod's modelSpecs don't reference the new ids.
 
+Run the script **before** merging the `librechat-config.yaml` change: once Argo syncs the ConfigMap, beta's `cBioPortalChatBeta` spec points at `agent_cbiobeta_router`.
+
 ```bash
 pip install pymongo
 # Port-forward the shared MongoDB (cbioportal-prod cluster, default namespace)
 kubectl port-forward svc/cbioagent-mongodb 27017:27017 &
 # MONGO_URI is in the librechat-credentials-env Secret (portal-configuration); point its host at localhost:27017
 export MONGO_URI='mongodb://<user>:<pass>@localhost:27017/cBioAgent?authSource=admin'
-
-./setup_handoff_agents.py --dry-run   # review the plan
-./setup_handoff_agents.py             # create/update; re-run any time — unchanged agents are skipped
 ```
 
-Run the script **before** merging the `librechat-config.yaml` change: once Argo syncs the ConfigMap, beta's `cBioPortalChatBeta` spec points at `agent_cbiobeta_router`. After changing a file in `prompts/`, or the unified agent's instructions or tools, re-run the script to update the three agents.
+1. Dry run: `./setup_handoff_agents.py --dry-run`. It writes nothing.
+2. Check the output. On a first apply it must contain exactly these three create lines (plus `acl grant` lines under each):
+   ```
+   create agent_cbiobeta_router (us.anthropic.claude-haiku-4-5-20251001-v1:0, 0 tools, 2 edges)
+   create agent_cbiobeta_data (us.anthropic.claude-haiku-4-5-20251001-v1:0, <n> tools, 0 edges)
+   create agent_cbiobeta_navigation (us.anthropic.claude-sonnet-5, <n> tools, 0 edges)
+   ```
+   A different line, such as `update ...` on a first run, or an exit mentioning `NAV_SECTIONS`, means stop and investigate.
+3. Apply: `./setup_handoff_agents.py`. Re-running is safe; unchanged agents print `unchanged`.
+
+After changing a file in `prompts/`, or the unified agent's instructions or tools, re-run steps 1–3 to update the three agents.
+
+## Validate on beta
+
+In a **new** chat on beta.chat.cbioportal.org, after the pod has rolled:
+
+- **Data question**, e.g. "How many studies have whole exome sequencing data?": the router hands off to `agent_cbiobeta_data`. The turn must contain **no `navigate_to_*` (or `resolve_and_route`) tool call and no `cbioportal.org` URL** in the answer.
+- **Navigation question**, e.g. "Give me an OncoPrint for EGFR and KRAS in TCGA lung adenocarcinoma": the router hands off to `agent_cbiobeta_navigation`, and the answer has a working cBioPortal link.
+- Neither turn returns a Bedrock 400. The router and data turns show no thinking blocks.
+
+Then run `cbioportal-mcp-qa --target beta --repeats 3` and compare median latency and pass rate by question category against the single-agent baseline.
+
+## Tests
+
+```bash
+pip install pymongo mongomock
+python -m unittest scripts/cbioagent-beta/test_setup_handoff_agents.py
+```
 
 ## Point beta at a different agent
 
