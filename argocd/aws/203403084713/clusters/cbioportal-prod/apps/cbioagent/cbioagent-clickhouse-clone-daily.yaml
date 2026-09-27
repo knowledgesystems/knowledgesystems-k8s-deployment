@@ -114,7 +114,24 @@ data:
       clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
     done
 
-    # 7) Hand off state to the patch-pointer container.
+    # 7) Drop the ClickHouse query cache before the patch-pointer container
+    #    flips clickhouse-mcp-active. The MCP's opt-in query cache
+    #    (CBIOPORTAL_MCP_QUERY_CACHE_ENABLED, cbioportal-mcp#152) is not
+    #    invalidated by the buffer swap, so an entry cached while reading
+    #    the old buffer could otherwise be served after the MCP moves to
+    #    ${DST_DB}. The cache is per replica: try every replica of the
+    #    'default' cluster, then this one. Best effort — a failure here
+    #    must not block the daily refresh; stale entries still expire
+    #    within the MCP's TTL cap (1h).
+    if clickhouse client $CH_FLAGS --query "SYSTEM DROP QUERY CACHE ON CLUSTER 'default'" >/dev/null 2>&1; then
+      log "dropped query cache on cluster 'default'"
+    elif clickhouse client $CH_FLAGS --query "SYSTEM DROP QUERY CACHE"; then
+      log "dropped query cache on the connected replica"
+    else
+      log "WARN: SYSTEM DROP QUERY CACHE failed; cached results expire within the MCP TTL"
+    fi
+
+    # 8) Hand off state to the patch-pointer container.
     # llm_user grants persist across DROP DATABASE + CREATE DATABASE in
     # ClickHouse so no GRANT step here.
     echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
@@ -215,7 +232,9 @@ spec:
                   readOnly: true
           containers:
             # Patches clickhouse-mcp-active with the buffer the clone
-            # container wrote to /workdir/state.env. Reloader (watching
+            # container wrote to /workdir/state.env (after it dropped the
+            # ClickHouse query cache; this image has no clickhouse
+            # client or admin credentials). Reloader (watching
             # clickhouse-mcp-active via the annotation on
             # cbioagent-clickhouse-mcp) rolls the MCP.
             - name: patch-pointer
