@@ -30,7 +30,7 @@ This is wired up by disabling every sub-chart (`mongodb`, `meilisearch`, `librec
 | [`librechat-config.yaml`](./librechat-config.yaml) | `librechat-config-beta` ConfigMap — mounted by the pod at `/app/librechat.yaml`. Contains the `modelSpecs` list (beta agents only), MCP server wiring, and welcome/greeting copy. |
 | [`ingress.yaml`](./ingress.yaml) | `cbioagent-beta-ingress` → `beta.chat.cbioportal.org`, backed by the `cbioagent-librechat-beta` Service. |
 | [`cbioagent-clickhouse-mcp-beta.yaml`](./cbioagent-clickhouse-mcp-beta.yaml) | Deployment/Service `cbioagent-clickhouse-mcp-beta` (in-cluster only). Image `cbioportal/mcp:beta`, rolled by Keel on new digests and by Reloader when `clickhouse-mcp-active-beta` changes. Datadog service / LLM Obs app `cbioportal-mcp-beta`. |
-| [`cbioagent-clickhouse-clone-daily-beta.yaml`](./cbioagent-clickhouse-clone-daily-beta.yaml) | CronJob `cbioagent-clickhouse-clone-daily-beta` (16:00 UTC, three hours after prod's), the `clickhouse-mcp-active-beta` pointer ConfigMap, and its own ServiceAccount/Role/RoleBinding (can patch only the beta pointer). Clones the production color into the idle `cbioportal_public_librechat_beta_*` buffer, checks each cloned table's row count against the source, applies the SQL from `cbioportal/mcp:beta` (portable → portal-specific → final; final is skipped when the image has no `sql/final/`), then flips the pointer. Aborts before touching ClickHouse if any shipped SQL file uses database-level DDL, `USE`, cross-database `EXCHANGE`/`RENAME`, or names a prod database. |
+| [`cbioagent-clickhouse-clone-daily-beta.yaml`](./cbioagent-clickhouse-clone-daily-beta.yaml) | CronJob `cbioagent-clickhouse-clone-daily-beta` (16:00 UTC, three hours after prod's), the `clickhouse-mcp-active-beta` pointer ConfigMap, and its own ServiceAccount/Role/RoleBinding (can patch only the beta pointer). Clones the production color into the idle `cbioportal_public_librechat_beta_*` buffer, checks each cloned table's row count against the source, applies the SQL from `cbioportal/mcp:beta` (portable → portal-specific → final; final is skipped when the image has no `sql/final/`), then flips the pointer. Aborts before touching ClickHouse if any shipped SQL file fails to parse with `clickhouse format`, or uses database-level DDL, `USE`, cross-database `EXCHANGE`/`RENAME`, inline `INSERT` data, or names a prod database. |
 
 The corresponding ArgoCD Application is at [`../argocd/cbioagent-beta.yaml`](../argocd/cbioagent-beta.yaml) and mirrors the prod `cbioagent` app's dual-source pattern (raw manifests from this repo + the helm chart from `danny-avila/LibreChat`).
 
@@ -38,7 +38,16 @@ The corresponding ArgoCD Application is at [`../argocd/cbioagent-beta.yaml`](../
 
 `cbioportal/cbioportal-mcp` PRs merged to its `beta` branch publish `cbioportal/mcp:beta`. Both the beta MCP pod and the beta clone's `fetch-sql` step use that tag, so schema/SQL changes and server changes land in beta's buffers and beta's MCP, not prod's (`:latest`, `cbioportal_public_librechat_{blue,green}`).
 
-This isolation has limits. The clone runs the image's SQL with the same ClickHouse admin credentials prod's clone uses, scoped only by `--database`. The clone job's preflight denylist catches the obvious ways out (`DROP`/`RENAME`/`ATTACH`/`DETACH` `DATABASE`, `USE`, db-qualified `EXCHANGE`/`RENAME TABLE`, any `cbioportal_public_librechat_{blue,green}` or `cbioportal_public_{blue,green}` name), but it's a text scan, not a sandbox. Review SQL changes on the `beta` branch as if they could reach prod. Both clones also share the ClickHouse server's CPU and memory.
+This isolation has limits. The clone runs the image's SQL with the same ClickHouse admin credentials prod's clone uses, scoped only by `--database`. The clone job's preflight runs each file through `clickhouse format --multiquery --oneline` (ClickHouse's own parser, from the job's image). A file the parser rejects aborts the job. The denylist then runs over the raw text and the formatted queries, and catches the obvious ways out:
+- `DROP`/`RENAME`/`ATTACH`/`DETACH` `DATABASE`;
+- `USE`;
+- db-qualified `EXCHANGE`/`RENAME TABLE`;
+- `INSERT … VALUES`/`FORMAT` inline data, which the formatter doesn't parse (use `INSERT … SELECT`);
+- any `cbioportal_public_librechat_{blue,green}` or `cbioportal_public_{blue,green}` name.
+
+It's still a denylist, not a sandbox. It doesn't catch, for example, a cross-database `INSERT INTO other.t SELECT …` or `ALTER … MOVE PARTITION … TO TABLE other.t` unless a prod name appears literally.
+
+One quirk: a file whose last chunk is only a `#` or `/* */` comment fails to format ("Empty query") and aborts the job. End files with a statement or a `--` comment. Review SQL changes on the `beta` branch as if they could reach prod. Both clones also share the ClickHouse server's CPU and memory.
 
 ### ClickHouse admin prerequisite (one-time)
 

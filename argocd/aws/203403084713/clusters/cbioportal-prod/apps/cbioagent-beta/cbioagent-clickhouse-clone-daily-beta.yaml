@@ -13,9 +13,11 @@
 # from the image and run with the shared clickhouse-librechat-admin
 # credentials, scoped only by --database. A preflight scan aborts the job if
 # any file uses database-level DDL, a USE statement, a cross-database
-# EXCHANGE/RENAME, or names a prod database; it matches after stripping
-# comments and string literals. That scan is a denylist, not a sandbox: a
-# file that evades it still runs with admin rights.
+# EXCHANGE/RENAME, inline INSERT data, or names a prod database. It matches
+# the raw text and the output of `clickhouse format` (ClickHouse's own
+# parser), and a file the parser rejects also aborts. That scan is a
+# denylist, not a sandbox: a file that evades it still runs with admin
+# rights.
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -92,40 +94,12 @@ data:
         log "FAIL: clickhouse exited $? for: $1" >&2; return 1; }
       printf '%s' "$_out" | tr -d '[:space:]'
     }
-    # Prints the file as one lowercase line per ';'-separated statement,
-    # with comments removed, string literals emptied, identifier quotes
-    # dropped, whitespace collapsed and no spaces around '.'. Prints
-    # __unterminated__ if the file ends inside a string or comment.
-    normalize_sql() {
-      awk '
-        { n = length($0); i = 1; out = ""
-          while (i <= n) {
-            c = substr($0, i, 1); d = substr($0, i, 2)
-            if (st == 0) {
-              if (d == "--") { st = 4; break }
-              if (d == "/*") { st = 5; out = out " "; i += 2; continue }
-              if (c == "\047") { st = 1; out = out "\047" }
-              else if (c == "\"") st = 2
-              else if (c == "`") st = 3
-              else out = out c
-            } else if (st == 1) {
-              if (c == "\\") { i += 2; continue }
-              if (c == "\047") {
-                if (substr($0, i + 1, 1) == "\047") { i += 2; continue }
-                st = 0; out = out "\047"
-              }
-            } else if (st == 2) { if (c == "\"") st = 0; else out = out c }
-            else if (st == 3) { if (c == "`") st = 0; else out = out c }
-            else if (st == 5 && d == "*/") { st = 0; i += 2; continue }
-            i++
-          }
-          if (st == 4) st = 0
-          printf "%s ", out
-        }
-        END { print ""; if (st != 0) print ";__unterminated__" }
-      ' "$1" | tr 'A-Z' 'a-z' | tr -s '[:space:]' ' ' \
-        | sed 's/ *\. */./g' | tr ';' '\n' | sed 's/^ *//'
-    }
+    # Canonical form of a .sql file from ClickHouse's own parser (same
+    # lexer as the client that runs it): one query per line, comments
+    # removed, whitespace and qualified names normalized. Non-zero exit if
+    # the parser rejects the file, including INSERT with multi-line or
+    # FORMAT inline data.
+    format_sql() { clickhouse format --multiquery --oneline < "$1"; }
     apply_sql() {
       for f in "$@"; do
         log "  → ${f#${SQL_DIR}/}"
@@ -150,19 +124,28 @@ data:
     #   Raw lines (so names hidden in strings or comments count too):
     #   database-level DDL, or any prod name (the prod LLM buffers or the
     #   cBioPortal source colors).
-    #   Normalized statements (normalize_sql): the same, plus any USE and
-    #   any EXCHANGE/RENAME with a db-qualified operand. Unqualified
-    #   EXCHANGE TABLES a AND b stays inside --database and is allowed.
+    #   format_sql output: the file must parse. Each query is then checked
+    #   for the same DDL and names, any USE, any EXCHANGE/RENAME with a
+    #   db-qualified operand, and any INSERT with inline data (VALUES or
+    #   FORMAT), whose data the formatter passes through unparsed. Use
+    #   INSERT ... SELECT instead. Unqualified EXCHANGE TABLES a AND b stays
+    #   inside --database and is allowed.
     PROD_NAMES='cbioportal_public_librechat_(blue|green)|cbioportal_public_(blue|green)'
     DB_DDL='(drop|rename|attach|detach|undrop|truncate)[[:space:]]+database'
     FORBIDDEN_LINE="${DB_DDL}|${PROD_NAMES}"
-    FORBIDDEN_STMT="(^| )${DB_DDL}( |\$)|^use( |\$)|^(exchange|rename) .*[[:alnum:]_]\.[[:alnum:]_]|__unterminated__|${PROD_NAMES}"
+    FORBIDDEN_STMT="(^|[[:space:]])${DB_DDL}([[:space:];]|\$)|^use([[:space:];]|\$)|^(exchange|rename)[[:space:]].*[[:alnum:]_\`]\.[[:alnum:]_\`]|^insert[[:space:]].*[[:space:]](values|format)([[:space:];(]|\$)|${PROD_NAMES}"
     ALL_SQL="$PORTABLE_SQL $PORTAL_SQL $FINAL_SQL"
     BAD=0
     for f in $ALL_SQL; do
+      if ! FORMATTED=$(format_sql "$f" 2>/dev/null); then
+        BAD=1
+        log "FAIL: clickhouse format could not parse ${f#${SQL_DIR}/}:"
+        format_sql "$f" 2>&1 >/dev/null | grep -m1 'Code:' | cut -c1-300 | sed 's/^/    /'
+        continue
+      fi
       HITS=$( { grep -Ein "$FORBIDDEN_LINE" "$f" || true
-                normalize_sql "$f" | grep -E "$FORBIDDEN_STMT" \
-                  | sed 's/^/stmt: /' || true; } )
+                printf '%s\n' "$FORMATTED" | grep -Ei "$FORBIDDEN_STMT" \
+                  | cut -c1-300 | sed 's/^/stmt: /' || true; } )
       if [ -n "$HITS" ]; then
         BAD=1
         log "FAIL: forbidden SQL in ${f#${SQL_DIR}/}:"
