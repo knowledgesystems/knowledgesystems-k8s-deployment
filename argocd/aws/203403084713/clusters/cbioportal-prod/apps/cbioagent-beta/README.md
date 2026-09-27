@@ -32,6 +32,8 @@ The corresponding ArgoCD Application is at [`../argocd/cbioagent-beta.yaml`](../
 
 Beta agents live in MongoDB like prod agents — see the root project `CLAUDE.md` for how to query/patch them. The `modelSpecs` preset in `librechat-config.yaml` also has copies of the greeting / agent IDs; keep these in sync with MongoDB when changing them.
 
+The default spec points at a handoff router (Haiku) that routes to a data agent (Haiku) or a navigation agent (Sonnet). Those three agent records are managed by [`scripts/cbioagent-beta/setup_handoff_agents.py`](../../../../../../../scripts/cbioagent-beta/README.md).
+
 ## Relationship to prod
 
 Keep `values.yaml` in sync with [`../cbioagent/values.yaml`](../cbioagent/values.yaml) for anything that should behave the same way across environments (probes, resources, image tag, etc.). The intentional differences are:
