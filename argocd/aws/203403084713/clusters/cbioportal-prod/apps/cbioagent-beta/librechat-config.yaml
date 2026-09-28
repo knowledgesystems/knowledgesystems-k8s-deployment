@@ -231,6 +231,8 @@ data:
             agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             temperature: 0
+            maxTokens: 4096
+            thinking: false
             # Bedrock prompt caching. On the Agents endpoint the request
             # body's model_parameters win; without this flag the ~40k-token
             # system+tools context is re-billed as fresh input every turn.
