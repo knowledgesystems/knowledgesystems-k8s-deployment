@@ -108,6 +108,8 @@ spec:
               value: "${SENDGRID_NEWSTEMPLATE}"
             - name: APPLICATION_SENDGRID_NEWSTEMPLATENOUNSUBSCRIBE
               value: "${SENDGRID_NEWSTEMPLATENOUNSUBSCRIBE}"
+            - name: APPLICATION_ONCOKBDATABRANCH
+              value: "data-release-v7.6"
 
           envFrom:
             - secretRef:
