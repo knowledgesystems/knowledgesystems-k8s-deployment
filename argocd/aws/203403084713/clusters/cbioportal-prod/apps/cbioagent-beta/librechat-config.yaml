@@ -127,8 +127,9 @@ data:
     endpoints:
       agents:
         contextStrategy: 'summarize'
-        recursionLimit: 50
-        maxRecursionLimit: 100
+        # Eight tool rounds + final model call = 17 steps; three steps of headroom.
+        recursionLimit: 20
+        maxRecursionLimit: 20
         disableBuilder: false
       assistants:
         disableBuilder: true
