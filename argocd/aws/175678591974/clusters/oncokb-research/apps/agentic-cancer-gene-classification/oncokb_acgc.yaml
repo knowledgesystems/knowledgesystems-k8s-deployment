@@ -66,8 +66,13 @@ spec:
             # OPENEVIDENCE_API_KEY comes from the acgc Secret via envFrom.
             - name: OPENEVIDENCE_ENABLED
               value: "true"
+            # The httpx timeout is per read (max gap between streamed chunks),
+            # not a total-call limit. Traefik and AWS LB still cut browser
+            # requests at ~300s; the backend continues and caches after a proxy 504.
             - name: OPENEVIDENCE_TIMEOUT_SECONDS
-              value: "300"
+              value: "600"
+            - name: OPENEVIDENCE_CACHE_TTL_SECONDS
+              value: "2592000"
             - name: PMID_DISTILLATION_ENABLED
               value: "false"
             # Repo curator feedback issues get filed against.
