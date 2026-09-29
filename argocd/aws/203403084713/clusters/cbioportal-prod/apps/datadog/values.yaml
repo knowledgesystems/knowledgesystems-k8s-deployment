@@ -116,6 +116,9 @@ datadog:
     # Experimental: Set to True and see if cloudwatch costs go up.
     containerCollectAll: true
     enabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+    useHostPort: true
   apm:
     portEnabled: true
     instrumentation:
