@@ -37,6 +37,16 @@ spec:
               value: https://www.cbioportal.org
             - name: NODE_ENV
               value: production
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_ENV
+              value: public
+            - name: DD_SERVICE
+              value: cbioportal-navigator
+            - name: OTEL_SERVICE_NAME
+              value: cbioportal-navigator
       nodeSelector:
         workload: "cbioagent"
       tolerations:

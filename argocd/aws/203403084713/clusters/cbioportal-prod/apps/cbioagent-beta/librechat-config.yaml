@@ -15,6 +15,7 @@ data:
     mcpSettings:
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
+        - 'cbioagent-clickhouse-mcp-beta'
         - 'cbioportal-navigator'
         - 'cbioportal-navigator-beta'
 
@@ -105,7 +106,14 @@ data:
         # No trailing slash: FastMCP 307-redirects the trailing-slash form to
         # this one, and LibreChat blocks following that redirect as SSRF.
         # Same fix as MSK-side (see portal-configuration#52).
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        # Beta-only MCP (cbioportal/mcp:beta, beta ClickHouse buffers); see
+        # cbioagent-clickhouse-mcp-beta.yaml.
+        url: http://cbioagent-clickhouse-mcp-beta:80/db/mcp
+        # Inject the server's FastMCP `instructions` (cbioportal-mcp
+        # resources/system-prompt.md: compact schema + guide index + core
+        # recipes) into the agent system prompt so the model doesn't spend
+        # tool rounds on list_guides / clickhouse_list_table_columns.
+        serverInstructions: true
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
@@ -230,22 +238,19 @@ data:
             endpoint: "agents"
             agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-            thinking: false
-            # Per model call; with adaptive thinking (Sonnet) the thinking
-            # and the answer share this budget, so keep headroom to avoid
-            # truncated answers and malformed tool-call JSON.
-            maxOutputTokens: 8192
             temperature: 0
-            # NOTE: on LibreChat v0.8.7-custom-v3 the Agents endpoint's
-            # compactAgentsSchema strips preset keys, so this flag is not
-            # what enables caching. Bedrock prompt caching is on because
-            # LibreChat defaults promptCache to true for model IDs
-            # containing "claude" (packages/data-provider/src/bedrock.ts
-            # :497-504). Likewise thinking/effort/maxOutputTokens in these
-            # presets take effect only once the LibreChat patch
-            # (polly/spec-agent-params, PR to cBioPortal/LibreChat) ships
-            # in a new image tag.
+            maxTokens: 4096
+            thinking: false
+            # Bedrock prompt caching. On the Agents endpoint the request
+            # body's model_parameters win; without this flag the ~40k-token
+            # system+tools context is re-billed as fresh input every turn.
+            # With it, subsequent turns within cache TTL cost 0.1× input
+            # rate. Beta canary before flipping the prod modelSpec on 203
+            # and the four MSK modelSpecs on 666.
             promptCache: true
+            # Pins the one-hour Bedrock prompt-cache TTL ('5m' | '1h').
+            # cBioPortal/LibreChat#36 forwards it from the preset to the
+            # agent; the Sonnet spec inherits it via the merge key.
             promptCacheTtl: 1h
             modelLabel: "cBioPortalChat"
             greeting: |
@@ -259,6 +264,3 @@ data:
           preset:
             <<: *betaPreset
             model: "us.anthropic.claude-sonnet-5"
-            thinking: true
-            effort: low
-            promptCacheTtl: 1h
