@@ -109,6 +109,11 @@ data:
         # Beta-only MCP (cbioportal/mcp:beta, beta ClickHouse buffers); see
         # cbioagent-clickhouse-mcp-beta.yaml.
         url: http://cbioagent-clickhouse-mcp-beta:80/db/mcp
+        # Inject the server's FastMCP `instructions` (cbioportal-mcp
+        # resources/system-prompt.md: compact schema + guide index + core
+        # recipes) into the agent system prompt so the model doesn't spend
+        # tool rounds on list_guides / clickhouse_list_table_columns.
+        serverInstructions: true
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
@@ -234,6 +239,8 @@ data:
             agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             temperature: 0
+            maxTokens: 4096
+            thinking: false
             # Bedrock prompt caching. On the Agents endpoint the request
             # body's model_parameters win; without this flag the ~40k-token
             # system+tools context is re-billed as fresh input every turn.
