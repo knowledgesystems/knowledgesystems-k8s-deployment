@@ -15,6 +15,7 @@ data:
     mcpSettings:
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
+        - 'cbioagent-clickhouse-mcp-beta'
         - 'cbioportal-navigator'
         - 'cbioportal-navigator-beta'
 
@@ -105,7 +106,14 @@ data:
         # No trailing slash: FastMCP 307-redirects the trailing-slash form to
         # this one, and LibreChat blocks following that redirect as SSRF.
         # Same fix as MSK-side (see portal-configuration#52).
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        # Beta-only MCP (cbioportal/mcp:beta, beta ClickHouse buffers); see
+        # cbioagent-clickhouse-mcp-beta.yaml.
+        url: http://cbioagent-clickhouse-mcp-beta:80/db/mcp
+        # Inject the server's FastMCP `instructions` (cbioportal-mcp
+        # resources/system-prompt.md: compact schema + guide index + core
+        # recipes) into the agent system prompt so the model doesn't spend
+        # tool rounds on list_guides / clickhouse_list_table_columns.
+        serverInstructions: true
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
@@ -244,6 +252,10 @@ data:
             # rate. Beta canary before flipping the prod modelSpec on 203
             # and the four MSK modelSpecs on 666.
             promptCache: true
+            # Pins the one-hour Bedrock prompt-cache TTL ('5m' | '1h').
+            # cBioPortal/LibreChat#36 forwards it from the preset to the
+            # agent; the Sonnet spec inherits it via the merge key.
+            promptCacheTtl: 1h
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
