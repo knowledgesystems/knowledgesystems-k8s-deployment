@@ -55,6 +55,19 @@ Never invent study IDs.
 Cite the REST API base URL for code questions.
 """
 
+BUDGET_TEXT = (
+    "Tool budget for each user message: aim to finish within six tool rounds. A tool round is one of your responses "
+    "that contains tool calls. Independent calls issued together in one response count as a single round, so batch "
+    "calls that do not depend on each other's results. Count only rounds made since the latest user message. Gather "
+    "only the evidence needed for a useful answer, and stop earlier when you have enough. After your sixth tool round, "
+    "make no further tool calls: give your best useful final answer using only the information already available. "
+    "Present the confirmed findings and any verified links, state uncertainty or missing evidence explicitly, and say "
+    "which part of the request remains unanswered. Do not invent results, counts, or links. If the evidence is "
+    "insufficient, explain what you could establish and suggest one focused follow-up the user can ask in a new "
+    "message. Do not mention an internal step limit, and never end with a tool error in place of an answer."
+)
+ROUTER_TRANSFER_LINE = "Always respond with exactly one transfer call; never answer the question yourself."
+
 DB_TOOL = "sys__all__sys_mcp_cbioportal-database"
 NAV_TOOL = "sys__all__sys_mcp_cbioportal-navigator"
 
@@ -182,8 +195,8 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertEqual(data["tools"], [DB_TOOL])
         self.assertEqual(data["mcpServerNames"], ["cbioportal-database"])
         data_md = m.read_prompt("data")
-        self.assertTrue(data["instructions"].endswith(data_md))
-        data_base = data["instructions"][: -len(data_md)]
+        self.assertTrue(data["instructions"].endswith(f"{data_md}\n\n{BUDGET_TEXT}"))
+        data_base = data["instructions"][: -len(f"{data_md}\n\n{BUDGET_TEXT}")]
         for marker in m.NAV_TOOL_MARKERS:
             self.assertNotIn(marker, data_base)
         self.assertIsNone(re.search(r"navigate_to_[a-z]", data["instructions"]))
@@ -196,7 +209,7 @@ class SetupHandoffAgentsTest(unittest.TestCase):
 
         self.assertEqual(nav["model"], m.SONNET)
         self.assertEqual(nav["tools"], [DB_TOOL, NAV_TOOL])
-        self.assertTrue(nav["instructions"].endswith(BASE_INSTRUCTIONS.strip()))
+        self.assertTrue(nav["instructions"].endswith(f"{BASE_INSTRUCTIONS.strip()}\n\n{BUDGET_TEXT}"))
 
         self.assertEqual(
             router["model_parameters"], {"model": m.HAIKU, "thinking": False, "maxOutputTokens": 256, "temperature": 0}
@@ -243,6 +256,55 @@ class SetupHandoffAgentsTest(unittest.TestCase):
             ],
         )
         self.assertNotIn("removed from the unified prompt", run(self.db))
+
+    def test_budget_is_last_and_once_in_specialists_only(self):
+        self.assertEqual(m.read_prompt("budget"), BUDGET_TEXT)
+        run(self.db)
+        router, data, nav = (self.agent(i) for i in m.MANAGED_IDS)
+        for a in (data, nav):
+            self.assertEqual(a["instructions"].count(m.BUDGET_MARKER), 1, a["id"])
+            self.assertEqual(a["instructions"].count("six tool rounds"), 1, a["id"])
+            self.assertTrue(a["instructions"].endswith("\n\n" + BUDGET_TEXT), a["id"])
+            self.assertEqual(a["versions"][-1]["instructions"], a["instructions"])
+        self.assertNotIn(m.BUDGET_MARKER, router["instructions"])
+        self.assertNotIn("tool round", router["instructions"])
+        self.assertEqual(router["instructions"].count(ROUTER_TRANSFER_LINE), 1)
+
+    def test_budget_in_unified_prompt_aborts_before_writing(self):
+        # Anywhere in the unified prompt, including inside a section NAV_SECTIONS strips from the data agent.
+        for instructions in (
+            f"{BASE_INSTRUCTIONS}\n## Tool Budget\n{BUDGET_TEXT}\n",
+            BASE_INSTRUCTIONS.replace("### Link First\n", f"### Link First\n{BUDGET_TEXT}\n"),
+        ):
+            self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"instructions": instructions}})
+            before = snapshot(self.db)
+            for args in ((), ("--dry-run",)):
+                with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+                    run(self.db, *args)
+                self.assertIn(m.BUDGET_MARKER, str(ctx.exception.code))
+                self.assertIn("already contain", str(ctx.exception.code))
+            self.assertEqual(snapshot(self.db), before)
+
+    def test_budget_in_prompt_file_aborts(self):
+        orig = m.read_prompt
+        m.read_prompt = lambda name: orig(name) + ("\n\n" + BUDGET_TEXT if name == "data" else "")
+        try:
+            before = snapshot(self.db)
+            with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+                run(self.db)
+            self.assertIn(m.DATA_ID, str(ctx.exception.code))
+            self.assertEqual(snapshot(self.db), before)
+        finally:
+            m.read_prompt = orig
+
+    def test_dry_run_shows_budget(self):
+        out = run(self.db, "--dry-run")
+        self.assertIn(
+            f"tool budget (prompts/budget.md), last section of {m.DATA_ID} and {m.NAV_ID}: "
+            f"{m.BUDGET_MARKER} aim to finish within six tool rounds.",
+            out,
+        )
+        self.assertNotIn("tool budget (prompts/budget.md)", run(self.db))
 
     def test_managed_diff_reports_only_changed_fields(self):
         desired = {"id": m.DATA_ID, "name": "n", "model": m.HAIKU}

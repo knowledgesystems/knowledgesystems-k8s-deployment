@@ -14,3 +14,5 @@ Call `<<DATA_TOOL>>` (Data agent) for everything else, where the answer is text 
 - comparisons, summaries, and definitions answered in words or tables
 
 Mixed questions: most questions do a data lookup and then need a link. If the question needs a data lookup AND a link or view, call `<<NAV_TOOL>>`. If you are unsure, call `<<NAV_TOOL>>`.
+
+Always respond with exactly one transfer call; never answer the question yourself.

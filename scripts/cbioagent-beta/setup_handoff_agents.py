@@ -44,6 +44,10 @@ NAV_SECTIONS = ("Capability Selection", "Navigate Workflow", "Link First")
 NAV_BRANCH_MARKER = "Navigation only:"
 NAV_TOOL_MARKERS = ("navigate_to_", "resolve_and_route", "get_studyviewfilter_options")
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
+# prompts/budget.md, the soft tool-round budget, is appended last to the data and navigation agents
+# only (the router makes no tool rounds). Its first sentence detects a copy already in the unified
+# prompt, which would otherwise reach the specialists twice.
+BUDGET_MARKER = "Tool budget for each user message:"
 # Lines left in the data agent's prompt that touch navigation or links; listed in the dry run for review.
 LINK_KEYWORDS = re.compile(r"navigate|link|url|cbioportal\.org", re.IGNORECASE)
 
@@ -134,6 +138,13 @@ def build_agents(source):
     if not db_tools:
         sys.exit(f"source agent {source['id']} has no {DB_SERVER} MCP tools; refusing to build agents without them")
     base_instructions = (source.get("instructions") or "").strip()
+    if BUDGET_MARKER in base_instructions:
+        sys.exit(
+            f"source agent {source['id']} instructions already contain the tool budget ({BUDGET_MARKER!r}). "
+            "This script appends prompts/budget.md to the data and navigation agents itself; remove the copy "
+            "from the unified agent's instructions, then re-run."
+        )
+    budget = read_prompt("budget")
 
     router_prompt = (
         read_prompt("router")
@@ -189,8 +200,8 @@ def build_agents(source):
             "id": DATA_ID,
             "name": "cBioPortalChat Data (beta)",
             "description": "Answers data questions with the cbioportal-database MCP.",
-            # The data.md override goes last so it wins over anything left in the shared prompt.
-            "instructions": f"{data_base}\n\n{read_prompt('data')}".strip(),
+            # The data.md override follows the shared prompt so it wins over anything left in it; the budget ends it.
+            "instructions": f"{data_base}\n\n{read_prompt('data')}\n\n{budget}".strip(),
             "model": HAIKU,
             "model_parameters": {
                 "model": HAIKU,
@@ -206,7 +217,7 @@ def build_agents(source):
             "id": NAV_ID,
             "name": "cBioPortalChat Navigation (beta)",
             "description": "Builds cBioPortal links and study-view navigation.",
-            "instructions": f"{read_prompt('navigation')}\n\n{base_instructions}".strip(),
+            "instructions": f"{read_prompt('navigation')}\n\n{base_instructions}\n\n{budget}".strip(),
             "model": SONNET,
             # No temperature. Anthropic's API rejects temperature/top_p/top_k on Sonnet 5 with a 400
             # (sampling parameters are removed on that model), and with thinking enabled it also
@@ -224,6 +235,14 @@ def build_agents(source):
         },
     ]
     for agent in agents:
+        count = agent["instructions"].count(BUDGET_MARKER)
+        if agent["id"] == ROUTER_ID and count:
+            sys.exit(f"{ROUTER_ID} instructions contain the tool budget; the router must not get it")
+        if agent["id"] != ROUTER_ID and (count != 1 or not agent["instructions"].endswith(budget)):
+            sys.exit(
+                f"{agent['id']} instructions must contain the tool budget exactly once, as the last section; "
+                f"found {count} copies. Remove any copy from prompts/*.md other than prompts/budget.md."
+            )
         agent.update(common)
         agent["mcpServerNames"] = mcp_server_names(agent["tools"])
         if source.get("tenantId") is not None:
@@ -234,6 +253,7 @@ def build_agents(source):
         "stripped_chars": len(data_base),
         "data_chars": len(agents[1]["instructions"]),
         "link_mentions": [ln.strip() for ln in data_base.splitlines() if LINK_KEYWORDS.search(ln)],
+        "budget_head": budget.split(". ", 1)[0] + ".",
     }
     return agents, report
 
@@ -244,10 +264,11 @@ def print_strip_report(report):
         print(f"  - {entry}")
     print(
         f"  {report['base_chars']} -> {report['stripped_chars']} chars after stripping, "
-        f"{report['data_chars']} with data.md"
+        f"{report['data_chars']} with data.md and budget.md"
     )
     for line in report["link_mentions"]:
         print(f"  still mentions navigation/links (data.md overrides): {line[:100]}")
+    print(f"tool budget (prompts/budget.md), last section of {DATA_ID} and {NAV_ID}: {report['budget_head']}")
 
 
 def agent_filter(agent_id, tenant_id):
