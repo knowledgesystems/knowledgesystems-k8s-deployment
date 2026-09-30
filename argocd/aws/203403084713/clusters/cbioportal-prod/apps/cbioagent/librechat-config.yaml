@@ -223,6 +223,8 @@ data:
             agent_id: "agent_9ZXhcwLIsROBQX0u4JS5F"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             temperature: 0
+            maxTokens: 4096
+            thinking: false
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>

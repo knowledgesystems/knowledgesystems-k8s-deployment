@@ -63,6 +63,18 @@ spec:
               value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             - name: LOG_LEVEL
               value: "INFO"
+            # OPENEVIDENCE_API_KEY comes from the acgc Secret via envFrom.
+            - name: OPENEVIDENCE_ENABLED
+              value: "true"
+            # The httpx timeout is per read (max gap between streamed chunks),
+            # not a total-call limit. Traefik and AWS LB still cut browser
+            # requests at ~300s; the backend continues and caches after a proxy 504.
+            - name: OPENEVIDENCE_TIMEOUT_SECONDS
+              value: "600"
+            - name: OPENEVIDENCE_CACHE_TTL_SECONDS
+              value: "2592000"
+            - name: PMID_DISTILLATION_ENABLED
+              value: "false"
             # Repo curator feedback issues get filed against.
             # ONCOKBDEV_PRIVATE_ACCESS_TOKEN (the filing bot's PAT) is not app
             # config, so it comes from the shared oncokb-github Secret

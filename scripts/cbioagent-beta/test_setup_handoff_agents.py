@@ -244,7 +244,7 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         haiku_params = {
             "model": m.HAIKU,
             "thinking": False,
-            "maxOutputTokens": 8192,
+            "maxOutputTokens": 4096,
             "temperature": 0,
             "promptCache": True,
             "promptCacheTtl": "1h",
@@ -255,9 +255,8 @@ class SetupHandoffAgentsTest(unittest.TestCase):
             nav["model_parameters"],
             {
                 "model": m.SONNET,
-                "thinking": True,
-                "effort": "low",
-                "maxOutputTokens": 8192,
+                "thinking": False,
+                "maxOutputTokens": 4096,
                 "promptCache": True,
                 "promptCacheTtl": "1h",
             },
@@ -461,6 +460,17 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         out = run(self.db)
         self.assertIn("update agent_cbiobeta_navigation: model_parameters", out)
         self.assertNotIn("temperature", self.agent(m.NAV_ID)["model_parameters"])
+
+    def test_previous_navigation_thinking_is_turned_off(self):
+        run(self.db)
+        old = {"model": m.SONNET, "thinking": True, "effort": "low", "maxOutputTokens": 8192, "promptCache": True}
+        self.db.agents.update_one({"id": m.NAV_ID}, {"$set": {"model_parameters": old}})
+        out = run(self.db)
+        self.assertIn("update agent_cbiobeta_navigation: model_parameters", out)
+        params = self.agent(m.NAV_ID)["model_parameters"]
+        self.assertIs(params["thinking"], False)
+        self.assertNotIn("effort", params)
+        self.assertEqual(params["maxOutputTokens"], 4096)
 
     def test_other_tenant_agent_is_untouched(self):
         others = [

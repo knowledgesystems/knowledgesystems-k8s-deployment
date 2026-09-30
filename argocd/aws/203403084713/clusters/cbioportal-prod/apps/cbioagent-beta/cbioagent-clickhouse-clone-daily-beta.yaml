@@ -1,0 +1,386 @@
+# Beta copy of cbioagent/cbioagent-clickhouse-clone-daily.yaml. Daily clone of
+# the active cBioPortal production color into a beta-only ping-pong buffer
+# (cbioportal_public_librechat_beta_{blue,green}), with LLM-prep SQL from the
+# `cbioportal/mcp:beta` image applied. Pod runs fetch-sql → clone →
+# patch-pointer. clone.sh always rebuilds the color the pointer doesn't name,
+# and patch-pointer runs only if clone.sh succeeds, so the MCP never reads a
+# half-built database. Reloader watches clickhouse-mcp-active-beta and rolls
+# cbioagent-clickhouse-mcp-beta when patch-pointer flips it.
+#
+# Isolation boundary: the Kubernetes objects are beta-named, the RBAC can only
+# patch clickhouse-mcp-active-beta, and clone.sh's own DDL only targets
+# cbioportal_public_librechat_beta_{blue,green}. The LLM-prep .sql files come
+# from the image and run with the shared clickhouse-librechat-admin
+# credentials, scoped only by --database. A preflight scan aborts the job if
+# any file uses database-level DDL, a USE statement, a cross-database
+# EXCHANGE/RENAME, inline INSERT data, or names a prod database. It matches
+# the raw text and the output of `clickhouse format` (ClickHouse's own
+# parser), and a file the parser rejects also aborts. That scan is a
+# denylist, not a sandbox: a file that evades it still runs with admin
+# rights.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-mcp-active-beta
+  namespace: default
+  annotations:
+    # Server-side apply for this object only, so Argo builds the patch from
+    # managed fields and skips the ignored /data/CLICKHOUSE_DATABASE.
+    argocd.argoproj.io/sync-options: ServerSideApply=true
+data:
+  # Initial seed. clone.sh always builds the color the pointer does not
+  # name and patches the pointer only after a full build, so the first run
+  # builds beta_green; until it succeeds the MCP points at a missing
+  # database and beta database queries fail. If a sync ever resets this
+  # value over the cron's patch, the MCP reads beta_blue: missing until the
+  # second run, then at most one build old.
+  CLICKHOUSE_DATABASE: cbioportal_public_librechat_beta_blue
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbioagent-clone-job-scripts-beta
+  namespace: default
+data:
+  clone.sh: |
+    #!/bin/sh
+    set -eu
+
+    # Required env (from clickhouse-librechat-admin Secret via envFrom)
+    : "${CLICKHOUSE_HOST:?missing}"
+    : "${CLICKHOUSE_PORT:?missing}"
+    : "${CLICKHOUSE_SECURE:?missing}"
+    : "${CLICKHOUSE_ADMIN_USER:?missing}"
+    : "${CLICKHOUSE_ADMIN_PASSWORD:?missing}"
+
+    MGMT_DB="${MGMT_DB:-publicdb_update_management_database}"
+    SRC_PREFIX="${SRC_PREFIX:-cbioportal_public_}"
+    DST_PREFIX="${DST_PREFIX:?missing}"
+    SQL_DIR="${SQL_DIR:-/workdir/sql}"
+    # This job DROPs ${DST_PREFIX}<color>; allow exactly the beta prefix.
+    case "$DST_PREFIX" in
+      cbioportal_public_librechat_beta_) ;;
+      *) echo "FAIL: DST_PREFIX '$DST_PREFIX' is not cbioportal_public_librechat_beta_"; exit 1 ;;
+    esac
+    # llm_user can be reached by anyone with access to cBioDBAgent, so the
+    # clone must not carry any auth/credential data. The explicit list
+    # covers today's cBioPortal schema; the substring patterns below are
+    # defense-in-depth for future schema additions (e.g. oauth_*, sessions).
+    EXCLUDED_TABLES="('authorities','data_access_tokens','users')"
+    EXCLUDED_SUBSTRINGS="'_backup','token','oauth','session','login','password','credential','secret'"
+
+    CH_FLAGS="--host=${CLICKHOUSE_HOST} --port=${CLICKHOUSE_PORT} --user=${CLICKHOUSE_ADMIN_USER} --password=${CLICKHOUSE_ADMIN_PASSWORD}"
+    [ "$CLICKHOUSE_SECURE" = "true" ] && CH_FLAGS="$CH_FLAGS --secure"
+
+    log() { echo "[clone-beta $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
+
+    # Numeric-prefixed .sql files matching the given globs, sorted; other
+    # files are docs and are skipped (same rule as the MCP repo's
+    # scripts/apply_sql.sh).
+    list_sql() {
+      for f in $(ls "$@" 2>/dev/null | sort); do
+        if basename "$f" | grep -Eq '^[0-9]+-'; then
+          echo "$f"
+        else
+          log "  skip ${f#${SQL_DIR}/} (no numeric prefix)" >&2
+        fi
+      done
+    }
+    # Single-value query. Aborts on a client error instead of treating empty
+    # output as an answer (a pipe into tr would hide the exit status).
+    ch_scalar() {
+      _out=$(clickhouse client $CH_FLAGS --query "$1") || {
+        log "FAIL: clickhouse exited $? for: $1" >&2; return 1; }
+      printf '%s' "$_out" | tr -d '[:space:]'
+    }
+    # Canonical form of a .sql file from ClickHouse's own parser (same
+    # lexer as the client that runs it): one query per line, comments
+    # removed, whitespace and qualified names normalized. Non-zero exit if
+    # the parser rejects the file, including INSERT with multi-line or
+    # FORMAT inline data.
+    format_sql() { clickhouse format --multiquery --oneline < "$1"; }
+    apply_sql() {
+      for f in "$@"; do
+        log "  → ${f#${SQL_DIR}/}"
+        clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+      done
+    }
+
+    # 0) Collect the LLM-prep SQL shipped in cbioportal/mcp:beta and scan it
+    #    before touching ClickHouse. Three phases:
+    #      a) sql/*.sql (portable)
+    #      b) sql/portal-specific/<portal>/*.sql for every subdir
+    #      c) sql/final/*.sql — runs after b because it reads the cohorts b
+    #         inserts. Images without sql/final/ skip this phase.
+    PORTABLE_SQL=$(list_sql "${SQL_DIR}"/*.sql)
+    PORTAL_SQL=$(list_sql "${SQL_DIR}"/portal-specific/*/*.sql)
+    FINAL_SQL=""
+    if [ -d "${SQL_DIR}/final" ]; then
+      FINAL_SQL=$(list_sql "${SQL_DIR}"/final/*.sql)
+    fi
+    # The files run with admin credentials scoped only by --database, so
+    # refuse any that could reach outside the target buffer. Fails closed:
+    #   Raw lines (so names hidden in strings or comments count too):
+    #   database-level DDL, or any prod name (the prod LLM buffers or the
+    #   cBioPortal source colors).
+    #   format_sql output: the file must parse. Each query is then checked
+    #   for the same DDL and names, any USE, any EXCHANGE/RENAME with a
+    #   db-qualified operand, and any INSERT with inline data (VALUES or
+    #   FORMAT), whose data the formatter passes through unparsed. Use
+    #   INSERT ... SELECT instead. Unqualified EXCHANGE TABLES a AND b stays
+    #   inside --database and is allowed.
+    PROD_NAMES='cbioportal_public_librechat_(blue|green)|cbioportal_public_(blue|green)'
+    DB_DDL='(drop|rename|attach|detach|undrop|truncate)[[:space:]]+database'
+    FORBIDDEN_LINE="${DB_DDL}|${PROD_NAMES}"
+    FORBIDDEN_STMT="(^|[[:space:]])${DB_DDL}([[:space:];]|\$)|^use([[:space:];]|\$)|^(exchange|rename)[[:space:]].*[[:alnum:]_\`]\.[[:alnum:]_\`]|^insert[[:space:]].*[[:space:]](values|format)([[:space:];(]|\$)|${PROD_NAMES}"
+    ALL_SQL="$PORTABLE_SQL $PORTAL_SQL $FINAL_SQL"
+    BAD=0
+    for f in $ALL_SQL; do
+      if ! FORMATTED=$(format_sql "$f" 2>/dev/null); then
+        BAD=1
+        log "FAIL: clickhouse format could not parse ${f#${SQL_DIR}/}:"
+        format_sql "$f" 2>&1 >/dev/null | grep -m1 'Code:' | cut -c1-300 | sed 's/^/    /'
+        continue
+      fi
+      HITS=$( { grep -Ein "$FORBIDDEN_LINE" "$f" || true
+                printf '%s\n' "$FORMATTED" | grep -Ei "$FORBIDDEN_STMT" \
+                  | cut -c1-300 | sed 's/^/stmt: /' || true; } )
+      if [ -n "$HITS" ]; then
+        BAD=1
+        log "FAIL: forbidden SQL in ${f#${SQL_DIR}/}:"
+        echo "$HITS" | sed 's/^/    /'
+      fi
+    done
+    [ "$BAD" = 0 ] || exit 1
+    log "preflight ok: $(echo $ALL_SQL | wc -w | tr -d ' ') SQL files"
+
+    # 1) Production color.
+    PROD_COLOR=$(ch_scalar "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'") || exit 1
+    if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
+      log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
+    fi
+    SRC_DB="${SRC_PREFIX}${PROD_COLOR}"
+    log "production color=$PROD_COLOR, source=$SRC_DB"
+
+    # 2) Active beta buffer (read from the ConfigMap mounted at /active).
+    #    Always build the other color, so the database the MCP reads is
+    #    never dropped or half-built; patch-pointer publishes the new one
+    #    only after this script succeeds. An unrecognised pointer value
+    #    builds blue. If the active buffer doesn't exist (first run), the
+    #    MCP keeps failing until this build is published.
+    ACTIVE_DB="$(cat /active/CLICKHOUSE_DATABASE 2>/dev/null || echo '')"
+    case "$ACTIVE_DB" in
+      "${DST_PREFIX}blue")  TARGET_COLOR="green" ;;
+      "${DST_PREFIX}green") TARGET_COLOR="blue"  ;;
+      *) log "active='${ACTIVE_DB}' is not a beta buffer"
+         ACTIVE_DB=""; TARGET_COLOR="blue" ;;
+    esac
+    if [ -n "$ACTIVE_DB" ]; then
+      ACTIVE_EXISTS=$(ch_scalar "EXISTS DATABASE ${ACTIVE_DB}") || exit 1
+      case "$ACTIVE_EXISTS" in
+        1) ;;
+        0) log "active=${ACTIVE_DB} does not exist yet (first run); beta MCP queries fail until this build is published" ;;
+        *) log "FAIL: EXISTS DATABASE ${ACTIVE_DB} returned '${ACTIVE_EXISTS}'"; exit 1 ;;
+      esac
+    fi
+    DST_DB="${DST_PREFIX}${TARGET_COLOR}"
+    case "$DST_DB" in
+      cbioportal_public_librechat_beta_blue|cbioportal_public_librechat_beta_green) ;;
+      *) log "FAIL: refusing to rebuild '${DST_DB}'"; exit 1 ;;
+    esac
+    log "active=${ACTIVE_DB:-<unset>}; building into ${DST_DB}"
+
+    # 3) Rebuild target.
+    clickhouse client $CH_FLAGS --query "DROP DATABASE IF EXISTS ${DST_DB}"
+    clickhouse client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
+
+    # 4) Enumerate source tables (exclude sensitive + backup).
+    TABLES=$(clickhouse client $CH_FLAGS --query "
+      SELECT name FROM system.tables
+      WHERE database = '${SRC_DB}'
+        AND name NOT IN ${EXCLUDED_TABLES}
+        AND NOT multiSearchAny(lower(name), [${EXCLUDED_SUBSTRINGS}])
+      ORDER BY name
+    ")
+    N=$(echo "$TABLES" | grep -c . || true)
+    log "cloning $N tables from $SRC_DB → $DST_DB"
+
+    # 5) Per-table zero-copy CLONE. SharedMergeTree parts are hard-linked,
+    # so each statement is near-instant and storage stays at zero until
+    # the LLM-prep ALTERs in step 6 cause copy-on-write divergence.
+    # CLONE AS can succeed yet leave the new table empty (seen on
+    # ClickHouse 24.10), so compare row counts before any SQL runs.
+    i=0
+    for t in $TABLES; do
+      i=$((i+1))
+      log "  [$i/$N] $t"
+      clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
+      SRC_ROWS=$(ch_scalar "SELECT count() FROM ${SRC_DB}.${t}") || exit 1
+      DST_ROWS=$(ch_scalar "SELECT count() FROM ${DST_DB}.${t}") || exit 1
+      if [ -z "$SRC_ROWS" ] || [ "$SRC_ROWS" != "$DST_ROWS" ]; then
+        log "FAIL: ${t} has ${DST_ROWS:-?} rows in ${DST_DB}, ${SRC_ROWS:-?} in ${SRC_DB}"
+        exit 1
+      fi
+    done
+    log "row counts match for $N tables"
+
+    # 6) Apply the LLM-prep SQL collected in step 0.
+    log "applying LLM-prep SQL files (portable)"
+    apply_sql $PORTABLE_SQL
+    log "applying LLM-prep SQL files (portal-specific)"
+    apply_sql $PORTAL_SQL
+    if [ -d "${SQL_DIR}/final" ]; then
+      log "applying LLM-prep SQL files (final)"
+      apply_sql $FINAL_SQL
+    else
+      log "no sql/final/ in this image; skipping final phase"
+    fi
+
+    # 7) Optionally drop the ClickHouse query cache before patch-pointer
+    #    flips clickhouse-mcp-active-beta. The MCP's opt-in query cache
+    #    (CBIOPORTAL_MCP_QUERY_CACHE_ENABLED, cbioportal-mcp#152) is not
+    #    invalidated by the buffer swap. SYSTEM DROP QUERY CACHE is
+    #    server-wide, so it also empties prod's cache; enable it only while
+    #    piloting the query cache on beta. Best effort when enabled.
+    if [ "${DROP_QUERY_CACHE:-false}" = "true" ]; then
+      if clickhouse client $CH_FLAGS --query "SYSTEM DROP QUERY CACHE"; then
+        log "dropped query cache"
+      else
+        log "WARN: SYSTEM DROP QUERY CACHE failed; cached results expire within the MCP TTL"
+      fi
+    else
+      log "DROP_QUERY_CACHE=${DROP_QUERY_CACHE:-false}; leaving query cache alone"
+    fi
+
+    # 8) Hand off state to the patch-pointer container.
+    # llm_user grants are keyed by database name and persist across DROP
+    # DATABASE + CREATE DATABASE, so no GRANT step here. The beta names
+    # need their own one-time grants (see README.md).
+    echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
+    log "done. ACTIVE_DB=${DST_DB}"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: clickhouse-clone-job-beta
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: clickhouse-clone-job-beta-role
+  namespace: default
+rules:
+  # Reloader rolls cbioagent-clickhouse-mcp-beta when this ConfigMap
+  # changes. Scoped to the beta pointer only; this SA can't patch prod's
+  # clickhouse-mcp-active.
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["clickhouse-mcp-active-beta"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: clickhouse-clone-job-beta-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: clickhouse-clone-job-beta
+    namespace: default
+roleRef:
+  kind: Role
+  name: clickhouse-clone-job-beta-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioagent-clickhouse-clone-daily-beta
+  labels:
+    app.kubernetes.io/instance: cbioagent-beta
+spec:
+  # Three hours after prod's 13:00 UTC run. Prod's activeDeadlineSeconds is
+  # 2h, so an on-time prod run has finished or been killed before this starts.
+  schedule: "0 16 * * *"  # daily 16:00 UTC = 12:00 ET (DST) / 11:00 ET (EST)
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200
+      template:
+        spec:
+          serviceAccountName: clickhouse-clone-job-beta
+          # Use cbio-dev node pool (same as the prod clone cron).
+          nodeSelector:
+            workload: cbio-dev
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbio-dev"
+              effect: "NoSchedule"
+          restartPolicy: OnFailure
+          volumes:
+            - name: workdir
+              emptyDir: {}
+            - name: scripts
+              configMap:
+                name: cbioagent-clone-job-scripts-beta
+                defaultMode: 0555
+            - name: active-readonly
+              configMap:
+                name: clickhouse-mcp-active-beta
+          # Three sequential containers: fetch-sql → clone → patch-pointer.
+          initContainers:
+            - name: fetch-sql
+              image: cbioportal/mcp:beta
+              imagePullPolicy: Always
+              command: ["sh", "-c", "cp -rv /app/sql /workdir/sql && ls /workdir/sql"]
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+            - name: clone
+              image: clickhouse/clickhouse-server:26.2-alpine
+              command: ["/bin/sh", "/scripts/clone.sh"]
+              env:
+                - name: DST_PREFIX
+                  value: cbioportal_public_librechat_beta_
+                # "true" runs SYSTEM DROP QUERY CACHE before the flip. It also
+                # empties prod's cache, so keep it off unless piloting
+                # CBIOPORTAL_MCP_QUERY_CACHE_ENABLED on beta.
+                - name: DROP_QUERY_CACHE
+                  value: "false"
+              envFrom:
+                - secretRef:
+                    name: clickhouse-librechat-admin
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                - mountPath: /scripts
+                  name: scripts
+                  readOnly: true
+                - mountPath: /active
+                  name: active-readonly
+                  readOnly: true
+          containers:
+            # Patches clickhouse-mcp-active-beta with the buffer the clone
+            # container wrote to /workdir/state.env. Reloader (watching
+            # clickhouse-mcp-active-beta via the annotation on
+            # cbioagent-clickhouse-mcp-beta) rolls the beta MCP.
+            - name: patch-pointer
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  . /workdir/state.env
+                  : "${ACTIVE_DB:?missing from state.env}"
+                  echo "patching clickhouse-mcp-active-beta → ${ACTIVE_DB}"
+                  kubectl -n default patch configmap clickhouse-mcp-active-beta \
+                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
+              volumeMounts:
+                - mountPath: /workdir
+                  name: workdir
+                  readOnly: true

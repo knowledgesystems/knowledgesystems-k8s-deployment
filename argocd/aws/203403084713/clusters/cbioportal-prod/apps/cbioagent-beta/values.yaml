@@ -1,10 +1,11 @@
 # Values for the beta cBioAgent LibreChat instance at beta.chat.cbioportal.org.
 # Rendered by the upstream LibreChat helm chart with releaseName: cbioagent-beta.
 #
-# Beta reuses all prod *backends* (MongoDB, meilisearch, rag-api if present,
-# the navigator, clickhouse-mcp, and the shared images PVC). Only the
-# LibreChat pod + its librechat.yaml ConfigMap are separate — beta exists to
-# test new agent variants and LibreChat changes without affecting prod.
+# Beta reuses the prod MongoDB, meilisearch, rag-api (if present), navigator,
+# and the shared images PVC. The LibreChat pod, its librechat.yaml ConfigMap,
+# and the ClickHouse MCP + its ClickHouse buffers (see
+# cbioagent-clickhouse-mcp-beta.yaml) are separate — beta exists to test new
+# agent variants, MCP changes, and LibreChat changes without affecting prod.
 #
 # Keep this file in sync with apps/cbioagent/values.yaml for anything that
 # should behave the same way on both environments. The differences below are

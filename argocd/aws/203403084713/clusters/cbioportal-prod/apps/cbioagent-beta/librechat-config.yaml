@@ -15,6 +15,7 @@ data:
     mcpSettings:
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
+        - 'cbioagent-clickhouse-mcp-beta'
         - 'cbioportal-navigator'
         - 'cbioportal-navigator-beta'
 
@@ -105,7 +106,14 @@ data:
         # No trailing slash: FastMCP 307-redirects the trailing-slash form to
         # this one, and LibreChat blocks following that redirect as SSRF.
         # Same fix as MSK-side (see portal-configuration#52).
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        # Beta-only MCP (cbioportal/mcp:beta, beta ClickHouse buffers); see
+        # cbioagent-clickhouse-mcp-beta.yaml.
+        url: http://cbioagent-clickhouse-mcp-beta:80/db/mcp
+        # Inject the server's FastMCP `instructions` (cbioportal-mcp
+        # resources/system-prompt.md: compact schema + guide index + core
+        # recipes) into the agent system prompt so the model doesn't spend
+        # tool rounds on list_guides / clickhouse_list_table_columns.
+        serverInstructions: true
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
@@ -179,10 +187,8 @@ data:
     # agent_cbiobeta_navigation (Sonnet 5, links and study-view navigation).
     # Those agent records are created by
     # scripts/cbioagent-beta/setup_handoff_agents.py, which must run before
-    # this spec points at them. Of the preset's generation settings, only
-    # `model` reaches an agent (the router); thinking, max output tokens,
-    # temperature and promptCache are set in each agent record's
-    # model_parameters by the script, so they are not repeated here.
+    # this spec points at them. The script sets each agent's generation
+    # parameters (thinking off everywhere, per #659) in its model_parameters.
     modelSpecs:
       enforce: false
       prioritize: true
@@ -226,6 +232,14 @@ data:
             endpoint: "agents"
             agent_id: "agent_cbiobeta_router"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            # From #659. With cBioPortal/LibreChat#36 the preset's allowlisted
+            # keys (thinking, thinkingBudget, effort, maxOutputTokens,
+            # temperature, promptCache, promptCacheTtl) reach only the spec's
+            # agent, the router; the data and navigation agents never see the
+            # preset. maxTokens is not on that allowlist, so the router keeps
+            # the 256 cap its record sets.
+            maxTokens: 4096
+            thinking: false
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
