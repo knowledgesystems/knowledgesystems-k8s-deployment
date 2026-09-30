@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-preview
-          image: mskcc/oncokb-public:6.30.2-beta.4
+          image: mskcc/oncokb-public:6.30.2-beta.6
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
