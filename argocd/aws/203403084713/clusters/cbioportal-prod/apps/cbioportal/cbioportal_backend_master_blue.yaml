@@ -7,7 +7,7 @@ metadata:
   name: cbioportal-backend-master-blue
 spec:
   progressDeadlineSeconds: 600
-  replicas: 1
+  replicas: 0
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -203,7 +203,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-blue
-          image: cbioportal/cbioportal@sha256:11a18a292f121b06e91e5525e27d5bc8abe47e04be8482998c3c4ba694fc3194
+          image: cbioportal/cbioportal@sha256:96da9ac96643d41734f00b9b469a62a050ed4050db472461c991369e2c547a8a
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
