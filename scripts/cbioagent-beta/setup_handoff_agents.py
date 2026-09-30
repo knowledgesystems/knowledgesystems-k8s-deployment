@@ -26,6 +26,11 @@ MANAGED_IDS = (ROUTER_ID, DATA_ID, NAV_ID)
 DEFAULT_SOURCE_ID = "agent_OHVSJI9Gd6gwsDnFSL-Xl"
 DEFAULT_DB = "cBioAgent"
 
+# #659: thinking off for every beta agent and a 4096-token output cap on the data and navigation agents.
+# `maxOutputTokens` is the key bedrockInputParser (LibreChat 7430a52) copies to Bedrock's `maxTokens`;
+# it wins if both are set.
+MAX_OUTPUT_TOKENS = 4096
+
 HAIKU = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 SONNET = "us.anthropic.claude-sonnet-5"
 PROVIDER = "bedrock"
@@ -225,7 +230,7 @@ def build_agents(source):
             "model_parameters": {
                 "model": HAIKU,
                 "thinking": False,
-                "maxOutputTokens": 8192,
+                "maxOutputTokens": MAX_OUTPUT_TOKENS,
                 "temperature": 0,
                 "promptCache": True,
             },
@@ -238,15 +243,13 @@ def build_agents(source):
             "description": "Builds cBioPortal links and study-view navigation.",
             "instructions": f"{read_prompt('navigation')}\n\n{base_instructions}\n\n{budget}".strip(),
             "model": SONNET,
-            # No temperature. Anthropic's API rejects temperature/top_p/top_k on Sonnet 5 with a 400
-            # (sampling parameters are removed on that model), and with thinking enabled it also
-            # rejects any temperature other than 1 on every model. This LibreChat version drops
-            # neither for Sonnet 5 before calling Bedrock, so the key must stay absent.
+            # Thinking off, no effort (#659). No temperature: Anthropic's API rejects
+            # temperature/top_p/top_k on Sonnet 5 with a 400 (sampling parameters are removed on that
+            # model), and LibreChat at 7430a52 does not drop them for Sonnet 5, so the key stays absent.
             "model_parameters": {
                 "model": SONNET,
-                "thinking": True,
-                "effort": "low",
-                "maxOutputTokens": 8192,
+                "thinking": False,
+                "maxOutputTokens": MAX_OUTPUT_TOKENS,
                 "promptCache": True,
             },
             "tools": source_tools,

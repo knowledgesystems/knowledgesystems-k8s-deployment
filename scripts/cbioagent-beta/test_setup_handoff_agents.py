@@ -227,11 +227,11 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         )
         self.assertEqual(
             data["model_parameters"],
-            {"model": m.HAIKU, "thinking": False, "maxOutputTokens": 8192, "temperature": 0, "promptCache": True},
+            {"model": m.HAIKU, "thinking": False, "maxOutputTokens": 4096, "temperature": 0, "promptCache": True},
         )
         self.assertEqual(
             nav["model_parameters"],
-            {"model": m.SONNET, "thinking": True, "effort": "low", "maxOutputTokens": 8192, "promptCache": True},
+            {"model": m.SONNET, "thinking": False, "maxOutputTokens": 4096, "promptCache": True},
         )
         for a in (router, data, nav):
             self.assertEqual(self.db.aclentries.count_documents({"resourceId": a["_id"]}), 3)
@@ -422,6 +422,17 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         out = run(self.db)
         self.assertIn("update agent_cbiobeta_navigation: model_parameters", out)
         self.assertNotIn("temperature", self.agent(m.NAV_ID)["model_parameters"])
+
+    def test_previous_navigation_thinking_is_turned_off(self):
+        run(self.db)
+        old = {"model": m.SONNET, "thinking": True, "effort": "low", "maxOutputTokens": 8192, "promptCache": True}
+        self.db.agents.update_one({"id": m.NAV_ID}, {"$set": {"model_parameters": old}})
+        out = run(self.db)
+        self.assertIn("update agent_cbiobeta_navigation: model_parameters", out)
+        params = self.agent(m.NAV_ID)["model_parameters"]
+        self.assertIs(params["thinking"], False)
+        self.assertNotIn("effort", params)
+        self.assertEqual(params["maxOutputTokens"], 4096)
 
     def test_other_tenant_agent_is_untouched(self):
         other = {"_id": ObjectId(), "id": m.ROUTER_ID, "tenantId": "other", "model": "keep-me", "author": self.author}

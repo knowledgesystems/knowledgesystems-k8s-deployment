@@ -37,15 +37,16 @@ Navigation goes to Sonnet because the benchmark shows it passes navigation quest
 - Handoffs are the `edges` array on the router's agent record (`{from, to, edgeType: "handoff", description}`). LibreChat gives the router one tool per edge, `lc_transfer_to_<agent id>`, with `description` as the tool description. No `librechat.yaml` change is needed: edge discovery isn't gated by an `agents.capabilities` entry (only the deprecated `agent_ids` chain uses `chain`), and beta sets no `capabilities` list, so it gets the defaults anyway.
 - A handoff target must exist, and the user must have VIEW on it through `aclentries`. On the Agents API (`/api/agents/v1/...`) that is `remoteAgent` VIEW. The script gives each new agent the same `aclentries` rows as the unified agent.
 - The target receives the whole message history, including tool calls and results from earlier turns. The transfer call itself is filtered out. It runs with its **own** tools, instructions and `model_parameters`.
-- Of the modelSpec preset, only `model` reaches an agent (the router), through the fork's spec override. `compactAgentsSchema` strips `temperature`, `promptCache`, `thinking`, `effort` and max-token settings. So the script sets every generation parameter in each record's `model_parameters`. Key names match `bedrockInputParser` at `7430a52`:
+- **Generation parameters follow #659: thinking off on every agent, Haiku and Sonnet alike, and a 4096-token output cap on the data and navigation agents.** The router keeps 256, since it only emits one argument-free transfer call. The modelSpec preset reaches only the spec's agent, the router: since cBioPortal/LibreChat#36, the fork forwards the preset's `model` plus the allowlisted `thinking`, `thinkingBudget`, `effort`, `maxOutputTokens`, `temperature`, `promptCache` and `promptCacheTtl` to it. The handoff targets never see the preset. So the script sets every generation parameter in each record's `model_parameters`:
 
   | Agent | `model_parameters` |
   |---|---|
   | router | Haiku 4.5, `thinking: false`, `maxOutputTokens: 256`, `temperature: 0` |
-  | data | Haiku 4.5, `thinking: false`, `maxOutputTokens: 8192`, `temperature: 0`, `promptCache: true` |
-  | navigation | Sonnet 5, `thinking: true` + `effort: "low"` (adaptive), `maxOutputTokens: 8192`, `promptCache: true` |
+  | data | Haiku 4.5, `thinking: false`, `maxOutputTokens: 4096`, `temperature: 0`, `promptCache: true` |
+  | navigation | Sonnet 5, `thinking: false` (no `effort`), `maxOutputTokens: 4096`, `promptCache: true` |
 
-  `thinking: false` is required on Haiku 4.5: when `thinking` is unset, the Bedrock parser turns it on with a 2000-token budget. Navigation has no `temperature`, because Anthropic's API rejects `temperature`/`top_p`/`top_k` on Sonnet 5 with a 400 (sampling parameters are removed on that model), and this LibreChat version doesn't drop them for Sonnet 5.
+  Key names match `bedrockInputParser` at `7430a52` (`packages/data-provider/src/bedrock.ts`). It accepts both `maxOutputTokens` and `maxTokens` and copies one to the other, with `maxOutputTokens` winning when both are set (`:525-529`). The records use `maxOutputTokens`, which is also the name on #36's preset allowlist. #659's preset `maxTokens: 4096` isn't on that allowlist, so it doesn't change the router's 256.
+  `thinking: false` has to be explicit: when `thinking` is unset, the Bedrock parser turns it on with a 2000-token budget. Navigation has no `temperature`, because Anthropic's API rejects `temperature`/`top_p`/`top_k` on Sonnet 5 with a 400 (sampling parameters are removed on that model), and `omitsSamplingParameters` at `7430a52` doesn't drop them for Sonnet 5.
 - Every turn starts at the router again, so each question is routed on its own. A follow-up such as "now give me the link" goes to navigation.
 - **Existing conversations bypass the router.** A conversation stores the `agent_id` it started with, so beta conversations created before the switch keep running on the unified agent. Only new chats use the router. Start a new chat when testing.
 
@@ -86,7 +87,7 @@ In a **new** chat on beta.chat.cbioportal.org, after the pod has rolled:
 
 - **Data question**, e.g. "How many studies have whole exome sequencing data?": the router hands off to `agent_cbiobeta_data`. The turn must contain **no `navigate_to_*` (or `resolve_and_route`) tool call and no `cbioportal.org` URL** in the answer.
 - **Navigation question**, e.g. "Give me an OncoPrint for EGFR and KRAS in TCGA lung adenocarcinoma": the router hands off to `agent_cbiobeta_navigation`, and the answer has a working cBioPortal link.
-- Neither turn returns a Bedrock 400. The router and data turns show no thinking blocks.
+- Neither turn returns a Bedrock 400. No turn (router, data or navigation) shows thinking blocks or `reasoning_content`.
 
 Then run `cbioportal-mcp-qa --target beta --repeats 3` and compare median latency and pass rate by question category against the single-agent baseline.
 
