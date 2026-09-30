@@ -106,6 +106,11 @@ data:
         # this one, and LibreChat blocks following that redirect as SSRF.
         # Same fix as MSK-side (see portal-configuration#52).
         url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        # Inject the server's FastMCP `instructions` (cbioportal-mcp
+        # resources/system-prompt.md: compact schema + guide index + core
+        # recipes) into the agent system prompt so the model doesn't spend
+        # tool rounds on list_guides / clickhouse_list_table_columns.
+        serverInstructions: true
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
