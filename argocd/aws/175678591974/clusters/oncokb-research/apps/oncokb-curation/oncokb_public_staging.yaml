@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-staging
-          image: mskcc/oncokb-public:6.30.2-beta.7
+          image: mskcc/oncokb-public:6.30.2-beta.8
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,no-liquibase
@@ -72,8 +72,8 @@ spec:
               value: "INFO"
             - name: LOGGING_PATTERN_CONSOLE
               value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%X{requestId}]  %C:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"
-            - name: APPLICATION_ONCOKBDATABRANCH
-              value: "data-release-v7.6"
+            # - name: APPLICATION_ONCOKBDATABRANCH
+            #   value: "data-release-v7.6"
           envFrom:
             - secretRef:
                 name: oncokb-public-staging
