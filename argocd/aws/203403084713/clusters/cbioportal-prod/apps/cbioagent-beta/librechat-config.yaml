@@ -246,6 +246,7 @@ data:
             # (polly/spec-agent-params, PR to cBioPortal/LibreChat) ships
             # in a new image tag.
             promptCache: true
+            promptCacheTtl: 1h
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
@@ -260,3 +261,4 @@ data:
             model: "us.anthropic.claude-sonnet-5"
             thinking: true
             effort: low
+            promptCacheTtl: 1h
