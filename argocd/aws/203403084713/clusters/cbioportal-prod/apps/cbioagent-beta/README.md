@@ -16,7 +16,8 @@ Beta is a second LibreChat frontend plus its **own ClickHouse MCP and ClickHouse
 | Navigator MCP (`cbioportal-navigator`) | yes (today) | May gain a `-beta` variant in the future |
 | ClickHouse MCP (`cbioagent-clickhouse-mcp`) | **no** | Beta runs `cbioagent-clickhouse-mcp-beta` (`cbioportal/mcp:beta`) — see below |
 | ClickHouse buffers (`cbioportal_public_librechat_{blue,green}`) | **no** | Beta reads `cbioportal_public_librechat_beta_{blue,green}`, built by its own clone cron. Both clones read the same production source DB. |
-| ClickHouse Secrets (`clickhouse-mcp`, `clickhouse-librechat-admin`) | yes | Same `llm_user` / admin credentials |
+| ClickHouse MCP Secret (`clickhouse-mcp-beta`) | **no** | Beta MCP uses its own `llm_user_beta` credentials; prod keeps `clickhouse-mcp` and `llm_user` |
+| ClickHouse clone admin Secret (`clickhouse-librechat-admin`) | yes | Beta clone still uses the shared admin credentials for DDL and copying data |
 | Images PVC (`cbioagent-librechat-images`) | yes | Both deployments mount the same RWX PVC |
 | `librechat-credentials-env` Secret | yes | Contains `MONGO_URI`, `MEILI_HOST`, etc. — all pointing at prod backends |
 
@@ -49,19 +50,40 @@ It's still a denylist, not a sandbox. It doesn't catch, for example, a cross-dat
 
 One quirk: a file whose last chunk is only a `#` or `/* */` comment fails to format ("Empty query") and aborts the job. End files with a statement or a `--` comment. Review SQL changes on the `beta` branch as if they could reach prod. Both clones also share the ClickHouse server's CPU and memory.
 
-### ClickHouse admin prerequisite (one-time)
+### ClickHouse admin and Secret prerequisites (one-time)
 
-`llm_user` grants are keyed by database name. They survive the clone's `DROP DATABASE` + `CREATE DATABASE`, but prod's grants on `cbioportal_public_librechat_{blue,green}` do **not** cover the beta names. A ClickHouse admin must run, once (grants can be issued before the databases exist):
+A ClickHouse admin must create a dedicated beta user and grant only `SELECT` on both beta buffers. These grants are keyed by database name, so they survive the clone's `DROP DATABASE` + `CREATE DATABASE` and may be issued before the databases exist. Use a new password kept outside this repository:
 
 ```sql
-GRANT SELECT ON cbioportal_public_librechat_beta_blue.*  TO llm_user;
-GRANT SELECT ON cbioportal_public_librechat_beta_green.* TO llm_user;
--- Needed once the dictionaries from cbioportal-mcp#155 ship in :beta
-GRANT dictGet ON cbioportal_public_librechat_beta_blue.*  TO llm_user;
-GRANT dictGet ON cbioportal_public_librechat_beta_green.* TO llm_user;
+CREATE USER llm_user_beta IDENTIFIED BY '<new-beta-password>' SETTINGS readonly = 1;
+GRANT SELECT ON cbioportal_public_librechat_beta_blue.* TO llm_user_beta;
+GRANT SELECT ON cbioportal_public_librechat_beta_green.* TO llm_user_beta;
 ```
 
-Mirror whatever else prod's `llm_user` holds on the prod buffers (`SHOW GRANTS FOR llm_user`).
+Create the beta MCP Secret out of band in the `default` namespace (the beta pointer ConfigMap and clone job explicitly use `namespace: default`). Replace every angle-bracket placeholder before running this command:
+
+```sh
+kubectl create secret generic clickhouse-mcp-beta -n default \
+  --from-literal=CLICKHOUSE_HOST='<clickhouse-host>' \
+  --from-literal=CLICKHOUSE_PORT='<clickhouse-http-port>' \
+  --from-literal=CLICKHOUSE_USER='llm_user_beta' \
+  --from-literal=CLICKHOUSE_PASSWORD='<new-beta-password>' \
+  --from-literal=CLICKHOUSE_SECURE='<true-or-false>' \
+  --from-literal=CLICKHOUSE_VERIFY='<true-or-false>' \
+  --from-literal=CLICKHOUSE_MCP_SERVER_TRANSPORT='http' \
+  --from-literal=CLICKHOUSE_MCP_BIND_HOST='0.0.0.0' \
+  --from-literal=CLICKHOUSE_MCP_BIND_PORT='8000'
+```
+
+These are the exact Secret keys needed to preserve the existing MCP connection and HTTP listener: `CLICKHOUSE_HOST`, `CLICKHOUSE_PORT`, `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`, `CLICKHOUSE_SECURE`, and `CLICKHOUSE_VERIFY` configure the ClickHouse HTTP client; `CLICKHOUSE_MCP_SERVER_TRANSPORT`, `CLICKHOUSE_MCP_BIND_HOST`, and `CLICKHOUSE_MCP_BIND_PORT` expose the MCP listener to its in-cluster Service. Use the prod Secret's host, HTTP port, and TLS settings, but the new username and password. The connection and listener variables come from [mcp-clickhouse 0.5.0](https://github.com/ClickHouse/mcp-clickhouse/blob/v0.5.0/README.md#clickhouse-database-connection) and the [cbioportal-mcp environment example](https://github.com/cBioPortal/cbioportal-mcp#configuration). `CLICKHOUSE_MCP_HTTP_PATH` is set directly in the beta Deployment. `CLICKHOUSE_DATABASE` comes from `clickhouse-mcp-active-beta`, which is loaded after this Secret so the active beta color wins even if an existing Secret includes that key. The database port above is the HTTP port, not the native TCP port used by `clickhouse client`.
+
+Verify the beta user's effective grants by logging in as that user (the client prompts for its password):
+
+```sh
+clickhouse client --host <clickhouse-host> --port <native-tcp-port> --secure --user llm_user_beta --password -q 'SHOW GRANTS'
+```
+
+Use the native port and TLS flag appropriate for the ClickHouse client connection. The output should contain `SELECT` on only `cbioportal_public_librechat_beta_blue.*` and `cbioportal_public_librechat_beta_green.*`, with no prod database grants. Navigator MCP and LibreChat beta connect to MCP Services and do not consume `clickhouse-mcp`; the beta clone consumes `clickhouse-librechat-admin` for DDL, so none of these switch Secrets.
 
 ### Query cache (off by default)
 
@@ -70,7 +92,7 @@ The clone job's `DROP_QUERY_CACHE` env var is `"false"`. Set it to `"true"` only
 ### Rollout order
 
 1. Confirm `docker manifest inspect cbioportal/mcp:beta` succeeds (built by cbioportal-mcp#158). This gates both the merge and the sync. Until it does, both the MCP pod and the clone's `fetch-sql` step fail to pull.
-2. Apply the grants above.
+2. Create `llm_user_beta` with the two beta `SELECT` grants, create `clickhouse-mcp-beta` in `default`, and verify its grants as above **before syncing**. Without the Secret, the beta MCP pod fails to start.
 3. Manually sync the `cbioagent-beta` Argo Application the first time **without prune**, with someone watching the sync. Check the diff first: it should only add the beta MCP, the clone job objects and the pointer ConfigMap, and modify `librechat-config-beta`. The beta MCP starts pointing at the seed `cbioportal_public_librechat_beta_blue`, which doesn't exist yet, so beta database queries fail until step 4 publishes a buffer. That's expected.
 4. Build the first buffer once instead of waiting for the schedule:
    ```sh

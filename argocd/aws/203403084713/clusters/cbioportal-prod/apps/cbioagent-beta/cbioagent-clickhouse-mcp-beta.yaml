@@ -72,9 +72,9 @@ spec:
             # - name: CBIOPORTAL_MCP_QUERY_CACHE_ENABLED
             #   value: "true"
           envFrom:
-            # Same ClickHouse credentials (llm_user) as prod.
+            # Dedicated read-only ClickHouse credentials (llm_user_beta).
             - secretRef:
-                name: clickhouse-mcp
+                name: clickhouse-mcp-beta
             # ConfigMap mounted AFTER the Secret so its CLICKHOUSE_DATABASE
             # value wins (envFrom: last-writer-wins on key collisions). The
             # cbioagent-clickhouse-clone-daily-beta CronJob owns this
