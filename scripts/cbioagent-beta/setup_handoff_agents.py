@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Create or update the beta cBioPortalChat handoff agents: router -> data | navigation.
+"""Create or update the beta cBioPortalChat handoff agents: router -> navigation | data | fast (-> data).
 
-Beta and prod share one MongoDB, so this script writes only the three agent ids
+Beta and prod share one MongoDB, so this script writes only the four agent ids
 in MANAGED_IDS and the `aclentries` rows that point at them. The unified beta
 agent (--source-agent) is read for its tools, instructions, author and sharing,
 never written. Safe to re-run: unchanged agents are left alone.
@@ -21,7 +21,8 @@ from pymongo import MongoClient
 ROUTER_ID = "agent_cbiobeta_router"
 DATA_ID = "agent_cbiobeta_data"
 NAV_ID = "agent_cbiobeta_navigation"
-MANAGED_IDS = (ROUTER_ID, DATA_ID, NAV_ID)
+FAST_ID = "agent_cbiobeta_fast"
+MANAGED_IDS = (ROUTER_ID, DATA_ID, NAV_ID, FAST_ID)
 
 DEFAULT_SOURCE_ID = "agent_OHVSJI9Gd6gwsDnFSL-Xl"
 DEFAULT_DB = "cBioAgent"
@@ -32,6 +33,19 @@ PROVIDER = "bedrock"
 
 DB_SERVER = "cbioportal-database"
 MCP_DELIMITER = "_mcp_"
+# LibreChat's "every tool of this server" entry: `sys__all__sys_mcp_<server>`.
+MCP_ALL = "sys__all__sys"
+# The fast agent's only tools: the four precomputed-aggregate tools from cbioportal-mcp #154, plus
+# list_studies, the one tool that turns a study name into its cancer_study_identifier.
+FAST_TOOL_NAMES = (
+    "get_alteration_frequency",
+    "get_top_altered_genes",
+    "get_gene_frequency_by_cancer_type",
+    "get_profiled_counts",
+    "list_studies",
+)
+# Bedrock cache-point TTL for every managed agent; read from each agent's model_parameters.
+PROMPT_CACHE_TTL = "1h"
 # LibreChat names each handoff tool `lc_transfer_to_<destination agent id>`.
 TRANSFER_PREFIX = "lc_transfer_to_"
 
@@ -45,13 +59,15 @@ NAV_BRANCH_MARKER = "Navigation only:"
 NAV_TOOL_MARKERS = ("navigate_to_", "resolve_and_route", "get_studyviewfilter_options")
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 # prompts/budget.md, the soft tool-round budget, is appended last to the data and navigation agents
-# only (the router makes no tool rounds). A copy already in the unified prompt would reach the
-# specialists twice. Copies are found case- and whitespace-insensitively, by the full text or by
-# either of these sentences, so an edited copy is caught but a note quoting the heading is not.
+# only (BUDGETED_IDS): the router makes no tool rounds, and the fast agent has a tighter budget in fast.md.
+# A copy already in the unified prompt would reach the specialists twice. Copies are found case- and
+# whitespace-insensitively, by the full text or by either of these sentences, so an edited copy is caught
+# but a note quoting the heading is not.
 BUDGET_KEY_SENTENCES = (
     "aim to finish within six tool rounds",
     "After your sixth tool round, make no further tool calls",
 )
+BUDGETED_IDS = (DATA_ID, NAV_ID)
 # #664's recursionLimit / maxRecursionLimit. LibreChat reads recursion_limit only from the entry agent (the router).
 HARD_RECURSION_LIMIT = 24
 # Lines left in the data agent's prompt that touch navigation or links; listed in the dry run for review.
@@ -165,13 +181,17 @@ def build_agents(source):
             "from the unified agent's instructions, then re-run."
         )
 
-    router_prompt = (
-        read_prompt("router")
-        .replace("<<NAV_TOOL>>", TRANSFER_PREFIX + NAV_ID)
-        .replace("<<DATA_TOOL>>", TRANSFER_PREFIX + DATA_ID)
-    )
-    if "<<" in router_prompt:
-        sys.exit("prompts/router.md has an unreplaced <<PLACEHOLDER>>")
+    router_prompt = fill_transfer_tools(read_prompt("router"), "router")
+    fast_prompt = fill_transfer_tools(read_prompt("fast"), "fast")
+    fast_tools = [name + MCP_DELIMITER + DB_SERVER for name in FAST_TOOL_NAMES]
+    # With the all-tools entry the source's tool list can't show whether the server has #154's tools.
+    fast_tools_verified = MCP_ALL + MCP_DELIMITER + DB_SERVER not in db_tools
+    missing = [t for t in fast_tools if t not in db_tools] if fast_tools_verified else []
+    if missing:
+        sys.exit(
+            f"source agent {source['id']} lacks {', '.join(missing)}; the fast agent needs every one of "
+            f"FAST_TOOL_NAMES from {DB_SERVER} (cbioportal-mcp #154)"
+        )
     try:
         data_base, removed = strip_navigation(base_instructions)
     except ValueError as err:
@@ -195,8 +215,31 @@ def build_agents(source):
             "to": DATA_ID,
             "edgeType": "handoff",
             "description": (
-                "Data agent (Haiku). Use only when the answer is text or tables from cBioPortal data "
-                "(counts, frequencies, study or sample lists, data availability) and needs no link or view."
+                "Data agent (Haiku). Use when the answer is text or tables from cBioPortal data "
+                "(counts, frequencies, study or sample lists, data availability), needs no link or view, "
+                "and is not a single fast-agent question. Use when unsure between fast and data."
+            ),
+        },
+        {
+            "from": ROUTER_ID,
+            "to": FAST_ID,
+            "edgeType": "handoff",
+            "description": (
+                "Fast agent (Haiku). Use only when the question is exactly one of: one named gene's alteration "
+                "frequency in one named study; the top altered genes in one named study; one named gene's "
+                "frequency by cancer type in a named cohort; sample/patient counts of one named study. "
+                "No filters, comparisons, survival, co-occurrence, variants, links or follow-ups."
+            ),
+        },
+    ]
+    fast_edges = [
+        {
+            "from": FAST_ID,
+            "to": DATA_ID,
+            "edgeType": "handoff",
+            "description": (
+                "Data agent (Haiku). Hand the question over when the fast tool returned an error, a note, no "
+                "rows or a fallback, the study is ambiguous, or the question needs more than one fast tool."
             ),
         },
     ]
@@ -211,7 +254,13 @@ def build_agents(source):
             "model": HAIKU,
             # The router only emits one argument-free tool call. Bedrock Haiku 4.5 thinks with a
             # 2000-token budget unless `thinking` is explicitly false.
-            "model_parameters": {"model": HAIKU, "thinking": False, "maxOutputTokens": 256, "temperature": 0},
+            "model_parameters": {
+                "model": HAIKU,
+                "thinking": False,
+                "maxOutputTokens": 256,
+                "temperature": 0,
+                "promptCacheTtl": PROMPT_CACHE_TTL,
+            },
             "tools": [],
             "edges": edges,
         },
@@ -228,6 +277,7 @@ def build_agents(source):
                 "maxOutputTokens": 8192,
                 "temperature": 0,
                 "promptCache": True,
+                "promptCacheTtl": PROMPT_CACHE_TTL,
             },
             "tools": db_tools,
             "edges": [],
@@ -248,16 +298,38 @@ def build_agents(source):
                 "effort": "low",
                 "maxOutputTokens": 8192,
                 "promptCache": True,
+                "promptCacheTtl": PROMPT_CACHE_TTL,
             },
             "tools": source_tools,
             "edges": [],
         },
+        {
+            "id": FAST_ID,
+            "name": "cBioPortalChat Fast (beta)",
+            "description": "Answers templated gene-frequency and sample-count questions with one purpose-built tool.",
+            # fast.md alone, not the unified prompt: the tools do the SQL, and a short prompt keeps the turn fast.
+            "instructions": fast_prompt,
+            "model": HAIKU,
+            "model_parameters": {
+                "model": HAIKU,
+                "thinking": False,
+                "maxOutputTokens": 8192,
+                "temperature": 0,
+                "promptCache": True,
+                "promptCacheTtl": PROMPT_CACHE_TTL,
+            },
+            "tools": fast_tools,
+            "edges": fast_edges,
+        },
     ]
     for agent in agents:
         count = budget_copies(agent["instructions"], budget)
-        if agent["id"] == ROUTER_ID and count:
-            sys.exit(f"{ROUTER_ID} instructions contain the tool budget; the router must not get it")
-        if agent["id"] != ROUTER_ID and (
+        if agent["id"] not in BUDGETED_IDS and count:
+            sys.exit(
+                f"{agent['id']} instructions contain the tool budget (prompts/budget.md); only "
+                f"{' and '.join(BUDGETED_IDS)} get it"
+            )
+        if agent["id"] in BUDGETED_IDS and (
             count != 1 or not normalize(agent["instructions"]).endswith(normalize(budget))
         ):
             sys.exit(
@@ -272,9 +344,11 @@ def build_agents(source):
         "removed": removed,
         "base_chars": len(base_instructions),
         "stripped_chars": len(data_base),
-        "data_chars": len(agents[1]["instructions"]),
+        "data_chars": len(next(a for a in agents if a["id"] == DATA_ID)["instructions"]),
         "link_mentions": [ln.strip() for ln in data_base.splitlines() if LINK_KEYWORDS.search(ln)],
         "budget_head": budget.split(". ", 1)[0] + ".",
+        "fast_tools": fast_tools,
+        "fast_tools_verified": fast_tools_verified,
     }
     return agents, report
 
@@ -290,6 +364,23 @@ def print_strip_report(report):
     for line in report["link_mentions"]:
         print(f"  still mentions navigation/links (data.md overrides): {line[:100]}")
     print(f"tool budget (prompts/budget.md), last section of {DATA_ID} and {NAV_ID}: {report['budget_head']}")
+    print(f"{FAST_ID} tools: {', '.join(report['fast_tools'])}")
+    if not report["fast_tools_verified"]:
+        print(
+            f"  not verified: the source agent has every {DB_SERVER} tool ({MCP_ALL}); confirm beta's "
+            f"{DB_SERVER} MCP server lists all of them (cbioportal-mcp #154) before applying"
+        )
+
+
+def fill_transfer_tools(prompt, name):
+    prompt = (
+        prompt.replace("<<NAV_TOOL>>", TRANSFER_PREFIX + NAV_ID)
+        .replace("<<DATA_TOOL>>", TRANSFER_PREFIX + DATA_ID)
+        .replace("<<FAST_TOOL>>", TRANSFER_PREFIX + FAST_ID)
+    )
+    if "<<" in prompt:
+        sys.exit(f"prompts/{name}.md has an unreplaced <<PLACEHOLDER>>")
+    return prompt
 
 
 def check_router_recursion_limit(db, tenant_id):
@@ -446,7 +537,7 @@ def main():
     )
     parser.add_argument("--dry-run", action="store_true", help="print the planned changes and write nothing")
     parser.add_argument(
-        "--delete", action="store_true", help="remove the three managed agents and their aclentries rows"
+        "--delete", action="store_true", help="remove the four managed agents and their aclentries rows"
     )
     args = parser.parse_args()
 
@@ -472,7 +563,8 @@ def main():
     check_router_recursion_limit(db, tenant_id)
     if args.dry_run:
         print_strip_report(report)
-    for desired in agents:
+    # Handoff targets first, so every edge of the router (the live entry agent) resolves as soon as it is written.
+    for desired in sorted(agents, key=lambda a: a["id"] == ROUTER_ID):
         oid = upsert_agent(db, desired, args.dry_run)
         sync_acl(db, source["_id"], desired["id"], oid, args.dry_run)
     warn_other_tenants(db, tenant_id)
