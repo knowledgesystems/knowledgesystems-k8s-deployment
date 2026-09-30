@@ -232,16 +232,16 @@ data:
             endpoint: "agents"
             agent_id: "agent_cbiobeta_router"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-            # thinking/maxTokens from #659, promptCacheTtl from #653. With
-            # cBioPortal/LibreChat#36 the preset's allowlisted keys (thinking,
-            # thinkingBudget, effort, maxOutputTokens, temperature,
-            # promptCache, promptCacheTtl) reach only the spec's agent, the
-            # router; the data and navigation agents never see the preset and
-            # use their own model_parameters. maxTokens is not on that
-            # allowlist, so the router keeps the 256 cap its record sets.
-            # promptCache is left unset: the Bedrock parser defaults it to
-            # true for Claude, which keeps the 1h TTL.
-            maxTokens: 4096
+            # With cBioPortal/LibreChat#36 and #37 these preset keys are
+            # forwarded to the router only, and override its saved
+            # model_parameters. They match the router record: thinking off
+            # and a 256-token cap (it emits one transfer call). The 256
+            # replaces #659's 4096 for this spec only. The data and
+            # navigation agents never see the preset; they use their own
+            # records (thinking off, 4096). promptCacheTtl is from #653;
+            # promptCache is left unset because the Bedrock parser defaults
+            # it to true for Claude, which keeps the 1h TTL.
+            maxTokens: 256
             thinking: false
             promptCacheTtl: 1h
             modelLabel: "cBioPortalChat"
