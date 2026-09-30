@@ -248,6 +248,10 @@ data:
             # rate. Beta canary before flipping the prod modelSpec on 203
             # and the four MSK modelSpecs on 666.
             promptCache: true
+            # Pins the one-hour Bedrock prompt-cache TTL ('5m' | '1h').
+            # cBioPortal/LibreChat#36 forwards it from the preset to the
+            # agent; the Sonnet spec inherits it via the merge key.
+            promptCacheTtl: 1h
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
