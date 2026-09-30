@@ -555,19 +555,81 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertIn("What about in the MSK cohort?", text)
         self.assertIn(ROUTER_TRANSFER_LINE, text)
 
+    def test_router_prompt_keeps_patient_level_frequencies_off_fast(self):
+        run(self.db)
+        text = self.agent(m.ROUTER_ID)["instructions"]
+        rule = (
+            "Patient-level alteration frequencies or prevalence are not fast; "
+            "only sample-level alteration frequencies are supported."
+        )
+        self.assertIn(rule, text)
+        self.assertLess(text.index(rule), text.index("Fast examples:"))
+        example = '- "What percentage of patients in msk_impact_2017 have a KRAS mutation?" (patient-level frequency)'
+        not_fast = text.split("Not fast (data):", 1)[1].split("Not fast (navigation):", 1)[0]
+        self.assertIn(example, not_fast)
+        fast_examples = text.split("Fast examples:", 1)[1].split("Not fast (data):", 1)[0]
+        self.assertNotIn("patients", fast_examples.replace("How many samples and patients are in", ""))
+
+    def test_fast_prompt_validates_before_the_first_call(self):
+        text = m.read_prompt("fast")
+        check = (
+            "Before any tool call, validate the latest message independently; do not assume the router classified "
+            "it correctly. Every requested qualifier and counting unit must be supported by the matching tool above. "
+            "Otherwise transfer to data before calling it. Never substitute sample-level frequencies for "
+            "patient-level frequencies."
+        )
+        self.assertIn(check, text)
+        self.assertLess(text.index(check), text.index("1. Once the question passes that check, call the matching"))
+        self.assertIn("- the question fails the check above;", text)
+        self.assertIn("patient-level alteration frequency or prevalence", text)
+        self.assertIn("Only sample-level alteration frequencies are supported.", text)
+
+    def test_fast_prompt_states_each_tools_counting_unit(self):
+        text = m.read_prompt("fast")
+        lines = {
+            name: next(ln for ln in text.splitlines() if ln.startswith(f"- `{name}(")) for name in m.FAST_TOOL_NAMES
+        }
+        for name in ("get_alteration_frequency", "get_top_altered_genes", "get_gene_frequency_by_cancer_type"):
+            self.assertIn("Counts samples only", lines[name], name)
+        self.assertIn("`altered_samples` of `profiled_samples`", lines["get_alteration_frequency"])
+        counts = lines["get_profiled_counts"]
+        self.assertIn("samples and how many patients", counts)
+        self.assertIn("no alteration counts", counts)
+        self.assertIn("Patient counts are supported only as study or data-type totals from `get_profiled_counts`", text)
+
+    def test_fast_prompt_zero_altered_exception(self):
+        text = m.read_prompt("fast")
+        exception = text[text.index("Exception: for `get_alteration_frequency`") :].split("\n\n", 1)[0]
+        for condition in (
+            "no precomputed row because the requested alteration is absent",
+            "there is no `error_message`",
+            "`fallback_reason` starts with `no precomputed row` (not `precomputed table unavailable`)",
+            "names the requested gene and study",
+            "`altered_samples` = 0, `profiled_samples` > 0 and `frequency_pct` = 0",
+            'Report "0 of N profiled samples (0%)"',
+            "Otherwise keep the escalation rules.",
+        ):
+            self.assertIn(condition, exception)
+        self.assertIn("a `fallback_reason` (except the case below);", text)
+
     def test_explicit_source_tools_verify_fast_tools(self):
         self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tools": [*EXPLICIT_DB_TOOLS, NAV_TOOL]}})
         out = run(self.db, "--dry-run")
         self.assertIn(f"{m.FAST_ID} tools: {', '.join(FAST_TOOLS)}", out)
         self.assertNotIn("not verified", out)
-        run(self.db)
+        self.assertNotIn("not verified", run(self.db))
         self.assertEqual(self.agent(m.FAST_ID)["tools"], FAST_TOOLS)
         self.assertEqual(self.agent(m.DATA_ID)["tools"], EXPLICIT_DB_TOOLS)
 
     def test_all_tools_source_is_reported_unverified(self):
+        warning = f"warning: {m.FAST_ID} tools not verified"
         out = run(self.db, "--dry-run")
         self.assertIn(f"{m.FAST_ID} tools: {', '.join(FAST_TOOLS)}", out)
-        self.assertIn("not verified", out)
+        self.assertEqual(out.count(warning), 1)
+        out = run(self.db)
+        self.assertEqual(out.count(warning), 1)
+        self.assertIn("create agent_cbiobeta_fast", out)
+        self.assertEqual(run(self.db).count(warning), 1)
 
     def test_missing_fast_tool_aborts_before_writing(self):
         tools = [t for t in EXPLICIT_DB_TOOLS if not t.startswith("get_profiled_counts")]

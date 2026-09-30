@@ -365,10 +365,13 @@ def print_strip_report(report):
         print(f"  still mentions navigation/links (data.md overrides): {line[:100]}")
     print(f"tool budget (prompts/budget.md), last section of {DATA_ID} and {NAV_ID}: {report['budget_head']}")
     print(f"{FAST_ID} tools: {', '.join(report['fast_tools'])}")
+
+
+def warn_unverified_fast_tools(report):
     if not report["fast_tools_verified"]:
         print(
-            f"  not verified: the source agent has every {DB_SERVER} tool ({MCP_ALL}); confirm beta's "
-            f"{DB_SERVER} MCP server lists all of them (cbioportal-mcp #154) before applying"
+            f"warning: {FAST_ID} tools not verified: the source agent has every {DB_SERVER} tool ({MCP_ALL}); "
+            f"confirm beta's {DB_SERVER} MCP server lists {', '.join(FAST_TOOL_NAMES)} (cbioportal-mcp #154)"
         )
 
 
@@ -563,6 +566,7 @@ def main():
     check_router_recursion_limit(db, tenant_id)
     if args.dry_run:
         print_strip_report(report)
+    warn_unverified_fast_tools(report)
     # Handoff targets first, so every edge of the router (the live entry agent) resolves as soon as it is written.
     for desired in sorted(agents, key=lambda a: a["id"] == ROUTER_ID):
         oid = upsert_agent(db, desired, args.dry_run)

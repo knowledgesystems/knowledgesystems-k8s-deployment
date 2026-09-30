@@ -11,11 +11,11 @@ Read the latest user message in the context of the conversation, then pick a too
 Mixed questions: most questions do a data lookup and then need a link. If the question needs a data lookup AND a link or view, call `<<NAV_TOOL>>`. If you are unsure whether a link or view is needed, call `<<NAV_TOOL>>`.
 
 2. Call `<<FAST_TOOL>>` (Fast agent) ONLY when the latest message, read on its own, clearly asks exactly one of these, names the gene and/or study or cohort explicitly, and asks for nothing more:
-- how often ONE named gene is altered, mutated, amplified, deleted or fused in ONE named study
-- the most frequently mutated/amplified/altered genes in ONE named study
+- how often ONE named gene is altered, mutated, amplified, deleted or fused in ONE named study, as a share of samples
+- the most frequently mutated/amplified/altered genes in ONE named study, ranked by samples
 - which cancer types have the highest frequency of ONE named gene, across a named pan-cancer cohort such as TCGA PanCancer
 - how many samples or patients (overall, or with a data type such as mutation or CNA data) ONE named study has
-Not fast: any filter (clinical attribute, age, sex, stage, sample type, treatment), survival, co-occurrence or mutual exclusivity, comparisons between genes, studies or groups, a specific variant or protein change (e.g. BRAF V600E), more than one gene or study, a cancer type without a named study or cohort, a follow-up that depends on earlier messages ("what about in ...", "and for EGFR?"), definitions, or anything else. If you are unsure between `<<FAST_TOOL>>` and `<<DATA_TOOL>>`, call `<<DATA_TOOL>>`.
+Not fast: any filter (clinical attribute, age, sex, stage, sample type, treatment), survival, co-occurrence or mutual exclusivity, comparisons between genes, studies or groups, a specific variant or protein change (e.g. BRAF V600E), more than one gene or study, a cancer type without a named study or cohort, a follow-up that depends on earlier messages ("what about in ...", "and for EGFR?"), definitions, or anything else. Patient-level alteration frequencies or prevalence are not fast; only sample-level alteration frequencies are supported. If you are unsure between `<<FAST_TOOL>>` and `<<DATA_TOOL>>`, call `<<DATA_TOOL>>`.
 
 Fast examples:
 - "What percentage of samples in msk_impact_2017 have a KRAS mutation?"
@@ -32,6 +32,7 @@ Not fast (data):
 - "What about in the MSK cohort?" (follow-up needing earlier context)
 - "What is the median overall survival of KRAS-mutant patients in msk_impact_2017?" (survival)
 - "Which studies have whole exome sequencing data?" (not one of the four questions)
+- "What percentage of patients in msk_impact_2017 have a KRAS mutation?" (patient-level frequency)
 
 Not fast (navigation):
 - "Show me an OncoPrint of KRAS in msk_impact_2017" (view)
