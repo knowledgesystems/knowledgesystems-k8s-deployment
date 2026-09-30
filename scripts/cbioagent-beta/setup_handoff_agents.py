@@ -45,9 +45,15 @@ NAV_BRANCH_MARKER = "Navigation only:"
 NAV_TOOL_MARKERS = ("navigate_to_", "resolve_and_route", "get_studyviewfilter_options")
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 # prompts/budget.md, the soft tool-round budget, is appended last to the data and navigation agents
-# only (the router makes no tool rounds). Its first sentence detects a copy already in the unified
-# prompt, which would otherwise reach the specialists twice.
-BUDGET_MARKER = "Tool budget for each user message:"
+# only (the router makes no tool rounds). A copy already in the unified prompt would reach the
+# specialists twice. Copies are found case- and whitespace-insensitively, by the full text or by
+# either of these sentences, so an edited copy is caught but a note quoting the heading is not.
+BUDGET_KEY_SENTENCES = (
+    "aim to finish within six tool rounds",
+    "After your sixth tool round, make no further tool calls",
+)
+# #664's recursionLimit / maxRecursionLimit. LibreChat reads recursion_limit only from the entry agent (the router).
+HARD_RECURSION_LIMIT = 24
 # Lines left in the data agent's prompt that touch navigation or links; listed in the dry run for review.
 LINK_KEYWORDS = re.compile(r"navigate|link|url|cbioportal\.org", re.IGNORECASE)
 
@@ -69,6 +75,16 @@ MANAGED_FIELDS = (
 
 def read_prompt(name):
     return (PROMPTS_DIR / f"{name}.md").read_text().strip()
+
+
+def normalize(text):
+    return " ".join(text.split()).casefold()
+
+
+def budget_copies(text, budget):
+    """Count copies of `budget` in `text`: the full text or either key sentence, ignoring case and whitespace."""
+    text = normalize(text)
+    return max(text.count(normalize(p)) for p in (budget, *BUDGET_KEY_SENTENCES))
 
 
 def indent_of(line):
@@ -138,13 +154,16 @@ def build_agents(source):
     if not db_tools:
         sys.exit(f"source agent {source['id']} has no {DB_SERVER} MCP tools; refusing to build agents without them")
     base_instructions = (source.get("instructions") or "").strip()
-    if BUDGET_MARKER in base_instructions:
+    budget = read_prompt("budget")
+    if not all(normalize(p) in normalize(budget) for p in BUDGET_KEY_SENTENCES):
+        sys.exit("prompts/budget.md no longer contains BUDGET_KEY_SENTENCES; update them to match")
+    if budget_copies(base_instructions, budget):
         sys.exit(
-            f"source agent {source['id']} instructions already contain the tool budget ({BUDGET_MARKER!r}). "
+            f"source agent {source['id']} instructions already contain the tool budget (its full text or one of "
+            f"{', '.join(repr(p) for p in BUDGET_KEY_SENTENCES)}, ignoring case and whitespace). "
             "This script appends prompts/budget.md to the data and navigation agents itself; remove the copy "
             "from the unified agent's instructions, then re-run."
         )
-    budget = read_prompt("budget")
 
     router_prompt = (
         read_prompt("router")
@@ -235,10 +254,12 @@ def build_agents(source):
         },
     ]
     for agent in agents:
-        count = agent["instructions"].count(BUDGET_MARKER)
+        count = budget_copies(agent["instructions"], budget)
         if agent["id"] == ROUTER_ID and count:
             sys.exit(f"{ROUTER_ID} instructions contain the tool budget; the router must not get it")
-        if agent["id"] != ROUTER_ID and (count != 1 or not agent["instructions"].endswith(budget)):
+        if agent["id"] != ROUTER_ID and (
+            count != 1 or not normalize(agent["instructions"]).endswith(normalize(budget))
+        ):
             sys.exit(
                 f"{agent['id']} instructions must contain the tool budget exactly once, as the last section; "
                 f"found {count} copies. Remove any copy from prompts/*.md other than prompts/budget.md."
@@ -269,6 +290,18 @@ def print_strip_report(report):
     for line in report["link_mentions"]:
         print(f"  still mentions navigation/links (data.md overrides): {line[:100]}")
     print(f"tool budget (prompts/budget.md), last section of {DATA_ID} and {NAV_ID}: {report['budget_head']}")
+
+
+def check_router_recursion_limit(db, tenant_id):
+    """Stop if the router, the entry agent, has a recursion_limit that would undercut #664's cap. Never changed here."""
+    router = db.agents.find_one(agent_filter(ROUTER_ID, tenant_id), {"recursion_limit": 1})
+    limit = (router or {}).get("recursion_limit")
+    if isinstance(limit, (int, float)) and not isinstance(limit, bool) and 0 < limit < HARD_RECURSION_LIMIT:
+        sys.exit(
+            f"{ROUTER_ID} has recursion_limit {limit}, below the beta cap of {HARD_RECURSION_LIMIT} (#664). "
+            "The entry agent's value overrides the cap, so the tool budget would hit it early. Unset it or "
+            f"raise it to >= {HARD_RECURSION_LIMIT} by hand, then re-run; this script does not change it."
+        )
 
 
 def agent_filter(agent_id, tenant_id):
@@ -436,6 +469,7 @@ def main():
         return
 
     agents, report = build_agents(source)
+    check_router_recursion_limit(db, tenant_id)
     if args.dry_run:
         print_strip_report(report)
     for desired in agents:

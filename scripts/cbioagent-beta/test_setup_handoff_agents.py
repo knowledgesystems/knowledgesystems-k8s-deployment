@@ -66,6 +66,17 @@ BUDGET_TEXT = (
     "insufficient, explain what you could establish and suggest one focused follow-up the user can ask in a new "
     "message. Do not mention an internal step limit, and never end with a tool error in place of an answer."
 )
+BUDGET_LABEL = "Tool budget for each user message:"
+# Copies the old exact-label check missed, plus an edited copy that keeps the budget's key sentences.
+BUDGET_VARIANTS = {
+    "lowercase": BUDGET_TEXT.replace("Tool budget", "tool budget"),
+    "extra space": BUDGET_TEXT.replace("Tool budget", "Tool  budget"),
+    "line break": BUDGET_TEXT.replace("Tool budget", "Tool\nbudget"),
+    "edited": BUDGET_TEXT.replace("Tool budget for each user message:", "**Budget:**").replace(
+        " Do not invent results, counts, or links.", ""
+    ),
+}
+LABEL_QUOTE = 'Documentation note: the label "Tool budget for each user message:" is reserved for future guidance.'
 ROUTER_TRANSFER_LINE = "Always respond with exactly one transfer call; never answer the question yourself."
 
 DB_TOOL = "sys__all__sys_mcp_cbioportal-database"
@@ -262,11 +273,11 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         run(self.db)
         router, data, nav = (self.agent(i) for i in m.MANAGED_IDS)
         for a in (data, nav):
-            self.assertEqual(a["instructions"].count(m.BUDGET_MARKER), 1, a["id"])
+            self.assertEqual(a["instructions"].count(BUDGET_LABEL), 1, a["id"])
             self.assertEqual(a["instructions"].count("six tool rounds"), 1, a["id"])
             self.assertTrue(a["instructions"].endswith("\n\n" + BUDGET_TEXT), a["id"])
             self.assertEqual(a["versions"][-1]["instructions"], a["instructions"])
-        self.assertNotIn(m.BUDGET_MARKER, router["instructions"])
+        self.assertNotIn(BUDGET_LABEL, router["instructions"])
         self.assertNotIn("tool round", router["instructions"])
         self.assertEqual(router["instructions"].count(ROUTER_TRANSFER_LINE), 1)
 
@@ -281,27 +292,75 @@ class SetupHandoffAgentsTest(unittest.TestCase):
             for args in ((), ("--dry-run",)):
                 with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
                     run(self.db, *args)
-                self.assertIn(m.BUDGET_MARKER, str(ctx.exception.code))
                 self.assertIn("already contain", str(ctx.exception.code))
+                self.assertIn("tool budget", str(ctx.exception.code))
             self.assertEqual(snapshot(self.db), before)
+
+    def test_budget_variant_in_unified_prompt_aborts_before_writing(self):
+        for name, variant in BUDGET_VARIANTS.items():
+            with self.subTest(name):
+                instructions = f"{BASE_INSTRUCTIONS}\n## Tool Budget\n{variant}\n"
+                self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"instructions": instructions}})
+                before = snapshot(self.db)
+                for args in ((), ("--dry-run",)):
+                    with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+                        run(self.db, *args)
+                    self.assertIn("already contain", str(ctx.exception.code))
+                self.assertEqual(snapshot(self.db), before)
+
+    def test_quoting_the_budget_label_does_not_abort(self):
+        instructions = f"{BASE_INSTRUCTIONS}\n{LABEL_QUOTE}\n"
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"instructions": instructions}})
+        self.assertEqual(run(self.db, "--dry-run").count("\ncreate "), 3)
+        run(self.db)
+        for agent_id in (m.DATA_ID, m.NAV_ID):
+            text = self.agent(agent_id)["instructions"]
+            self.assertTrue(text.endswith("\n\n" + BUDGET_TEXT), agent_id)
+            self.assertEqual(text.count("six tool rounds"), 1, agent_id)
+        self.assertIn(LABEL_QUOTE, self.agent(m.NAV_ID)["instructions"])
 
     def test_budget_in_prompt_file_aborts(self):
         orig = m.read_prompt
-        m.read_prompt = lambda name: orig(name) + ("\n\n" + BUDGET_TEXT if name == "data" else "")
-        try:
-            before = snapshot(self.db)
+        for copy_text in (BUDGET_TEXT, *BUDGET_VARIANTS.values()):
+            for target, agent_id in (("data", m.DATA_ID), ("navigation", m.NAV_ID), ("router", m.ROUTER_ID)):
+                with self.subTest(target=target, copy=copy_text[:30]):
+                    m.read_prompt = lambda name, t=target, c=copy_text: orig(name) + ("\n\n" + c if name == t else "")
+                    try:
+                        before = snapshot(self.db)
+                        with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+                            run(self.db)
+                        self.assertIn(agent_id, str(ctx.exception.code))
+                        self.assertEqual(snapshot(self.db), before)
+                    finally:
+                        m.read_prompt = orig
+
+    def test_router_recursion_limit_below_cap_aborts_before_writing(self):
+        run(self.db)
+        self.db.agents.update_one({"id": m.ROUTER_ID}, {"$set": {"recursion_limit": 10}})
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"instructions": BASE_INSTRUCTIONS + "\nNew."}})
+        before = snapshot(self.db)
+        for args in ((), ("--dry-run",)):
             with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
-                run(self.db)
-            self.assertIn(m.DATA_ID, str(ctx.exception.code))
-            self.assertEqual(snapshot(self.db), before)
-        finally:
-            m.read_prompt = orig
+                run(self.db, *args)
+            self.assertIn("recursion_limit 10", str(ctx.exception.code))
+            self.assertIn("24", str(ctx.exception.code))
+        self.assertEqual(snapshot(self.db), before)
+        self.assertEqual(self.agent(m.ROUTER_ID)["recursion_limit"], 10)
+
+    def test_router_recursion_limit_at_or_above_cap_or_unset_is_kept(self):
+        run(self.db)
+        for limit in (24, 50, 0, None):
+            with self.subTest(limit=limit):
+                self.db.agents.update_one({"id": m.ROUTER_ID}, {"$set": {"recursion_limit": limit}})
+                run(self.db, "--dry-run")
+                self.assertEqual(run(self.db).count("unchanged "), 3)
+                self.assertEqual(self.agent(m.ROUTER_ID)["recursion_limit"], limit)
 
     def test_dry_run_shows_budget(self):
         out = run(self.db, "--dry-run")
         self.assertIn(
             f"tool budget (prompts/budget.md), last section of {m.DATA_ID} and {m.NAV_ID}: "
-            f"{m.BUDGET_MARKER} aim to finish within six tool rounds.",
+            f"{BUDGET_LABEL} aim to finish within six tool rounds.",
             out,
         )
         self.assertNotIn("tool budget (prompts/budget.md)", run(self.db))
