@@ -6,6 +6,7 @@ Standalone Terraform root for a **new** cBio Claw EC2 gateway in the dev account
 The backend uses a dedicated state key. Referenced subnet, security groups, and
 SSH key pair remain externally managed.
 
+The instance is on-demand, avoiding the existing node's Spot-capacity interruptions.
 The default is `m8g.large` (2 ARM vCPUs, 8 GiB RAM), half the CPU and RAM of the
 existing `m8g.xlarge`. An idle observation on 2026-09-30 showed approximately
 192 MiB for the current gateway container and 394 MiB used on the host. This is
@@ -36,7 +37,7 @@ apply the reviewed plan. No Terraform provisioners execute remote commands.
 
 The pinned AMI is Amazon Linux 2023 ARM64. Cloud-init installs Docker, a pinned
 Compose release, and Git; checks out cBio Claw commit
-`1daa68efa156ba44c4e736e98c28495ae2649746`; builds `hermes-cbio:0.1`; and installs
+`89ed45cf794e9ada3c952ceee6c21e78322cd19b`; builds `hermes-cbio:0.1`; and installs
 an inactive systemd service. Check `/var/log/cloud-init-output.log` for bootstrap
 errors. The private subnet needs outbound access to package repositories,
 GitHub, Docker image registries, Slack, and model providers. Existing security
@@ -48,22 +49,58 @@ Access the new `private_ip` output through the existing dev-network access path
 using the `hermes-agent-node-key` key pair. The existing node's Tailscale identity
 is not copied; provision a distinct identity if Tailscale access is needed.
 
-The runtime is `/home/ec2-user/work/cbio-claw`. Install private runtime secrets
-in `hermes-data/.env`, and model/Slack/channel configuration in
-`hermes-data/config.yaml`, owned by UID/GID 1000. Keep secrets and authentication
-files off this public repository and out of Terraform variables and user data.
-The skill vault is `hermes-data/skills`, persisted with sessions and credentials
-in `hermes-data` on the root disk. Select the intended skill bindings in the
-private configuration; modular presets are tracked separately in `cbio-2qu`
-and `cbio-e2h`.
+The runtime is `/home/ec2-user/work/cbio-claw`. Bootstrap writes a Compose
+profile override and `profile.env`, defaulting to `HERMES_PROFILE=support`.
+The command explicitly invokes `hermes -p support gateway run`; credentials
+come only from `hermes-data/profiles/support/.env`. The root/default profile's
+credentials are not inherited through Compose. The dashboard uses the same
+selected profile and remains off. Automatic mailing-list replies are held off
+by `CBIO_MAILING_REPLIES=off`; activation is a separate reviewed change.
+
+Install the private cBioPortal/cbio-claw-configuration vault release `f500968`
+at `/home/ec2-user/work/cbio-claw-configuration/releases/f500968`. Transfer a
+reviewed archive through an authorized access path; bootstrap does not fetch
+private repositories or embed a GitHub token. Compose mounts that release at
+`/opt/cbio-claw/vault:ro`. `profile.env` contains the profile name and vault path,
+not secrets. Update its vault path deliberately for later reviewed releases.
+
+Create the support profile using native Hermes, without starting a gateway:
+
+```sh
+cd /home/ec2-user/work/cbio-claw
+sudo docker run --rm --network none --user 1000:1000 \
+  --entrypoint hermes -e HERMES_HOME=/opt/data \
+  -v "$PWD/hermes-data:/opt/data" hermes-cbio:0.1 \
+  profile create support --no-skills --no-alias
+```
+
+Install private `.env`, model/provider/Slack config, authentication and SOUL in
+`hermes-data/profiles/support`, owned by UID/GID 1000. Set secret files to mode
+0600. Merge the vault's `presets/support/config.skills.yaml` fragment into the
+profile config, preserving its other settings. It loads the support and shared
+skill directories: six curated skills, with `.no-bundled-skills` and an empty
+profile-local `skills/` directory. Engineering loads engineering/shared for
+seventeen skills. Use the vault's native-profile tests to verify the catalog.
+Skills, config files and Terraform user data must not contain secret values.
+
+For an engineering gateway, create `engineering` instead, merge its matching
+fragment, provide the separate Hermes Engineer bot credentials, and select
+`HERMES_PROFILE=engineering` in `profile.env`. This service runs one selected
+profile per host. Concurrent support/engineering gateways require separately
+configured containers with distinct names, ports, and credentials; starting
+this service twice does not create two bots.
 
 Use separate test Slack credentials/channels while the existing node remains
-active. Do not start two gateways with the same bot credentials. Set a strong
+active. Never run two gateways with the same bot credentials. Set a strong
 `API_SERVER_KEY` in the host's `docker-compose.env`; the source default is a test
-key. Review access to the API port before activation. The dashboard stays off.
-The existing host has local vendor patches for Slack handling that are not in
-the pinned source revision. Review and port those changes through cBio Claw
-before expecting equivalent forwarded-mail behavior from the new node.
+key. Review API-port access before activation. Renew expired MCP OAuth before
+enabling that server; `mcp_servers.cbioportal-db.enabled: false` can defer an
+unavailable database MCP connection so it does not delay Slack startup.
+
+The pinned runtime includes the reviewed attachment-aware mailing-list extension,
+but the kill switch keeps it disabled. Existing host-local vendor patches are
+not copied by bootstrap; compare the reviewed runtime with those patches before
+cutover. Profile and vault loading use native Hermes, with no preset loader.
 
 After explicit activation approval and private configuration installation:
 
@@ -88,7 +125,8 @@ the service. Restore the previous source/image/configuration for rollback;
 restore state only with the gateway stopped.
 
 Any future cutover from the existing node is a separate operation: stop its
-gateway, back up and transfer consistent state/skills/secrets, then activate the
+gateway, back up and transfer the complete consistent support profile (including
+SQLite databases, sessions, memories, pairing and authentication), then activate the
 new gateway. Verify existing conversations and channel behavior before deciding
 whether to retire anything. This PR does not perform cutover or retirement.
 

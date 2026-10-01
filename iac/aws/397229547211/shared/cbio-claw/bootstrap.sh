@@ -14,7 +14,7 @@ chmod 0755 /usr/local/lib/docker/cli-plugins/docker-compose
 install -d -o ec2-user -g ec2-user /home/ec2-user/work
 runuser -u ec2-user -- git clone https://github.com/jamesqo/cbio-claw.git /home/ec2-user/work/cbio-claw
 cd /home/ec2-user/work/cbio-claw
-runuser -u ec2-user -- git checkout --detach 1daa68efa156ba44c4e736e98c28495ae2649746
+runuser -u ec2-user -- git checkout --detach 89ed45cf794e9ada3c952ceee6c21e78322cd19b
 sed -i \
   -e 's/^HERMES_UID=.*/HERMES_UID=1000/' \
   -e 's/^HERMES_GID=.*/HERMES_GID=1000/' \
@@ -23,23 +23,45 @@ sed -i \
 install -d -m 0700 -o ec2-user -g ec2-user hermes-data
 docker build -t hermes-cbio:0.1 -f docker/Dockerfile .
 
-# Private configuration and a deliberate activation step are required before
-# connecting a second gateway to Slack.
+cat > docker-compose.profile.yml <<'COMPOSE'
+services:
+  hermes-cbio-gateway:
+    command: ["hermes", "-p", "${HERMES_PROFILE:?Set HERMES_PROFILE}", "gateway", "run"]
+    env_file: !override
+      - ${HERMES_DATA}/profiles/${HERMES_PROFILE}/.env
+    environment:
+      CBIO_MAILING_REPLIES: "off"
+    volumes:
+      - ${HERMES_VAULT:?Install the pinned private vault}:/opt/cbio-claw/vault:ro
+  hermes-cbio-dashboard:
+    command: ["hermes", "-p", "${HERMES_PROFILE}", "dashboard", "--no-open", "--insecure", "--host", "0.0.0.0", "--port", "${HERMES_DASHBOARD_PORT}"]
+    env_file: !override
+      - ${HERMES_DATA}/profiles/${HERMES_PROFILE}/.env
+    volumes:
+      - ${HERMES_VAULT}:/opt/cbio-claw/vault:ro
+COMPOSE
+cat > profile.env <<'PROFILE'
+HERMES_PROFILE=support
+HERMES_VAULT=/home/ec2-user/work/cbio-claw-configuration/releases/f500968
+PROFILE
+chown ec2-user:ec2-user docker-compose.profile.yml profile.env
+
 cat > /etc/systemd/system/cbio-claw.service <<'UNIT'
 [Unit]
-Description=cBio Claw gateway
+Description=cBio Claw native-profile gateway
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
-ConditionPathExists=/home/ec2-user/work/cbio-claw/hermes-data/.env
-ConditionPathExists=/home/ec2-user/work/cbio-claw/hermes-data/config.yaml
+ConditionPathExists=/home/ec2-user/work/cbio-claw/profile.env
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/home/ec2-user/work/cbio-claw
-ExecStart=/usr/bin/docker compose --env-file docker-compose.env up -d hermes-cbio-gateway
-ExecStop=/usr/bin/docker compose --env-file docker-compose.env stop hermes-cbio-gateway
+EnvironmentFile=/home/ec2-user/work/cbio-claw/profile.env
+ExecStartPre=/bin/sh -c 'test -s "hermes-data/profiles/${HERMES_PROFILE}/.env" && test -s "hermes-data/profiles/${HERMES_PROFILE}/config.yaml" && test -f "${HERMES_VAULT}/presets/${HERMES_PROFILE}/config.skills.yaml"'
+ExecStart=/usr/bin/docker compose --env-file docker-compose.env --env-file profile.env -f docker-compose.yml -f docker-compose.profile.yml up -d hermes-cbio-gateway
+ExecStop=/usr/bin/docker compose --env-file docker-compose.env --env-file profile.env -f docker-compose.yml -f docker-compose.profile.yml stop hermes-cbio-gateway
 
 [Install]
 WantedBy=multi-user.target
