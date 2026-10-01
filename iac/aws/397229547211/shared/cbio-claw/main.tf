@@ -43,6 +43,8 @@ resource "aws_spot_instance_request" "hermes_agent" {
 
   lifecycle {
     prevent_destroy = true
+    # Root-volume tags are managed by aws_ec2_tag.
+    ignore_changes = [root_block_device[0].tags]
   }
 }
 
