@@ -63,7 +63,7 @@ data:
       cbioportal_public_librechat_beta_) ;;
       *) echo "FAIL: DST_PREFIX '$DST_PREFIX' is not cbioportal_public_librechat_beta_"; exit 1 ;;
     esac
-    # llm_user can be reached by anyone with access to cBioDBAgent, so the
+    # llm_user_beta can be reached by anyone with access to cBioDBAgent, so the
     # clone must not carry any auth/credential data. The explicit list
     # covers today's cBioPortal schema; the substring patterns below are
     # defense-in-depth for future schema additions (e.g. oauth_*, sessions).
@@ -254,7 +254,7 @@ data:
     fi
 
     # 8) Hand off state to the patch-pointer container.
-    # llm_user grants are keyed by database name and persist across DROP
+    # llm_user_beta grants are keyed by database name and persist across DROP
     # DATABASE + CREATE DATABASE, so no GRANT step here. The beta names
     # need their own one-time grants (see README.md).
     echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
