@@ -8,6 +8,14 @@ resource "aws_instance" "hermes_agent" {
   user_data_replace_on_change = true
   vpc_security_group_ids      = ["sg-03bc1bfbebc3b9651", "sg-07f9067f60b547b5a"]
 
+  instance_market_options {
+    market_type = "spot"
+    spot_options {
+      spot_instance_type             = "persistent"
+      instance_interruption_behavior = "stop"
+    }
+  }
+
   root_block_device {
     volume_size           = 40
     volume_type           = "gp3"
