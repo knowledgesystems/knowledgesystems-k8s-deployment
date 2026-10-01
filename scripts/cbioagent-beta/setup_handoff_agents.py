@@ -4,7 +4,8 @@
 Beta and prod share one MongoDB, so this script writes only the four agent ids
 in MANAGED_IDS and the `aclentries` rows that point at them. The unified beta
 agent (--source-agent) is read for its tools, instructions, author and sharing,
-never written. Safe to re-run: unchanged agents are left alone.
+never written. FAST_TOOL_NAMES missing from its explicit tool list are added to the
+beta agents' copies only: prod's modelSpec uses the same unified agent. Safe to re-run: unchanged agents are left alone.
 
     MONGO_URI=mongodb://localhost:27017/cBioAgent ./setup_handoff_agents.py --dry-run
 """
@@ -189,14 +190,12 @@ def build_agents(source):
     router_prompt = fill_transfer_tools(read_prompt("router"), "router")
     fast_prompt = fill_transfer_tools(read_prompt("fast"), "fast")
     fast_tools = [name + MCP_DELIMITER + DB_SERVER for name in FAST_TOOL_NAMES]
-    # With the all-tools entry the source's tool list can't show whether the server has #154's tools.
-    fast_tools_verified = MCP_ALL + MCP_DELIMITER + DB_SERVER not in db_tools
-    missing = [t for t in fast_tools if t not in db_tools] if fast_tools_verified else []
-    if missing:
-        sys.exit(
-            f"source agent {source['id']} lacks {', '.join(missing)}; the fast agent needs every one of "
-            f"FAST_TOOL_NAMES from {DB_SERVER} (cbioportal-mcp #154)"
-        )
+    # An explicit source tool list may predate cbioportal-mcp #154, and prod's modelSpec uses the same agent
+    # against an MCP without those tools, so the missing ones are appended to the beta copies, never the source.
+    # With the all-tools entry nothing is appended, and the tool list can't show whether the server has them.
+    all_db_tools = MCP_ALL + MCP_DELIMITER + DB_SERVER in db_tools
+    added_tools = [] if all_db_tools else [t for t in fast_tools if t not in db_tools]
+    unverified_tools = fast_tools if all_db_tools else added_tools
     try:
         data_base, removed = strip_navigation(base_instructions)
     except ValueError as err:
@@ -284,7 +283,7 @@ def build_agents(source):
                 "promptCache": True,
                 "promptCacheTtl": PROMPT_CACHE_TTL,
             },
-            "tools": db_tools,
+            "tools": db_tools + added_tools,
             "edges": [],
         },
         {
@@ -303,7 +302,8 @@ def build_agents(source):
                 "promptCache": True,
                 "promptCacheTtl": PROMPT_CACHE_TTL,
             },
-            "tools": source_tools,
+            # The #154 tools too: navigation questions often start with a frequency or count lookup.
+            "tools": source_tools + added_tools,
             "edges": [],
         },
         {
@@ -351,7 +351,9 @@ def build_agents(source):
         "link_mentions": [ln.strip() for ln in data_base.splitlines() if LINK_KEYWORDS.search(ln)],
         "budget_head": budget.split(". ", 1)[0] + ".",
         "fast_tools": fast_tools,
-        "fast_tools_verified": fast_tools_verified,
+        "added_tools": added_tools,
+        "unverified_tools": unverified_tools,
+        "all_db_tools": all_db_tools,
     }
     return agents, report
 
@@ -368,14 +370,25 @@ def print_strip_report(report):
         print(f"  still mentions navigation/links (data.md overrides): {line[:100]}")
     print(f"tool budget (prompts/budget.md), last section of {DATA_ID} and {NAV_ID}: {report['budget_head']}")
     print(f"{FAST_ID} tools: {', '.join(report['fast_tools'])}")
+    if report["added_tools"]:
+        print(
+            f"added to {DATA_ID}, {NAV_ID} and {FAST_ID}, not in the source agent: {', '.join(report['added_tools'])}"
+        )
 
 
 def warn_unverified_fast_tools(report):
-    if not report["fast_tools_verified"]:
-        print(
-            f"warning: {FAST_ID} tools not verified: the source agent has every {DB_SERVER} tool ({MCP_ALL}); "
-            f"confirm beta's {DB_SERVER} MCP server lists {', '.join(FAST_TOOL_NAMES)} (cbioportal-mcp #154)"
-        )
+    """This script reads only MongoDB, so it cannot list the MCP server's tools; the operator has to."""
+    if not report["unverified_tools"]:
+        return
+    if report["all_db_tools"]:
+        reason = f"the source agent has every {DB_SERVER} tool ({MCP_ALL})"
+    else:
+        reason = "the source agent doesn't list them, so they were added without checking the MCP server"
+    names = ", ".join(t.split(MCP_DELIMITER, 1)[0] for t in report["unverified_tools"])
+    print(
+        f"warning: {FAST_ID} tools not verified: {reason}; "
+        f"confirm beta's {DB_SERVER} MCP server lists {names} (cbioportal-mcp #154)"
+    )
 
 
 def fill_transfer_tools(prompt, name):
@@ -428,6 +441,8 @@ def version_snapshot(desired, now):
 
 
 def upsert_agent(db, desired, dry_run):
+    if desired["id"] not in MANAGED_IDS:
+        sys.exit(f"refusing to write {desired['id']}: not one of {', '.join(MANAGED_IDS)}")
     now = datetime.datetime.now(datetime.timezone.utc)
     existing = db.agents.find_one(agent_filter(desired["id"], desired.get("tenantId")))
     if existing is None:

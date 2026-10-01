@@ -90,6 +90,9 @@ FAST_TOOLS = [
 ]
 # A source agent that lists cbioportal-database tools one by one instead of the all-tools entry.
 EXPLICIT_DB_TOOLS = [*FAST_TOOLS, "clickhouse_run_select_query_mcp_cbioportal-database"]
+# The cbioportal-mcp #154 tools, which a unified agent configured before #154 doesn't list.
+AGGREGATE_TOOLS = [t for t in FAST_TOOLS if not t.startswith("list_studies")]
+PRE_154_DB_TOOLS = [t for t in EXPLICIT_DB_TOOLS if t not in AGGREGATE_TOOLS]
 
 
 def run(db, *args):
@@ -641,15 +644,74 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertIn("create agent_cbiobeta_fast", out)
         self.assertEqual(run(self.db).count(warning), 1)
 
-    def test_missing_fast_tool_aborts_before_writing(self):
-        tools = [t for t in EXPLICIT_DB_TOOLS if not t.startswith("get_profiled_counts")]
-        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tools": [*tools, NAV_TOOL]}})
+    def use_pre_154_source(self):
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tools": [*PRE_154_DB_TOOLS, NAV_TOOL]}})
+
+    def test_source_without_fast_tools_appends_them(self):
+        self.use_pre_154_source()
+        warning = (
+            f"warning: {m.FAST_ID} tools not verified: the source agent doesn't list them, so they were added "
+            "without checking the MCP server; confirm beta's cbioportal-database MCP server lists "
+            "get_alteration_frequency, get_top_altered_genes, get_gene_frequency_by_cancer_type, get_profiled_counts "
+            "(cbioportal-mcp #154)"
+        )
         before = snapshot(self.db)
-        for args in ((), ("--dry-run",)):
-            with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
-                run(self.db, *args)
-            self.assertIn("get_profiled_counts_mcp_cbioportal-database", str(ctx.exception.code))
+        out = run(self.db, "--dry-run")
         self.assertEqual(snapshot(self.db), before)
+        self.assertIn(f"{m.FAST_ID} tools: {', '.join(FAST_TOOLS)}", out)
+        self.assertIn(f"not in the source agent: {', '.join(AGGREGATE_TOOLS)}", out)
+        self.assertEqual(out.count(warning), 1)
+        self.assertEqual(out.count("\ncreate "), 4)
+
+        self.assertEqual(run(self.db).count(warning), 1)
+        self.assertEqual(self.agent(m.FAST_ID)["tools"], FAST_TOOLS)
+        self.assertEqual(self.agent(m.DATA_ID)["tools"], [*PRE_154_DB_TOOLS, *AGGREGATE_TOOLS])
+        self.assertEqual(self.agent(m.NAV_ID)["tools"], [*PRE_154_DB_TOOLS, NAV_TOOL, *AGGREGATE_TOOLS])
+        self.assertEqual(self.agent(m.DATA_ID)["mcpServerNames"], ["cbioportal-database"])
+        self.assertEqual(self.agent(m.NAV_ID)["mcpServerNames"], ["cbioportal-database", "cbioportal-navigator"])
+        self.assertEqual(run(self.db).count("unchanged "), 4)
+
+    def test_existing_agents_without_fast_tools_are_updated(self):
+        # Data and navigation built before the fast path copied the pre-#154 tool list; fast doesn't exist yet.
+        self.use_pre_154_source()
+        run(self.db)
+        self.db.agents.update_one({"id": m.DATA_ID}, {"$set": {"tools": PRE_154_DB_TOOLS}})
+        self.db.agents.update_one({"id": m.NAV_ID}, {"$set": {"tools": [*PRE_154_DB_TOOLS, NAV_TOOL]}})
+        fast = self.agent(m.FAST_ID)
+        self.db.aclentries.delete_many({"resourceId": fast["_id"]})
+        self.db.agents.delete_one({"_id": fast["_id"]})
+        out = run(self.db, "--dry-run")
+        self.assertIn(f"update {m.DATA_ID}: tools\n", out)
+        self.assertIn(f"update {m.NAV_ID}: tools\n", out)
+        self.assertIn(f"create {m.FAST_ID} ({m.HAIKU}, 5 tools, 1 edges)", out)
+        self.assertIn(f"unchanged {m.ROUTER_ID}", out)
+
+    def test_unified_agent_is_never_written(self):
+        self.use_pre_154_source()
+
+        def source_state():
+            rows = self.db.aclentries.find({"resourceId": self.source["_id"]})
+            return self.db.agents.find_one({"_id": self.source["_id"]}), sorted(repr(sorted(r.items())) for r in rows)
+
+        before = copy.deepcopy(source_state())
+        source_before = before[0]
+        for args in (("--dry-run",), (), (), ("--delete",)):
+            run(self.db, *args)
+            self.assertEqual(source_state(), before)
+        self.assertNotIn(AGGREGATE_TOOLS[0], source_before["tools"])
+        for agent_id in (m.DEFAULT_SOURCE_ID, "agent_prod_unified"):
+            with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+                m.upsert_agent(self.db, {"id": agent_id, "model": m.HAIKU, "tools": [], "edges": []}, False)
+            self.assertIn(f"refusing to write {agent_id}", str(ctx.exception.code))
+        self.assertEqual(self.db.agents.find_one({"_id": self.source["_id"]}), source_before)
+
+    def test_partial_fast_tools_appends_only_missing(self):
+        tools = [t for t in EXPLICIT_DB_TOOLS if not t.startswith("get_profiled_counts")]
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tools": tools}})
+        out = run(self.db)
+        self.assertIn("confirm beta's cbioportal-database MCP server lists get_profiled_counts (", out)
+        self.assertEqual(self.agent(m.DATA_ID)["tools"], [*tools, "get_profiled_counts_mcp_cbioportal-database"])
+        self.assertEqual(self.agent(m.FAST_ID)["tools"], FAST_TOOLS)
 
     def test_fast_placeholder_left_aborts(self):
         orig = m.read_prompt
