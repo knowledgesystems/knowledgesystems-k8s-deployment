@@ -81,6 +81,15 @@ ROUTER_TRANSFER_LINE = "Always respond with exactly one transfer call; never ans
 
 DB_TOOL = "sys__all__sys_mcp_cbioportal-database"
 NAV_TOOL = "sys__all__sys_mcp_cbioportal-navigator"
+FAST_TOOLS = [
+    "get_alteration_frequency_mcp_cbioportal-database",
+    "get_top_altered_genes_mcp_cbioportal-database",
+    "get_gene_frequency_by_cancer_type_mcp_cbioportal-database",
+    "get_profiled_counts_mcp_cbioportal-database",
+    "list_studies_mcp_cbioportal-database",
+]
+# A source agent that lists cbioportal-database tools one by one instead of the all-tools entry.
+EXPLICIT_DB_TOOLS = [*FAST_TOOLS, "clickhouse_run_select_query_mcp_cbioportal-database"]
 
 
 def run(db, *args):
@@ -192,14 +201,20 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         before = snapshot(self.db)
         out = run(self.db, "--dry-run")
         self.assertEqual(snapshot(self.db), before)
-        self.assertEqual(out.count("\ncreate "), 3)
+        self.assertEqual(out.count("\ncreate "), 4)
+        self.assertIn(f"create {m.ROUTER_ID} ({m.HAIKU}, 0 tools, 3 edges)", out)
+        self.assertIn(f"create {m.FAST_ID} ({m.HAIKU}, 5 tools, 1 edges)", out)
+        creates = [ln.split()[1] for ln in out.splitlines() if ln.startswith("create ")]
+        self.assertEqual(creates[-1], m.ROUTER_ID)
 
     def test_apply_builds_expected_agents(self):
         run(self.db)
-        router, data, nav = (self.agent(i) for i in m.MANAGED_IDS)
+        router, data, nav, fast = (self.agent(i) for i in m.MANAGED_IDS)
 
         self.assertEqual(router["tools"], [])
-        self.assertEqual([e["to"] for e in router["edges"]], [m.NAV_ID, m.DATA_ID])
+        self.assertEqual([e["to"] for e in router["edges"]], [m.NAV_ID, m.DATA_ID, m.FAST_ID])
+        self.assertEqual({e["from"] for e in router["edges"]}, {m.ROUTER_ID})
+        self.assertEqual({e["edgeType"] for e in router["edges"]}, {"handoff"})
         self.assertNotIn("<<", router["instructions"])
         self.assertIn(m.TRANSFER_PREFIX + m.NAV_ID, router["instructions"])
 
@@ -223,17 +238,30 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertTrue(nav["instructions"].endswith(f"{BASE_INSTRUCTIONS.strip()}\n\n{BUDGET_TEXT}"))
 
         self.assertEqual(
-            router["model_parameters"], {"model": m.HAIKU, "thinking": False, "maxOutputTokens": 256, "temperature": 0}
+            router["model_parameters"],
+            {"model": m.HAIKU, "thinking": False, "maxOutputTokens": 256, "temperature": 0, "promptCacheTtl": "1h"},
         )
-        self.assertEqual(
-            data["model_parameters"],
-            {"model": m.HAIKU, "thinking": False, "maxOutputTokens": 4096, "temperature": 0, "promptCache": True},
-        )
+        haiku_params = {
+            "model": m.HAIKU,
+            "thinking": False,
+            "maxOutputTokens": 4096,
+            "temperature": 0,
+            "promptCache": True,
+            "promptCacheTtl": "1h",
+        }
+        self.assertEqual(data["model_parameters"], haiku_params)
+        self.assertEqual(fast["model_parameters"], haiku_params)
         self.assertEqual(
             nav["model_parameters"],
-            {"model": m.SONNET, "thinking": False, "maxOutputTokens": 4096, "promptCache": True},
+            {
+                "model": m.SONNET,
+                "thinking": False,
+                "maxOutputTokens": 4096,
+                "promptCache": True,
+                "promptCacheTtl": "1h",
+            },
         )
-        for a in (router, data, nav):
+        for a in (router, data, nav, fast):
             self.assertEqual(self.db.aclentries.count_documents({"resourceId": a["_id"]}), 3)
             self.assertEqual(len(a["versions"]), 1)
             self.assertNotIn("author", a["versions"][0])
@@ -271,7 +299,8 @@ class SetupHandoffAgentsTest(unittest.TestCase):
     def test_budget_is_last_and_once_in_specialists_only(self):
         self.assertEqual(m.read_prompt("budget"), BUDGET_TEXT)
         run(self.db)
-        router, data, nav = (self.agent(i) for i in m.MANAGED_IDS)
+        router, data, nav, fast = (self.agent(i) for i in m.MANAGED_IDS)
+        self.assertEqual(m.BUDGETED_IDS, (m.DATA_ID, m.NAV_ID))
         for a in (data, nav):
             self.assertEqual(a["instructions"].count(BUDGET_LABEL), 1, a["id"])
             self.assertEqual(a["instructions"].count("six tool rounds"), 1, a["id"])
@@ -280,6 +309,9 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertNotIn(BUDGET_LABEL, router["instructions"])
         self.assertNotIn("tool round", router["instructions"])
         self.assertEqual(router["instructions"].count(ROUTER_TRANSFER_LINE), 1)
+        self.assertNotIn(BUDGET_LABEL, fast["instructions"])
+        self.assertEqual(m.budget_copies(fast["instructions"], BUDGET_TEXT), 0)
+        self.assertIn("one tool round, two at most", fast["instructions"])
 
     def test_budget_in_unified_prompt_aborts_before_writing(self):
         # Anywhere in the unified prompt, including inside a section NAV_SECTIONS strips from the data agent.
@@ -311,7 +343,7 @@ class SetupHandoffAgentsTest(unittest.TestCase):
     def test_quoting_the_budget_label_does_not_abort(self):
         instructions = f"{BASE_INSTRUCTIONS}\n{LABEL_QUOTE}\n"
         self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"instructions": instructions}})
-        self.assertEqual(run(self.db, "--dry-run").count("\ncreate "), 3)
+        self.assertEqual(run(self.db, "--dry-run").count("\ncreate "), 4)
         run(self.db)
         for agent_id in (m.DATA_ID, m.NAV_ID):
             text = self.agent(agent_id)["instructions"]
@@ -322,7 +354,12 @@ class SetupHandoffAgentsTest(unittest.TestCase):
     def test_budget_in_prompt_file_aborts(self):
         orig = m.read_prompt
         for copy_text in (BUDGET_TEXT, *BUDGET_VARIANTS.values()):
-            for target, agent_id in (("data", m.DATA_ID), ("navigation", m.NAV_ID), ("router", m.ROUTER_ID)):
+            for target, agent_id in (
+                ("data", m.DATA_ID),
+                ("navigation", m.NAV_ID),
+                ("router", m.ROUTER_ID),
+                ("fast", m.FAST_ID),
+            ):
                 with self.subTest(target=target, copy=copy_text[:30]):
                     m.read_prompt = lambda name, t=target, c=copy_text: orig(name) + ("\n\n" + c if name == t else "")
                     try:
@@ -353,7 +390,7 @@ class SetupHandoffAgentsTest(unittest.TestCase):
             with self.subTest(limit=limit):
                 self.db.agents.update_one({"id": m.ROUTER_ID}, {"$set": {"recursion_limit": limit}})
                 run(self.db, "--dry-run")
-                self.assertEqual(run(self.db).count("unchanged "), 3)
+                self.assertEqual(run(self.db).count("unchanged "), 4)
                 self.assertEqual(self.agent(m.ROUTER_ID)["recursion_limit"], limit)
 
     def test_dry_run_shows_budget(self):
@@ -373,16 +410,16 @@ class SetupHandoffAgentsTest(unittest.TestCase):
     def test_explicit_null_tenant_is_unchanged(self):
         run(self.db)
         self.db.agents.update_many({"id": {"$in": list(m.MANAGED_IDS)}}, {"$set": {"tenantId": None}})
-        self.assertEqual(run(self.db).count("unchanged "), 3)
+        self.assertEqual(run(self.db).count("unchanged "), 4)
 
     def test_tenant_change_leaves_old_copies_reported(self):
         self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tenantId": "t1"}})
         run(self.db)
         self.db.agents.update_one({"_id": self.source["_id"]}, {"$unset": {"tenantId": ""}})
         out = run(self.db)
-        self.assertEqual(out.count("\ncreate "), 3)
-        self.assertEqual(out.count("tenantId='t1'; not touched"), 3)
-        self.assertEqual(self.db.agents.count_documents({"id": {"$in": list(m.MANAGED_IDS)}, "tenantId": "t1"}), 3)
+        self.assertEqual(out.count("\ncreate "), 4)
+        self.assertEqual(out.count("tenantId='t1'; not touched"), 4)
+        self.assertEqual(self.db.agents.count_documents({"id": {"$in": list(m.MANAGED_IDS)}, "tenantId": "t1"}), 4)
 
     def test_delete_requires_source_agent(self):
         run(self.db)
@@ -397,7 +434,7 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         before = snapshot(self.db)
         out = run(self.db)
         self.assertEqual(snapshot(self.db), before)
-        self.assertEqual(out.count("unchanged "), 3)
+        self.assertEqual(out.count("unchanged "), 4)
 
     def test_update_snapshot_matches_create_shape(self):
         run(self.db)
@@ -408,6 +445,7 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertIn("update agent_cbiobeta_data: instructions", out)
         self.assertIn("update agent_cbiobeta_navigation: instructions", out)
         self.assertIn("unchanged agent_cbiobeta_router", out)
+        self.assertIn("unchanged agent_cbiobeta_fast", out)
         data = self.agent(m.DATA_ID)
         self.assertEqual(len(data["versions"]), 2)
         first, second = data["versions"]
@@ -435,19 +473,24 @@ class SetupHandoffAgentsTest(unittest.TestCase):
         self.assertEqual(params["maxOutputTokens"], 4096)
 
     def test_other_tenant_agent_is_untouched(self):
-        other = {"_id": ObjectId(), "id": m.ROUTER_ID, "tenantId": "other", "model": "keep-me", "author": self.author}
-        self.db.agents.insert_one(other)
+        others = [
+            {"_id": ObjectId(), "id": agent_id, "tenantId": "other", "model": "keep-me", "author": self.author}
+            for agent_id in (m.ROUTER_ID, m.FAST_ID)
+        ]
+        self.db.agents.insert_many(copy.deepcopy(others))
         run(self.db)
-        self.assertEqual(self.db.agents.find_one({"_id": other["_id"]}), other)
-        self.assertEqual(self.agent(m.ROUTER_ID)["model"], m.HAIKU)
+        for other in others:
+            self.assertEqual(self.db.agents.find_one({"_id": other["_id"]}), other)
+            self.assertEqual(self.agent(other["id"])["model"], m.HAIKU)
         run(self.db, "--delete")
-        self.assertEqual(self.db.agents.find_one({"_id": other["_id"]}), other)
+        for other in others:
+            self.assertEqual(self.db.agents.find_one({"_id": other["_id"]}), other)
 
     def test_source_tenant_is_propagated(self):
         self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tenantId": "t1"}})
         run(self.db)
-        self.assertEqual(self.db.agents.count_documents({"id": {"$in": list(m.MANAGED_IDS)}, "tenantId": "t1"}), 3)
-        self.assertEqual(run(self.db).count("unchanged "), 3)
+        self.assertEqual(self.db.agents.count_documents({"id": {"$in": list(m.MANAGED_IDS)}, "tenantId": "t1"}), 4)
+        self.assertEqual(run(self.db).count("unchanged "), 4)
 
     def test_missing_nav_heading_aborts_before_writing(self):
         self.db.agents.update_one(
@@ -458,6 +501,179 @@ class SetupHandoffAgentsTest(unittest.TestCase):
             run(self.db)
         self.assertIn("Link First", str(ctx.exception.code))
         self.assertEqual(snapshot(self.db), before)
+
+    def test_fast_agent(self):
+        run(self.db)
+        fast = self.agent(m.FAST_ID)
+        self.assertEqual(fast["name"], "cBioPortalChat Fast (beta)")
+        self.assertEqual(fast["provider"], "bedrock")
+        self.assertEqual(fast["model"], m.HAIKU)
+        self.assertEqual(fast["author"], self.author)
+        self.assertEqual(fast["tools"], FAST_TOOLS)
+        self.assertEqual(fast["mcpServerNames"], ["cbioportal-database"])
+        self.assertEqual(
+            fast["instructions"], m.read_prompt("fast").replace("<<DATA_TOOL>>", m.TRANSFER_PREFIX + m.DATA_ID)
+        )
+        self.assertNotIn("<<", fast["instructions"])
+        # Built from fast.md alone, not the unified prompt.
+        self.assertNotIn("## Query Workflow", fast["instructions"])
+        for text in (
+            "never construct or output any cbioportal.org URL",
+            "Never copy a `url` value from `list_studies`",
+            "https://www.cbioportal.org/api",
+            "numerator and denominator",
+            "Never guess a study ID",
+            "`fallback_reason`",
+        ):
+            self.assertIn(text, fast["instructions"])
+        for name in m.FAST_TOOL_NAMES:
+            self.assertIn(f"`{name}(", fast["instructions"])
+        for marker in m.NAV_TOOL_MARKERS:
+            self.assertNotIn(marker, fast["instructions"])
+        self.assertEqual(self.db.aclentries.count_documents({"resourceId": fast["_id"]}), 3)
+
+    def test_fast_escalation_edge(self):
+        run(self.db)
+        fast = self.agent(m.FAST_ID)
+        self.assertEqual(len(fast["edges"]), 1)
+        edge = fast["edges"][0]
+        self.assertEqual((edge["from"], edge["to"], edge["edgeType"]), (m.FAST_ID, m.DATA_ID, "handoff"))
+        self.assertTrue(edge["description"])
+        self.assertIn(m.TRANSFER_PREFIX + m.DATA_ID, fast["instructions"])
+        # The escalation target is a managed agent users can reach.
+        self.assertEqual(self.db.aclentries.count_documents({"resourceId": self.agent(m.DATA_ID)["_id"]}), 3)
+        self.assertEqual(self.agent(m.DATA_ID)["edges"], [])
+        self.assertEqual(self.agent(m.NAV_ID)["edges"], [])
+
+    def test_router_prompt_routes_fast(self):
+        run(self.db)
+        text = self.agent(m.ROUTER_ID)["instructions"]
+        nav, data, fast = (m.TRANSFER_PREFIX + i for i in (m.NAV_ID, m.DATA_ID, m.FAST_ID))
+        for tool in (nav, data, fast):
+            self.assertIn(tool, text)
+        # Navigation rules come first, so a link or view request never reaches the fast agent.
+        self.assertLess(text.index(f"1. Call `{nav}`"), text.index(f"2. Call `{fast}`"))
+        self.assertLess(text.index(f"2. Call `{fast}`"), text.index(f"3. Call `{data}`"))
+        self.assertIn(f"If you are unsure between `{fast}` and `{data}`, call `{data}`.", text)
+        self.assertIn(f"If you are unsure whether a link or view is needed, call `{nav}`.", text)
+        self.assertIn("Fast examples:", text)
+        self.assertIn("Not fast (data):", text)
+        self.assertIn("Not fast (navigation):", text)
+        for excluded in ("filter", "survival", "co-occurrence", "comparisons", "follow-up"):
+            self.assertIn(excluded, text.split("Fast examples:")[0])
+        self.assertIn("Top 10 most mutated genes in luad_tcga_pan_can_atlas_2018", text)
+        self.assertIn("What about in the MSK cohort?", text)
+        self.assertIn(ROUTER_TRANSFER_LINE, text)
+
+    def test_router_prompt_keeps_patient_level_frequencies_off_fast(self):
+        run(self.db)
+        text = self.agent(m.ROUTER_ID)["instructions"]
+        rule = (
+            "Patient-level alteration frequencies or prevalence are not fast; "
+            "only sample-level alteration frequencies are supported."
+        )
+        self.assertIn(rule, text)
+        self.assertLess(text.index(rule), text.index("Fast examples:"))
+        example = '- "What percentage of patients in msk_impact_2017 have a KRAS mutation?" (patient-level frequency)'
+        not_fast = text.split("Not fast (data):", 1)[1].split("Not fast (navigation):", 1)[0]
+        self.assertIn(example, not_fast)
+        fast_examples = text.split("Fast examples:", 1)[1].split("Not fast (data):", 1)[0]
+        self.assertNotIn("patients", fast_examples.replace("How many samples and patients are in", ""))
+
+    def test_fast_prompt_validates_before_the_first_call(self):
+        text = m.read_prompt("fast")
+        check = (
+            "Before any tool call, validate the latest message independently; do not assume the router classified "
+            "it correctly. Every requested qualifier and counting unit must be supported by the matching tool above. "
+            "Otherwise transfer to data before calling it. Never substitute sample-level frequencies for "
+            "patient-level frequencies."
+        )
+        self.assertIn(check, text)
+        self.assertLess(text.index(check), text.index("1. Once the question passes that check, call the matching"))
+        self.assertIn("- the question fails the check above;", text)
+        self.assertIn("patient-level alteration frequency or prevalence", text)
+        self.assertIn("Only sample-level alteration frequencies are supported.", text)
+
+    def test_fast_prompt_states_each_tools_counting_unit(self):
+        text = m.read_prompt("fast")
+        lines = {
+            name: next(ln for ln in text.splitlines() if ln.startswith(f"- `{name}(")) for name in m.FAST_TOOL_NAMES
+        }
+        for name in ("get_alteration_frequency", "get_top_altered_genes", "get_gene_frequency_by_cancer_type"):
+            self.assertIn("Counts samples only", lines[name], name)
+        self.assertIn("`altered_samples` of `profiled_samples`", lines["get_alteration_frequency"])
+        counts = lines["get_profiled_counts"]
+        self.assertIn("samples and how many patients", counts)
+        self.assertIn("no alteration counts", counts)
+        self.assertIn("Patient counts are supported only as study or data-type totals from `get_profiled_counts`", text)
+
+    def test_fast_prompt_zero_altered_exception(self):
+        text = m.read_prompt("fast")
+        exception = text[text.index("Exception: for `get_alteration_frequency`") :].split("\n\n", 1)[0]
+        for condition in (
+            "no precomputed row because the requested alteration is absent",
+            "there is no `error_message`",
+            "`fallback_reason` starts with `no precomputed row` (not `precomputed table unavailable`)",
+            "names the requested gene and study",
+            "`altered_samples` = 0, `profiled_samples` > 0 and `frequency_pct` = 0",
+            'Report "0 of N profiled samples (0%)"',
+            "Otherwise keep the escalation rules.",
+        ):
+            self.assertIn(condition, exception)
+        self.assertIn("a `fallback_reason` (except the case below);", text)
+
+    def test_explicit_source_tools_verify_fast_tools(self):
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tools": [*EXPLICIT_DB_TOOLS, NAV_TOOL]}})
+        out = run(self.db, "--dry-run")
+        self.assertIn(f"{m.FAST_ID} tools: {', '.join(FAST_TOOLS)}", out)
+        self.assertNotIn("not verified", out)
+        self.assertNotIn("not verified", run(self.db))
+        self.assertEqual(self.agent(m.FAST_ID)["tools"], FAST_TOOLS)
+        self.assertEqual(self.agent(m.DATA_ID)["tools"], EXPLICIT_DB_TOOLS)
+
+    def test_all_tools_source_is_reported_unverified(self):
+        warning = f"warning: {m.FAST_ID} tools not verified"
+        out = run(self.db, "--dry-run")
+        self.assertIn(f"{m.FAST_ID} tools: {', '.join(FAST_TOOLS)}", out)
+        self.assertEqual(out.count(warning), 1)
+        out = run(self.db)
+        self.assertEqual(out.count(warning), 1)
+        self.assertIn("create agent_cbiobeta_fast", out)
+        self.assertEqual(run(self.db).count(warning), 1)
+
+    def test_missing_fast_tool_aborts_before_writing(self):
+        tools = [t for t in EXPLICIT_DB_TOOLS if not t.startswith("get_profiled_counts")]
+        self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tools": [*tools, NAV_TOOL]}})
+        before = snapshot(self.db)
+        for args in ((), ("--dry-run",)):
+            with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+                run(self.db, *args)
+            self.assertIn("get_profiled_counts_mcp_cbioportal-database", str(ctx.exception.code))
+        self.assertEqual(snapshot(self.db), before)
+
+    def test_fast_placeholder_left_aborts(self):
+        orig = m.read_prompt
+        m.read_prompt = lambda name: orig(name) + ("\n<<OTHER_TOOL>>" if name == "fast" else "")
+        try:
+            before = snapshot(self.db)
+            with self.assertRaises(SystemExit) as ctx, contextlib.redirect_stdout(io.StringIO()):
+                run(self.db, "--dry-run")
+            self.assertIn("prompts/fast.md", str(ctx.exception.code))
+            self.assertEqual(snapshot(self.db), before)
+        finally:
+            m.read_prompt = orig
+
+    def test_fast_prompt_change_updates_only_fast(self):
+        run(self.db)
+        orig = m.read_prompt
+        m.read_prompt = lambda name: orig(name) + ("\nExtra rule." if name == "fast" else "")
+        try:
+            out = run(self.db)
+        finally:
+            m.read_prompt = orig
+        self.assertIn(f"update {m.FAST_ID}: instructions", out)
+        self.assertEqual(out.count("unchanged "), 3)
+        self.assertEqual(len(self.agent(m.FAST_ID)["versions"]), 2)
 
     def test_delete_removes_only_managed_agents(self):
         run(self.db)
