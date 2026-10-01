@@ -135,8 +135,12 @@ data:
     endpoints:
       agents:
         contextStrategy: 'summarize'
-        recursionLimit: 50
-        maxRecursionLimit: 100
+        # Soft budget (agent instructions): ~6 tool rounds. Hard backstop:
+        # each round = model + tools (2 steps), plus final model call;
+        # each context summarization adds 2 steps.
+        # 24 = 8 rounds + final + up to 3 summarizations (23 steps).
+        recursionLimit: 24
+        maxRecursionLimit: 24
         disableBuilder: false
       assistants:
         disableBuilder: true
