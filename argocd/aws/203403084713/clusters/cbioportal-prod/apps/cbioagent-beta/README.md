@@ -55,10 +55,12 @@ One quirk: a file whose last chunk is only a `#` or `/* */` comment fails to for
 A ClickHouse admin must create a dedicated beta user and grant only `SELECT` on both beta buffers. These grants are keyed by database name, so they survive the clone's `DROP DATABASE` + `CREATE DATABASE` and may be issued before the databases exist. Use a new password kept outside this repository:
 
 ```sql
-CREATE USER llm_user_beta IDENTIFIED BY '<new-beta-password>' SETTINGS readonly = 1;
+CREATE USER llm_user_beta IDENTIFIED BY '<new-beta-password>' SETTINGS readonly = 1, optimize_use_implicit_projections = 0 CONST;
 GRANT SELECT ON cbioportal_public_librechat_beta_blue.* TO llm_user_beta;
 GRANT SELECT ON cbioportal_public_librechat_beta_green.* TO llm_user_beta;
 ```
+
+`optimize_use_implicit_projections = 0 CONST` changes no results today: the beta buffers have no projections since cbioportal-mcp#169 reverted #156. It is set up front so that #156 can be re-tested on beta without recreating the user. With projections present, ClickHouse's implicit-projection shortcut can overcount plain `count()` queries, and #156's startup check refuses to run unless this setting is locked on the MCP user. `CONST` stops queries from turning it back on. Prod's `llm_user` already has the same setting.
 
 Create the beta MCP Secret out of band in the `default` namespace (the beta pointer ConfigMap and clone job explicitly use `namespace: default`). First inspect **key names only** in prod's Secret; this does not print their values:
 
