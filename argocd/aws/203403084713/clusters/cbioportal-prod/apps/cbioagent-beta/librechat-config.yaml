@@ -182,27 +182,21 @@ data:
       refillIntervalUnit: "days"
       refillAmount: 20000000
 
-    # Beta model specs — unified agent only. The DB and Navigator MCP servers
-    # remain configured above for the unified agent's tools.
+    # Beta model spec — handoff router. agent_cbiobeta_router (Haiku) hands
+    # each question to agent_cbiobeta_data (Haiku, database MCP) or
+    # agent_cbiobeta_navigation (Sonnet 5, links and study-view navigation).
+    # Those agent records are created by
+    # scripts/cbioagent-beta/setup_handoff_agents.py, which must run before
+    # this spec points at them. The script sets each agent's generation
+    # parameters (thinking off everywhere, per #659) in its model_parameters.
     modelSpecs:
       enforce: false
       prioritize: true
       list:
-        # Same agent offered under two models. cbioportal/librechat
-        # v0.8.7-custom-v2+ runs the agent with preset.model when the spec's
-        # agent_id matches, and specs with `modelOption` for the same agent
-        # are shown as a model picker in the chat input instead of in the
-        # header selector. The Sonnet spec reuses this one via YAML merge.
-        # softDefault (not default) so a new chat reuses the model picked in
-        # the user's last conversation; Haiku only applies with no prior pick.
-        - &betaSpec
-          name: "cBioPortalChatBeta"
+        - name: "cBioPortalChatBeta"
           label: "cBioPortalChat - Explore cBioPortal data and links"
-          softDefault: true
+          default: true
           description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
-          modelOption:
-            label: "Haiku 4.5"
-            description: "Fast answers for most questions"
           placeholder: "How can I help you explore cBioPortal?"
           iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
           showIconInHeader: true
@@ -234,33 +228,22 @@ data:
                 - "Show me TP53 mutation frequency across all cancer types."
                 - "What are the most mutated genes in lung cancer?"
                 - "Compare low grade glioma by molecular subtype."
-          preset: &betaPreset
+          preset:
             endpoint: "agents"
-            agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
+            agent_id: "agent_cbiobeta_router"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-            temperature: 0
-            maxTokens: 4096
+            # With cBioPortal/LibreChat#36 and #37 these preset keys are
+            # forwarded to the router only, and override its saved
+            # model_parameters. They match the router record: thinking off
+            # and a 256-token cap (it emits one transfer call). The 256
+            # replaces #659's 4096 for this spec only. The data and
+            # navigation agents never see the preset; they use their own
+            # records (thinking off, 4096). promptCacheTtl is from #653;
+            # promptCache is left unset because the Bedrock parser defaults
+            # it to true for Claude, which keeps the 1h TTL.
+            maxTokens: 256
             thinking: false
-            # Bedrock prompt caching. On the Agents endpoint the request
-            # body's model_parameters win; without this flag the ~40k-token
-            # system+tools context is re-billed as fresh input every turn.
-            # With it, subsequent turns within cache TTL cost 0.1× input
-            # rate. Beta canary before flipping the prod modelSpec on 203
-            # and the four MSK modelSpecs on 666.
-            promptCache: true
-            # Pins the one-hour Bedrock prompt-cache TTL ('5m' | '1h').
-            # cBioPortal/LibreChat#36 forwards it from the preset to the
-            # agent; the Sonnet spec inherits it via the merge key.
             promptCacheTtl: 1h
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
-        - <<: *betaSpec
-          name: "cBioPortalChatBetaSonnet"
-          softDefault: false
-          modelOption:
-            label: "Sonnet 5"
-            description: "Deeper reasoning for complex analyses. Uses more of your limit."
-          preset:
-            <<: *betaPreset
-            model: "us.anthropic.claude-sonnet-5"
