@@ -68,7 +68,9 @@ spec:
             # left OFF by default. To pilot it on beta, uncomment below.
             # If you do, also set DROP_QUERY_CACHE=true on the beta clone job
             # so the cache is dropped before each buffer flip (that drop is
-            # server-wide and empties prod's cache too).
+            # server-wide and empties prod's cache too). The pilot needs
+            # readonly=2 (or CHANGEABLE_IN_READONLY constraints) on
+            # llm_user_beta; default readonly=1 disables the cache pilot.
             # - name: CBIOPORTAL_MCP_QUERY_CACHE_ENABLED
             #   value: "true"
           envFrom:

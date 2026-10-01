@@ -60,7 +60,32 @@ GRANT SELECT ON cbioportal_public_librechat_beta_blue.* TO llm_user_beta;
 GRANT SELECT ON cbioportal_public_librechat_beta_green.* TO llm_user_beta;
 ```
 
-Create the beta MCP Secret out of band in the `default` namespace (the beta pointer ConfigMap and clone job explicitly use `namespace: default`). Replace every angle-bracket placeholder before running this command:
+Create the beta MCP Secret out of band in the `default` namespace (the beta pointer ConfigMap and clone job explicitly use `namespace: default`). First inspect **key names only** in prod's Secret; this does not print their values:
+
+```sh
+kubectl get secret clickhouse-mcp -n default -o json | jq '.data | keys'
+```
+
+Copy every prod key, including `DD_API_KEY` for Datadog LLM Observability, except `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`, and `CLICKHOUSE_DATABASE` if present. Replace the first two with the dedicated beta credentials; the beta pointer ConfigMap supplies the database. This example prompts without echoing the password, keeps it out of shell history, and pipes Secret data directly to `kubectl apply` without displaying it:
+
+```sh
+printf 'New beta ClickHouse password: ' >&2
+IFS= read -rs BETA_CLICKHOUSE_PASSWORD
+printf '\n' >&2
+export BETA_CLICKHOUSE_PASSWORD
+kubectl get secret clickhouse-mcp -n default -o json |
+  jq '{apiVersion: "v1", kind: "Secret",
+       metadata: {name: "clickhouse-mcp-beta", namespace: "default"},
+       type: .type,
+       data: (.data |
+         .CLICKHOUSE_USER = ("llm_user_beta" | @base64) |
+         .CLICKHOUSE_PASSWORD = (env.BETA_CLICKHOUSE_PASSWORD | @base64) |
+         del(.CLICKHOUSE_DATABASE))}' |
+  kubectl apply -f -
+unset BETA_CLICKHOUSE_PASSWORD
+```
+
+As a manual fallback, create the Secret with `kubectl create secret generic` after reviewing the prod key list. The placeholders below are not credentials; include any additional keys present in prod's Secret. Supplying real values as shell literals may put them in shell history, so prefer the piped command above:
 
 ```sh
 kubectl create secret generic clickhouse-mcp-beta -n default \
@@ -68,6 +93,7 @@ kubectl create secret generic clickhouse-mcp-beta -n default \
   --from-literal=CLICKHOUSE_PORT='<clickhouse-http-port>' \
   --from-literal=CLICKHOUSE_USER='llm_user_beta' \
   --from-literal=CLICKHOUSE_PASSWORD='<new-beta-password>' \
+  --from-literal=DD_API_KEY='<prod-dd-api-key>' \
   --from-literal=CLICKHOUSE_SECURE='<true-or-false>' \
   --from-literal=CLICKHOUSE_VERIFY='<true-or-false>' \
   --from-literal=CLICKHOUSE_MCP_SERVER_TRANSPORT='http' \
@@ -75,7 +101,7 @@ kubectl create secret generic clickhouse-mcp-beta -n default \
   --from-literal=CLICKHOUSE_MCP_BIND_PORT='8000'
 ```
 
-These are the exact Secret keys needed to preserve the existing MCP connection and HTTP listener: `CLICKHOUSE_HOST`, `CLICKHOUSE_PORT`, `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`, `CLICKHOUSE_SECURE`, and `CLICKHOUSE_VERIFY` configure the ClickHouse HTTP client; `CLICKHOUSE_MCP_SERVER_TRANSPORT`, `CLICKHOUSE_MCP_BIND_HOST`, and `CLICKHOUSE_MCP_BIND_PORT` expose the MCP listener to its in-cluster Service. Use the prod Secret's host, HTTP port, and TLS settings, but the new username and password. The connection and listener variables come from [mcp-clickhouse 0.5.0](https://github.com/ClickHouse/mcp-clickhouse/blob/v0.5.0/README.md#clickhouse-database-connection) and the [cbioportal-mcp environment example](https://github.com/cBioPortal/cbioportal-mcp#configuration). `CLICKHOUSE_MCP_HTTP_PATH` is set directly in the beta Deployment. `CLICKHOUSE_DATABASE` comes from `clickhouse-mcp-active-beta`, which is loaded after this Secret so the active beta color wins even if an existing Secret includes that key. The database port above is the HTTP port, not the native TCP port used by `clickhouse client`.
+The manual example covers the ClickHouse connection and HTTP listener variables from [mcp-clickhouse 0.5.0](https://github.com/ClickHouse/mcp-clickhouse/blob/v0.5.0/README.md#clickhouse-database-connection) and the [cbioportal-mcp environment example](https://github.com/cBioPortal/cbioportal-mcp#configuration), plus `DD_API_KEY`. It is not an exhaustive key list: preserve any prod tuning keys such as `CLICKHOUSE_MCP_QUERY_TIMEOUT`, `CLICKHOUSE_SEND_RECEIVE_TIMEOUT`, `CLICKHOUSE_CONNECT_TIMEOUT`, `CBIOPORTAL_MCP_MAX_CONCURRENT_QUERIES`, and `CLICKHOUSE_MCP_MAX_WORKERS`. Keep the last two concurrency settings consistent or the server exits at startup. `CLICKHOUSE_MCP_HTTP_PATH` is set directly in the beta Deployment. `CLICKHOUSE_DATABASE` comes from `clickhouse-mcp-active-beta`, loaded after this Secret. The database port above is the HTTP port, not the native TCP port used by `clickhouse client`.
 
 Verify the beta user's effective grants by logging in as that user (the client prompts for its password):
 
@@ -87,13 +113,13 @@ Use the native port and TLS flag appropriate for the ClickHouse client connectio
 
 ### Query cache (off by default)
 
-The clone job's `DROP_QUERY_CACHE` env var is `"false"`. Set it to `"true"` only while piloting `CBIOPORTAL_MCP_QUERY_CACHE_ENABLED` on the beta MCP: the swap doesn't invalidate cached results, so the job then runs `SYSTEM DROP QUERY CACHE` before the flip. That cache is server-wide, so the drop also empties prod's cache (prod gets cold-cache latency, not wrong results). The admin user needs the `SYSTEM DROP QUERY CACHE` privilege; without it the job logs a WARN and continues.
+The clone job's `DROP_QUERY_CACHE` env var is `"false"`. Set it to `"true"` only while piloting `CBIOPORTAL_MCP_QUERY_CACHE_ENABLED` on the beta MCP. The default `readonly = 1` user setting makes that pilot disable itself; a pilot also needs `readonly = 2` on `llm_user_beta` (or suitable `CHANGEABLE_IN_READONLY` constraints). Keep `readonly = 1` for normal operation. The swap doesn't invalidate cached results, so the job then runs `SYSTEM DROP QUERY CACHE` before the flip. That cache is server-wide, so the drop also empties prod's cache (prod gets cold-cache latency, not wrong results). The admin user needs the `SYSTEM DROP QUERY CACHE` privilege; without it the job logs a WARN and continues.
 
 ### Rollout order
 
 1. Confirm `docker manifest inspect cbioportal/mcp:beta` succeeds (built by cbioportal-mcp#158). This gates both the merge and the sync. Until it does, both the MCP pod and the clone's `fetch-sql` step fail to pull.
 2. Create `llm_user_beta` with the two beta `SELECT` grants, create `clickhouse-mcp-beta` in `default`, and verify its grants as above **before syncing**. Without the Secret, the beta MCP pod fails to start.
-3. Manually sync the `cbioagent-beta` Argo Application the first time **without prune**, with someone watching the sync. Check the diff first: it should only add the beta MCP, the clone job objects and the pointer ConfigMap, and modify `librechat-config-beta`. The beta MCP starts pointing at the seed `cbioportal_public_librechat_beta_blue`, which doesn't exist yet, so beta database queries fail until step 4 publishes a buffer. That's expected.
+3. Manually sync the `cbioagent-beta` Argo Application the first time **without prune**, with someone watching the sync. Check the diff first: it should only add the beta MCP, the clone job objects and the pointer ConfigMap, and modify `librechat-config-beta`. The beta MCP starts pointing at the seed `cbioportal_public_librechat_beta_blue`, which doesn't exist yet. Its startup `CHECK GRANT` may crash-loop until step 4 builds a buffer and flips the pointer; that's expected.
 4. Build the first buffer once instead of waiting for the schedule:
    ```sh
    kubectl -n default create job --from=cronjob/cbioagent-clickhouse-clone-daily-beta clone-beta-manual-$(date +%s)
