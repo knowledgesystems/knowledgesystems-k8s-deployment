@@ -1,0 +1,14 @@
+# Holds the file-backed session store. EFS rather than EBS because cbio-dev
+# is a multi-AZ spot pool: an EBS volume would pin the pod to one AZ.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cbioportal-go-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 1Gi

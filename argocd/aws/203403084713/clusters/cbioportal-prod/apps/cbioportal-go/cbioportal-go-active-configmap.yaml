@@ -1,0 +1,14 @@
+# Blue/green pointer: which ClickHouse databases cbioportal-go serves.
+# The cbioportal-go-import-daily CronJob patches all three keys after a
+# successful import; Reloader then rolls the cbioportal-go Deployment.
+# The cbioportal-go Argo Application ignores these keys, so the values
+# below are only the initial seed.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbioportal-go-active
+  namespace: default
+data:
+  CBIOPORTAL_DB: dev_cbioportal_public_go_green
+  CBIOPORTAL_RAW_DB: dev_cbioportal_public_go_green_raw
+  CBIOPORTAL_REF_DB: dev_cbioportal_public_go_green_ref

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioportal-go
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+    path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-go
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    # ServerSideApply builds the patch from managed-fields, so with
+    # RespectIgnoreDifferences the ignored pointer data is left out of the
+    # apply instead of being reset to the seed.
+    syncOptions:
+      - RespectIgnoreDifferences=true
+      - ServerSideApply=true
+  # The live pointer values are set by kubectl patch (and later the mirror job).
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: cbioportal-go-active
+      namespace: default
+      jsonPointers:
+        - /data/CBIOPORTAL_DB
+        - /data/CBIOPORTAL_RAW_DB
+        - /data/CBIOPORTAL_REF_DB
+  revisionHistoryLimit: 3
