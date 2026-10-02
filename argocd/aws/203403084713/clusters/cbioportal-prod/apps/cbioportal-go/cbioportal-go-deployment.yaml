@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-go
+  namespace: default
+  labels:
+    run: cbioportal-go
+  annotations:
+    # Rolls the pod when the import CronJob flips the blue/green pointer or
+    # when the ClickHouse credentials change.
+    configmap.reloader.stakater.com/reload: "cbioportal-go-active"
+    secret.reloader.stakater.com/reload: "clickhouse-go-portal"
+    # Keel polls Docker Hub and rolls the Deployment when the digest behind
+    # inodb/cbioportal-go:latest changes.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
+spec:
+  # Single replica: the session store is one JSON file on the PVC.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      run: cbioportal-go
+  template:
+    metadata:
+      labels:
+        run: cbioportal-go
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: cbioportal-go
+          image: inodb/cbioportal-go:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: FRONTEND_DIR
+              value: /app/frontend
+            - name: SESSION_STORE_FILE
+              value: /data/sessions.json
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-portal
+            - configMapRef:
+                name: cbioportal-go-active
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cbioportal-go-data
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-go
+  namespace: default
+  labels:
+    run: cbioportal-go
+spec:
+  selector:
+    run: cbioportal-go
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  type: ClusterIP
