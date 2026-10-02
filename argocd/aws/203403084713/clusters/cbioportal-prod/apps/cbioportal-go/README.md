@@ -67,7 +67,7 @@ a live cluster.
 ## Loading studies
 
 From a machine with the studies staged in a local ClickHouse (see the cbioportal-go
-README), with the `go_import` credentials in the environment:
+README), with the import credentials in the environment:
 
 ```bash
 deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
