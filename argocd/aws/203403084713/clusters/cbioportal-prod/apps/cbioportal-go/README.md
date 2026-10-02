@@ -1,9 +1,18 @@
 # cbioportal-go
 
+> [!WARNING]
+> **Experimental.** go.cbioportal.org runs
+> [cbioportal-go](https://github.com/inodb/cbioportal-go), an experiment to
+> reimplement cBioPortal in Go. It is not an official cBioPortal release and
+> not a supported service: results may differ from www.cbioportal.org, and it
+> may change, break or be taken down at any time. Every page shows an
+> "experimental preview" banner.
+
 Go reimplementation of the cBioPortal backend (REST API + bundled React frontend),
-served at https://go.cbioportal.org. Backed by ClickHouse Cloud. Studies are loaded
-with `deploy/publish-local-studies.sh` from the cbioportal-go repo; a daily job that
-mirrors production (zero-copy clone of the live `cbioportal_public_<color>`) is planned.
+served at https://go.cbioportal.org. Backed by ClickHouse Cloud; a daily job mirrors
+production's data (zero-copy clone of the live `cbioportal_public_<color>`). Studies
+can also be loaded by hand with `deploy/publish-local-studies.sh` from the
+cbioportal-go repo.
 
 ## Components (all in `default` namespace)
 
@@ -14,17 +23,21 @@ mirrors production (zero-copy clone of the live `cbioportal_public_<color>`) is 
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
+| `CronJob cbioportal-go-mirror-daily` | Daily 14:00 UTC: clones the live production color into the inactive color, builds the Go portal's tables, then flips the pointer. |
+| `ServiceAccount/Role/RoleBinding cbioportal-go-mirror-job*` | Lets the CronJob `get`/`patch` only `cbioportal-go-active`. |
 | `Application cbioportal-go` (`apps/argocd/`) | Auto-sync (prune + selfHeal) of this directory. |
 
-It runs on the `workload=cbio-dev` node pool (arm64 spot), alongside the other
-dev/preview cBioPortal instances.
+Both workloads run on the `workload=cbio-dev` node pool (arm64 spot), alongside the
+other dev/preview cBioPortal instances.
 
 ## Blue/green pointer
 
 ClickHouse holds two sets of databases, `dev_cbioportal_public_go_{blue,green}` plus
 their `_raw` and `_ref` companions. `cbioportal-go-active` names the set being served.
 
-Load the inactive color (see "Loading studies" below), then switch the site to it:
+The mirror CronJob rebuilds the inactive color every day and switches the site to it
+when the build succeeds; a failed run leaves the site on the previous color. To switch
+by hand (e.g. after loading studies into the inactive color, see below):
 
 ```bash
 kubectl -n default patch configmap cbioportal-go-active --type=merge -p \
@@ -52,8 +65,8 @@ deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
 
 - **Secrets** (`portal-configuration`, branch `go-cbioportal-org`, under
   `secrets/cbioportal-go/`): `clickhouse-go-portal` (read-only user for the API) and
-  `clickhouse-go-import` (user that loads the `dev_cbioportal_public_go_*` databases;
-  not used in the cluster until the production-mirror job exists), each with `CLICKHOUSE_URL`, `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`.
+  `clickhouse-go-import` (user of the mirror CronJob: reads the live production color, writes the
+  `dev_cbioportal_public_go_*` databases), each with `CLICKHOUSE_URL`, `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`.
   Merge that branch so the `portal-configuration` Application syncs them.
 - **ClickHouse** databases and users for the `dev_cbioportal_public_go_*` prefix.
 - **DNS**: a `go.cbioportal.org` record pointing at the Traefik load balancer (same
