@@ -45,6 +45,10 @@ spec:
               value: "8080"
             - name: FRONTEND_DIR
               value: /app/frontend
+            - name: SITE_BANNER
+              value: "⚠️ Experimental preview: a reimplementation of cBioPortal in Go. Results may differ from the official portal; do not use for research or clinical decisions. Official portal:"
+            - name: SITE_BANNER_LINK
+              value: https://www.cbioportal.org
             - name: SESSION_STORE_FILE
               value: /data/sessions.json
           envFrom:
