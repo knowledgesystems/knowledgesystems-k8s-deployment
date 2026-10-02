@@ -9,6 +9,6 @@ metadata:
   name: cbioportal-go-active
   namespace: default
 data:
-  CBIOPORTAL_DB: dev_cbioportal_public_go_blue
-  CBIOPORTAL_RAW_DB: dev_cbioportal_public_go_blue_raw
-  CBIOPORTAL_REF_DB: dev_cbioportal_public_go_blue_ref
+  CBIOPORTAL_DB: dev_cbioportal_public_go_green
+  CBIOPORTAL_RAW_DB: dev_cbioportal_public_go_green_raw
+  CBIOPORTAL_REF_DB: dev_cbioportal_public_go_green_ref
