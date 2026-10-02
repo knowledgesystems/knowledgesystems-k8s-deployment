@@ -24,7 +24,7 @@ spec:
     syncOptions:
       - RespectIgnoreDifferences=true
       - ServerSideApply=true
-  # cbioportal-go-import-daily owns the live pointer values.
+  # The live pointer values are set by kubectl patch (and later the mirror job).
   ignoreDifferences:
     - group: ""
       kind: ConfigMap
