@@ -35,6 +35,19 @@ other dev/preview cBioPortal instances.
 ClickHouse holds two sets of databases, `dev_cbioportal_public_go_{blue,green}` plus
 their `_raw` and `_ref` companions. `cbioportal-go-active` names the set being served.
 
+What the three databases of a color hold (the API reads all three: `-db`, `-raw-db`,
+`-ref-db`):
+
+| Database | Holds | Built by the mirror job as |
+|---|---|---|
+| `…_<color>_ref` | Reference data the API joins against: genes, gene aliases, cancer types, reference-genome positions. | A zero-copy `CLONE AS` of every production table (minus auth/credential tables). Production already has the reference tables, and the rest of the clone is the source for the other two databases. |
+| `…_<color>_raw` | Per-gene data in the "staging" shape the API reads for a few endpoints (expression, CNA, methylation and generic-assay matrices, profiles, timeline). | Views over production's `genetic_alteration_derived` / `generic_assay_data_derived` and copies of a few small tables — no bulk copy. |
+| `…_<color>` | The portal model the API mainly serves: studies, samples, patients, clinical data, mutations, CNA, structural variants, case lists, gene panels, and the study-view `*_derived` tables. | Views over the clone's `*_derived` tables plus tables copied from production's normalized tables (tens of millions of rows at most). |
+
+The names come from cbioportal-go's file importer, where `_raw` holds the staged
+study files and `_ref` the reference data loaded from the cBioPortal seed dump; the
+mirror fills the same three roles from production instead.
+
 The mirror CronJob rebuilds the inactive color every day and switches the site to it
 when the build succeeds; a failed run leaves the site on the previous color. To switch
 by hand (e.g. after loading studies into the inactive color, see below):
