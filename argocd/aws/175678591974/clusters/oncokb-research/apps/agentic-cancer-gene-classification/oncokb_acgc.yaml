@@ -101,6 +101,13 @@ spec:
             # plain master/replica, so REDIS_URL just points at the master.
             - name: REDIS_URL
               value: "redis://:$(REDIS_PASSWORD)@acgc-redis-master:6379/0"
+            # Authentication & SSO Settings
+            - name: AUTH_ENABLED
+              value: "true"
+            - name: PUBLIC_APP_BASE_URL
+              value: "https://acgc.oncokb.org"
+            - name: GOOGLE_CLIENT_ID
+              value: "635615829896-fndd6v2mk8pi6ha4emjqi0opbvh461he.apps.googleusercontent.com"
           envFrom:
             - secretRef:
                 name: oncokb-db-public-rds-admin
