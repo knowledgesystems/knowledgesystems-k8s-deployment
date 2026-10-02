@@ -2,7 +2,7 @@
 
 > [!WARNING]
 > **Experimental.** go.cbioportal.org runs
-> [cbioportal-go](https://github.com/inodb/cbioportal-go), an experiment to
+> [cbioportal-go](https://github.com/cBioPortal/cbioportal-go), an experiment to
 > reimplement cBioPortal in Go. It is not an official cBioPortal release and
 > not a supported service: results may differ from www.cbioportal.org, and it
 > may change, break or be taken down at any time. Every page shows an
