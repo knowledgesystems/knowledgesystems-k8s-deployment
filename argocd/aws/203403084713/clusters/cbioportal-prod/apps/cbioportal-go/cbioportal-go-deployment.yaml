@@ -11,7 +11,7 @@ metadata:
     configmap.reloader.stakater.com/reload: "cbioportal-go-active"
     secret.reloader.stakater.com/reload: "clickhouse-go-portal"
     # Keel polls Docker Hub and rolls the Deployment when the digest behind
-    # inodb/cbioportal-go:latest changes.
+    # cbioportal/cbioportal-go:latest changes.
     keel.sh/policy: force
     keel.sh/trigger: poll
     keel.sh/match-tag: "true"
@@ -35,7 +35,7 @@ spec:
         fsGroup: 10001
       containers:
         - name: cbioportal-go
-          image: inodb/cbioportal-go:latest
+          image: cbioportal/cbioportal-go:latest
           imagePullPolicy: Always
           command: ["/usr/local/bin/cbioportal-api"]
           # www.cbioportal.org's portal settings (generated from its

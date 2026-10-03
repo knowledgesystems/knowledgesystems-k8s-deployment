@@ -18,7 +18,7 @@ cbioportal-go repo.
 
 | Resource | Purpose |
 |---|---|
-| `Deployment cbioportal-go` | Single replica of `inodb/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`). Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
+| `Deployment cbioportal-go` | Single replica of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`). Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
 | `PVC cbioportal-go-data` | 1Gi `efs-sc` volume at `/data` holding the session store (`/data/sessions.json`). |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
@@ -85,7 +85,7 @@ deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
 - **DNS**: a `go.cbioportal.org` record pointing at the Traefik load balancer (same
   target as the other `*.cbioportal.org` hosts). cert-manager issues the certificate
   over HTTP-01 once the record resolves.
-- **Image**: `inodb/cbioportal-go:latest` on Docker Hub (multi-arch amd64+arm64, uid
+- **Image**: `cbioportal/cbioportal-go:latest` on Docker Hub (multi-arch amd64+arm64, uid
   10001) with the API as entrypoint and the frontend in `/app/frontend`.
 - **Argo**: the `argocd` app-of-apps is manual-sync; sync it to create the
   `cbioportal-go` Application.

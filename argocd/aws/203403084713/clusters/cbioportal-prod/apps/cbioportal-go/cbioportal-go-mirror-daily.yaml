@@ -4,7 +4,7 @@
 # mirror → patch-pointer; Reloader rolls cbioportal-go when the pointer
 # changes.
 #
-# The script ships in the inodb/cbioportal-go image (/app/deploy/mirror-prod.sh).
+# The script ships in the cbioportal/cbioportal-go image (/app/deploy/mirror-prod.sh).
 # It reads the live production color from update_status, zero-copy clones
 # production's tables (without auth/credential tables) into the inactive
 # color, builds the portal database from them with
@@ -79,7 +79,7 @@ spec:
                 sizeLimit: 1Gi
           initContainers:
             - name: mirror
-              image: inodb/cbioportal-go:latest
+              image: cbioportal/cbioportal-go:latest
               imagePullPolicy: Always
               command: ["/app/deploy/mirror-prod.sh"]
               securityContext:
