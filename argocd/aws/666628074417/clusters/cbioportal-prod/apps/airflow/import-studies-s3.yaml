@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: import-studies-s3-pv
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - read-only
+    - region us-east-1
+  claimRef:
+    namespace: airflow
+    name: import-studies-s3-pvc
+  csi:
+    driver: s3.csi.aws.com
+    volumeHandle: cbioportal-import-studies-203403084713
+    volumeAttributes:
+      bucketName: cbioportal-import-studies-203403084713
+      authenticationSource: pod
+      stsRegion: us-east-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: import-studies-s3-pvc
+  namespace: airflow
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 500Gi
+  volumeName: import-studies-s3-pv
