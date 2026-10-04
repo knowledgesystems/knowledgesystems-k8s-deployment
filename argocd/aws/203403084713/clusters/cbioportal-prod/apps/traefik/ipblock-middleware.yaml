@@ -11,3 +11,11 @@ spec:
         # Huawei-Cloud-SG (PetalBot). Fetches robots.txt but ignores it; ~1,600/hr
         # patient-page render fan-out. Datacenter range, no real users.
         - 114.119.128.0/19
+        # AWS us-east-1 headless-browser scraper looping /results/oncoprint on
+        # brca_tcga_pan_can_atlas_2018 (~245k req/hr, 2026-10-04); its bulk
+        # fetches OOM-crash-loop cbioportal-backend-public(-api)-green.
+        - 52.55.52.183
+        - 34.202.101.75
+        - 3.229.98.135
+        - 18.211.227.23
+        - 52.55.84.43
