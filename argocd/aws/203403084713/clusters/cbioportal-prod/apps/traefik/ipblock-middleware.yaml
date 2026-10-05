@@ -19,3 +19,7 @@ spec:
         - 3.229.98.135
         - 18.211.227.23
         - 52.55.84.43
+        # Google Cloud python-httpx client looping whole-study mutation GETs for
+        # luad/lusc TCGA PanCan and nsclc_tcga_broad_2016 (~7k req/hr,
+        # 2026-10-05); OOM-restarted cbioportal-backend-public-api-green.
+        - 34.93.139.167
