@@ -3,6 +3,10 @@
 # responses are discarded: a load and parity test of the Go backend on real
 # API traffic. Clients only ever see the Java responses.
 #
+# www.cbioportal.org's non-browser catch-all route (cbio-www-ingressroute in
+# apps/cbioportal) uses this service too, so it carries most of the API pool's
+# traffic.
+#
 # The IngressRoute takes precedence over cbioportal-api-ingress for HTTPS;
 # that Ingress still serves plain HTTP and the certificate (cert-manager).
 # When switching the API pool between blue and green, switch the main
