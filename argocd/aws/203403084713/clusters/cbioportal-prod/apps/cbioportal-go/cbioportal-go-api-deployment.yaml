@@ -1,50 +1,50 @@
+# cbioportal-go serving the REST API only, for a share of api.cbioportal.org
+# traffic mirrored to it (apps/cbioportal-api/cbioportal-api-mirror.yaml):
+# its responses are discarded, so this measures load, latency and errors on
+# real API traffic without affecting clients. Stateless (no session file), so
+# it scales out. Same databases as go.cbioportal.org.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cbioportal-go
+  name: cbioportal-go-api
   namespace: default
   labels:
-    run: cbioportal-go
+    run: cbioportal-go-api
   annotations:
-    # Rolls the pod when the import CronJob flips the blue/green pointer or
-    # when the ClickHouse credentials change.
     configmap.reloader.stakater.com/reload: "cbioportal-go-active"
     secret.reloader.stakater.com/reload: "clickhouse-go-portal"
-    # Keel polls Docker Hub and rolls the Deployment when the digest behind
-    # cbioportal/cbioportal-go:latest changes.
     keel.sh/policy: force
     keel.sh/trigger: poll
     keel.sh/match-tag: "true"
 spec:
-  # Single replica: the session store is one JSON file on the PVC.
-  replicas: 1
+  replicas: 2
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
-      run: cbioportal-go
+      run: cbioportal-go-api
   template:
     metadata:
       annotations:
         # Datadog scrapes the Prometheus metrics (METRICS_ADDR below).
-        ad.datadoghq.com/cbioportal-go.checks: |
+        ad.datadoghq.com/cbioportal-go-api.checks: |
           {"openmetrics": {"instances": [{"openmetrics_endpoint": "http://%%host%%:9090/metrics",
             "namespace": "cbioportal_go", "metrics": [".*"]}]}}
       labels:
-        run: cbioportal-go
+        run: cbioportal-go-api
     spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
         runAsGroup: 10001
-        fsGroup: 10001
       containers:
-        - name: cbioportal-go
+        - name: cbioportal-go-api
           image: cbioportal/cbioportal-go:latest
           imagePullPolicy: Always
           command: ["/usr/local/bin/cbioportal-api"]
-          # www.cbioportal.org's portal settings (generated from its
-          # /config_service; analytics and login left out), shipped in the image.
           args:
             - --portal-properties=/app/deploy/public-portal.properties
           ports:
@@ -62,17 +62,9 @@ spec:
               value: ":9090"
             - name: ACCESS_LOG
               value: "true"
-            - name: FRONTEND_DIR
-              value: /app/frontend
-            - name: SITE_BANNER
-              value: "⚠️ Experimental preview: a reimplementation of cBioPortal in Go. Results may differ from the official portal; do not use for research or clinical decisions. Official portal:"
-            - name: SITE_BANNER_LINK
-              value: https://www.cbioportal.org
-            - name: SESSION_STORE_FILE
-              value: /data/sessions.json
             # Tags this deployment's queries in ClickHouse's system.query_log.
             - name: CLICKHOUSE_LOG_COMMENT
-              value: go.cbioportal.org
+              value: cbioportal-go-api
           envFrom:
             - secretRef:
                 name: clickhouse-go-portal
@@ -96,18 +88,11 @@ spec:
             failureThreshold: 5
           resources:
             requests:
-              cpu: 250m
+              cpu: 500m
               memory: 512Mi
             limits:
               cpu: "2"
               memory: 2Gi
-          volumeMounts:
-            - name: data
-              mountPath: /data
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: cbioportal-go-data
       nodeSelector:
         workload: cbio-dev
       tolerations:
@@ -119,13 +104,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cbioportal-go
+  name: cbioportal-go-api
   namespace: default
   labels:
-    run: cbioportal-go
+    run: cbioportal-go-api
 spec:
   selector:
-    run: cbioportal-go
+    run: cbioportal-go-api
   ports:
     - port: 80
       name: http
