@@ -277,12 +277,14 @@ spec:
           # Please change this in tandem with the website backend image.
           image: cbioportal/cbioportal:v7.1.2-web-shenandoah
           imagePullPolicy: Always
-          # /api/health is cheap to answer; the timeout leaves headroom for GC
+          # Liveness checks only that the JVM answers (/ renders without the
+          # database), so a ClickHouse outage does not restart every pod;
+          # readiness (/api/health) queries the database. Both allow 5 s for GC
           # pauses and warm-up under load.
           livenessProbe:
             failureThreshold: 5
             httpGet:
-              path: /api/health
+              path: /
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 180
