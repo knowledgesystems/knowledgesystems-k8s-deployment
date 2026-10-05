@@ -9,7 +9,7 @@ metadata:
     # Rolls the pod when the import CronJob flips the blue/green pointer or
     # when the ClickHouse credentials change.
     configmap.reloader.stakater.com/reload: "cbioportal-go-active"
-    secret.reloader.stakater.com/reload: "clickhouse-go-portal"
+    secret.reloader.stakater.com/reload: "clickhouse-go-portal,cbioportal-public-green"
     # Keel polls Docker Hub and rolls the Deployment when the digest behind
     # cbioportal/cbioportal-go:latest changes.
     keel.sh/policy: force
@@ -70,6 +70,16 @@ spec:
               value: https://www.cbioportal.org
             - name: SESSION_STORE_FILE
               value: /data/sessions.json
+            # The public portal's OncoKB token, read from its secret, and the
+            # authenticated OncoKB API it is for (the frontend's mutation
+            # annotations go through the /proxy endpoint).
+            - name: ONCOKB_URL
+              value: https://www.oncokb.org/api/v1
+            - name: ONCOKB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: ONCOKB_TOKEN
             # Tags this deployment's queries in ClickHouse's system.query_log.
             - name: CLICKHOUSE_LOG_COMMENT
               value: go.cbioportal.org
