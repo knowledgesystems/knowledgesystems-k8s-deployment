@@ -280,16 +280,18 @@ spec:
           # Please change this in tandem with the public API backend image.
           image: cbioportal/cbioportal:v7.1.2-web-shenandoah
           imagePullPolicy: Always
+          # /api/health is cheap to answer; the timeout leaves headroom for GC
+          # pauses and warm-up under load.
           livenessProbe:
             failureThreshold: 5
             httpGet:
-              path: /
+              path: /api/health
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 180
             periodSeconds: 12
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           name: cbioportal-backend-public-blue
           ports:
             - containerPort: 8080
@@ -305,7 +307,7 @@ spec:
             initialDelaySeconds: 45
             periodSeconds: 5
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           resources:
             limits:
               memory: 12Gi
