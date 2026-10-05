@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: mskcc/oncokb-public:6.30.3
+          image: mskcc/oncokb-public:6.31.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
