@@ -183,12 +183,12 @@ spec:
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
             #- --persistence.cache_type_clickhouse=no-cache
-            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)&custom_settings=log_comment%3Dcbioportal-api
             - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
             - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
-            - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)&custom_settings=log_comment%3Dcbioportal-api
             - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
             - --clickhouse_mode=true
