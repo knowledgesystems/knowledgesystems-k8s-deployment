@@ -22,6 +22,31 @@ spec:
       services:
         - name: cbioportal-backend-public-green
           port: 80
+    # Same two clinical-events routes for requests proxied by Cloudflare: the
+    # connection IP is a Cloudflare edge (IPv4 ranges from
+    # https://www.cloudflare.com/ips/; the origin ELB is IPv4-only), so the
+    # rate limit keys on CF-Connecting-IP instead. ipblock does not apply here;
+    # its list is mirrored as a Cloudflare WAF rule that blocks at the edge.
+    - match: >-
+        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
+      kind: Rule
+      priority: 201
+      middlewares:
+        - name: ratelimit-heavy-cloudflare
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-green
+          port: 80
+    - match: >-
+        Host(`www.cbioportal.org`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
+      kind: Rule
+      priority: 191
+      middlewares:
+        - name: ratelimit-heavy-cloudflare
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-api-green
+          port: 80
     # Study-wide clinical-events (bulk/API only; the UI does not call this): per-IP rate limit
     - match: >-
         Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`)
