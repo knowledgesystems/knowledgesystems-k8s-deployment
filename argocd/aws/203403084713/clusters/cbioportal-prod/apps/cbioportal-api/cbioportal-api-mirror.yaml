@@ -1,16 +1,19 @@
-# api.cbioportal.org over HTTPS, served by the Java API pool as before, with a
-# share of requests also sent to cbioportal-go-api (apps/cbioportal-go) whose
-# responses are discarded: a load and parity test of the Go backend on real
-# API traffic. Clients only ever see the Java responses.
+# Traefik services that serve the public API pool exactly as before and also
+# send a share of requests to cbioportal-go-api (apps/cbioportal-go), whose
+# responses are discarded: a load and parity test of the Go backend on real API
+# traffic. Clients only ever see the Java responses.
 #
-# The IngressRoute takes precedence over cbioportal-api-ingress for HTTPS;
-# that Ingress still serves plain HTTP and the certificate (cert-manager).
-# When switching the API pool between blue and green, switch the main
-# service below as well. Deleting this file restores the Ingress alone.
+# One service per color, so the import pipeline's color swap
+# (cmo-pipelines transfer-deployment-color.sh) switches routes between them by
+# renaming -green <-> -blue in the routes that use them: www.cbioportal.org's
+# non-browser catch-all (cbio-www-ingressroute in apps/cbioportal).
+#
+# To stop mirroring, point that route back at
+# cbioportal-backend-public-api-<color> (port 80), then delete this file.
 apiVersion: traefik.io/v1alpha1
 kind: TraefikService
 metadata:
-  name: cbioportal-api-mirror
+  name: cbioportal-api-mirror-green
   namespace: default
 spec:
   mirroring:
@@ -25,22 +28,17 @@ spec:
         percent: 10
 ---
 apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+kind: TraefikService
 metadata:
-  name: cbioportal-api-mirror
+  name: cbioportal-api-mirror-blue
   namespace: default
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`api.cbioportal.org`)
-      priority: 1000
-      middlewares:
-        - name: uablock-browser
-          namespace: default
-      services:
-        - name: cbioportal-api-mirror
-          kind: TraefikService
-  tls:
-    secretName: api-cbio-cert
+  mirroring:
+    name: cbioportal-backend-public-api-blue
+    port: 80
+    mirrorBody: true
+    maxBodySize: 1048576
+    mirrors:
+      - name: cbioportal-go-api
+        port: 80
+        percent: 10
