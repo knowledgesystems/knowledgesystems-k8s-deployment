@@ -21,7 +21,7 @@ cbioportal-go repo.
 | `Deployment cbioportal-go` | Single replica of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`). Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
 | `PVC cbioportal-go-data` | 1Gi `efs-sc` volume at `/data` holding the session store (`/data/sessions.json`). |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
-| `Deployment` / `Service cbioportal-go-api` | API-only, stateless (no session file), 2 replicas on the same databases; receives a mirrored share of api.cbioportal.org traffic (below). |
+| `Deployment` / `Service cbioportal-go-api` | API-only, stateless (no session file), 2 replicas on the same databases; receives a mirrored share of the public API traffic (below). |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
 | `CronJob cbioportal-go-mirror-daily` | Daily 14:00 UTC: clones the live production color into the inactive color, builds the Go portal's tables, then flips the pointer. |
@@ -91,16 +91,17 @@ deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
 - **Argo**: the `argocd` app-of-apps is manual-sync; sync it to create the
   `cbioportal-go` Application.
 
-## Mirrored api.cbioportal.org traffic
+## Mirrored API traffic
 
-`apps/cbioportal-api/cbioportal-api-mirror.yaml` routes api.cbioportal.org
-over HTTPS through a Traefik mirroring service: clients are served by the Java
-API pool as before, and `percent` of requests (POST bodies up to 1 MiB) are
-also sent to `cbioportal-go-api`, whose responses are discarded. It tests the
-Go backend's load, latency and errors on real API traffic. Change `percent` to
-send more; delete that file to stop mirroring. When the API pool switches
-between blue and green, its main service must switch with
-`cbioportal-api-ingress`.
+`apps/cbioportal-api/cbioportal-api-mirror.yaml` defines one Traefik mirroring
+service per color (`cbioportal-api-mirror-green` / `-blue`). www.cbioportal.org's
+non-browser catch-all route uses the one for the live API pool: clients are
+served by the Java API pool as before, and `percent` of requests (POST bodies
+up to 1 MiB) are also sent to `cbioportal-go-api`, whose responses are
+discarded. The import pipeline's color swap renames `-green` <-> `-blue` in that
+route like the Java services, so it follows the API pool. To stop mirroring,
+point the route back at `cbioportal-backend-public-api-<color>`, then delete
+the mirror file.
 
 ## Metrics and logs
 

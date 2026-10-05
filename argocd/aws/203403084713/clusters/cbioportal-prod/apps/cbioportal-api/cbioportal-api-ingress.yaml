@@ -1,6 +1,3 @@
-# HTTPS for api.cbioportal.org goes through IngressRoute cbioportal-api-mirror
-# (cbioportal-api-mirror.yaml), which mirrors a share of requests to
-# cbioportal-go-api; switch its main service together with the one below.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
