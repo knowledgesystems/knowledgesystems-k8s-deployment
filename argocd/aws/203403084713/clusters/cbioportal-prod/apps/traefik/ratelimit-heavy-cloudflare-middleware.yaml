@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit-heavy-cloudflare
+  namespace: default
+spec:
+  # Same limit as ratelimit-heavy, for www requests proxied by Cloudflare
+  # (cbio.fyi Cloudflare for SaaS zone). The connection IP there is a
+  # Cloudflare edge, so the client is keyed on CF-Connecting-IP instead.
+  # Cloudflare overwrites that header on every request, and only routes
+  # that match ClientIP(<Cloudflare ranges>) use this middleware, so it
+  # cannot be spoofed by clients connecting directly.
+  rateLimit:
+    sourceCriterion:
+      requestHeaderName: Cf-Connecting-Ip
+    average: 50 # sustained ~50 requests / minute / client IP
+    period: 1m
+    burst: 20 # allow short bursts (a study page fires several fetches)
