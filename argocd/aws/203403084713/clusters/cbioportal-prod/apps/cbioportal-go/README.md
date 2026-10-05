@@ -21,6 +21,7 @@ cbioportal-go repo.
 | `Deployment cbioportal-go` | Single replica of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`). Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
 | `PVC cbioportal-go-data` | 1Gi `efs-sc` volume at `/data` holding the session store (`/data/sessions.json`). |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
+| `Deployment` / `Service cbioportal-go-api` | API-only, stateless (no session file), 2 replicas on the same databases; receives a mirrored share of api.cbioportal.org traffic (below). |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
 | `CronJob cbioportal-go-mirror-daily` | Daily 14:00 UTC: clones the live production color into the inactive color, builds the Go portal's tables, then flips the pointer. |
@@ -89,3 +90,22 @@ deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
   10001) with the API as entrypoint and the frontend in `/app/frontend`.
 - **Argo**: the `argocd` app-of-apps is manual-sync; sync it to create the
   `cbioportal-go` Application.
+
+## Mirrored api.cbioportal.org traffic
+
+`apps/cbioportal-api/cbioportal-api-mirror.yaml` routes api.cbioportal.org
+over HTTPS through a Traefik mirroring service: clients are served by the Java
+API pool as before, and `percent` of requests (POST bodies up to 1 MiB) are
+also sent to `cbioportal-go-api`, whose responses are discarded. It tests the
+Go backend's load, latency and errors on real API traffic. Change `percent` to
+send more; delete that file to stop mirroring. When the API pool switches
+between blue and green, its main service must switch with
+`cbioportal-api-ingress`.
+
+## Metrics and logs
+
+Both deployments serve Prometheus metrics on port 9090 (`METRICS_ADDR`, not
+exposed by the Services), scraped by Datadog's OpenMetrics check through the
+pod annotation (namespace `cbioportal_go`), and write a JSON access log line
+per request (`ACCESS_LOG`). Their ClickHouse queries carry `log_comment`
+(`go.cbioportal.org`, `cbioportal-go-api`) in `system.query_log`.

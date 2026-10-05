@@ -1,0 +1,46 @@
+# api.cbioportal.org over HTTPS, served by the Java API pool as before, with a
+# share of requests also sent to cbioportal-go-api (apps/cbioportal-go) whose
+# responses are discarded: a load and parity test of the Go backend on real
+# API traffic. Clients only ever see the Java responses.
+#
+# The IngressRoute takes precedence over cbioportal-api-ingress for HTTPS;
+# that Ingress still serves plain HTTP and the certificate (cert-manager).
+# When switching the API pool between blue and green, switch the main
+# service below as well. Deleting this file restores the Ingress alone.
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-api-mirror
+  namespace: default
+spec:
+  mirroring:
+    name: cbioportal-backend-public-api-green
+    port: 80
+    # Mirror POST bodies up to 1 MiB; larger requests are not mirrored.
+    mirrorBody: true
+    maxBodySize: 1048576
+    mirrors:
+      - name: cbioportal-go-api
+        port: 80
+        percent: 10
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: cbioportal-api-mirror
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`api.cbioportal.org`)
+      priority: 1000
+      middlewares:
+        - name: uablock-browser
+          namespace: default
+      services:
+        - name: cbioportal-api-mirror
+          kind: TraefikService
+  tls:
+    secretName: api-cbio-cert

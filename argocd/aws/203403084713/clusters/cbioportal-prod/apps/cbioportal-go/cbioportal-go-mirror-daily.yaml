@@ -59,7 +59,9 @@ spec:
       activeDeadlineSeconds: 7200
       # A failed mirror leaves the pointer on the previous databases; the
       # next scheduled run retries.
-      backoffLimit: 0
+      # mirror-prod.sh can be rerun from any point (it rebuilds the inactive
+      # color from scratch), so a transient failure retries.
+      backoffLimit: 2
       template:
         spec:
           serviceAccountName: cbioportal-go-mirror-job
