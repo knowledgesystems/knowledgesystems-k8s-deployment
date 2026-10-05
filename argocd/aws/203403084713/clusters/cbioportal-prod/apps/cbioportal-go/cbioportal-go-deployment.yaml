@@ -68,8 +68,21 @@ spec:
               value: "⚠️ Experimental preview: a reimplementation of cBioPortal in Go. Results may differ from the official portal; do not use for research or clinical decisions. Official portal:"
             - name: SITE_BANNER_LINK
               value: https://www.cbioportal.org
-            - name: SESSION_STORE_FILE
-              value: /data/sessions.json
+            # Sessions (shared links, virtual studies, groups) in the public
+            # portal's session service, with its credentials from its secret,
+            # so www links open here too.
+            - name: SESSION_SERVICE_URL
+              value: https://session-service.cbioportal.org/api/sessions/public_portal/
+            - name: SESSION_SERVICE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_NAME
+            - name: SESSION_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_PASSWORD
             # The public portal's OncoKB token, read from its secret, and the
             # authenticated OncoKB API it is for (the frontend's mutation
             # annotations go through the /proxy endpoint).
