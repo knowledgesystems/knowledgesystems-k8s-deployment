@@ -10,7 +10,9 @@
 # The IngressRoute takes precedence over cbioportal-api-ingress for HTTPS;
 # that Ingress still serves plain HTTP and the certificate (cert-manager).
 # When switching the API pool between blue and green, switch the main
-# service below as well. Deleting this file restores the Ingress alone.
+# service below as well. To stop mirroring, set the www catch-all back to
+# cbioportal-backend-public-api-green, then delete this file (the Ingress then
+# serves api.cbioportal.org alone).
 apiVersion: traefik.io/v1alpha1
 kind: TraefikService
 metadata:
