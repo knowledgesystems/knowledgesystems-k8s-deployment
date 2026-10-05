@@ -47,6 +47,22 @@ spec:
           # /config_service; analytics and login left out), shipped in the image.
           args:
             - --portal-properties=/app/deploy/public-portal.properties
+            # Optional Google sign-in as on www. ${...} placeholders are
+            # resolved by the API from the env vars below, so the secrets
+            # never appear in the process args.
+            - --authenticate=optional_oauth2
+            - --authorization=false
+            - --security.method_authorization_enabled=false
+            - --always_show_study_group=PUBLIC
+            - --spring.security.oauth2.client.registration.google.clientId=${GOOGLE_PLUS_CONSUMER_KEY}
+            - --spring.security.oauth2.client.registration.google.clientSecret=${GOOGLE_PLUS_CONSUMER_SECRET}
+            - --spring.security.oauth2.client.provider.google.user-name-attribute=email
+            # Login sessions in the public portal's session Redis, so they
+            # survive restarts.
+            - --spring.session.store-type=redis
+            - --spring.data.redis.host=${REDIS_SESSION_HOST}
+            - --spring.data.redis.port=${REDIS_SESSION_PORT}
+            - --spring.data.redis.password=${REDIS_SESSION_PASSWORD}
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -93,6 +109,31 @@ spec:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: ONCOKB_TOKEN
+            - name: GOOGLE_PLUS_CONSUMER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: GOOGLE_PLUS_CONSUMER_KEY
+            - name: GOOGLE_PLUS_CONSUMER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: GOOGLE_PLUS_CONSUMER_SECRET
+            - name: REDIS_SESSION_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: REDIS_SESSION_HOST
+            - name: REDIS_SESSION_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: REDIS_SESSION_PORT
+            - name: REDIS_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: REDIS_SESSION_PASSWORD
             # Tags this deployment's queries in ClickHouse's system.query_log.
             - name: CLICKHOUSE_LOG_COMMENT
               value: go.cbioportal.org
