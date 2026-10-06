@@ -73,6 +73,21 @@ spec:
       services:
         - name: cbioportal-backend-public-api-blue
           port: 80
+    # Browser API requests: served as the browser route below, through
+    # cbioportal-www-mirror-<color> (apps/cbioportal-go), which also sends a
+    # share of them to cbioportal-go-www and discards its answers. Requests
+    # that write (sessions, virtual study publishing, tokens, the cache) are
+    # left to the browser route, so they are never sent twice.
+    - match: >-
+        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathPrefix(`/api/`) && !PathPrefix(`/api/session`) && !PathPrefix(`/api/public_virtual_studies`) && !PathPrefix(`/api/data-access-token`) && !PathPrefix(`/api/cache`)
+      kind: Rule
+      priority: 110
+      middlewares:
+        - name: ipblock
+          namespace: default
+      services:
+        - name: cbioportal-www-mirror-blue
+          kind: TraefikService
     # Browser traffic: User-Agent contains Mozilla
     - match: >-
         Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
