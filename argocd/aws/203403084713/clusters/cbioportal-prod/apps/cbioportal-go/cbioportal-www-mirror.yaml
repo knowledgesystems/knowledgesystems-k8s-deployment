@@ -1,0 +1,46 @@
+# Traefik services that serve www.cbioportal.org's browser API requests from
+# the public portal pool exactly as before and also send a share of them to
+# cbioportal-go-www, whose responses are discarded. Users only ever see the
+# Java responses.
+#
+# One service per color, so the import pipeline's color swap
+# (cmo-pipelines transfer-deployment-color.sh) switches the www route that
+# uses them by renaming -green <-> -blue (cbio-www-ingressroute.yml in
+# apps/cbioportal).
+#
+# To stop mirroring, delete the "Browser API requests" route from that file,
+# then this file and cbioportal-go-www-deployment.yaml.
+---
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-www-mirror-green
+  namespace: default
+spec:
+  mirroring:
+    name: cbioportal-backend-public-green
+    port: 80
+    # Mirror POST bodies up to 1 MiB; larger requests are not mirrored.
+    mirrorBody: true
+    maxBodySize: 1048576
+    mirrors:
+      - name: cbioportal-go-www
+        port: 80
+        percent: 10
+---
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-www-mirror-blue
+  namespace: default
+spec:
+  mirroring:
+    name: cbioportal-backend-public-blue
+    port: 80
+    # Mirror POST bodies up to 1 MiB; larger requests are not mirrored.
+    mirrorBody: true
+    maxBodySize: 1048576
+    mirrors:
+      - name: cbioportal-go-www
+        port: 80
+        percent: 10

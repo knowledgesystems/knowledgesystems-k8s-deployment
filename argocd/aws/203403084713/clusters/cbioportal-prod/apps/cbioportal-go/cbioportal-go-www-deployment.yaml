@@ -1,0 +1,119 @@
+# cbioportal-go serving the REST API for a share of www.cbioportal.org's
+# browser API requests, mirrored to it by cbioportal-www-mirror-<color>
+# (cbioportal-www-mirror.yaml): its responses are discarded, so this measures
+# load, latency and errors on the website's real traffic without affecting
+# users. Separate from cbioportal-go-api so its queries carry their own
+# log_comment (cbioportal-go-www) next to Java's cbioportal-www.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-go-www
+  namespace: default
+  labels:
+    run: cbioportal-go-www
+  annotations:
+    configmap.reloader.stakater.com/reload: "cbioportal-go-active"
+    secret.reloader.stakater.com/reload: "clickhouse-go-portal"
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go-www
+  template:
+    metadata:
+      annotations:
+        # Datadog scrapes the Prometheus metrics (METRICS_ADDR below).
+        ad.datadoghq.com/cbioportal-go-www.checks: |
+          {"openmetrics": {"instances": [{"openmetrics_endpoint": "http://%%host%%:9090/metrics",
+            "namespace": "cbioportal_go", "metrics": [".*"]}]}}
+      labels:
+        run: cbioportal-go-www
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: cbioportal-go-www
+          image: cbioportal/cbioportal-go:latest
+          imagePullPolicy: Always
+          command: ["/usr/local/bin/cbioportal-api"]
+          args:
+            - --portal-properties=/app/deploy/public-portal.properties
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            # Prometheus metrics on a port the Service does not expose, and a
+            # JSON access log line per request.
+            - name: METRICS_ADDR
+              value: ":9090"
+            - name: ACCESS_LOG
+              value: "true"
+            # Tags this deployment's queries in ClickHouse's system.query_log.
+            - name: CLICKHOUSE_LOG_COMMENT
+              value: cbioportal-go-www
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-portal
+            - configMapRef:
+                name: cbioportal-go-active
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-go-www
+  namespace: default
+  labels:
+    run: cbioportal-go-www
+spec:
+  selector:
+    run: cbioportal-go-www
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  type: ClusterIP
