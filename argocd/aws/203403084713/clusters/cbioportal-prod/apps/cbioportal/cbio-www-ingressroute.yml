@@ -20,7 +20,7 @@ spec:
         - name: uablock-patient-crawler
           namespace: default
       services:
-        - name: cbioportal-backend-public-green
+        - name: cbioportal-backend-public-blue
           port: 80
     # Same two clinical-events routes for requests proxied by Cloudflare: the
     # connection IP is a Cloudflare edge (IPv4 ranges from
@@ -35,7 +35,7 @@ spec:
         - name: ratelimit-heavy-cloudflare
           namespace: default
       services:
-        - name: cbioportal-backend-public-green
+        - name: cbioportal-backend-public-blue
           port: 80
     - match: >-
         Host(`www.cbioportal.org`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
@@ -45,7 +45,7 @@ spec:
         - name: ratelimit-heavy-cloudflare
           namespace: default
       services:
-        - name: cbioportal-backend-public-api-green
+        - name: cbioportal-backend-public-api-blue
           port: 80
     # Study-wide clinical-events (bulk/API only; the UI does not call this): per-IP rate limit
     - match: >-
@@ -58,7 +58,7 @@ spec:
         - name: ratelimit-heavy
           namespace: default
       services:
-        - name: cbioportal-backend-public-green
+        - name: cbioportal-backend-public-blue
           port: 80
     # Study-wide clinical-events (non-browser): per-IP rate limit
     - match: >-
@@ -71,7 +71,7 @@ spec:
         - name: ratelimit-heavy
           namespace: default
       services:
-        - name: cbioportal-backend-public-api-green
+        - name: cbioportal-backend-public-api-blue
           port: 80
     # Browser traffic: User-Agent contains Mozilla
     - match: >-
@@ -82,7 +82,7 @@ spec:
         - name: ipblock
           namespace: default
       services:
-        - name: cbioportal-backend-public-green
+        - name: cbioportal-backend-public-blue
           port: 80
     # Non-browser traffic (catch-all). Served by the public API pool through
     # cbioportal-api-mirror-<color> (apps/cbioportal-api), which also sends a
@@ -94,7 +94,7 @@ spec:
         - name: ipblock
           namespace: default
       services:
-        - name: cbioportal-api-mirror-green
+        - name: cbioportal-api-mirror-blue
           kind: TraefikService
   tls:
     secretName: www-cbioportal-cert

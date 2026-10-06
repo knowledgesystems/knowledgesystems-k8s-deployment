@@ -10,7 +10,7 @@ metadata:
   name: cbioportal-backend-public-api-green
 spec:
   progressDeadlineSeconds: 600
-  replicas: 2
+  replicas: 0
   selector:
     matchLabels:
       run: cbioportal-backend-public-api-green
