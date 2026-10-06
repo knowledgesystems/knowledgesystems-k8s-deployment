@@ -40,16 +40,6 @@ test "$status" = 401 || {
   exit 1
 }
 
-# The capability carries the slide source; a browser-supplied one is refused
-# before authentication.
-status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-  --header "X-WSI-Source: $source_url" \
-  "$tile_path")"
-test "$status" = 400 || {
-  echo "expected a client-supplied X-WSI-Source to return 400, got $status" >&2
-  exit 1
-}
-
 curl --silent --show-error --include --request OPTIONS \
   --header "Origin: $origin" \
   --header 'Access-Control-Request-Method: GET' \
@@ -66,6 +56,16 @@ if [[ -n "${WSI_BEARER_TOKEN:-}" ]]; then
     "$tile_path")"
   test "$status" != 401 || {
     echo "provided WSI_BEARER_TOKEN was rejected" >&2
+    exit 1
+  }
+
+  # The capability carries the slide source; a browser-supplied one is refused.
+  status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    --header "Authorization: Bearer ${WSI_BEARER_TOKEN}" \
+    --header "X-WSI-Source: $source_url" \
+    "$tile_path")"
+  test "$status" = 400 || {
+    echo "expected a client-supplied X-WSI-Source to return 400, got $status" >&2
     exit 1
   }
 fi
