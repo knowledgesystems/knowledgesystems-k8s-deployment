@@ -93,6 +93,13 @@ spec:
             limits:
               cpu: "2"
               memory: 2Gi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              run: cbioportal-go-api
       nodeSelector:
         workload: cbio-dev
       tolerations:
@@ -116,3 +123,16 @@ spec:
       name: http
       targetPort: 8080
   type: ClusterIP
+---
+# Keeps one pod serving while nodes are drained (the cbio-dev spot pool is
+# consolidated and replaced often).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cbioportal-go-api
+  namespace: default
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go-api

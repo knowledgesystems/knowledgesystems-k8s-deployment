@@ -16,10 +16,14 @@ metadata:
     keel.sh/trigger: poll
     keel.sh/match-tag: "true"
 spec:
-  # Single replica: the session store is one JSON file on the PVC.
-  replicas: 1
+  # Two replicas, rolled one at a time and spread over nodes: sessions live
+  # in the session service and logins in Redis, so any pod serves any user.
+  replicas: 2
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       run: cbioportal-go
@@ -165,13 +169,13 @@ spec:
             limits:
               cpu: "2"
               memory: 2Gi
-          volumeMounts:
-            - name: data
-              mountPath: /data
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: cbioportal-go-data
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              run: cbioportal-go
       nodeSelector:
         workload: cbio-dev
       tolerations:
@@ -195,3 +199,16 @@ spec:
       name: http
       targetPort: 8080
   type: ClusterIP
+---
+# Keeps one pod serving while nodes are drained (the cbio-dev spot pool is
+# consolidated and replaced often).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cbioportal-go
+  namespace: default
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go
