@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public-deploy-preview-1405
-          image: mskcc/oncokb-public:6.27.9-hotspot.1
+          image: mskcc/oncokb-public:6.31.0-hotspot.0
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
