@@ -10,8 +10,8 @@ ready_payload="$(curl --fail --silent --show-error "${base_url%/}/ready")"
 jq --exit-status \
   '.status == "ok"
    and .auth_required == true
-   and .auth_contract_version == 2
-   and .serving_contract_version == "wsi-serving-v3"' \
+   and .auth_contract_version == 3
+   and .serving_contract_version == "wsi-serving-v5"' \
   <<<"$ready_payload" >/dev/null || {
     echo "unexpected WSI readiness contract: $ready_payload" >&2
     exit 1
@@ -40,10 +40,20 @@ test "$status" = 401 || {
   exit 1
 }
 
+# The capability carries the slide source; a browser-supplied one is refused
+# before authentication.
+status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+  --header "X-WSI-Source: $source_url" \
+  "$tile_path")"
+test "$status" = 400 || {
+  echo "expected a client-supplied X-WSI-Source to return 400, got $status" >&2
+  exit 1
+}
+
 curl --silent --show-error --include --request OPTIONS \
   --header "Origin: $origin" \
   --header 'Access-Control-Request-Method: GET' \
-  --header 'Access-Control-Request-Headers: authorization, x-wsi-source' \
+  --header 'Access-Control-Request-Headers: authorization' \
   "$tile_path" \
   | grep -i "^access-control-allow-origin: $origin" >/dev/null || {
     echo "CORS preflight did not allow $origin" >&2
@@ -53,7 +63,6 @@ curl --silent --show-error --include --request OPTIONS \
 if [[ -n "${WSI_BEARER_TOKEN:-}" ]]; then
   status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
     --header "Authorization: Bearer ${WSI_BEARER_TOKEN}" \
-    --header "X-WSI-Source: $source_url" \
     "$tile_path")"
   test "$status" != 401 || {
     echo "provided WSI_BEARER_TOKEN was rejected" >&2
