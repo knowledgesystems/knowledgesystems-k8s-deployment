@@ -1,4 +1,4 @@
-# Daily mirror of the live production database into the inactive blue/green
+# Hourly mirror of the live production database into the inactive blue/green
 # databases of go.cbioportal.org, then a flip of the cbioportal-go-active
 # pointer — the pattern of cbioagent-clickhouse-clone-daily. Pod runs
 # mirror → patch-pointer; Reloader rolls cbioportal-go when the pointer
@@ -50,7 +50,10 @@ metadata:
   labels:
     app.kubernetes.io/instance: cbioportal-go
 spec:
-  schedule: "0 14 * * *"  # daily 14:00 UTC, after the 13:00 cbioagent clone
+  # Hourly: mirror-prod.sh rebuilds only when production serves a new import
+  # (and never while one is running), otherwise it leaves the pointer as is,
+  # so go.cbioportal.org follows each production switch within an hour.
+  schedule: "7 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
