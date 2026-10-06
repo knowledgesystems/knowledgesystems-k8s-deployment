@@ -1,0 +1,27 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: inflight-heavy
+  namespace: default
+spec:
+  # Caps concurrent bulk-data requests (molecular-data, mutations, CNA
+  # segments) per client IP for non-browser traffic. A few whole-study
+  # fetches running at once build multi-GB responses in JVM heap and
+  # OOM-kill the public API pool; extra concurrent requests get a 429
+  # instead. Sequential scripts are unaffected. Tune as needed.
+  inFlightReq:
+    amount: 3
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: inflight-heavy-cloudflare
+  namespace: default
+spec:
+  # Same cap as inflight-heavy for www requests proxied by Cloudflare, keyed
+  # on CF-Connecting-IP (see ratelimit-heavy-cloudflare for why this is safe:
+  # only ClientIP(<Cloudflare ranges>) routes use it).
+  inFlightReq:
+    amount: 3
+    sourceCriterion:
+      requestHeaderName: Cf-Connecting-Ip
