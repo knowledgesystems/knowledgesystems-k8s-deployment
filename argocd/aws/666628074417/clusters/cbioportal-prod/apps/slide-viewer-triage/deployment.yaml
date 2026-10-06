@@ -102,6 +102,12 @@ spec:
               value: "30"
             - name: GUNICORN_TIMEOUT
               value: "60"
+            # Concurrent slide decodes per worker (overrides the ConfigMap's 2).
+            # With N_WORKERS=2, 2 per worker returned 503 for ~2% of tiles under
+            # 5 users panning uncached regions; 4 gave none, at the same memory
+            # (memory scales with workers and MAX_OPEN_SLIDES, not this).
+            - name: MAX_IMAGE_OPERATIONS
+              value: "4"
             - name: CORS_ORIGINS
               value: "https://beta.cbioportal.mskcc.org,https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app"
             - name: WSI_RELEASE_ID
