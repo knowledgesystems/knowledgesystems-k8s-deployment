@@ -95,7 +95,7 @@ def portal_identity(path: Path) -> tuple[str, str, str, str]:
     expected_identity = {
         "--wsi.release-id": release_id,
         "--wsi.backend-git-sha": backend_image_match.group(1),
-        "--wsi.serving-contract-version": "wsi-serving-v5",
+        "--wsi.serving-contract-version": "wsi-serving-v3",
     }
     if any(
         runtime_identity.get(key) != expected
@@ -287,8 +287,8 @@ assert_docker_digest("cbioportal/cbioportal-tile-server", tile_match.group(2))
 tile_env = env_map(tile_container)
 if tile_env.get("WSI_RELEASE_ID") != blue[0]:
     raise AssertionError("tile-server runtime release identity differs")
-if tile_env.get("WSI_SERVING_CONTRACT_VERSION") != "wsi-serving-v5":
-    raise AssertionError("tile-server does not declare wsi-serving-v5")
+if tile_env.get("WSI_SERVING_CONTRACT_VERSION") != "wsi-serving-v3":
+    raise AssertionError("tile-server does not declare wsi-serving-v3")
 if not re.fullmatch(r"[0-9a-f]{40}", tile_env.get("IMAGE_GIT_SHA", "")):
     raise AssertionError("tile-server does not declare a full immutable git SHA")
 tile_cors_origins = comma_separated_values(tile_env.get("CORS_ORIGINS", ""))

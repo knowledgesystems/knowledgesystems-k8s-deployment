@@ -27,8 +27,8 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-rd-20261006-1"
-        wsi.cbioportal.org/frontend-git-sha: "045105b073e6f3afcdb2fde5240f8ef45469b0c3"
+        wsi.cbioportal.org/release-id: "beta-wsi-v2-20260916-4"
+        wsi.cbioportal.org/frontend-git-sha: "ca327132101fcce80732b53b098083a9e273344b"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-green
@@ -85,10 +85,10 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://6ac48117bcbba50008ca68db--cbioportalfrontend.netlify.app/
-            - --wsi.release-id=beta-wsi-rd-20261006-1
-            - --wsi.backend-git-sha=b479612a9532a6581df750b24b5178c504be46ae
-            - --wsi.serving-contract-version=wsi-serving-v5
+            - --frontend.url=https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app/
+            - --wsi.release-id=beta-wsi-v2-20260916-4
+            - --wsi.backend-git-sha=e56f407b2d31b45a6b1a314c5152be61b4954ae0
+            - --wsi.serving-contract-version=wsi-serving-v3
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
             - --default_cross_cancer_study_list=mskimpact
@@ -118,7 +118,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ac48117bcbba50008ca68db--cbioportalfrontend.netlify.app
+            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6aaad47e4dd99b00083d160d--cbioportalfrontend.netlify.app
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
@@ -270,7 +270,7 @@ spec:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-green
-          image: cbioportal/cbioportal-dev:b479612a9532a6581df750b24b5178c504be46ae-web-shenandoah@sha256:5b7f004c4daacf60f219ad185fc49a6bc762a544fc6dfe29ad0939f85284f569
+          image: cbioportal/cbioportal-dev:e56f407b2d31b45a6b1a314c5152be61b4954ae0-web-shenandoah@sha256:780fa5ec83b26eb5a0634a45a3b0494cc0144645a0683c4b69b210e7e668e9bd
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20

@@ -16,10 +16,8 @@ metadata:
     # users behind one NAT address. The tile server still bounds expensive
     # image work independently with MAX_IMAGE_OPERATIONS.
     nginx.ingress.kubernetes.io/limit-connections: "300"
-    # Keep a slide's cold-open cache and SlideCache affinity on one pod. The
-    # bearer capability is the only per-slide request input (it rotates with
-    # its TTL, so affinity holds for one token lifetime).
-    nginx.ingress.kubernetes.io/upstream-hash-by: "$http_authorization"
+    # Keep a slide's cold-open cache and SlideCache affinity on one pod.
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$http_x_wsi_source"
     # The browser uses a same-origin /wsi route while the FastAPI application
     # owns root-level /tiles, /thumbnails, /health, and /ready paths.
     nginx.ingress.kubernetes.io/use-regex: "true"
