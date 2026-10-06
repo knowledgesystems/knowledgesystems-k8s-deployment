@@ -9,8 +9,9 @@
 > "experimental preview" banner.
 
 Go reimplementation of the cBioPortal backend (REST API + bundled React frontend),
-served at https://go.cbioportal.org. Backed by ClickHouse Cloud; a daily job mirrors
-production's data (zero-copy clone of the live `cbioportal_public_<color>`). Studies
+served at https://go.cbioportal.org. Backed by ClickHouse Cloud; an hourly job mirrors
+production's data (zero-copy clone of the live `cbioportal_public_<color>`) after each
+production import. Studies
 can also be loaded by hand with `deploy/publish-local-studies.sh` from the
 cbioportal-go repo.
 
@@ -18,13 +19,14 @@ cbioportal-go repo.
 
 | Resource | Purpose |
 |---|---|
-| `Deployment cbioportal-go` | Single replica of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`). Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
-| `PVC cbioportal-go-data` | 1Gi `efs-sc` volume at `/data` holding the session store (`/data/sessions.json`). |
+| `Deployment cbioportal-go` | 2 replicas of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`), stateless: sessions in the public session service, logins in the public session Redis. Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
-| `Deployment` / `Service cbioportal-go-api` | API-only, stateless (no session file), 2 replicas on the same databases; receives a mirrored share of the public API traffic (below). |
+| `Deployment` / `Service cbioportal-go-api` | API-only, stateless, 2 replicas on the same databases; receives a mirrored share of www's non-browser API traffic. |
+| `Deployment` / `Service cbioportal-go-www`, `TraefikService cbioportal-www-mirror-{green,blue}` | The same, for a mirrored share of www's browser API traffic. |
+| `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
-| `CronJob cbioportal-go-mirror-daily` | Daily 14:00 UTC: clones the live production color into the inactive color, builds the Go portal's tables, then flips the pointer. |
+| `CronJob cbioportal-go-mirror-daily` | Hourly: when production serves a new import (and none is running), clones it into the inactive color, builds the Go portal's tables, then flips the pointer; otherwise leaves the pointer as is. |
 | `ServiceAccount/Role/RoleBinding cbioportal-go-mirror-job*` | Lets the CronJob `get`/`patch` only `cbioportal-go-active`. |
 | `Application cbioportal-go` (`apps/argocd/`) | Auto-sync (prune + selfHeal) of this directory. |
 
