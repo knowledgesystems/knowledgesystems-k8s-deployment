@@ -22,3 +22,46 @@ We use Datadog and AWS CloudWatch for monitoring. For cBioPortal, datadog is dep
 | cBioPortal | [Link][cw-cbioportal] | Custom CloudWatch Dashboard prepared for cBioPortal |
 
 [cw-cbioportal]: https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards/dashboard/cBioPortal
+
+## CronJob alerting
+
+CronJob run outcomes are reported to Slack through Datadog, not ArgoCD. Argo computes
+Application health from its immediate git-tracked children only, so the Jobs a CronJob
+controller spawns at runtime are never reflected in Application health — ArgoCD
+Notifications cannot see them.
+
+No cluster-side change is needed for the metrics. The pinned Datadog Helm chart
+defaults `datadog.kubeStateMetricsCore.enabled` to true, no `values.yaml` overrides it,
+and both cbioportal clusters enable the Cluster Agent, so `kubernetes_state.job.*` and
+`kubernetes_state.cronjob.*` are already collected.
+
+Monitor definitions live in [`tools/datadog-monitors/`][dd-cronjob-monitors] and are
+applied with the Datadog API — see the README there. All of them notify
+`@slack-cBioPortal-cronjob-status`.
+
+{.compact}
+| Monitor | Catches |
+|---|---|
+| `cronjob-failed` | A Job run failed — bad exit code, OOMKill, image pull error, deadline exceeded |
+| `cronjob-missed-run-frequent` | An AWS credential refresher stopped being scheduled |
+| `cronjob-missed-run-daily` | The daily ClickHouse clone stopped being scheduled |
+| `cronjob-missed-run-weekly` | The weekly public DB dump stopped being scheduled |
+
+The two split cleanly: `cronjob-failed` covers "it ran and broke", the `missed-run`
+tiers cover "it never ran" — a CronJob that is suspended or deleted emits no failure
+metric at all, so the failure monitor alone would stay silent.
+
+Every query is scoped to `kube_cluster_name:cbioportal-*`. The OncoKB clusters run
+their own CronJobs and are deliberately out of scope.
+
+> [!NOTE]
+> The `missed-run` monitors track time since the CronJob was last *scheduled*, not
+> since it last *succeeded*. The stricter metric needs agent 7.68.0 and the clusters
+> pin 7.52.0. See the README in `tools/datadog-monitors/`.
+
+[dd-cronjob-monitors]: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/tree/master/tools/datadog-monitors
+
+> [!WARNING]
+> Kubernetes only observes a container's exit code, so no monitor can see an error the
+> job's script swallows. A script without `set -e`, or one ending in a pipeline whose
+> last command succeeds, exits 0 on a partial failure.
