@@ -6,9 +6,10 @@ metadata:
   labels:
     app.kubernetes.io/instance: cbioportal
 data:
-  # Served at https://www.cbioportal.org/llms.txt by the public backend
-  # (--llms_txt.location). Guidance for AI agents and automated clients:
-  # where to get data in bulk instead of crawling the app or looping the API.
+  # Served at https://www.cbioportal.org/llms.txt as a static file: mounted at
+  # /cbioportal-llms/ in the public backend, which lists that directory in
+  # spring.web.resources.static-locations. Guidance for AI agents and automated
+  # clients: where to get data in bulk instead of crawling the app or the API.
   llms.txt: |
     # cBioPortal for Cancer Genomics
 
