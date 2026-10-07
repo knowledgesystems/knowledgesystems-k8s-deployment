@@ -10,7 +10,7 @@ metadata:
   labels:
     run: cbioportal-go-hub
   annotations:
-    secret.reloader.stakater.com/reload: "clickhouse-go-portal"
+    secret.reloader.stakater.com/reload: "clickhouse-go-portal,cbioportal-public-green"
     # Keel polls Docker Hub and rolls the Deployment when the digest behind
     # cbioportal/cbioportal-go:latest changes.
     keel.sh/policy: force
@@ -46,8 +46,13 @@ spec:
           image: cbioportal/cbioportal-go:latest
           imagePullPolicy: Always
           command: ["/usr/local/bin/cbioportal-api"]
+          # www.cbioportal.org's portal settings, so previews look and behave
+          # like production, minus what points at production's own data.
           args:
+            - --portal-properties=/app/deploy/public-portal.properties
             - --authenticate=false
+            - --default_cross_cancer_study_session_id=
+            - --priority_studies=
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -73,6 +78,15 @@ spec:
               value: "Development instance for previewing studies of cBioPortal/datahub pull requests; data may be incomplete or incorrect. For research use:"
             - name: SITE_BANNER_LINK
               value: https://www.cbioportal.org
+            # The public portal's OncoKB token and the authenticated OncoKB API
+            # it is for, as on go.cbioportal.org (annotations go through /proxy).
+            - name: ONCOKB_URL
+              value: https://www.oncokb.org/api/v1
+            - name: ONCOKB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: ONCOKB_TOKEN
             # Tags this deployment's queries in ClickHouse's system.query_log.
             - name: CLICKHOUSE_LOG_COMMENT
               value: hub.cbioportal.org
