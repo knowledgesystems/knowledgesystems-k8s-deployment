@@ -154,6 +154,9 @@ spec:
             # Serve /cbioportal-llms/ (public-portal-llms-txt ConfigMap) as static files, so
             # /llms.txt is served directly. Keeps Spring Boot's default locations first.
             - --spring.web.resources.static-locations=classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:/cbioportal-llms/
+            # Same file via LlmsTxtController (cBioPortal/cbioportal#12396) once the image
+            # includes it; that controller would otherwise answer /llms.txt with 404.
+            - --llms_txt.location=file:/cbioportal-llms/llms.txt
             - --oncokb.public_api.url=https://www.oncokb.org/api/v1
             - --oncokb.token=$(ONCOKB_TOKEN)
             - --genomenexus.url=https://v1.genomenexus.org
