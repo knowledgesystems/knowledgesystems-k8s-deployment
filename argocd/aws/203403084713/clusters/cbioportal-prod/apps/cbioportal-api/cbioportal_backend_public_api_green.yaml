@@ -176,6 +176,9 @@ spec:
             # persistence cache settings (currently redis)
             #- -Dcache.statistics_endpoint_enabled=false
             - --persistence.cache_type=redis
+            # Capture requests in cbioportal_qc.logged_requests (async inserts):
+            # real traffic for cbioportal-go's nightly parity check.
+            - --request-logging.enabled=true
             - --redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379
             - --redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379
             - --redis.database=9
