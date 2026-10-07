@@ -1,0 +1,155 @@
+# hub.cbioportal.org: cbioportal-go serving the studies of cBioPortal/datahub
+# pull requests labelled `preview`, imported by the per-PR Jobs
+# (import-job-helm/) into the ClickHouse Cloud databases
+# dev_cbioportal_hub_go{,_raw,_ref}.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-go-hub
+  namespace: default
+  labels:
+    run: cbioportal-go-hub
+  annotations:
+    secret.reloader.stakater.com/reload: "clickhouse-go-portal"
+    # Keel polls Docker Hub and rolls the Deployment when the digest behind
+    # cbioportal/cbioportal-go:latest changes.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go-hub
+  template:
+    metadata:
+      annotations:
+        # Datadog scrapes the Prometheus metrics (METRICS_ADDR below).
+        ad.datadoghq.com/cbioportal-go-hub.checks: |
+          {"openmetrics": {"instances": [{"openmetrics_endpoint": "http://%%host%%:9090/metrics",
+            "namespace": "cbioportal_go_hub", "metrics": [".*"]}]}}
+      labels:
+        run: cbioportal-go-hub
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: cbioportal-go-hub
+          image: cbioportal/cbioportal-go:latest
+          imagePullPolicy: Always
+          command: ["/usr/local/bin/cbioportal-api"]
+          args:
+            - --authenticate=false
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: METRICS_ADDR
+              value: ":9090"
+            - name: ACCESS_LOG
+              value: "true"
+            - name: FRONTEND_DIR
+              value: /app/frontend
+            - name: CBIOPORTAL_DB
+              value: dev_cbioportal_hub_go
+            - name: CBIOPORTAL_RAW_DB
+              value: dev_cbioportal_hub_go_raw
+            - name: CBIOPORTAL_REF_DB
+              value: dev_cbioportal_hub_go_ref
+            - name: SITE_BANNER
+              value: "Development instance for previewing studies of cBioPortal/datahub pull requests; data may be incomplete or incorrect. For research use:"
+            - name: SITE_BANNER_LINK
+              value: https://www.cbioportal.org
+            # Tags this deployment's queries in ClickHouse's system.query_log.
+            - name: CLICKHOUSE_LOG_COMMENT
+              value: hub.cbioportal.org
+          # CLICKHOUSE_URL, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-portal
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              run: cbioportal-go-hub
+      nodeSelector:
+        workload: cbio-dev
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-go-hub
+  namespace: default
+  labels:
+    run: cbioportal-go-hub
+  annotations:
+    # Sessions (shared links, virtual studies) live in each pod's built-in
+    # store, so a browser sticks to one pod.
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: hub_pod
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
+spec:
+  selector:
+    run: cbioportal-go-hub
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  type: ClusterIP
+---
+# Keeps one pod serving while nodes are drained (the cbio-dev spot pool is
+# consolidated and replaced often).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cbioportal-go-hub
+  namespace: default
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go-hub
