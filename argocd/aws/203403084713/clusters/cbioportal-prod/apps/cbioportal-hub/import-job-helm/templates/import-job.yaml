@@ -1,3 +1,8 @@
+# Imports the studies of one datahub PR commit into hub.cbioportal.org with
+# cbioportal-go's ops/cbioportal.org/hub-import.sh (shipped in the image at /app/deploy):
+# checkout of the changed studies, `cbioportal-import ingest` of each, one
+# `transform` of the hub database, and a Check Run plus a Deployment on the
+# PR. Jobs of different PRs run one at a time through a lock in ClickHouse.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -6,398 +11,45 @@ metadata:
     argocd.argoproj.io/sync-options: Replace=true
 spec:
   ttlSecondsAfterFinished: 86400
-  backoffLimit: 1
+  # The script reports failures on the PR; a retry would post a second run.
+  backoffLimit: 0
+  # Waiting for other imports (LOCK_WAIT) plus the import itself.
+  activeDeadlineSeconds: 14400
   template:
     spec:
       restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
       containers:
         - name: importer
-          image: cbioportal/cbioportal-core:demo-bulk-load-fix
+          image: cbioportal/cbioportal-go:latest
           imagePullPolicy: Always
-          command: ["/bin/bash", "-c"]
-          args:
-            - |
-              # Install dependencies (fail fast here)
-              set -e
-              apt-get update && apt-get install -y git git-lfs curl jq gettext-base > /dev/null 2>&1
-              git lfs install
-              # rebuild_derived_tables.py (invoked via `metaImport.py derive-tables`)
-              # shells out to `clickhouse client`. The cbioportal-core image
-              # doesn't ship that binary; grab the static release for this arch.
-              CH_ARCH=$(uname -m); [ "$CH_ARCH" = "x86_64" ] && CH_ARCH=amd64
-              curl -sfL "https://builds.clickhouse.com/master/$CH_ARCH/clickhouse" -o /usr/local/bin/clickhouse \
-                && chmod +x /usr/local/bin/clickhouse
-              # cbioportal-core image layout: importer scripts at /scripts/importer/,
-              # core JAR at /core-*.jar, application.properties placeholder at /,
-              # PORTAL_HOME=/ . Adapt the script accordingly.
-              export PATH=/scripts/importer:$PATH
-              CORE_JAR=$(ls /core-*.jar | head -1)
-              # Substitute ${CLICKHOUSE_USER}/${CLICKHOUSE_PASSWORD} from the
-              # hub-clickhouse-creds Secret into application.properties, then
-              # re-pack into the importer JAR (entrypoint.sh trick from
-              # cbioportal-docker-compose).
-              cd /tmp && envsubst < /application.properties > application.properties && jar uf "$CORE_JAR" application.properties
-              cd /
-              # metaImport refreshes derived ClickHouse tables after each study via
-              # $PORTAL_HOME/clickhouse.sql. cbioportal-core doesn't ship this file
-              # (it lives in the cbioportal repo); fetch from raw.githubusercontent.com.
-              curl -sfL https://raw.githubusercontent.com/cBioPortal/cbioportal/master/src/main/resources/db-scripts/clickhouse/clickhouse.sql -o /clickhouse.sql || true
-              set +e
-
-              PR_NUMBER={{ .Values.prNumber }}
-              PR_BRANCH={{ .Values.prBranch }}
-              HEAD_SHA={{ .Values.headSha }}
-              IMPORT_FAILURES=0
-              IMPORT_SUCCESSES=0
-              HUB_BASE=https://hub.cbioportal.org
-              # Force git-lfs at the canonical datahub S3 endpoint so cross-repo
-              # (forked) PRs don't fall back to the fork's GitHub LFS (which has
-              # per-account quotas that the upstream S3 endpoint doesn't).
-              DATAHUB_LFS_URL=https://nsssw8k94d.execute-api.us-east-1.amazonaws.com/
-              # ArgoCD logs link for this specific Job (predictable from PR# + sha[:7]).
-              JOB_NAME="datahub-import-$PR_NUMBER-$(echo "$HEAD_SHA" | cut -c1-7)"
-              LOG_URL="https://argocd.cbioportal.org/applications/datahub-import-$PR_NUMBER?resource=&node=batch%2FJob%2Fdefault%2F${JOB_NAME}%2F0&tab=logs"
-              : > /tmp/summary.md  # per-study result lines, sent to GitHub at end
-
-              # ---- GitHub App auth (best-effort; no-op if Secret not mounted) ----
-              gh_token() {
-                if [ ! -f /etc/gh-app/key.pem ] || [ -z "$GH_CLIENT_ID" ]; then return 1; fi
-                if [ -s /tmp/gh-token ] && [ "$(($(date +%s) - $(stat -c %Y /tmp/gh-token)))" -lt 3000 ]; then
-                  cat /tmp/gh-token; return 0
-                fi
-                local hdr='{"alg":"RS256","typ":"JWT"}'
-                local now=$(date +%s)
-                local pl="{\"iat\":$now,\"exp\":$((now+540)),\"iss\":\"$GH_CLIENT_ID\"}"
-                local h=$(printf '%s' "$hdr" | openssl base64 -A | tr -d '=' | tr '/+' '_-')
-                local p=$(printf '%s' "$pl"  | openssl base64 -A | tr -d '=' | tr '/+' '_-')
-                local sig=$(printf '%s.%s' "$h" "$p" | openssl dgst -sha256 -sign /etc/gh-app/key.pem -binary \
-                  | openssl base64 -A | tr -d '=' | tr '/+' '_-')
-                local tok=$(curl -sf -X POST -H "Authorization: Bearer $h.$p.$sig" \
-                  -H "Accept: application/vnd.github+json" \
-                  "https://api.github.com/app/installations/$GH_INSTALLATION_ID/access_tokens" \
-                  | jq -r '.token // empty')
-                [ -z "$tok" ] && return 1
-                printf '%s' "$tok" > /tmp/gh-token
-                printf '%s' "$tok"
-              }
-              gh_api() {
-                local method=$1 path=$2; shift 2
-                local tok=$(gh_token) || return 1
-                curl -sf -X "$method" -H "Authorization: Bearer $tok" \
-                  -H "Accept: application/vnd.github+json" \
-                  -H "X-GitHub-Api-Version: 2022-11-28" \
-                  "https://api.github.com$path" "$@"
-              }
-              CHECK_ID=""; DEPLOY_ID=""
-              update_check_progress() {
-                # Refresh the in_progress check run with current per-study results
-                # so reviewers see growth without waiting for the whole loop to end.
-                [ -z "$CHECK_ID" ] && return 0
-                local processed=$((IMPORT_SUCCESSES + IMPORT_FAILURES))
-                local title="Importing... ($processed of ${STUDY_COUNT:-?} done, $IMPORT_FAILURES failed)"
-                gh_api PATCH "/repos/cBioPortal/datahub/check-runs/$CHECK_ID" \
-                  -H "Content-Type: application/json" \
-                  -d "$(jq -n --arg t "$title" --arg s "$(cat /tmp/summary.md)" --arg log "$LOG_URL" \
-                    '{status:"in_progress", details_url:$log,
-                      output:{title:$t, summary:$s}}')" > /dev/null || true
-              }
-              # ---- /GitHub auth ----
-
-              # Look up head repo so we can handle PRs from forks (cross-repo).
-              # The pulls API is always against the base repo (cBioPortal/datahub),
-              # but the branch + LFS content live on the head repo.
-              PR_INFO=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/pulls/$PR_NUMBER")
-              HEAD_REPO_FULL=$(echo "$PR_INFO" | jq -r '.head.repo.full_name')
-              HEAD_CLONE_URL=$(echo "$PR_INFO" | jq -r '.head.repo.clone_url')
-              echo "PR #$PR_NUMBER head: $HEAD_REPO_FULL@$PR_BRANCH"
-
-              # Post in_progress Check Run + Deployment (best-effort; ignored if no Secret).
-              CHECK_ID=$(gh_api POST "/repos/cBioPortal/datahub/check-runs" \
-                -H "Content-Type: application/json" \
-                -d "$(jq -n --arg sha "$HEAD_SHA" --arg base "$HUB_BASE" --arg log "$LOG_URL" \
-                  '{name:"Hub preview import", head_sha:$sha, status:"in_progress",
-                    details_url:$log,
-                    output:{title:"Importing studies...",
-                            summary:"Job is running. [View live logs in ArgoCD](\($log)) or [hub.cbioportal.org](\($base))."}}')" \
-                | jq -r '.id // empty')
-              DEPLOY_ID=$(gh_api POST "/repos/cBioPortal/datahub/deployments" \
-                -H "Content-Type: application/json" \
-                -d "$(jq -n --arg sha "$HEAD_SHA" \
-                  '{ref:$sha, environment:"hub-preview", auto_merge:false,
-                    required_contexts:[], transient_environment:true,
-                    description:"Per-PR preview on hub.cbioportal.org"}')" \
-                | jq -r '.id // empty')
-              if [ -n "$DEPLOY_ID" ]; then
-                gh_api POST "/repos/cBioPortal/datahub/deployments/$DEPLOY_ID/statuses" \
-                  -H "Content-Type: application/json" \
-                  -d "$(jq -n --arg env "$HUB_BASE/" --arg log "$LOG_URL" \
-                    '{state:"in_progress", environment_url:$env, log_url:$log}')" > /dev/null || true
-              fi
-              [ -n "$CHECK_ID" ] && echo "Posted GitHub check_run=$CHECK_ID deployment=$DEPLOY_ID"
-
-              # Use GitHub API to detect changed files (always on base repo)
-              echo "Fetching changed files for PR #$PR_NUMBER..."
-              ALL_CHANGED_FILES=$(curl -s "https://api.github.com/repos/cBioPortal/datahub/pulls/$PR_NUMBER/files?per_page=300" \
-                | jq -r '.[].filename')
-
-              # Import any changed reference gene panels first
-              CHANGED_PANELS=$(echo "$ALL_CHANGED_FILES" | grep '^reference_data/gene_panels/data_gene_panel_' || true)
-              if [ -n "$CHANGED_PANELS" ]; then
-                echo "Importing changed reference gene panels..."
-                rm -rf /datahub
-                mkdir /datahub && cd /datahub
-                git init -q
-                git config --local lfs.url "$DATAHUB_LFS_URL"
-                git remote add origin "$HEAD_CLONE_URL"
-                git sparse-checkout init --cone
-                git sparse-checkout set reference_data/gene_panels
-                GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1 -q
-                GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
-                # Build --include flags for just the changed panels and pull them
-                # via the S3 LFS endpoint. --exclude='' overrides .lfsconfig
-                # fetchexclude=*.
-                INCLUDE_ARGS=""
-                for panel_path in $CHANGED_PANELS; do
-                  INCLUDE_ARGS="$INCLUDE_ARGS --include=$panel_path"
-                done
-                git lfs pull $INCLUDE_ARGS --exclude='' 2>&1 | sed 's/^/  /' || true
-                for panel_path in $CHANGED_PANELS; do
-                  echo "  Importing $(basename "$panel_path")..."
-                  java -Xmx512M -Dspring.profiles.active=clickhouse \
-                    -cp /core-*.jar \
-                    -DPORTAL_HOME=/ \
-                    org.mskcc.cbio.portal.scripts.ImportGenePanel \
-                    --data "$panel_path" --noprogress 2>&1 || true
-                done
-                rm -rf /datahub
-              fi
-
-              PUBLIC_STUDIES=$(echo "$ALL_CHANGED_FILES" \
-                | grep '^public/' \
-                | cut -d'/' -f1-2 \
-                | sort -u)
-
-              GDC_STUDIES=$(echo "$ALL_CHANGED_FILES" \
-                | grep '^crdc/gdc/' \
-                | cut -d'/' -f1-3 \
-                | sort -u)
-
-              CHANGED_STUDIES=$(printf '%s\n%s' "$PUBLIC_STUDIES" "$GDC_STUDIES" \
-                | sed '/^$/d' | sort -u)
-
-              # Optional PR-body marker to restrict imports to a subset of the
-              # changed studies. Useful for big PRs (e.g. cBioPortal/datahub#2326
-              # touches 32 TCGA Pancan studies; a reviewer typically only wants
-              # to spot-check one or two). Recommended PR description format:
-              #
-              #   ## Preview Configuration
-              #
-              #   hub-import-only:
-              #   - public/acc_tcga_pan_can_atlas_2018
-              #   - public/brca_tcga_pan_can_atlas_2018
-              #
-              # The parser keys on the `hub-import-only:` line; the section
-              # header is purely for human readability.
-              #
-              # If the marker is present, intersect with CHANGED_STUDIES so we
-              # can't accidentally import paths the PR didn't actually change.
-              PR_BODY=$(echo "$PR_INFO" | jq -r '.body // ""')
-              HUB_ONLY=$(printf '%s\n' "$PR_BODY" | tr -d '\r' | awk '
-                /^hub-import-only:/ {found=1; next}
-                found {
-                  if ($0 ~ /^-[[:space:]]/) {
-                    sub(/^-[[:space:]]+/,"")
-                    sub(/[[:space:]]+$/,"")
-                    if (length($0) > 0) print
-                  } else { exit }
-                }')
-              if [ -n "$HUB_ONLY" ]; then
-                echo "PR body restricts hub imports to:"
-                echo "$HUB_ONLY" | sed 's/^/  /'
-                CHANGED_STUDIES=$(comm -12 \
-                  <(echo "$CHANGED_STUDIES" | sort -u) \
-                  <(echo "$HUB_ONLY" | sort -u))
-              fi
-
-              if [ -z "$CHANGED_STUDIES" ]; then
-                echo "No changed studies detected (or import-only filter eliminated all of them)."
-                exit 0
-              fi
-
-              echo "Changed studies: $CHANGED_STUDIES"
-
-              # Process studies one at a time to limit disk usage
-              STUDY_COUNT=$(echo "$CHANGED_STUDIES" | wc -l)
-              STUDY_INDEX=0
-
-              for study_dir in $CHANGED_STUDIES; do
-                STUDY_INDEX=$((STUDY_INDEX + 1))
-                study_id=$(basename "$study_dir")
-                echo "========================================="
-                echo "[$STUDY_INDEX/$STUDY_COUNT] Processing $study_dir..."
-                echo "========================================="
-
-                # Sparse checkout just this study
-                rm -rf /datahub
-                mkdir /datahub && cd /datahub
-                git init -q
-                git config --local lfs.url "$DATAHUB_LFS_URL"
-                git remote add origin "$HEAD_CLONE_URL"
-                # Cone mode auto-includes root files (.lfsconfig, .gitattributes)
-                # which we need for the explicit git lfs pull below.
-                git sparse-checkout init --cone
-                git sparse-checkout set "$study_dir"
-                GIT_LFS_SKIP_SMUDGE=1 git fetch origin "$PR_BRANCH" --depth=1 -q
-                if [ $? -ne 0 ]; then
-                  echo "ERROR: Failed to fetch branch $PR_BRANCH"
-                  IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
-                  printf -- '- :x: `%s` — failed to fetch branch `%s`\n' "$study_id" "$PR_BRANCH" >> /tmp/summary.md
-                  update_check_progress
-                  continue
-                fi
-                GIT_LFS_SKIP_SMUDGE=1 git checkout FETCH_HEAD -q
-
-                # datahub's .lfsconfig sets fetchexclude=*, which silently
-                # blocks both the smudge filter on checkout AND a plain
-                # `git lfs pull`. Override with --exclude='' and scope the
-                # download to just this study with --include. LFS objects
-                # come from the S3-backed API Gateway endpoint set in
-                # .lfsconfig (no GitHub LFS bandwidth quota).
-                git lfs pull --include="${study_dir}/**" --exclude='' 2>&1 | sed 's/^/  /' || true
-
-                if [ ! -f "$study_dir/meta_study.txt" ]; then
-                  echo "Skipping $study_dir (no meta_study.txt)"
-                  continue
-                fi
-
-                # Import gene panel definitions (skip matrix file, that's handled by the study importer)
-                for panel in $study_dir/data_gene_panel_*.txt; do
-                  if [ -f "$panel" ] && [[ "$panel" != *"_matrix.txt" ]]; then
-                    echo "Importing gene panel: $panel"
-                    java -Xmx512M -Dspring.profiles.active=clickhouse \
-                      -cp /core-*.jar \
-                      -DPORTAL_HOME=/ \
-                      org.mskcc.cbio.portal.scripts.ImportGenePanel \
-                      --data "$panel" --noprogress 2>&1 || true
-                  fi
-                done
-
-                # Direct import — skips metaImport.py's online validation. datahub's
-                # own CI runs the canonical validators per PR, so re-validating
-                # here is duplicative and roughly doubles per-study wall time.
-                cbioportalImporter.py import-study -s /datahub/$study_dir 2>&1
-                import_rc=$?
-                if [ $import_rc -ne 0 ]; then
-                  echo "WARNING: Import failed for $study_dir. Continuing..."
-                  IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
-                  printf -- '- :x: `%s` — import failed (see job logs)\n' "$study_id" >> /tmp/summary.md
-                else
-                  # Refresh ClickHouse derived tables via the upstream
-                  # rebuild_derived_tables.py (the same path metaImport.py
-                  # takes after a full import). Without this, *_derived
-                  # tables stay stale and the v7 API returns 0 rows.
-                  echo "Rebuilding ClickHouse derived tables..."
-                  if metaImport.py derive-tables --derived-table-sql /clickhouse.sql 2>&1; then
-                    echo "Successfully imported $study_dir"
-                    IMPORT_SUCCESSES=$((IMPORT_SUCCESSES + 1))
-                    printf -- '- :white_check_mark: [%s](%s/study/summary?id=%s)\n' \
-                      "$study_id" "$HUB_BASE" "$study_id" >> /tmp/summary.md
-                  else
-                    echo "WARNING: Imported $study_dir but derived-table refresh failed."
-                    IMPORT_FAILURES=$((IMPORT_FAILURES + 1))
-                    printf -- '- :warning: `%s` — imported but derived-table refresh failed\n' "$study_id" >> /tmp/summary.md
-                  fi
-                fi
-                update_check_progress
-
-                # Clean up to free disk before next study
-                rm -rf /datahub
-              done
-
-              echo "========================================="
-              echo "All imports attempted. Failures: $IMPORT_FAILURES"
-              echo "========================================="
-
-              # ---- Finalize GitHub Check Run + Deployment status (best-effort) ----
-              if [ "$IMPORT_FAILURES" -eq 0 ] && [ "$IMPORT_SUCCESSES" -gt 0 ]; then
-                CONCL=success
-              elif [ "$IMPORT_SUCCESSES" -gt 0 ]; then
-                CONCL=neutral  # partial: at least one study made it
-              else
-                CONCL=failure
-              fi
-              FIRST_OK=$(grep -m1 ':white_check_mark:' /tmp/summary.md 2>/dev/null \
-                | grep -oE 'https://[^)]+' || true)
-              # On success, send reviewer to the imported study. On failure, send
-              # them to the ArgoCD logs so they can see what went wrong.
-              if [ "$CONCL" = success ] && [ -n "$FIRST_OK" ]; then
-                DETAILS_URL="$FIRST_OK"
-              else
-                DETAILS_URL="$LOG_URL"
-              fi
-              TOTAL=$((IMPORT_SUCCESSES + IMPORT_FAILURES))
-              # Append log footer to the markdown summary
-              printf '\n[View import logs in ArgoCD](%s)\n' "$LOG_URL" >> /tmp/summary.md
-
-              if [ -n "$CHECK_ID" ]; then
-                gh_api PATCH "/repos/cBioPortal/datahub/check-runs/$CHECK_ID" \
-                  -H "Content-Type: application/json" \
-                  -d "$(jq -n \
-                    --arg c "$CONCL" \
-                    --arg t "Imported $IMPORT_SUCCESSES of $TOTAL studies" \
-                    --arg s "$(cat /tmp/summary.md)" \
-                    --arg u "$DETAILS_URL" \
-                    '{status:"completed", conclusion:$c, details_url:$u,
-                      output:{title:$t, summary:$s}}')" > /dev/null \
-                  && echo "Updated check_run=$CHECK_ID conclusion=$CONCL" \
-                  || echo "WARN: failed to update check_run=$CHECK_ID"
-              fi
-              if [ -n "$DEPLOY_ID" ]; then
-                DSTATE=$([ "$CONCL" = success ] && echo success || echo failure)
-                gh_api POST "/repos/cBioPortal/datahub/deployments/$DEPLOY_ID/statuses" \
-                  -H "Content-Type: application/json" \
-                  -d "$(jq -n --arg s "$DSTATE" --arg env "${FIRST_OK:-$HUB_BASE/}" --arg log "$LOG_URL" \
-                    '{state:$s, environment_url:$env, log_url:$log}')" > /dev/null \
-                  && echo "Updated deployment=$DEPLOY_ID state=$DSTATE" \
-                  || echo "WARN: failed to update deployment=$DEPLOY_ID"
-              fi
+          command: ["/app/deploy/hub-import.sh"]
           env:
-            - name: PORTAL_HOME
-              value: /
-            # Picked up by cbioportalImporter.py and passed to every java
-            # invocation. 6GB heap accommodates the in-memory TSV the
-            # bulk loader builds for large matrix files (e.g. methylation
-            # hm450 = ~400K rows × ~80 samples ≈ ~200MB just for values).
-            - name: JAVA_OPTS
-              value: "-Xmx6g"
-            # metaImport.py reads these (NOT application.properties) when
-            # invoking clickhouse-client to rebuild derived tables after each
-            # study. Without them: "Derived table construction failed:
-            # ClickHouse properties not set" → *_derived tables stay empty →
-            # study/patient views return 0 rows from the v7 API. The same
-            # CLICKHOUSE_USER/PASSWORD are also envsubst'd into
-            # application.properties for the JDBC importer steps.
-            - name: CLICKHOUSE_HOST
-              value: cbioportal-hub-clickhouse
-            - name: CLICKHOUSE_NATIVE_PORT
-              value: "9000"
-            - name: CLICKHOUSE_USER
-              valueFrom:
-                secretKeyRef:
-                  name: hub-clickhouse-creds
-                  key: username
-            - name: CLICKHOUSE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: hub-clickhouse-creds
-                  key: password
-            - name: CLICKHOUSE_DB
-              valueFrom:
-                secretKeyRef:
-                  name: hub-clickhouse-creds
-                  key: database
-            # GitHub App credentials (optional — Secret may not exist; the script
-            # falls back to running the import without posting status).
+            - name: PR_NUMBER
+              value: {{ .Values.prNumber | quote }}
+            - name: HEAD_SHA
+              value: {{ .Values.headSha | quote }}
+            - name: HUB_DB
+              value: dev_cbioportal_hub_go
+            - name: HUB_BASE
+              value: https://hub.cbioportal.org
+            - name: WORKDIR
+              value: /work
+            - name: HOME
+              value: /work
+            - name: LOCK_WAIT
+              value: "7200"
+            - name: LOG_URL
+              value: "https://argocd.cbioportal.org/applications/datahub-import-{{ .Values.prNumber }}?resource=&node=batch%2FJob%2Fdefault%2Fdatahub-import-{{ .Values.prNumber }}-{{ .Values.headSha | trunc 7 }}%2F0&tab=logs"
+            # Tags the import's queries in ClickHouse's system.query_log.
+            - name: CLICKHOUSE_LOG_COMMENT
+              value: hub-import-{{ .Values.prNumber }}
+            # GitHub App that posts the Check Run and Deployment; without the
+            # Secret the import runs and posts nothing.
             - name: GH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -410,24 +62,32 @@ spec:
                   name: hub-preview-bot
                   key: installation-id
                   optional: true
+            - name: GH_APP_KEY
+              value: /etc/gh-app/key.pem
+          # CLICKHOUSE_URL, CLICKHOUSE_USER (go_import), CLICKHOUSE_PASSWORD
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-import
           resources:
             requests:
-              memory: 2Gi
+              cpu: 250m
+              memory: 512Mi
               ephemeral-storage: 1Gi
             limits:
-              memory: 8Gi
+              cpu: "2"
+              memory: 2Gi
               ephemeral-storage: 15Gi
           volumeMounts:
-            - name: properties
-              mountPath: /application.properties
-              subPath: application.properties
+            - name: work
+              mountPath: /work
             - name: gh-app-key
               mountPath: /etc/gh-app
               readOnly: true
       volumes:
-        - name: properties
-          configMap:
-            name: cbioportal-hub-import-config
+        # One study's files at a time; each is deleted after its ingest.
+        - name: work
+          emptyDir:
+            sizeLimit: 15Gi
         - name: gh-app-key
           secret:
             secretName: hub-preview-bot

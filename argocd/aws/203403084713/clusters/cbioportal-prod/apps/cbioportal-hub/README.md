@@ -1,25 +1,65 @@
 # cbioportal-hub
 
-Per-PR preview cBioPortal instance at https://hub.cbioportal.org. Imports studies from `cBioPortal/datahub` PRs labeled `preview`. See commit `84357773` for the original setup.
+https://hub.cbioportal.org previews the studies of `cBioPortal/datahub` pull
+requests labelled `preview`. It runs
+[cbioportal-go](https://github.com/cBioPortal/cbioportal-go) on the ClickHouse
+Cloud service of go.cbioportal.org.
 
 ## Components (all in `default` namespace)
 
 | Resource | Purpose |
 |---|---|
-| `Deployment cbioportal-hub` | Java cBioPortal **v7** serving the UI/API |
-| `Deployment cbioportal-hub-clickhouse` | ClickHouse 24.8 + 50Gi PVC, init-seeded from `db-scripts/clickhouse/` bundled in the v7 cbioportal image |
-| `Service cbioportal-hub` / `Service cbioportal-hub-clickhouse` | ClusterIP wiring (hub on 80, ClickHouse on 8123/9000) |
-| `Ingress cbioportal-hub-ingress` | Traefik + cert-manager TLS for hub.cbioportal.org |
-| `Job gene-panel-seed` | One-shot, imports reference gene panels into a fresh DB |
-| `ApplicationSet datahub-pr-import-set` (`apps/argocd/`) | Generates one `datahub-import-<PR#>` Application per `preview`-labeled PR; each renders the helm chart at `import-job-helm/` into a Job |
+| `Deployment` / `Service cbioportal-go-hub` | 2 replicas of `cbioportal/cbioportal-go:latest` (API + frontend), no login. Sessions in each pod's memory, so the Service has a sticky cookie; they are lost on restart. Keel rolls it on new `:latest` digests. |
+| `PodDisruptionBudget cbioportal-go-hub` | Keeps one pod serving through node drains. |
+| `Ingress cbioportal-hub-ingress` | Traefik + cert-manager TLS for hub.cbioportal.org. |
+| `ApplicationSet datahub-pr-import-set` (`apps/argocd/`) | One `datahub-import-<PR#>` Application per `preview`-labelled PR, rendering `import-job-helm/` into a Job per PR commit. |
 
-## Per-PR import behavior
+## Databases
 
-By default, when a `cBioPortal/datahub` PR is labeled `preview`, the import Job imports **every study touched by the PR**. Two PR-author-controlled knobs:
+| Database | Holds |
+|---|---|
+| `dev_cbioportal_hub_go` | The portal tables the API serves. |
+| `dev_cbioportal_hub_go_raw` | The staged study files of every imported study, the shared gene panels, the import lock and the import log. |
+| `dev_cbioportal_hub_go_ref` | Genes, aliases, cancer types from datahub's seed dump. |
+
+The Deployment reads them as the user of the `clickhouse-go-portal` Secret,
+the import Jobs write them as `go_import` (`clickhouse-go-import`), which
+needs SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW
+and TRUNCATE on the three databases.
+
+## Per-PR import
+
+The Job runs `/app/deploy/hub-import.sh` from the cbioportal-go image (source:
+[ops/cbioportal.org/hub-import.sh](https://github.com/cBioPortal/cbioportal-go/blob/main/ops/cbioportal.org/hub-import.sh)):
+
+1. Lists the PR's changed studies (`public/<study>`, `crdc/gdc/<study>`) and
+   reference gene panels; stops if this commit was imported completely already (Argo
+   recreates finished Jobs after their 24 h TTL).
+2. Posts an in-progress Check Run and Deployment on the PR.
+3. Sparse, blobless checkout of `pull/<PR>/head`; a Job whose commit is no
+   longer the PR head stops ("superseded").
+4. Takes the hub import lock (a table in the raw database): one import at a
+   time; a lock without a heartbeat for 10 minutes is taken over; waits up
+   to 2 h.
+5. Loads the reference data and the shared gene panels when the hub has
+   none, and reloads the gene panels when the PR changes them.
+6. Per study: downloads its LFS files (datahub's LFS store, else the PR
+   head repository's GitHub LFS) and runs `cbioportal-import ingest`, which
+   replaces the study's earlier rows. A study that fails is removed from the
+   hub.
+7. One `cbioportal-import transform`. It builds every table under a staging
+   name and publishes them all at the end, so a failed transform leaves the
+   hub as it was; the PR's studies are then removed and the hub rebuilt
+   without them.
+8. Completes the Check Run (success, neutral when partial, failure) and the
+   Deployment status, with links to the imported studies.
+
+While a study is being ingested (minutes), its pages may show it half
+loaded: some study-level objects read the raw database directly.
 
 ### `hub-import-only:` (restrict to a subset)
 
-For large multi-study PRs (e.g. all 32 TCGA Pancan studies), reviewers typically only want to spot-check a couple. Add to the PR body:
+For large multi-study PRs add to the PR body:
 
 ```markdown
 ## Preview Configuration
@@ -29,60 +69,32 @@ hub-import-only:
 - public/brca_tcga_pan_can_atlas_2018
 ```
 
-The parser keys on the literal line `hub-import-only:`; the section header is human-readable only. The list is intersected with the PR's actually-changed studies, so you can't accidentally import paths the PR didn't touch. Paths must match the on-disk form (e.g. `public/<study>` or `crdc/gdc/<study>`).
+The list is intersected with the PR's changed studies. Paths are as on disk
+(`public/<study>`, `crdc/gdc/<study>`). Validation is skipped: datahub's own
+CI runs the validators.
 
-### Validation is skipped on purpose
+### Removing a study
 
-The Job calls `cbioportalImporter.py import-study` directly — it does **not** run `metaImport.py -o` (online validation). datahub's own per-PR CI runs the canonical validators; doing it again in hub doubles wall-time without adding signal. If a study fails to import (data quality issue), the Check Run summary marks it ✗ and the PR-author can address it.
+Closing a PR leaves its studies on the hub. To remove one, from a pod with
+the cbioportal-go image and `envFrom: clickhouse-go-import`:
 
-## v7 + ClickHouse architecture notes
+```bash
+cbioportal-import remove-study <study_id> --db dev_cbioportal_hub_go_raw
+cbioportal-import transform --raw-db dev_cbioportal_hub_go_raw \
+  --db dev_cbioportal_hub_go --ref-db dev_cbioportal_hub_go_ref
+```
 
-- cBioPortal v7 dropped MySQL — see [v6→v7 migration guide](https://docs.cbioportal.org/migration-v6-to-v7/). Hub mirrors the official [`cbioportal-docker-compose`](https://github.com/cBioPortal/cbioportal-docker-compose) v7 setup translated to k8s.
-- The ClickHouse Deployment's initContainer extracts `schema.sql`, `seed-cbioportal_hg19_hg38_v2.14.5.sql.gz`, and `clickhouse.sql` from the **cbioportal v7 image** at `/cbioportal/db-scripts/clickhouse/...` into a shared emptyDir. ClickHouse's `docker-entrypoint-initdb.d` then runs the `load_*.sh` scripts (in `cbioportal-hub-clickhouse-init-scripts` ConfigMap) in lexical order: schema → seed → derived tables.
-- Importer pods (per-PR `import-job-helm/templates/import-job.yaml` and `gene-panel-seed-job.yaml`) re-pack the runtime `application.properties` into `core-IMPORTER.jar` at start — mirrors `cbioportal-docker-compose/entrypoint.sh`. Skipping that step means the importer uses the JAR's bundled (wrong) DB connection.
-- The same script also copies `/cbioportal/db-scripts/clickhouse/clickhouse.sql` to `/cbioportal/clickhouse.sql` so `metaImport.py` can refresh derived tables after each study.
-- Connection: `jdbc:ch://cbioportal-hub-clickhouse:8123/cbioportal`. Username + password come from the `hub-clickhouse-creds` Secret (synced into the cluster by ArgoCD from `portal-configuration/argocd/aws/203403084713/clusters/cbioportal-prod/secrets/cbioportal-hub/hub-clickhouse-creds.yaml`). Consumed by: the ClickHouse Deployment (`CLICKHOUSE_USER`/`CLICKHOUSE_PASSWORD`), the app Deployment (`SPRING_DATASOURCE_USERNAME`/`SPRING_DATASOURCE_PASSWORD`, Spring relaxed-binding), and the importer Jobs (envsubst into `application.properties` plus `CLICKHOUSE_USER`/`CLICKHOUSE_PASSWORD` env for `metaImport.py`'s derived-table refresh).
+TODO: remove a PR's studies automatically when it closes.
 
 ## GitHub status integration (`hub-preview-bot`)
 
-The import Job posts a **Check Run** + a **Deployment** on the source PR, so reviewers see import status and a clickable preview link directly in the PR UI.
+The Job mints an installation token of the GitHub App "cBioPortal Datahub
+Preview" from the `hub-preview-bot` Secret (portal-configuration,
+`argocd/aws/203403084713/clusters/cbioportal-prod/secrets/cbioportal-hub/hub-preview-bot.yaml`;
+keys `client-id`, `installation-id`, `private-key`). The Secret is optional:
+without it the import runs and posts nothing.
 
-**How auth works.** The Job mints an installation access token from a GitHub App ("cBioPortal Datahub Preview") on the fly via JWT, using credentials in the `hub-preview-bot` Secret. The Secret is declared in the private `knowledgesystems/portal-configuration` repo at:
-
-```
-argocd/aws/203403084713/clusters/cbioportal-prod/secrets/cbioportal-hub/hub-preview-bot.yaml
-```
-
-ArgoCD's `portal-configuration` Application syncs it into this cluster's `default` namespace automatically.
-
-**Secret schema:**
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: hub-preview-bot
-  namespace: default
-stringData:
-  client-id: "Iv23li..."                   # GitHub App Client ID (preferred over App ID)
-  installation-id: "<numeric installation id on cBioPortal/datahub>"
-  private-key: |
-    -----BEGIN RSA PRIVATE KEY-----
-    ...
-    -----END RSA PRIVATE KEY-----
-```
-
-**Rotating the App's private key.** When the existing key is compromised, expired, or simply being rotated:
-
-1. https://github.com/organizations/cBioPortal/settings/apps/cbioportal-datahub-preview → **Private keys** → **Generate a private key** (downloads a new `.pem`)
-2. On the same page, **Delete** the old key
-3. Update `private-key:` in the portal-configuration secret yaml, commit, push to master
-4. ArgoCD picks it up within ~3 min; the next import Job uses the new key
-
-**Disabling status posting (e.g. App is broken, GitHub API outage).** Delete or rename the `hub-preview-bot` Secret. The Job's `secretKeyRef` and volume mount are `optional: true`; the script's `gh_token` returns 1 when `/etc/gh-app/key.pem` is missing, and all `gh_api` calls become no-ops. Imports continue to run normally — no PR status updates.
-
-## Things to be aware of when debugging
-
-- `cbioportal-hub-mysql` boots with a wrapper command — see `cbioportal-hub-mysql.yaml` for first-boot vs subsequent-boot behavior (initial DB init can't have `/var/lib/mysql/tmp` present, so tmpdir is `/tmp` on first boot only).
-- `gene-panel-seed` Job has `argocd.argoproj.io/sync-options: Replace=true` and TTL 24h; if the PVC is rebuilt, delete the completed Job manually so ArgoCD recreates it (otherwise reference panels stay un-seeded and study imports referencing IMPACT468 etc. fail with `Gene panel cannot be found in database`).
-- All LFS fetching uses `git lfs pull --include=<path>/** --exclude=''` — the `--exclude=''` is required to override `fetchexclude=*` in datahub's `.lfsconfig`, which routes LFS to AWS S3 via API Gateway (not GitHub LFS).
+To rotate the key: generate a new private key at
+https://github.com/organizations/cBioPortal/settings/apps/cbioportal-datahub-preview,
+delete the old one, update `private-key:` in the portal-configuration secret
+and push; the next Job uses it.
