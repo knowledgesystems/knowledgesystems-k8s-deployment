@@ -151,6 +151,7 @@ spec:
             - --db.suppress_schema_version_mismatch_errors=true
             - --sitemaps=true
             - --robots.disallow_user_agents=PetalBot
+            - --llms_txt.location=file:/cbioportal-llms/llms.txt
             - --oncokb.public_api.url=https://www.oncokb.org/api/v1
             - --oncokb.token=$(ONCOKB_TOKEN)
             - --genomenexus.url=https://v1.genomenexus.org
@@ -320,6 +321,9 @@ spec:
           volumeMounts:
             - mountPath: /cbioportal/
               name: cbioportal-frontend-config-volume
+            - mountPath: /cbioportal-llms/
+              name: llms-txt-volume
+              readOnly: true
       dnsPolicy: ClusterFirst
       nodeSelector:
         workload: cbioportal
@@ -337,6 +341,10 @@ spec:
             defaultMode: 420
             name: single-cell-frontend-config
           name: cbioportal-frontend-config-volume
+        - configMap:
+            defaultMode: 420
+            name: public-portal-llms-txt
+          name: llms-txt-volume
 ---
 apiVersion: v1
 kind: Service
