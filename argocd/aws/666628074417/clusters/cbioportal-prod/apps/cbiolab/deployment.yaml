@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbiolab
+  labels:
+    app: cbiolab
+spec:
+  # 'use cache: remote' falls back to process memory off Vercel, so each replica keeps its own cache
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cbiolab
+  template:
+    metadata:
+      labels:
+        app: cbiolab
+    spec:
+      containers:
+        - name: cbiolab
+          image: ghcr.io/cbioportal/cohort-lab:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: cbiolab
+          env:
+            - name: APP_BASE_URL
+              value: "https://cbiolab.cbioportal.mskcc.org"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1536"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /lab
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /lab
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 5
+      imagePullSecrets:
+        - name: ghcr-creds
