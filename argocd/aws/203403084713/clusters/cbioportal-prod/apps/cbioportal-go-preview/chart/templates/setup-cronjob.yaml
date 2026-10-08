@@ -1,0 +1,144 @@
+# Builds the preview's databases with the PR's own importer
+# (/app/deploy/pr-preview-setup.sh of the PR image), then restarts the API
+# when it rebuilt them. It runs every 5 minutes and rebuilds only when the
+# PR head or the PR description's "Preview Configuration" changed since the
+# last build (recorded in ClickHouse), so editing the description takes
+# effect within minutes.
+#
+# The CronJob is named after the head commit: a new commit replaces it, and
+# Argo's prune deletes the old one with its running Job, also one still
+# waiting for its image.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "preview.name" . }}-setup
+  labels:
+    {{- include "preview.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "preview.name" . }}-setup
+  labels:
+    {{- include "preview.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: [{{ include "preview.name" . | quote }}]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "preview.name" . }}-setup
+  labels:
+    {{- include "preview.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "preview.name" . }}-setup
+roleRef:
+  kind: Role
+  name: {{ include "preview.name" . }}-setup
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "preview.name" . }}-setup-{{ include "preview.sha" . }}
+  labels:
+    {{- include "preview.labels" . | nindent 4 }}
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      # The script reports failures on the PR and retries a failed build on
+      # a later run (at most twice per commit and configuration).
+      backoffLimit: 0
+      # Waiting for the image plus a datahub import.
+      activeDeadlineSeconds: 21600
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            {{- include "preview.labels" . | nindent 12 }}
+        spec:
+          serviceAccountName: {{ include "preview.name" . }}-setup
+          restartPolicy: Never
+          securityContext:
+            fsGroup: 10001
+          initContainers:
+            - name: setup
+              image: {{ include "preview.image" . }}
+              imagePullPolicy: IfNotPresent
+              command: ["/app/deploy/pr-preview-setup.sh"]
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 10001
+                runAsGroup: 10001
+              env:
+                - name: PR_NUMBER
+                  value: {{ .Values.prNumber | quote }}
+                - name: HEAD_SHA
+                  value: {{ .Values.headSha | quote }}
+                - name: PREVIEW_URL
+                  value: https://{{ include "preview.host" . }}
+                - name: WORKDIR
+                  value: /work
+                - name: HOME
+                  value: /work
+                - name: LOG_URL
+                  value: "https://argocd.cbioportal.org/applications/{{ include "preview.name" . }}?resource=kind%3AJob"
+                - name: CLICKHOUSE_LOG_COMMENT
+                  value: go-pr-{{ .Values.prNumber }}-setup
+                {{- include "preview.ghEnv" . | nindent 16 }}
+              # CLICKHOUSE_URL, CLICKHOUSE_USER (go_import), CLICKHOUSE_PASSWORD
+              envFrom:
+                - secretRef:
+                    name: clickhouse-go-import
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                  ephemeral-storage: 1Gi
+                limits:
+                  cpu: "2"
+                  memory: 2Gi
+                  ephemeral-storage: 15Gi
+              volumeMounts:
+                - name: work
+                  mountPath: /work
+                - name: gh-app-key
+                  mountPath: /etc/gh-app
+                  readOnly: true
+          containers:
+            - name: restart-api
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  . /work/state.env
+                  if [ "$REBUILT" = 1 ]; then
+                    kubectl rollout restart deployment/{{ include "preview.name" . }}
+                  fi
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+              volumeMounts:
+                - name: work
+                  mountPath: /work
+                  readOnly: true
+          volumes:
+            # One study's files at a time; each is deleted after its ingest.
+            - name: work
+              emptyDir:
+                sizeLimit: 15Gi
+            {{- include "preview.ghVolume" . | nindent 12 }}
+          {{- include "preview.scheduling" . | nindent 10 }}
