@@ -612,18 +612,24 @@ class SetupHandoffAgentsTest(unittest.TestCase):
 
     def test_fast_prompt_zero_altered_exception(self):
         text = m.read_prompt("fast")
-        exception = text[text.index("Exception: for `get_alteration_frequency`") :].split("\n\n", 1)[0]
+        exception = text[text.index("For `get_alteration_frequency`, answer a genuine zero") :].split("\n\n", 1)[0]
         for condition in (
-            "no precomputed row because the requested alteration is absent",
-            "there is no `error_message`",
-            "`fallback_reason` starts with `no precomputed row` (not `precomputed table unavailable`)",
-            "names the requested gene and study",
-            "`altered_samples` = 0, `profiled_samples` > 0 and `frequency_pct` = 0",
+            "there is no `error_message` or `note`",
+            "the returned gene and study identify the requested gene and study",
+            "`altered_samples` = 0, `profiled_samples` > 0, and `frequency_pct` = 0",
+            "Read compact rows using their `columns`.",
             'Report "0 of N profiled samples (0%)"',
-            "Otherwise keep the escalation rules.",
+            "Do not require `fallback_reason`.",
+            "Never interpret missing rows or `0/0` as 0%.",
         ):
             self.assertIn(condition, exception)
-        self.assertIn("a `fallback_reason` (except the case below);", text)
+        self.assertNotIn("precomputed", text)
+        self.assertNotIn("built_at", text)
+        self.assertIn(
+            "- the tool returns `error_message`, a `note`, missing or empty `rows`, or a `fallback_reason`; "
+            "or a frequency row has `profiled_samples` ≤ 0 or `frequency_pct` = null;",
+            text,
+        )
 
     def test_explicit_source_tools_verify_fast_tools(self):
         self.db.agents.update_one({"_id": self.source["_id"]}, {"$set": {"tools": [*EXPLICIT_DB_TOOLS, NAV_TOOL]}})
