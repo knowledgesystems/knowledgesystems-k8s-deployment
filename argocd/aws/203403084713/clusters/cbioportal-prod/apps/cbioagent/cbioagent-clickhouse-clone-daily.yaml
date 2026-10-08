@@ -100,14 +100,9 @@ data:
     done
 
     # 6) Apply LLM-prep SQL files from the fetch-sql initContainer's
-    #    payload. Three phases, the same order as the MCP repo's
-    #    scripts/apply_sql.sh:
+    #    payload. Two phases:
     #      a) sql/*.sql (portable, numeric order)
     #      b) sql/portal-specific/<portal>/*.sql for every subdir
-    #      c) sql/final/*.sql — aggregates over everything a) and b)
-    #         created, including the portal-specific
-    #         cancer_study_query_preferences rows (cbioportal-mcp#154).
-    #         Images without sql/final/ skip this phase.
     log "applying LLM-prep SQL files (portable)"
     for f in $(ls /workdir/sql/*.sql 2>/dev/null | sort); do
       log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
@@ -115,11 +110,6 @@ data:
     done
     log "applying LLM-prep SQL files (portal-specific)"
     for f in $(ls /workdir/sql/portal-specific/*/*.sql 2>/dev/null | sort); do
-      log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
-      clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
-    done
-    log "applying LLM-prep SQL files (final)"
-    for f in $(ls /workdir/sql/final/*.sql 2>/dev/null | sort); do
       log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
       clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
     done
