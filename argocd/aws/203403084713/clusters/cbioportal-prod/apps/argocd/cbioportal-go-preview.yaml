@@ -1,0 +1,24 @@
+# The shared part of the cbioportal-go PR previews (the gc CronJob); the
+# per-PR chart is rendered by cbioportal-go-preview-set.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioportal-go-preview
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+    path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-go-preview
+    targetRevision: HEAD
+    directory:
+      recurse: true
+      exclude: 'chart/*'
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  revisionHistoryLimit: 3

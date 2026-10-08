@@ -1,0 +1,45 @@
+# One cbioportal-go-pr-<N> Application per open cBioPortal/cbioportal-go pull
+# request labelled `preview`: pr-<N>.gopreview.cbioportal.org, rendered from
+# apps/cbioportal-go-preview/chart. Removing the label or closing the PR
+# deletes the Application, its resources and (PostDelete hook) its databases.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cbioportal-go-preview-set
+  namespace: argocd
+spec:
+  generators:
+    - pullRequest:
+        github:
+          owner: cBioPortal
+          repo: cbioportal-go
+          labels:
+            - preview
+          # cbioportal-go is private: the GitHub App (repo-creds Secret in
+          # the argocd namespace) lists its pull requests.
+          appSecretName: cbioportal-go-preview-github-app
+        requeueAfterSeconds: 120
+  template:
+    metadata:
+      name: 'cbioportal-go-pr-{{number}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      destination:
+        namespace: default
+        server: 'https://kubernetes.default.svc'
+      project: default
+      source:
+        repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+        path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-go-preview/chart
+        targetRevision: HEAD
+        helm:
+          parameters:
+            - name: prNumber
+              value: '{{number}}'
+            - name: headSha
+              value: '{{head_sha}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
