@@ -25,3 +25,18 @@ spec:
     amount: 3
     sourceCriterion:
       requestHeaderName: Cf-Connecting-Ip
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: inflight-heavy-total
+  namespace: default
+spec:
+  # Caps the total number of concurrent non-browser bulk-data requests (all
+  # clients together, keyed on host) so several sequential heavy users can't
+  # saturate the 2-pod public API pool at once. Each router using this gets
+  # its own counter. Tune as needed.
+  inFlightReq:
+    amount: 6
+    sourceCriterion:
+      requestHost: true

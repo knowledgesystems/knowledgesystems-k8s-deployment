@@ -100,28 +100,33 @@ spec:
         - name: cbioportal-backend-public-blue
           port: 80
     # Non-browser bulk-data endpoints: cap concurrent requests per client IP
-    # (inflight-heavy) so parallel whole-study fetches can't OOM the API pool.
+    # (inflight-heavy) and in total (inflight-heavy-total) so whole-study
+    # fetches can't saturate the API pool.
     # Browser traffic matches the priority-100 route first and is not capped.
     # Cloudflare-proxied twin keys on CF-Connecting-IP (see the clinical-events
     # twins above).
     - match: >-
-        Host(`www.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|molecular-profiles/[^/]+/(molecular-data|mutations)(/fetch)?)$`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
+        Host(`www.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|structural-variant/fetch|molecular-profiles/[^/]+/(molecular-data|mutations|discrete-copy-number)(/fetch)?)$`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
       kind: Rule
       priority: 61
       middlewares:
         - name: inflight-heavy-cloudflare
           namespace: default
+        - name: inflight-heavy-total
+          namespace: default
       services:
         - name: cbioportal-api-mirror-blue
           kind: TraefikService
     - match: >-
-        Host(`www.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|molecular-profiles/[^/]+/(molecular-data|mutations)(/fetch)?)$`)
+        Host(`www.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|structural-variant/fetch|molecular-profiles/[^/]+/(molecular-data|mutations|discrete-copy-number)(/fetch)?)$`)
       kind: Rule
       priority: 60
       middlewares:
         - name: ipblock
           namespace: default
         - name: inflight-heavy
+          namespace: default
+        - name: inflight-heavy-total
           namespace: default
       services:
         - name: cbioportal-api-mirror-blue
