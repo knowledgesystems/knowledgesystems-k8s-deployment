@@ -4,6 +4,10 @@ metadata:
   name: cbiolab
   labels:
     app: cbiolab
+  annotations:
+    # The daily clone cron flips clickhouse-mcp-active to the freshly built
+    # librechat buffer; roll alongside cbioagent-clickhouse-mcp.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
 spec:
   # 'use cache: remote' falls back to process memory off Vercel, so each replica keeps its own cache
   replicas: 1
@@ -26,6 +30,36 @@ spec:
             - secretRef:
                 name: cbiolab
           env:
+            # Same ClickHouse, user and buffer as cbioagent-clickhouse-mcp
+            - name: CLICKHOUSE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_HOST
+            - name: CLICKHOUSE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_PORT
+            - name: CLICKHOUSE_URL
+              value: "https://$(CLICKHOUSE_HOST):$(CLICKHOUSE_PORT)"
+            - name: CLICKHOUSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_USER
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_PASSWORD
+            - name: CLICKHOUSE_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: clickhouse-mcp-active
+                  key: CLICKHOUSE_DATABASE
+            - name: STUDY_ID
+              value: "mskimpact"
             - name: APP_BASE_URL
               value: "https://cbiolab.cbioportal.mskcc.org"
             - name: NODE_OPTIONS
