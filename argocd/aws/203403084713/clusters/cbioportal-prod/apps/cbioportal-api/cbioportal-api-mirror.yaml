@@ -25,7 +25,7 @@ spec:
     mirrors:
       - name: cbioportal-go-api
         port: 80
-        percent: 10
+        percent: 25
 ---
 apiVersion: traefik.io/v1alpha1
 kind: TraefikService
@@ -41,4 +41,4 @@ spec:
     mirrors:
       - name: cbioportal-go-api
         port: 80
-        percent: 10
+        percent: 25
