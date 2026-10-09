@@ -9,6 +9,56 @@ spec:
   entryPoints:
     - websecure
   routes:
+    # api.cbioportal.org over HTTPS. These routes live here, not in
+    # apps/cbioportal-api, because the color swap rewrites the services of
+    # every route in this file; the host's Ingress (cbioportal-api-ingress)
+    # stays as the swap script's configured target, keeps the certificate
+    # (api-cbio-cert) and serves plain HTTP. Their priorities (1000+) win
+    # over that Ingress's router.
+    # Requests are split between the Java API pool and cbioportal-go-api by
+    # cbioportal-api-canary-<color> (apps/cbioportal-api). The middlewares
+    # run before the split, so both backends get the same 403/429 behavior.
+    # api.cbioportal.org is not proxied by Cloudflare, so the limits key on
+    # the connection IP.
+    - match: Host(`api.cbioportal.org`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`)
+      kind: Rule
+      priority: 1020
+      middlewares:
+        - name: uablock-browser
+          namespace: default
+        - name: ipblock
+          namespace: default
+        - name: ratelimit-heavy
+          namespace: default
+      services:
+        - name: cbioportal-api-canary-blue
+          kind: TraefikService
+    - match: Host(`api.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|structural-variant/fetch|clinical-data/fetch|studies/[^/]+/clinical-data(/fetch)?|molecular-profiles/[^/]+/(molecular-data|mutations|discrete-copy-number)(/fetch)?)$`)
+      kind: Rule
+      priority: 1010
+      middlewares:
+        - name: uablock-browser
+          namespace: default
+        - name: ipblock
+          namespace: default
+        - name: inflight-heavy
+          namespace: default
+        - name: inflight-heavy-total
+          namespace: default
+      services:
+        - name: cbioportal-api-canary-blue
+          kind: TraefikService
+    - match: Host(`api.cbioportal.org`)
+      kind: Rule
+      priority: 1000
+      middlewares:
+        - name: uablock-browser
+          namespace: default
+        - name: ipblock
+          namespace: default
+      services:
+        - name: cbioportal-api-canary-blue
+          kind: TraefikService
     # Patient-page crawler fingerprint: forged Google referer with Sec-Fetch-Site "none"
     # (a real click-through sends "cross-site") and no cookies. Blocking the landing page
     # stops the frontend from loading and fanning out to the patient API calls.

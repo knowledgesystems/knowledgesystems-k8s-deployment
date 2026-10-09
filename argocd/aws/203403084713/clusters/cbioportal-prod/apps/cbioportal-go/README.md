@@ -21,7 +21,7 @@ cbioportal-go repo.
 |---|---|
 | `Deployment cbioportal-go` | 2 replicas of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`), stateless: sessions in the public session service, logins in the public session Redis. Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
-| `Deployment` / `Service cbioportal-go-api` | API-only, stateless, 2 replicas on the same databases; receives a mirrored share of www's non-browser API traffic. |
+| `Deployment` / `Service` / `HPA cbioportal-go-api` | API-only, stateless, 2-6 replicas (CPU HPA) on the same databases; serves a weighted share of api.cbioportal.org and receives a mirrored share of the Java API pool's traffic. |
 | `Deployment` / `Service cbioportal-go-www`, `TraefikService cbioportal-www-mirror-{green,blue}` | The same, for a mirrored share of www's browser API traffic. |
 | `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
@@ -104,6 +104,18 @@ discarded. The import pipeline's color swap renames `-green` <-> `-blue` in that
 route like the Java services, so it follows the API pool. To stop mirroring,
 point the route back at `cbioportal-backend-public-api-<color>`, then delete
 the mirror file.
+
+## api.cbioportal.org canary
+
+`apps/cbioportal-api/cbioportal-api-canary.yaml` defines one weighted Traefik
+service per color (`cbioportal-api-canary-green` / `-blue`): `java-share`% of
+api.cbioportal.org's HTTPS requests go to the Java pool through
+`cbioportal-api-mirror-<color>` (so only that share is mirrored), `go-share`%
+are served by `cbioportal-go-api`. The routes are the `Host(api.cbioportal.org)`
+ones in `apps/cbioportal/cbio-www-ingressroute.yml`, which the color swap
+rewrites; their middlewares (`uablock-browser`, `ipblock`, `ratelimit-heavy`,
+`inflight-heavy`, `inflight-heavy-total`) apply to both shares. Step or roll
+back (go-share 0) with the `sed` line in the canary file's header.
 
 ## Metrics and logs
 
