@@ -1,8 +1,9 @@
-# cbioportal-go serving the REST API only, for a share of api.cbioportal.org
-# traffic mirrored to it (apps/cbioportal-api/cbioportal-api-mirror.yaml):
-# its responses are discarded, so this measures load, latency and errors on
-# real API traffic without affecting clients. Stateless (no session file), so
-# it scales out. Same databases as go.cbioportal.org.
+# cbioportal-go serving the REST API only. It serves a weighted share of
+# api.cbioportal.org to clients (apps/cbioportal-api/cbioportal-api-canary.yaml)
+# and also receives a mirrored share of the Java API pool's traffic
+# (apps/cbioportal-api/cbioportal-api-mirror.yaml), whose responses are
+# discarded. Stateless (no session file), so it scales out (HPA below). Same
+# databases as go.cbioportal.org.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +18,7 @@ metadata:
     keel.sh/trigger: poll
     keel.sh/match-tag: "true"
 spec:
-  replicas: 2
+  # Replica count is owned by the HorizontalPodAutoscaler below.
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -47,6 +48,10 @@ spec:
           command: ["/usr/local/bin/cbioportal-api"]
           args:
             - --portal-properties=/app/deploy/public-portal.properties
+            # Served on api.cbioportal.org: robots.txt and sitemaps as on www
+            # (the properties file disallows crawling for preview sites).
+            - --robots.disallow_all=false
+            - --sitemaps=true
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -65,10 +70,10 @@ spec:
             # Tags this deployment's queries in ClickHouse's system.query_log.
             - name: CLICKHOUSE_LOG_COMMENT
               value: cbioportal-go-api
-            # Go's soft heap limit, about 80% of the 2Gi memory limit, so the
+            # Go's soft heap limit, about 80% of the 3Gi memory limit, so the
             # garbage collector works harder before the container is OOM-killed.
             - name: GOMEMLIMIT
-              value: "1600MiB"
+              value: "2400MiB"
           envFrom:
             - secretRef:
                 name: clickhouse-go-portal
@@ -96,7 +101,8 @@ spec:
               memory: 512Mi
             limits:
               cpu: "2"
-              memory: 2Gi
+              # Whole-study bulk responses peak at ~1.5Gi heap in one pod.
+              memory: 3Gi
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -140,3 +146,26 @@ spec:
   selector:
     matchLabels:
       run: cbioportal-go-api
+---
+# Scales on CPU (500m request): idle pods use ~20m, whole-study bulk requests
+# burst to 0.5-2 cores per pod. With minReplicas 2 the PDB (minAvailable 1)
+# keeps one pod serving through spot-node drains.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cbioportal-go-api
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cbioportal-go-api
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

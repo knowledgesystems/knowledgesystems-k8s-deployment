@@ -1,0 +1,50 @@
+# Canary of cbioportal-go (apps/cbioportal-go, Deployment cbioportal-go-api)
+# on api.cbioportal.org: a weighted split of the host's requests between the
+# Java public API pool and the Go API, both serving real responses.
+#
+# The Java share goes through cbioportal-api-mirror-<color>
+# (cbioportal-api-mirror.yaml), so only that share is also mirrored to
+# cbioportal-go-api; requests Go already serves are never sent twice.
+#
+# One service per color, like the mirror: the api.cbioportal.org routes live
+# in cbio-www-ingressroute (apps/cbioportal), whose services the import
+# pipeline's color swap (cmo-pipelines transfer-deployment-color.sh) renames
+# -green <-> -blue. Keep the two weights identical in both documents.
+#
+# Weights are percentages (java-share + go-share = 100). Step both colors at
+# once from the repository root:
+#
+#   G=25; f=argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-api/cbioportal-api-canary.yaml
+#   sed -i -E "s/weight: [0-9]+ # go-share/weight: $G # go-share/; s/weight: [0-9]+ # java-share/weight: $((100-G)) # java-share/" $f
+#
+# G=0 is the rollback: Traefik drops a weight-0 service, so Java serves
+# everything (and the mirror keeps running).
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-api-canary-blue
+  namespace: default
+spec:
+  weighted:
+    services:
+      - name: cbioportal-api-mirror-blue
+        kind: TraefikService
+        weight: 95 # java-share
+      - name: cbioportal-go-api
+        port: 80
+        weight: 5 # go-share
+---
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-api-canary-green
+  namespace: default
+spec:
+  weighted:
+    services:
+      - name: cbioportal-api-mirror-green
+        kind: TraefikService
+        weight: 95 # java-share
+      - name: cbioportal-go-api
+        port: 80
+        weight: 5 # go-share
