@@ -73,7 +73,7 @@ clusterAgent:
   image:
     name: cluster-agent
     tag: 7.52.0
-  replicas: 1
+  replicas: 2
   confd:
     airflow.yaml: |-
       cluster_check: true
