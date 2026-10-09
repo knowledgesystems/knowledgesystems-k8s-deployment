@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.842406087006">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.844888608407">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.6.0">
@@ -38,12 +38,12 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../resources/css/retype.css?v=4.6.0.842406087006" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=4.6.0.844888608407" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=4.6.0.842406087006" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=4.6.0.844888608407" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=4.6.0.842406087006" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=4.6.0.842406087006" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=4.6.0.844888608407" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../resources/js/prism.js?v=4.6.0.844888608407" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -161,6 +161,67 @@
                 <!-- Page content  -->
 <h1 id="troubleshooting">Troubleshooting</h1>
 <p>This list is used to track issues and their remedies.</p>
+<h2 id="saml2aws-login-issues">saml2aws Login Issues</h2>
+<p>If you are unable to log in to AWS with saml2aws, set up your configuration manually using the steps below.</p>
+<ol>
+<li>Make sure you have <a href="https://github.com/Versent/saml2aws#install">saml2aws</a>, the <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI</a>, and <a href="https://kubernetes.io/docs/tasks/tools/#kubectl">kubectl</a> installed. If any are missing, install them from the linked pages, or on macOS:
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">brew install saml2aws awscli kubectl</code></pre>
+</doc-codeblock></div>
+</li>
+<li>Update <code translate="no" v-pre>~/.saml2aws</code> with an entry for each AWS account you need access to. Replace <code translate="no" v-pre>&lt;AWS_ACCOUNT_ID_*&gt;</code> with the account IDs and <code translate="no" v-pre>&lt;username&gt;</code> with your MSK username. Repeat the block for as many accounts as needed.
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-ini"><code v-pre class="language-ini">[&lt;AWS_ACCOUNT_ID_1&gt;]
+name                    = &lt;AWS_ACCOUNT_ID_1&gt;
+url                     = https://ssofed.mskcc.org
+username                = &lt;username&gt;
+provider                = Ping
+mfa                     = Auto
+skip_verify             = false
+timeout                 = 0
+aws_urn                 = urn:amazon:webservices
+aws_session_duration    = 3600
+aws_profile             = &lt;AWS_ACCOUNT_ID_1&gt;
+saml_cache              = false
+disable_remember_device = false
+disable_sessions        = false
+download_browser_driver = false
+headless                = false
+
+[&lt;AWS_ACCOUNT_ID_2&gt;]
+name                    = &lt;AWS_ACCOUNT_ID_2&gt;
+url                     = https://ssofed.mskcc.org
+username                = &lt;username&gt;
+provider                = Ping
+mfa                     = Auto
+skip_verify             = false
+timeout                 = 0
+aws_urn                 = urn:amazon:webservices
+aws_session_duration    = 3600
+aws_profile             = &lt;AWS_ACCOUNT_ID_2&gt;
+saml_cache              = false
+disable_remember_device = false
+disable_sessions        = false
+download_browser_driver = false
+headless                = false</code></pre>
+</doc-codeblock></div>
+</li>
+<li>Log in to the account:
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">saml2aws login --force -a &lt;AWS_ACCOUNT_ID&gt; --username=&lt;username&gt;</code></pre>
+</doc-codeblock></div>
+</li>
+<li>Set the AWS profile for your shell session:
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">export AWS_PROFILE=&lt;AWS_ACCOUNT_ID&gt;</code></pre>
+</doc-codeblock></div>
+</li>
+<li>Update your kubeconfig for the cluster you want to access:
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">aws eks update-kubeconfig --profile &lt;AWS_ACCOUNT_ID&gt; --region us-east-1 --name &lt;CLUSTER_NAME&gt;</code></pre>
+</doc-codeblock></div>
+</li>
+</ol>
 <h2 id="efs-mount-failed---missing-mount-targets-in-availability-zone">EFS Mount Failed - Missing Mount Targets in Availability Zone</h2>
 <p>When deploying applications that use EFS persistent volumes, you may encounter mount errors like:</p>
 <div id="efs-mount-failed---missing-mount-targets-in-availability-zone-code-1" class="codeblock-wrapper"><doc-codeblock>

@@ -3,7 +3,7 @@ The `iac` directory in the repo contains all Terraform configurations for managi
 
 ## Prerequisites
 1. **terrafrom**: Install the terraform CLI tool. The recommended way is to use [tfenv](https://github.com/tfutils/tfenv) to install and manage multiple versions of terraform as each cluster runs on a different version.
-2. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions.
+2. **saml2aws**: Before you can use terraform, you need to make sure you have setup saml2aws and you are logged in to the correct AWS account in your cli. For all of the following commands, terraform uses your awscli to connect to the aws account. Running these commands in the wrong account can lead to destructive actions. If you have trouble logging in, see [saml2aws Login Issues](../troubleshooting.md#saml2aws-login-issues).
 
 ## Terraform Registry Authentication
 The EKS cluster modules are hosted on the [Terraform Registry](https://app.terraform.io). You must authenticate with the registry before running `terraform get` or `terraform init` on modules that reference it.
