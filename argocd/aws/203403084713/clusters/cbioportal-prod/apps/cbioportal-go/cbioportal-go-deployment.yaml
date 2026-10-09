@@ -141,10 +141,6 @@ spec:
             # Tags this deployment's queries in ClickHouse's system.query_log.
             - name: CLICKHOUSE_LOG_COMMENT
               value: go.cbioportal.org
-            # Go's soft heap limit, about 80% of the 2Gi memory limit, so the
-            # garbage collector works harder before the container is OOM-killed.
-            - name: GOMEMLIMIT
-              value: "1600MiB"
           envFrom:
             - secretRef:
                 name: clickhouse-go-portal
