@@ -95,7 +95,7 @@ def portal_identity(path: Path) -> tuple[str, str, str, str]:
     expected_identity = {
         "--wsi.release-id": release_id,
         "--wsi.backend-git-sha": backend_image_match.group(1),
-        "--wsi.serving-contract-version": "wsi-serving-v5",
+        "--wsi.serving-contract-version": "wsi-serving-v6",
     }
     if any(
         runtime_identity.get(key) != expected
@@ -287,8 +287,20 @@ assert_docker_digest("cbioportal/cbioportal-tile-server", tile_match.group(2))
 tile_env = env_map(tile_container)
 if tile_env.get("WSI_RELEASE_ID") != blue[0]:
     raise AssertionError("tile-server runtime release identity differs")
-if tile_env.get("WSI_SERVING_CONTRACT_VERSION") != "wsi-serving-v5":
-    raise AssertionError("tile-server does not declare wsi-serving-v5")
+if tile_env.get("WSI_SERVING_CONTRACT_VERSION") != "wsi-serving-v6":
+    raise AssertionError("tile-server does not declare wsi-serving-v6")
+# wsi-serving-v6: the tile server opens sealed slide sources with this key and
+# fails closed without it; the value lives only in portal-configuration.
+seal_key_ref = next(
+    (
+        item.get("valueFrom", {}).get("secretKeyRef", {})
+        for item in tile_container.get("env", [])
+        if item.get("name") == "WSI_SOURCE_SEAL_KEY"
+    ),
+    {},
+)
+if seal_key_ref.get("name") != "cbioportal-wsi-source-seal" or seal_key_ref.get("key") != "WSI_SOURCE_SEAL_KEY":
+    raise AssertionError("tile-server must read WSI_SOURCE_SEAL_KEY from the cbioportal-wsi-source-seal secret")
 if not re.fullmatch(r"[0-9a-f]{40}", tile_env.get("IMAGE_GIT_SHA", "")):
     raise AssertionError("tile-server does not declare a full immutable git SHA")
 tile_cors_origins = comma_separated_values(tile_env.get("CORS_ORIGINS", ""))

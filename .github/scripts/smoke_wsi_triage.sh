@@ -10,8 +10,8 @@ ready_payload="$(curl --fail --silent --show-error "${base_url%/}/ready")"
 jq --exit-status \
   '.status == "ok"
    and .auth_required == true
-   and .auth_contract_version == 3
-   and .serving_contract_version == "wsi-serving-v5"' \
+   and .auth_contract_version == 4
+   and .serving_contract_version == "wsi-serving-v6"' \
   <<<"$ready_payload" >/dev/null || {
     echo "unexpected WSI readiness contract: $ready_payload" >&2
     exit 1
