@@ -19,6 +19,43 @@ spec:
       labels:
         app: cbiolab
     spec:
+      initContainers:
+        # db/migrations are idempotent and there is no runner, so apply them all on every start
+        - name: migrate
+          image: ghcr.io/cbioportal/cohort-lab:latest
+          imagePullPolicy: Always
+          command:
+            - node
+            - -e
+            - |
+              const fs = require("fs"), { Client } = require("pg");
+              const dir = "db/migrations";
+              (async () => {
+                for (let i = 0; ; i++) {
+                  const c = new Client({ connectionString: process.env.SUPABASE_DB_URL });
+                  try { await c.connect(); }
+                  catch (e) {
+                    if (i >= 30) throw e;
+                    console.log("waiting for postgres:", e.message);
+                    await new Promise((r) => setTimeout(r, 2000));
+                    continue;
+                  }
+                  for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".sql")).sort()) {
+                    console.log("applying", f);
+                    await c.query(fs.readFileSync(dir + "/" + f, "utf8"));
+                  }
+                  await c.end();
+                  return;
+                }
+              })().catch((e) => { console.error(e); process.exit(1); });
+          env:
+            - name: CBIOLAB_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbiolab-postgres
+                  key: POSTGRES_PASSWORD
+            - name: SUPABASE_DB_URL
+              value: "postgresql://cohort_lab_app:$(CBIOLAB_POSTGRES_PASSWORD)@cbiolab-postgres:5432/cohort_lab?sslmode=disable"
       containers:
         - name: cbiolab
           image: ghcr.io/cbioportal/cohort-lab:latest
@@ -30,6 +67,15 @@ spec:
             - secretRef:
                 name: cbiolab
           env:
+            # In-cluster store (postgres/); takes precedence over SUPABASE_DB_URL in the cbiolab secret.
+            # sslmode=disable because the in-cluster server has no TLS and lib/db.ts otherwise forces it.
+            - name: CBIOLAB_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbiolab-postgres
+                  key: POSTGRES_PASSWORD
+            - name: SUPABASE_DB_URL
+              value: "postgresql://cohort_lab_app:$(CBIOLAB_POSTGRES_PASSWORD)@cbiolab-postgres:5432/cohort_lab?sslmode=disable"
             # Same ClickHouse, user and buffer as cbioagent-clickhouse-mcp
             - name: CLICKHOUSE_HOST
               valueFrom:
