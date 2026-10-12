@@ -39,4 +39,4 @@ spec:
   tls:
     - hosts:
         - cost.cbioportal.org
-      secretName: k8s-cert
+      secretName: cost-cert
