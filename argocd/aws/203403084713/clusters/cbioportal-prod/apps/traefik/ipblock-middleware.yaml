@@ -23,3 +23,7 @@ spec:
         # luad/lusc TCGA PanCan and nsclc_tcga_broad_2016 (~7k req/hr,
         # 2026-10-05); OOM-restarted cbioportal-backend-public-api-green.
         - 34.93.139.167
+        # Trenton NJ hosting IP flooding /results, /cross_cancer.do and
+        # sitemap_study.xml with junk query params (~10k req/min, 2026-10-12);
+        # also blocked in the cbioportal.org Cloudflare WAF rule.
+        - 212.56.54.218
