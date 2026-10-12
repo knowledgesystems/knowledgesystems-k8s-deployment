@@ -31,7 +31,7 @@ spec:
             name: oncokb-core-log4j-properties
       containers:
         - name: oncokb-core-deploy-preview-1405
-          image: mskcc/oncokb:6.12.0-hotspot.2
+          image: mskcc/oncokb:6.12.0-hotspot.3
           imagePullPolicy: Always
           envFrom:
             - secretRef:
