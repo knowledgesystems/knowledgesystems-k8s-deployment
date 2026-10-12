@@ -49,35 +49,10 @@ spec:
           command: ["/usr/local/bin/cbioportal-api"]
           # www.cbioportal.org's portal settings (generated from its
           # /config_service; analytics and login left out), shipped in the image.
+          # Login, sessions and the frontend are set with go's settings in env.
           args:
             - --portal-properties=/app/deploy/public-portal.properties
-            # Optional Google and Microsoft sign-in as on www. ${...} placeholders are
-            # resolved by the API from the env vars below, so the secrets
-            # never appear in the process args.
-            - --authenticate=optional_oauth2
-            - --authorization=false
-            - --security.method_authorization_enabled=false
             - --always_show_study_group=PUBLIC
-            - --spring.security.oauth2.client.registration.google.clientId=${GOOGLE_PLUS_CONSUMER_KEY}
-            - --spring.security.oauth2.client.registration.google.clientSecret=${GOOGLE_PLUS_CONSUMER_SECRET}
-            - --spring.security.oauth2.client.provider.google.user-name-attribute=email
-            # Microsoft (work and personal accounts) through the common
-            # endpoint, with go's own app registration ("cBioPortal go"),
-            # whose redirect URI is
-            # https://go.cbioportal.org/login/oauth2/code/azure.
-            - --spring.security.oauth2.client.registration.azure.client-id=${MICROSOFT_CLIENT_ID}
-            - --spring.security.oauth2.client.registration.azure.client-secret=${MICROSOFT_CLIENT_SECRET}
-            - --spring.security.oauth2.client.registration.azure.scope=openid,profile,email
-            - --spring.security.oauth2.client.provider.azure.user-name-attribute=email
-            - --spring.security.oauth2.client.provider.azure.authorization-uri=https://login.microsoftonline.com/common/oauth2/v2.0/authorize
-            - --spring.security.oauth2.client.provider.azure.token-uri=https://login.microsoftonline.com/common/oauth2/v2.0/token
-            - --spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys
-            # Login sessions in the public portal's session Redis, so they
-            # survive restarts.
-            - --spring.session.store-type=redis
-            - --spring.data.redis.host=${REDIS_SESSION_HOST}
-            - --spring.data.redis.port=${REDIS_SESSION_PORT}
-            - --spring.data.redis.password=${REDIS_SESSION_PASSWORD}
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -93,6 +68,11 @@ spec:
               value: ":9090"
             - name: ACCESS_LOG
               value: "true"
+            # The released frontend, loaded by the browser from where www
+            # loads it, so frontend releases need no new go image. The
+            # image's own build (FRONTEND_DIR) is the fallback without it.
+            - name: CBIOPORTAL_FRONTEND_ASSETS_URL
+              value: https://frontend.cbioportal.org/
             - name: FRONTEND_DIR
               value: /app/frontend
             - name: SITE_BANNER
@@ -124,37 +104,50 @@ spec:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: ONCOKB_TOKEN
-            - name: GOOGLE_PLUS_CONSUMER_KEY
+            # Optional sign-in as on www: Google with the public portal's
+            # client, Microsoft (work and personal accounts) with go's own app
+            # registration ("cBioPortal Go", redirect URI
+            # https://go.cbioportal.org/login/oauth2/code/azure). Studies stay
+            # readable without signing in.
+            - name: CBIOPORTAL_LOGIN
+              value: optional
+            - name: CBIOPORTAL_STUDY_AUTHORIZATION
+              value: "false"
+            - name: CBIOPORTAL_LOGIN_GOOGLE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: GOOGLE_PLUS_CONSUMER_KEY
-            - name: GOOGLE_PLUS_CONSUMER_SECRET
+            - name: CBIOPORTAL_LOGIN_GOOGLE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: GOOGLE_PLUS_CONSUMER_SECRET
-            - name: MICROSOFT_CLIENT_ID
+            - name: CBIOPORTAL_LOGIN_MICROSOFT_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-go-microsoft
                   key: MICROSOFT_CLIENT_ID
-            - name: MICROSOFT_CLIENT_SECRET
+            - name: CBIOPORTAL_LOGIN_MICROSOFT_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-go-microsoft
                   key: MICROSOFT_CLIENT_SECRET
-            - name: REDIS_SESSION_HOST
+            # Login sessions in the public portal's session Redis, so they
+            # survive restarts.
+            - name: CBIOPORTAL_LOGIN_SESSION_STORE
+              value: redis
+            - name: CBIOPORTAL_REDIS_HOST
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: REDIS_SESSION_HOST
-            - name: REDIS_SESSION_PORT
+            - name: CBIOPORTAL_REDIS_PORT
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: REDIS_SESSION_PORT
-            - name: REDIS_SESSION_PASSWORD
+            - name: CBIOPORTAL_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-public-green
