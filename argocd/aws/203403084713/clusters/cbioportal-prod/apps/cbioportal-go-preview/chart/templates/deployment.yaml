@@ -132,7 +132,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: traefik
     kubernetes.io/tls-acme: "true"
-    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-ratelimit-host@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-ratelimit-host-direct@kubernetescrd
 spec:
   rules:
     - host: {{ include "preview.host" . }}

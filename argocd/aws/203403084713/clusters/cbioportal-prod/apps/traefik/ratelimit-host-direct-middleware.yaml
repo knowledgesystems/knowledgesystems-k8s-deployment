@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit-host-direct
+  namespace: default
+spec:
+  # Same limit as ratelimit-host, keyed on the connection IP, for hosts that are
+  # not proxied by Cloudflare (e.g. *.gopreview, which Cloudflare's universal
+  # certificate doesn't cover).
+  rateLimit:
+    average: 600 # ~600 requests / minute / client IP
+    period: 1m
+    burst: 100
