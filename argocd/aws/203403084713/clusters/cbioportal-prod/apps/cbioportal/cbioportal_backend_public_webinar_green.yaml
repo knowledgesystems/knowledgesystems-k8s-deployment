@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-webinar-green
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.1.2
+    tags.datadoghq.com/version: 7.1.3
   name: cbioportal-backend-public-webinar-green
 spec:
   progressDeadlineSeconds: 600
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-public-webinar-green
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.1.2
+        tags.datadoghq.com/version: 7.1.3
     spec:
       containers:
         - args:
@@ -277,7 +277,7 @@ spec:
             - secretRef:
                 name: cbioportal-public-green
           # Please change this in tandem with the public API backend image.
-          image: cbioportal/cbioportal:v7.1.2-web-shenandoah
+          image: cbioportal/cbioportal:v7.1.3-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
