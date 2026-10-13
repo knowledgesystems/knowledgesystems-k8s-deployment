@@ -196,8 +196,6 @@ spec:
         - --redis.clear_on_startup=true
         - --redis.ttl_mins=60
         # auth
-        # TLS terminates upstream; honor X-Forwarded-Proto so SAML ACS/redirect URLs are built as https
-        - --server.forward-headers-strategy=framework
         # - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.assertingparty.metadata-uri=/cbioportal/msk-beta-cbioportal-saml-idp-metadata.xml
         # - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.binding=POST
         # - --spring.security.saml2.relyingparty.registration.cbio-saml-idp.singlelogout.response-url=http://localhost:8080/logout/saml2/slo
@@ -285,7 +283,7 @@ spec:
         envFrom:
         - secretRef:
             name: cbioportal-msk-staging
-        image: cbioportal/cbioportal-dev:3fdb3a7b07371c7f5cc87fd38639f9eddb19232c-web-shenandoah
+        image: cbioportal/cbioportal-dev:e8d27ed51cc0e634c4efc9b22e1ae2f6b90b3cb7-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 20
