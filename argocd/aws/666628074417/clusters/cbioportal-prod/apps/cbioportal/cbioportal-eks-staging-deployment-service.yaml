@@ -283,7 +283,7 @@ spec:
         envFrom:
         - secretRef:
             name: cbioportal-msk-staging
-        image: cbioportal/cbioportal-dev:935fcd8fd9376648ef31b718ad473984cca13afc-web-shenandoah
+        image: cbioportal/cbioportal-dev:3fdb3a7b07371c7f5cc87fd38639f9eddb19232c-web-shenandoah
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 20
