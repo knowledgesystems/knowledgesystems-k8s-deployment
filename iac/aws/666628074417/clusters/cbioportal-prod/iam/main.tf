@@ -7,6 +7,8 @@ locals {
   # Cross-account (203403084713) Service Catalog bucket. Requires a matching
   # bucket policy in 203403084713 naming this role as principal.
   databricks_s3_mountpoint_bucket = "sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr"
+  import_studies_bucket = "cdsi-curation-unpublished"
+  testing_studies_bucket = "cdsi-testing"
 }
 
 data "aws_caller_identity" "current" {}
@@ -111,7 +113,9 @@ resource "aws_iam_policy" "userServicePolicyDatabricksS3Mountpoint" {
             "s3:ListBucket"
           ],
           "Resource" : [
-            "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}"
+            "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}",
+            "arn:aws:s3:::${local.import_studies_bucket}",
+            "arn:aws:s3:::${local.testing_studies_bucket}"
           ]
         },
         {
@@ -121,7 +125,9 @@ resource "aws_iam_policy" "userServicePolicyDatabricksS3Mountpoint" {
             "s3:GetObject"
           ],
           "Resource" : [
-            "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}/*"
+            "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}/*",
+            "arn:aws:s3:::${local.import_studies_bucket}/*",
+            "arn:aws:s3:::${local.testing_studies_bucket}/*"
           ]
         }
       ]
