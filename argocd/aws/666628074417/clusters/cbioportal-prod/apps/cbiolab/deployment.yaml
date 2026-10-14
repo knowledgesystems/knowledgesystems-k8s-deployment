@@ -116,7 +116,7 @@ spec:
             - name: CHAT_ON_DEPLOYMENT
               value: "1"
             - name: CHAT_MODEL
-              value: "us.anthropic.claude-opus-5-5"
+              value: "us.anthropic.claude-sonnet-5"
             - name: AWS_REGION
               value: "us-east-1"
             # Bedrock creds written by the aws-credentials-refresher cron (cbioagent)
