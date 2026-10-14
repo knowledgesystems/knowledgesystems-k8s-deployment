@@ -110,6 +110,24 @@ spec:
               value: "https://cbiolab.cbioportal.aws.mskcc.org"
             - name: NODE_OPTIONS
               value: "--max-old-space-size=1536"
+            # Assistant sidebar on Bedrock; the credentials chain re-reads the file on every request
+            - name: CHAT_PROVIDER
+              value: "bedrock"
+            - name: CHAT_ON_DEPLOYMENT
+              value: "1"
+            - name: CHAT_MODEL
+              value: "us.anthropic.claude-opus-5-5"
+            - name: AWS_REGION
+              value: "us-east-1"
+            # Bedrock creds written by the aws-credentials-refresher cron (cbioagent)
+            - name: AWS_SHARED_CREDENTIALS_FILE
+              value: /aws/credentials
+            - name: AWS_PROFILE
+              value: default
+          volumeMounts:
+            - name: aws-creds
+              mountPath: /aws
+              readOnly: true
           resources:
             requests:
               cpu: "500m"
@@ -129,5 +147,9 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
             failureThreshold: 5
+      volumes:
+        - name: aws-creds
+          persistentVolumeClaim:
+            claimName: aws-credentials-pvc
       imagePullSecrets:
         - name: ghcr-creds
