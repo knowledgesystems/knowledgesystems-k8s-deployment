@@ -223,6 +223,9 @@ spec:
             - --wsi.access-token-audience=cbioportal-wsi
             - --wsi.access-token-ttl-seconds=300
             - --wsi.local-auth-bypass=false
+            - --wsi.tile_server.url=https://beta.cbioportal.mskcc.org/wsi
+            # Pre-rename name, read by backend images built before
+            # cBioPortal/cbioportal#12378 e9367b4fe3; drop with the next WSI release.
             - --msk.wsi.tile_server.url=https://beta.cbioportal.mskcc.org/wsi
             - --enable_study_tags=false
             - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
