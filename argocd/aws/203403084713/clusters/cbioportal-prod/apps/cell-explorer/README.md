@@ -64,10 +64,12 @@ Using `ADMIN_API_KEY`, create datasources/datasets via the admin API
 `is_public: true` so they serve without datasource credentials.
 
 ## Notes
-- Image tag is pinned (not `latest`). Bump it here to deploy a new version.
+- Image tag is pinned (not `latest`). To deploy a new version, bump it in **both**
+  `deployment.yaml` and `image-prepull.yaml`.
 - Spot nodegroup (2 nodes, single AZ): on a spot interruption the pod reschedules onto the
   other node and the EBS volume reattaches in the same AZ. Instance types are diversified
-  (`m7i`/`m6i`/`m5` large) so the ASG can find spot capacity.
+  (`m7i`/`m6i`/`m5` large) so the ASG can find spot capacity. The `image-prepull`
+  DaemonSet keeps the image cached on both nodes so the failover skips the image pull.
 - `Recreate` deploy strategy: the RWO EBS volume can't be shared across pods, so the
   old pod stops before the new one starts. Brief downtime on each deploy is expected.
 - Keycloak realm session timeouts gate re-login; keep the cookie max-ages in the
