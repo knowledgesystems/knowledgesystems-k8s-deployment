@@ -1,0 +1,43 @@
+# Keeps the app image cached on every cell-explorer node so a spot failover
+# doesn't wait ~2.5min for a GHCR pull: an idle container from the same image
+# runs on each node, and kubelet won't garbage-collect an image in use.
+# Keep the image identical to deployment.yaml — bump both together.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cell-explorer-image-prepull
+  namespace: cell-explorer
+  labels:
+    app: cell-explorer-image-prepull
+spec:
+  selector:
+    matchLabels:
+      app: cell-explorer-image-prepull
+  template:
+    metadata:
+      labels:
+        app: cell-explorer-image-prepull
+    spec:
+      nodeSelector:
+        workload: cell-explorer
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cell-explorer"
+          effect: "NoSchedule"
+      automountServiceAccountToken: false
+      # sleep ignores SIGTERM as PID 1; don't wait the default 30s on delete.
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: hold
+          image: ghcr.io/cbioportal/cell-explorer-py:sha-f1625db@sha256:e35120ef366d3a8380a637603504b3ecb3f7ca02d75d16a0d0358017588094b9
+          imagePullPolicy: IfNotPresent
+          # Override the app CMD (migrations + uvicorn): never touch the SQLite volume.
+          command: ["sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+            limits:
+              cpu: 10m
+              memory: 16Mi
