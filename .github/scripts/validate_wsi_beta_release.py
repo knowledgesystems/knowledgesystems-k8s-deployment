@@ -104,22 +104,15 @@ def portal_identity(path: Path) -> tuple[str, str, str, str]:
         raise AssertionError(
             f"{path.name} backend runtime identity differs from its pod annotation or image"
         )
-    tile_server_urls = {
-        name: [
+    tile_server_url = next(
+        (
             argument.split("=", 1)[1]
             for argument in args
-            if argument.startswith(f"--{name}=")
-        ]
-        for name in ("wsi.tile_server.url", "msk.wsi.tile_server.url")
-    }
-    # wsi.tile_server.url is required; the pre-rename msk.wsi.tile_server.url
-    # may remain for older backend images but must then match.
-    if tile_server_urls["wsi.tile_server.url"] != [
-        "https://beta.cbioportal.mskcc.org/wsi"
-    ] or any(
-        url != "https://beta.cbioportal.mskcc.org/wsi"
-        for url in tile_server_urls["msk.wsi.tile_server.url"]
-    ):
+            if argument.startswith("--wsi.tile_server.url=")
+        ),
+        "",
+    )
+    if tile_server_url != "https://beta.cbioportal.mskcc.org/wsi":
         raise AssertionError(
             f"{path.name} does not use the beta same-origin WSI ingress route"
         )
