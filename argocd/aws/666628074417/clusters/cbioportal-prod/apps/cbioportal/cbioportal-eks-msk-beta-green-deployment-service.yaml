@@ -27,8 +27,8 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-v6-20261015-1"
-        wsi.cbioportal.org/frontend-git-sha: "7a9b5a13f0317d0b7c4e78732fdb01b9835a603c"
+        wsi.cbioportal.org/release-id: "beta-wsi-v6-20261015-2"
+        wsi.cbioportal.org/frontend-git-sha: "0a3aba0b7dbce196414d9fe4aa279e20908fa5d1"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-green
@@ -85,9 +85,9 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://6ad128191af51b2bef4b9935--cbioportalfrontend.netlify.app/
-            - --wsi.release-id=beta-wsi-v6-20261015-1
-            - --wsi.backend-git-sha=632b77e6ba06277d353d882d8bec184958fd1379
+            - --frontend.url=https://6ad185830b34e304d6569563--cbioportalfrontend.netlify.app/
+            - --wsi.release-id=beta-wsi-v6-20261015-2
+            - --wsi.backend-git-sha=620568047f3073e294b4a70db6a0d26641228f3a
             - --wsi.serving-contract-version=wsi-serving-v6
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -118,7 +118,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ad128191af51b2bef4b9935--cbioportalfrontend.netlify.app
+            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ad185830b34e304d6569563--cbioportalfrontend.netlify.app
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
@@ -222,7 +222,7 @@ spec:
             - --wsi.access-token-audience=cbioportal-wsi
             - --wsi.access-token-ttl-seconds=300
             - --wsi.local-auth-bypass=false
-            - --msk.wsi.tile_server.url=https://beta.cbioportal.mskcc.org/wsi
+            - --wsi.tile_server.url=https://beta.cbioportal.mskcc.org/wsi
             - --enable_study_tags=false
             - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
             - --patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID
@@ -270,7 +270,7 @@ spec:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-green
-          image: cbioportal/cbioportal-dev:632b77e6ba06277d353d882d8bec184958fd1379-web-shenandoah@sha256:6d6cef8dc7b44eddb803f49b5303f746f68aacf0e0bc6026b14df5b73ebc43e5
+          image: cbioportal/cbioportal-dev:620568047f3073e294b4a70db6a0d26641228f3a-web-shenandoah@sha256:d57414acea0618fccf6fea7e111c1b52468b80572826f74a29064ed173261d40
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
