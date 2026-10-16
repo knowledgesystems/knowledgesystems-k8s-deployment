@@ -119,6 +119,7 @@ spec:
             - --authenticate=saml_plus_basic
             - --authorization=false
             - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ad147045b36f8a8cf34896e--cbioportalfrontend.netlify.app
+            - --security.cors.allow-credentials=true
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
