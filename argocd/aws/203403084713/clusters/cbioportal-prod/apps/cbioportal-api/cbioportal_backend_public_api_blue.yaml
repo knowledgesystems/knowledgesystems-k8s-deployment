@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-public-api-blue
     tags.datadoghq.com/env: eks-public-api
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.1.3
+    tags.datadoghq.com/version: 7.2.0
   name: cbioportal-backend-public-api-blue
 spec:
   progressDeadlineSeconds: 600
@@ -28,7 +28,7 @@ spec:
         run: cbioportal-backend-public-api-blue
         tags.datadoghq.com/env: eks-public-api
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.1.3
+        tags.datadoghq.com/version: 7.2.0
     spec:
       containers:
         - args:
@@ -73,7 +73,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            - --frontend.url=https://deploy-preview-5629.preview.cbioportal.org/
             - --enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -268,7 +268,7 @@ spec:
             - name: DD_SERVICE
               value: "cbioportal"
             - name: DD_VERSION
-              value: "7.0.6"
+              value: "7.2.0"
             # 1. Ensure collection is explicitly enabled
             - name: DD_TRACE_CLIENT_IP_ENABLED
               value: "true"
@@ -284,7 +284,7 @@ spec:
             - secretRef:
                 name: cbioportal-public-blue
           # Please change this in tandem with the website backend image.
-          image: cbioportal/cbioportal:v7.1.3-web-shenandoah
+          image: cbioportal/cbioportal:v7.2.0-web-shenandoah
           imagePullPolicy: Always
           # Liveness checks only that the JVM answers (/ renders without the
           # database), so a ClickHouse outage does not restart every pod;
