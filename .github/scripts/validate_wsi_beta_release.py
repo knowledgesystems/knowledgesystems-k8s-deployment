@@ -108,7 +108,7 @@ def portal_identity(path: Path) -> tuple[str, str, str, str]:
         (
             argument.split("=", 1)[1]
             for argument in args
-            if argument.startswith("--msk.wsi.tile_server.url=")
+            if argument.startswith("--wsi.tile_server.url=")
         ),
         "",
     )
