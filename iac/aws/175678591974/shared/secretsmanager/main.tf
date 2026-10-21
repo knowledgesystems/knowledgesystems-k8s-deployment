@@ -15,6 +15,23 @@ resource "aws_secretsmanager_secret_version" "oncokb-public-db-pw" {
   secret_string = random_password.oncokb-public-db-pw[0].result
 }
 
+resource "random_password" "oncokb-postgres-test-pw" {
+  count            = 1
+  length           = 16
+  special          = true
+  override_special = "!#$%^&*()-_=+[]{}<>:?"
+}
+
+resource "aws_secretsmanager_secret" "user-oncokb-postgres-test-pw" {
+  name        = "user-oncokb-postgres-test-pw"
+  description = "RDS master password for oncokb-postgres-test"
+}
+
+resource "aws_secretsmanager_secret_version" "oncokb-postgres-test-pw" {
+  secret_id     = aws_secretsmanager_secret.user-oncokb-postgres-test-pw.id
+  secret_string = random_password.oncokb-postgres-test-pw[0].result
+}
+
 # SAML login (saml2aws) creds for ACGC's Bedrock-account (490004633549)
 # credential refresher — see argocd/aws/175678591974/clusters/oncokb-research/
 # apps/agentic-cancer-gene-classification/oncokb_acgc_aws_creds_refresher.yaml.
