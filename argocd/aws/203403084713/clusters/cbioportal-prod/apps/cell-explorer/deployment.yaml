@@ -38,7 +38,8 @@ spec:
           effect: "NoSchedule"
       # Prefer one pod per node. Soft, so while a node drains (still a cordoned
       # node in the cluster) the evicted pod can double up on the other one
-      # instead of sitting Pending.
+      # instead of sitting Pending. matchLabelKeys counts only pods of the same
+      # rollout; otherwise the outgoing pods push every new pod onto one node.
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -46,6 +47,8 @@ spec:
           labelSelector:
             matchLabels:
               app: cell-explorer
+          matchLabelKeys:
+            - pod-template-hash
       containers:
         - name: cell-explorer
           image: ghcr.io/cbioportal/cell-explorer-py:sha-a35b938@sha256:13674b9c2edd2c62a271965e73fd75ecd3ffb3ad434767be25ca2cfdddfa25ee
