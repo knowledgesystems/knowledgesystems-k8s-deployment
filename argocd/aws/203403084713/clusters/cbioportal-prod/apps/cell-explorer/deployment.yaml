@@ -14,9 +14,13 @@ metadata:
     # wrong order leave both merged and neither in effect.
     configmap.reloader.stakater.com/reload: "cell-explorer-config"
 spec:
-  replicas: 1
+  # One replica per spot node, so a reclaim or restart leaves one serving.
+  replicas: 2
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: cell-explorer
@@ -32,6 +36,16 @@ spec:
           operator: "Equal"
           value: "cell-explorer"
           effect: "NoSchedule"
+      # Prefer one pod per node. Soft, so while a node drains (still a cordoned
+      # node in the cluster) the evicted pod can double up on the other one
+      # instead of sitting Pending.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: cell-explorer
       containers:
         - name: cell-explorer
           image: ghcr.io/cbioportal/cell-explorer-py:sha-a35b938@sha256:13674b9c2edd2c62a271965e73fd75ecd3ffb3ad434767be25ca2cfdddfa25ee
@@ -44,8 +58,6 @@ spec:
             - secretRef:
                 name: cell-explorer-secrets
           volumeMounts:
-            - name: data
-              mountPath: /app/data
             # AWS credentials for Bedrock (account 490004633549); the container
             # runs as root, so HOME=/root and the SDK reads /root/.aws/credentials.
             - name: aws-creds
@@ -81,9 +93,6 @@ spec:
               cpu: "2"
               memory: "4Gi"
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: cell-explorer-data
         - name: aws-creds
           secret:
             secretName: k8s-aws-creds-manager

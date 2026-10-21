@@ -1,3 +1,5 @@
+# Not mounted by any pod; holds the retired SQLite catalog. Kept in git so ArgoCD doesn't
+# list it for pruning: the reclaim policy is Delete, so pruning deletes the EBS volume.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

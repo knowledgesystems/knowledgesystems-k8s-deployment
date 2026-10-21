@@ -1,0 +1,11 @@
+# Keep one pod serving while a node is drained (spot interruption, node upgrade).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cell-explorer
+  namespace: cell-explorer
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cell-explorer
