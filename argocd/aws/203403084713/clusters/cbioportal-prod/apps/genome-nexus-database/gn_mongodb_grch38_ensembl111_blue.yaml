@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gn-mongo-grch38-ensembl111-blue
+  namespace: genome-nexus
+  labels:
+    app: gn-mongo-grch38-ensembl111-blue
+spec:
+  serviceName: gn-mongo-grch38-ensembl111-blue
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gn-mongo-grch38-ensembl111-blue
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: gn-mongo-grch38-ensembl111-blue
+    spec:
+      containers:
+        - name: mongodb
+          image: genomenexus/gn-mongo:1.6-grch38-ensembl111
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 27017
+              name: mongodb
+              protocol: TCP
+          env:
+            - name: COLLECTION_UPDATE_LIST
+              value: "ensembl.biomart_transcripts,ensembl.canonical_transcript_per_hgnc,oncokb.gene,version"
+            - name: MONGO_DB
+              value: "annotator"
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+              subPath: data/db
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gn-mongodb-grch38-ensembl111-pvc
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: gn-db-lg
+          effect: NoSchedule
+      nodeSelector:
+        workload: gn-db-lg
+        topology.kubernetes.io/zone: us-east-1b # This should match the availability zone of the underlying volumes created in terraform
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gn-mongo-grch38-ensembl111-blue
+  namespace: genome-nexus
+  labels:
+    app: gn-mongo-grch38-ensembl111-blue
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+      protocol: TCP
+      name: mongodb
+  selector:
+    app: gn-mongo-grch38-ensembl111-blue
