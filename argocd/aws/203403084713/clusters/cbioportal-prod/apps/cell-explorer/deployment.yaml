@@ -34,7 +34,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: cell-explorer
-          image: ghcr.io/cbioportal/cell-explorer-py:sha-f87fb88@sha256:c39c29af7d56433598d18cbae107f2e69bb74ca22042a73e0d78e2542a1c405c
+          image: ghcr.io/cbioportal/cell-explorer-py:sha-a35b938@sha256:13674b9c2edd2c62a271965e73fd75ecd3ffb3ad434767be25ca2cfdddfa25ee
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
