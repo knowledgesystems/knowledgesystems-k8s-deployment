@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: oncokb-public
-          image: mskcc/oncokb-public:6.32.3
+          image: mskcc/oncokb-public:6.33.0-beta.0
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
@@ -96,6 +96,8 @@ spec:
               value: "1s"
             - name: APPLICATION_SENDGRID_ENABLED
               value: "true"
+            - name: APPLICATION_SENDGRID_MAXRECIPIENTSPERREQUEST
+              value: "500"
             - name: APPLICATION_SENDGRID_APIKEY
               value: "${SENDGRID_APIKEY}"
             - name: APPLICATION_SENDGRID_BASEURL
