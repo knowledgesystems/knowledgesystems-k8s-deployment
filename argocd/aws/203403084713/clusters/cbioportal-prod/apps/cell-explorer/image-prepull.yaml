@@ -30,7 +30,7 @@ spec:
       terminationGracePeriodSeconds: 1
       containers:
         - name: hold
-          image: ghcr.io/cbioportal/cell-explorer-py:sha-a35b938@sha256:13674b9c2edd2c62a271965e73fd75ecd3ffb3ad434767be25ca2cfdddfa25ee
+          image: ghcr.io/cbioportal/cell-explorer-py:sha-606be20@sha256:b148b724e677b8d926442c4077f2630d31e48ef2895cff218d1417cbb769b70e
           imagePullPolicy: IfNotPresent
           # Override the app CMD (migrations + uvicorn): never touch the SQLite volume.
           command: ["sleep", "infinity"]
