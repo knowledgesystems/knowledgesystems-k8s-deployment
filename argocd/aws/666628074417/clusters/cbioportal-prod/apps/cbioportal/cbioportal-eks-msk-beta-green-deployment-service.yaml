@@ -27,7 +27,7 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-v6-20261022-1"
+        wsi.cbioportal.org/release-id: "beta-wsi-v6-20261024-1"
         wsi.cbioportal.org/frontend-git-sha: "f26f4e888747b6b3451ae85470120b87d28fcad5"
       labels:
         admission.datadoghq.com/enabled: "true"
@@ -86,7 +86,7 @@ spec:
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
             - --frontend.url=https://6ada43302bdc8d8f12c9443f--cbioportalfrontend.netlify.app/
-            - --wsi.release-id=beta-wsi-v6-20261022-1
+            - --wsi.release-id=beta-wsi-v6-20261024-1
             - --wsi.backend-git-sha=0020ec34b88b52408cec6ac79b788b580c7b94b6
             - --wsi.serving-contract-version=wsi-serving-v6
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
