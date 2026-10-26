@@ -51,7 +51,7 @@ spec:
             - pod-template-hash
       containers:
         - name: cell-explorer
-          image: ghcr.io/cbioportal/cell-explorer-py:sha-2f8673b@sha256:79c616f94c5df73366e64fffd67dcccf1d06b31ec22af5088f99ee877ffe021e
+          image: ghcr.io/cbioportal/cell-explorer-py:sha-0e3d2ec@sha256:64cd7c5f7982686985f4bb09c6781d4bc6f0740bd407ef6fd1e3207e66fd81d7
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
