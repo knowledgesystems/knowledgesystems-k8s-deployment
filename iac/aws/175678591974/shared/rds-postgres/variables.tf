@@ -54,7 +54,7 @@ variable "DB_ENGINE" {
 variable "DB_ENGINE_VERSION" {
   description = "Postgres major version; RDS picks the default minor"
   type        = string
-  default     = "17"
+  default     = "18"
 }
 
 variable "DB_INSTANCE_CLASS" {

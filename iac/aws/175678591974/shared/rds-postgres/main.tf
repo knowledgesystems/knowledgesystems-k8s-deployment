@@ -74,7 +74,10 @@ resource "aws_db_instance" "oncokb_postgres_db" {
   username             = var.MASTER_USERNAME
   password             = data.aws_secretsmanager_secret_version.rds_master_password.secret_string
   port                 = 5432
-  parameter_group_name = "default.postgres17"
+  parameter_group_name = "default.postgres${var.DB_ENGINE_VERSION}"
+
+  allow_major_version_upgrade = true
+  apply_immediately           = true
 
   multi_az            = false
   publicly_accessible = var.PUBLICLY_ACCESSIBLE
