@@ -65,6 +65,8 @@ spec:
               value: "INFO"
             - name: ANNOTATE_MAX_INPUTS
               value: "250"
+            - name: AUTH_SESSION_TTL_SECONDS
+              value: "2592000"
             # OPENEVIDENCE_API_KEY comes from the acgc Secret via envFrom.
             - name: OPENEVIDENCE_ENABLED
               value: "true"
