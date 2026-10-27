@@ -63,6 +63,8 @@ spec:
               value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             - name: LOG_LEVEL
               value: "INFO"
+            - name: ANNOTATE_MAX_INPUTS
+              value: "250"
             # OPENEVIDENCE_API_KEY comes from the acgc Secret via envFrom.
             - name: OPENEVIDENCE_ENABLED
               value: "true"
