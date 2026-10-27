@@ -8,6 +8,24 @@ spec:
     prefixes:
       - /navigator
 ---
+# 302 to the MCP setup docs. Applied to:
+#   - the bare-hostname root landing (mcp-cbioportal-root-redirect-ingress)
+#   - browser GETs to /db/mcp and /db-mcp-apps/mcp (via the
+#     mcp-cbioportal-browser-redirect-route IngressRoute below)
+# so a human who lands on the endpoint URL sees setup instructions
+# instead of a raw 401 JSON body. Non-permanent (302) so we can move
+# the docs URL later without stale-cache pain.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-mcp-docs
+  namespace: default
+spec:
+  redirectRegex:
+    regex: ^.*$
+    replacement: https://docs.cbioportal.org/ai-integrations/mcp/
+    permanent: false
+---
 # Rate-limit the public database MCP path. Unlike /navigator (which only
 # mints URLs), /db lets clients run arbitrary SELECTs against ClickHouse —
 # cap per-IP throughput so a single client (or scraper) can't DOS the
@@ -188,3 +206,91 @@ spec:
     - hosts:
         - mcp.cbioportal.org
       secretName: mcp-cbio-cert
+---
+# / on mcp.cbioportal.org — bare-hostname visits get 302'd to the MCP
+# setup docs instead of the current hard 404. `pathType: Exact` scopes
+# this to just `/`; the /db, /db-mcp-apps, /navigator, and OAuth-plane
+# paths remain served by their own Ingresses above. Backend is a
+# placeholder — the redirect middleware short-circuits the request.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-cbioportal-root-redirect-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-to-mcp-docs@kubernetescrd
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  rules:
+    - host: mcp.cbioportal.org
+      http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: cbioagent-clickhouse-mcp-auth
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - mcp.cbioportal.org
+      secretName: mcp-cbio-cert
+---
+# Browser GETs to /db/mcp and /db-mcp-apps/mcp → 302 to docs. Uses a
+# Traefik IngressRoute (not a plain Ingress) because we need to match
+# on Method + User-Agent regex simultaneously, which the standard
+# Ingress spec doesn't express. Higher `priority` than any standard
+# Ingress rule so this route wins for matching requests.
+#
+# Detection: `HeaderRegexp("User-Agent", "Mozilla")` catches every
+# real browser (Chrome, Firefox, Safari, Edge — they all send
+# "Mozilla/5.0 (...)"). MCP clients don't: Anthropic/ClaudeAI,
+# Anthropic/Toolbox, github-copilot-developer, python-httpx, curl,
+# WhatsApp scraper, etc. all send non-Mozilla UAs and pass through
+# to the normal MCP path. `!HeaderRegexp("User-Agent", "(?i)(headless|kprofile-pipeline)")`
+# mirrors the sibling cbioportal-www-ingressroute pattern, excluding
+# our own headless testing traffic.
+#
+# GET-only: MCP Streamable HTTP uses GET for the SSE upgrade
+# (`Accept: text/event-stream`) — but MCP clients still send
+# non-Mozilla UAs there, so the UA check is sufficient to avoid
+# breaking SSE. POSTs (MCP RPC) are never intercepted.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: mcp-cbioportal-browser-redirect-route
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: cbioagent
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: >-
+        Host(`mcp.cbioportal.org`) && PathPrefix(`/db/mcp`) && Method(`GET`) &&
+        HeaderRegexp(`User-Agent`, `Mozilla`) &&
+        !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
+      kind: Rule
+      priority: 100
+      middlewares:
+        - name: redirect-to-mcp-docs
+          namespace: default
+      services:
+        - name: cbioagent-clickhouse-mcp-auth
+          port: 80
+    - match: >-
+        Host(`mcp.cbioportal.org`) && PathPrefix(`/db-mcp-apps/mcp`) && Method(`GET`) &&
+        HeaderRegexp(`User-Agent`, `Mozilla`) &&
+        !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
+      kind: Rule
+      priority: 100
+      middlewares:
+        - name: redirect-to-mcp-docs
+          namespace: default
+      services:
+        - name: cbioagent-clickhouse-mcp-apps
+          port: 80
+  tls:
+    secretName: mcp-cbio-cert
