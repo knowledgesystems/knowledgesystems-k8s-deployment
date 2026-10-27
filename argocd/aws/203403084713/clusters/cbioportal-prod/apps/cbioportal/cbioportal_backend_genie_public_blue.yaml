@@ -97,8 +97,6 @@ spec:
             - --spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)
             - --spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)
             - --spring.security.oauth2.client.provider.google.user-name-attribute=email
-            # show the login page instead of redirecting to Google, which signs the user straight back in after logout
-            - --security.force_redirect_on_one_idp=false
             - --security.cors.allowed-origins=*
             - --tomcat.catalina.scope=runtime
             - --authorization=true
