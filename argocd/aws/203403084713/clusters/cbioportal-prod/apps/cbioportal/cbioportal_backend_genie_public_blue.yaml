@@ -97,6 +97,8 @@ spec:
             - --spring.security.oauth2.client.registration.google.clientId=$(GOOGLE_PLUS_CONSUMER_KEY)
             - --spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)
             - --spring.security.oauth2.client.provider.google.user-name-attribute=email
+            # show the login page instead of redirecting to Google, which signs the user straight back in after logout
+            - --security.force_redirect_on_one_idp=false
             - --security.cors.allowed-origins=*
             - --tomcat.catalina.scope=runtime
             - --authorization=true
@@ -213,7 +215,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-genie-public-blue
-          image: cbioportal/cbioportal-dev:f11a37b7aa3492abfe9a0166688c4efb4362c192-web-shenandoah
+          image: cbioportal/cbioportal:v7.2.0-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
