@@ -28,8 +28,8 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-v6-20261024-1"
-        wsi.cbioportal.org/frontend-git-sha: "f26f4e888747b6b3451ae85470120b87d28fcad5"
+        wsi.cbioportal.org/release-id: "beta-wsi-v7-20261028-1"
+        wsi.cbioportal.org/frontend-git-sha: "fcf12f761df1700e4ac186e5eba7a60dc4b9cc0b"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-blue
@@ -86,9 +86,9 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://6ada43302bdc8d8f12c9443f--cbioportalfrontend.netlify.app/
-            - --wsi.release-id=beta-wsi-v6-20261024-1
-            - --wsi.backend-git-sha=0020ec34b88b52408cec6ac79b788b580c7b94b6
+            - --frontend.url=https://6ae21924d0c86e6973c7975a--cbioportalfrontend.netlify.app/
+            - --wsi.release-id=beta-wsi-v7-20261028-1
+            - --wsi.backend-git-sha=a01b98d2a66dbb5eda6e9ec60ec265781b04701a
             - --wsi.serving-contract-version=wsi-serving-v6
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -119,7 +119,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ada43302bdc8d8f12c9443f--cbioportalfrontend.netlify.app
+            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ae21924d0c86e6973c7975a--cbioportalfrontend.netlify.app
             - --security.cors.allow-credentials=true
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
@@ -274,7 +274,7 @@ spec:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal-dev:0020ec34b88b52408cec6ac79b788b580c7b94b6-web-shenandoah@sha256:2060bc77156cb62df3ac1b6602ce4b3368bd331d2119fba6fefc823b8193df30
+          image: cbioportal/cbioportal-dev:a01b98d2a66dbb5eda6e9ec60ec265781b04701a-web-shenandoah@sha256:30b06c88c1ea57192715a626825461c4ede88b22cda78b3fe9a85a81b06adcfd
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
