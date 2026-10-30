@@ -6,7 +6,7 @@ metadata:
   labels:
     run: gn-vep-111-grch38
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       run: gn-vep-111-grch38
@@ -68,9 +68,6 @@ spec:
         - containerPort: 8080
           protocol: TCP
         resources:
-          requests:
-            memory: 6Gi
-            cpu: 1500m
           limits:
             memory: 6.5Gi # bursts to ~5.5G under load; -Xmx4g leaves ~2.5G for JVM non-heap
       nodeSelector:
