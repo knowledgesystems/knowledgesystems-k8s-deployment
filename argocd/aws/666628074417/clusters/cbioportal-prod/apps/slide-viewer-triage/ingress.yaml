@@ -16,12 +16,29 @@ metadata:
     # users behind one NAT address. The tile server still bounds expensive
     # image work independently with MAX_IMAGE_OPERATIONS.
     nginx.ingress.kubernetes.io/limit-connections: "300"
+    # Every pixel request is authorized by cBioPortal: the auth subrequest
+    # asks the portal for the request's study with the browser's session
+    # cookie. 2xx passes; the portal's 401 (no or expired session) or 403
+    # refuses. $wsi_study comes from the controller's http-snippet map on
+    # $request_uri (ingress/values.yaml), because $arg_studyId is empty inside
+    # the auth subrequest; a missing or invalid studyId becomes "!", which the
+    # portal refuses. The tile server itself never answers 401/403.
+    # This must follow the active beta color: it names the same Service as
+    # the beta.cbioportal.mskcc.org rule in cbioportal/eks-msk-ingress.yaml.
+    nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-beta-green.default.svc.cluster.local/api/studies/$wsi_study"
+    nginx.ingress.kubernetes.io/auth-method: GET
+    # Cache only successes, per session and study, so panning does not send
+    # one portal request per tile. A logout or study-access change can take
+    # up to the cache duration to apply to pixels.
+    nginx.ingress.kubernetes.io/auth-cache-key: "$cookie_SESSION$wsi_study"
+    nginx.ingress.kubernetes.io/auth-cache-duration: "200 60s"
+    # The query carries the slide's sealed source (enc); keep it out of logs.
+    nginx.ingress.kubernetes.io/enable-access-log: "false"
     # Keep a slide's cold-open cache and SlideCache affinity on one pod. The
-    # bearer capability is the only per-slide request input (it rotates with
-    # its TTL, so affinity holds for one token lifetime).
-    nginx.ingress.kubernetes.io/upstream-hash-by: "$http_authorization"
+    # slide's serving key is the stable per-slide request input.
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_key"
     # The browser uses a same-origin /wsi route while the FastAPI application
-    # owns root-level /tiles, /thumbnails, /health, and /ready paths.
+    # owns root-level /tiles and /thumbnails paths.
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
@@ -32,7 +49,32 @@ spec:
         paths:
           # Keep the allowlist explicit: do not expose metrics, OpenAPI, or
           # any future application route through the public ingress.
-          - path: /wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?|health|ready)$
+          - path: /wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: slide-viewer-triage-wsi-probes
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    # Unauthenticated health and readiness for the post-deploy smoke; they
+    # carry no slide data.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: beta.cbioportal.mskcc.org
+      http:
+        paths:
+          - path: /wsi(/|$)(health|ready)$
             pathType: ImplementationSpecific
             backend:
               service:

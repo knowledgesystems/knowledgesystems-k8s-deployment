@@ -1,8 +1,17 @@
 # Slide viewer tile-server operations
 
 The tile server is a source-bound pixel service. cBioPortal remains the owner
-of WSI hierarchy and slide-access metadata; the tile server receives an exact
-source URL and short-lived capability from the backend.
+of WSI hierarchy and slide-access metadata. The browser requests
+`/wsi/tiles/zxy/{z}/{x}/{y}` and `/wsi/thumbnails` same-origin with
+`studyId`, the slide's serving `key`, and its sealed source `enc`; only the
+tile server can open `enc`. There is no bearer token: the ingress authorizes
+each pixel request with an auth subrequest to cBioPortal's
+`GET /api/studies/{studyId}` carrying the browser's `SESSION` cookie (2xx
+passes, 401/403 refuse). The study comes from a `$request_uri` map in the
+controller `http-snippet` (`ingress/values.yaml`), because `$arg_studyId` is
+empty inside the auth subrequest. The auth URL names the beta portal Service
+and must follow the active beta color. The tile server's own refusals are 404
+or 400, never 401/403.
 
 ## Development capacity controls
 
@@ -23,7 +32,7 @@ source URL and short-lived capability from the backend.
   one replica and two Gunicorn workers provide four bounded image operation
   slots across beta.
 - `CACHE_MISS_RATE_LIMIT_PER_MINUTE` is a shared Redis sliding-window limit
-  for extraction leaders per capability subject and source. Redis cache hits
+  for extraction leaders per client address and slide key. Redis cache hits
   are not application-rate-limited.
 - Redis locks coalesce identical cache misses across workers and replicas.
 - Cold-read guardrails use a renewable 120-second distributed lock lease, a
@@ -33,8 +42,10 @@ source URL and short-lived capability from the backend.
   image-operation, or open-slide concurrency.
 - Ingress retains a 100 requests/second limit, burst multiplier 5, and a
   300-connection limit per client (six browser connections for 50 users behind
-  one NAT address). Requests carrying `X-WSI-Source` are hashed
-  to keep a slide's cold-open cache on one pod.
+  one NAT address). Requests are hashed by the slide's `key` query parameter
+  to keep a slide's cold-open cache on one pod. Successful portal auth
+  responses are cached for 60 seconds per session and study, and the pixel
+  route's access log is off because its query carries the sealed source.
 
 The Redis instance used by `REDIS_URL` must have bounded memory, an LRU/LFU
 eviction policy, and alerts for evictions, memory pressure, and unavailable
@@ -50,8 +61,9 @@ Do not broaden the policy to `0.0.0.0/0` as a substitute for that inventory.
 ## Monitoring
 
 Datadog scrapes `/metrics` through the pod IP using OpenMetrics. The public
-ingress intentionally routes only `/wsi/tiles`, `/wsi/thumbnails`,
-`/wsi/health`, and `/wsi/ready`; `/metrics` is not externally exposed. The
+ingress intentionally routes only `/wsi/tiles` and `/wsi/thumbnails` (portal
+auth) and `/wsi/health` and `/wsi/ready` (a separate probe ingress without
+auth); `/metrics` is not externally exposed. The
 network policy permits the monitoring namespace to scrape the metrics route.
 
 Alert on tile/thumbnail p95 and p99 latency, hierarchy/access latency from the

@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   annotations:
     argocd.argoproj.io/tracking-id: cbioportal:apps/Deployment:default/eks-msk-beta-green
-    # Keep both beta colors on the same WSI signing-key revision.
-    secret.reloader.stakater.com/reload: "cbioportal-wsi-auth"
   labels:
     run: eks-msk-beta-green
     tags.datadoghq.com/env: eks-msk-beta
@@ -27,8 +25,8 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-v7-20261028-1"
-        wsi.cbioportal.org/frontend-git-sha: "fcf12f761df1700e4ac186e5eba7a60dc4b9cc0b"
+        wsi.cbioportal.org/release-id: "beta-wsi-v8-20261030-1"
+        wsi.cbioportal.org/frontend-git-sha: "8798d8b317422136156441e6081554fd2dd180e3"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-green
@@ -85,9 +83,9 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://6ae21924d0c86e6973c7975a--cbioportalfrontend.netlify.app/
-            - --wsi.release-id=beta-wsi-v7-20261028-1
-            - --wsi.backend-git-sha=a01b98d2a66dbb5eda6e9ec60ec265781b04701a
+            - --frontend.url=https://6ae4d971b7b0d681b9e88a16--cbioportalfrontend.netlify.app/
+            - --wsi.release-id=beta-wsi-v8-20261030-1
+            - --wsi.backend-git-sha=c6277593e75d31989fb64ceaeec2e44161c3153a
             - --wsi.serving-contract-version=wsi-serving-v6
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -118,7 +116,7 @@ spec:
             - --dbconnector=dbcp
             - --authenticate=saml_plus_basic
             - --authorization=false
-            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ae21924d0c86e6973c7975a--cbioportalfrontend.netlify.app
+            - --security.cors.allowed-origins=https://beta.cbioportal.mskcc.org,https://keycloak.cbioportal.mskcc.org,https://6ae4d971b7b0d681b9e88a16--cbioportalfrontend.netlify.app
             - --security.cors.allow-credentials=true
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
@@ -219,10 +217,6 @@ spec:
             - --spring.profiles.active=clickhouse
             # compress on client side
             - --enable_request_body_gzip_compression=true
-            - --wsi.access-token-secret=$(WSI_AUTH_SECRET)
-            - --wsi.access-token-audience=cbioportal-wsi
-            - --wsi.access-token-ttl-seconds=300
-            - --wsi.local-auth-bypass=false
             - --wsi.tile_server.url=https://beta.cbioportal.mskcc.org/wsi
             - --enable_study_tags=false
             - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
@@ -261,17 +255,12 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
-            - name: WSI_AUTH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: cbioportal-wsi-auth
-                  key: WSI_AUTH_SECRET
           envFrom:
             - configMapRef:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-green
-          image: cbioportal/cbioportal-dev:a01b98d2a66dbb5eda6e9ec60ec265781b04701a-web-shenandoah@sha256:30b06c88c1ea57192715a626825461c4ede88b22cda78b3fe9a85a81b06adcfd
+          image: cbioportal/cbioportal-dev:c6277593e75d31989fb64ceaeec2e44161c3153a-web-shenandoah@sha256:PORTALDIGEST
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20

@@ -9,7 +9,7 @@ metadata:
     # Secret values supplied through envFrom/valueFrom are captured when a
     # pod starts. Reloader makes portal-configuration Secret changes replace
     # all beta tile-server pods automatically.
-    secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-auth,cbioportal-wsi-source-seal"
+    secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-source-seal"
     configmap.reloader.stakater.com/reload: "slide-viewer-triage-config,wsi-serving-policy"
 spec:
   # Beta accepts node/pod downtime. Keep one warm replica for the observed
@@ -31,7 +31,7 @@ spec:
       labels:
         app: slide-viewer-triage
       annotations:
-        wsi.cbioportal.org/release-id: "beta-wsi-v7-20261028-1"
+        wsi.cbioportal.org/release-id: "beta-wsi-v8-20261030-1"
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
         # Force a clean beta block cache after source-region tile failures.
         slide-viewer-cache-revision: "2026-08-31-native-overview-cache-recovery"
@@ -80,7 +80,7 @@ spec:
                 - ALL
           # Keep the channel tag for operator familiarity; the digest is the
           # immutable release identity validated by CI.
-          image: cbioportal/cbioportal-tile-server:beta-wsi-20261027-72019327e0@sha256:776a8d8a6f4f26c78a606016927627a4d7b01db25b8f76609148335809e0016b
+          image: cbioportal/cbioportal-tile-server:beta-wsi-20261030-ae936903e9@sha256:fca2e68300a516c495be27dbdefb4a17b6d700120e35ad69df6fbe9d5b04e1f0
           imagePullPolicy: Always
           resources:
             requests:
@@ -109,11 +109,11 @@ spec:
             - name: MAX_IMAGE_OPERATIONS
               value: "4"
             - name: CORS_ORIGINS
-              value: "https://beta.cbioportal.mskcc.org,https://6ae21924d0c86e6973c7975a--cbioportalfrontend.netlify.app"
+              value: "https://beta.cbioportal.mskcc.org,https://6ae4d971b7b0d681b9e88a16--cbioportalfrontend.netlify.app"
             - name: WSI_RELEASE_ID
-              value: "beta-wsi-v7-20261028-1"
+              value: "beta-wsi-v8-20261030-1"
             - name: IMAGE_GIT_SHA
-              value: "72019327e0e945b26030c2c4c66c336c15a366c9"
+              value: "ae936903e954ad51aaf789933c906ee2d41780be"
             - name: WSI_SERVING_CONTRACT_VERSION
               value: "wsi-serving-v6"
             - name: AWS_ACCESS_KEY_ID
@@ -131,17 +131,6 @@ spec:
                 secretKeyRef:
                   name: slide-viewer-secrets
                   key: REDIS_URL
-            - name: WSI_AUTH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: cbioportal-wsi-auth
-                  key: WSI_AUTH_SECRET
-            - name: WSI_AUTH_PREVIOUS_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: cbioportal-wsi-auth
-                  key: WSI_AUTH_PREVIOUS_SECRET
-                  optional: true
             # wsi-serving-v6: opens the sealed slide sources the pathology
             # pipeline writes; the same key is the Databricks secret
             # pdm-wsi/wsi_source_seal_key. Required: the tile fails closed without it.
