@@ -8,10 +8,15 @@ on:
         required: true
         default: https://beta.cbioportal.mskcc.org/wsi
         type: string
-      origin:
-        description: Browser origin used for the CORS preflight
-        required: true
-        default: https://beta.cbioportal.mskcc.org
+      release_id:
+        description: Expected WSI release ID reported by /ready (empty skips)
+        required: false
+        default: beta-wsi-v8-20261030-1
+        type: string
+      tile_git_sha:
+        description: Expected tile-server image Git SHA reported by /ready (empty skips)
+        required: false
+        default: ae936903e954ad51aaf789933c906ee2d41780be
         type: string
 
 permissions:
@@ -25,5 +30,9 @@ jobs:
       - name: Run WSI routing smoke
         env:
           CBIOPORTAL_WSI_URL: ${{ inputs.url }}
-          CBIOPORTAL_WSI_ORIGIN: ${{ inputs.origin }}
+          EXPECTED_WSI_RELEASE_ID: ${{ inputs.release_id }}
+          EXPECTED_WSI_TILE_GIT_SHA: ${{ inputs.tile_git_sha }}
+          # Optional beta portal session (cookie SESSION) for the authorized
+          # checks; kept as a secret, never a workflow input. Unset skips them.
+          WSI_SESSION_COOKIE: ${{ secrets.WSI_SESSION_COOKIE }}
         run: bash .github/scripts/smoke_wsi_triage.sh
