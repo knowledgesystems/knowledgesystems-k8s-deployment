@@ -1,0 +1,96 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: gn-vep-111-grch38
+  namespace: genome-nexus
+  labels:
+    run: gn-vep-111-grch38
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: gn-vep-111-grch38
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1   # node group is fixed at 3; rollout needs to free a slot
+  template:
+    metadata:
+      labels:
+        run: gn-vep-111-grch38
+    spec: 
+      containers:
+      - name: gn-vep-111-grch38
+        image: genomenexus/gn-vep:111-grch38-3.1.1-extended
+        imagePullPolicy: Always
+        command: ["java"]
+        args: ["-Xmx4g", "-jar", "vep_wrapper.war", "--spring.profiles.active=prod"]
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-grch38-rds-user
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-grch38-rds-user
+              key: MYSQL_PORT
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-grch38-rds-user
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: genome-nexus-vep-111-grch38-rds-user
+              key: MYSQL_PASSWORD
+        - name: MODE
+          value: Database
+        readinessProbe:
+          httpGet:
+            path: /vep/human/hgvs/ENST00000275493.7:c.2369C>T
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 180
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /vep/human/hgvs/ENST00000275493.7:c.2369C>T
+            port: 8080
+          initialDelaySeconds: 240
+          timeoutSeconds: 120
+          periodSeconds: 60
+          failureThreshold: 5
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          requests:
+            memory: 6Gi
+            cpu: 1500m
+          limits:
+            memory: 6.5Gi # bursts to ~5.5G under load; -Xmx4g leaves ~2.5G for JVM non-heap
+      nodeSelector:
+        workload: "gn-vep"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "gn-vep"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: gn-vep-111-grch38
+  name: gn-vep-111-grch38
+  namespace: genome-nexus
+spec:
+  ports:
+    - port: 8080
+  selector:
+    run: gn-vep-111-grch38
+  type: ClusterIP
