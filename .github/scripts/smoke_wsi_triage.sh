@@ -2,15 +2,16 @@
 set -euo pipefail
 
 base_url="${CBIOPORTAL_WSI_URL:-https://beta.cbioportal.mskcc.org/wsi}"
-origin="${CBIOPORTAL_WSI_ORIGIN:-https://beta.cbioportal.mskcc.org}"
 source_url="s3://example.invalid/slide.svs"
-tile_path="${base_url%/}/tiles/zxy/0/0/0"
+# A well-formed request for a slide that does not exist: the ingress decides
+# 401 vs pass from the session alone, and the tile server cannot open `enc`.
+tile_url="${base_url%/}/tiles/zxy/0/0/0?studyId=mskimpact&key=000000000000&enc=AAAA"
 
 ready_payload="$(curl --fail --silent --show-error "${base_url%/}/ready")"
 jq --exit-status \
   '.status == "ok"
-   and .auth_required == true
-   and .auth_contract_version == 4
+   and .auth_required == false
+   and .auth_contract_version == 5
    and .serving_contract_version == "wsi-serving-v6"' \
   <<<"$ready_payload" >/dev/null || {
     echo "unexpected WSI readiness contract: $ready_payload" >&2
@@ -33,39 +34,32 @@ if [[ -n "${EXPECTED_WSI_TILE_GIT_SHA:-}" ]]; then
     }
 fi
 
+# Without a portal session the ingress auth subrequest refuses the request.
 status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-  "$tile_path")"
+  "$tile_url")"
 test "$status" = 401 || {
   echo "expected anonymous tile request to return 401, got $status" >&2
   exit 1
 }
 
-curl --silent --show-error --include --request OPTIONS \
-  --header "Origin: $origin" \
-  --header 'Access-Control-Request-Method: GET' \
-  --header 'Access-Control-Request-Headers: authorization' \
-  "$tile_path" \
-  | grep -i "^access-control-allow-origin: $origin" >/dev/null || {
-    echo "CORS preflight did not allow $origin" >&2
+if [[ -n "${WSI_SESSION_COOKIE:-}" ]]; then
+  # The session passes the ingress; the tile server refuses an `enc` that
+  # does not open under `key` with 404 (it never answers 401/403).
+  status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    --cookie "SESSION=${WSI_SESSION_COOKIE}" \
+    "$tile_url")"
+  test "$status" = 404 || {
+    echo "expected an authorized request for an unknown slide to return 404, got $status" >&2
     exit 1
   }
 
-if [[ -n "${WSI_BEARER_TOKEN:-}" ]]; then
+  # The sealed `enc` carries the slide source; a browser-supplied one is refused.
   status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --header "Authorization: Bearer ${WSI_BEARER_TOKEN}" \
-    "$tile_path")"
-  test "$status" != 401 || {
-    echo "provided WSI_BEARER_TOKEN was rejected" >&2
-    exit 1
-  }
-
-  # The capability carries the slide source; a browser-supplied one is refused.
-  status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --header "Authorization: Bearer ${WSI_BEARER_TOKEN}" \
-    --header "X-WSI-Source: $source_url" \
-    "$tile_path")"
+    --cookie "SESSION=${WSI_SESSION_COOKIE}" \
+    --get --data-urlencode "source=$source_url" \
+    "$tile_url")"
   test "$status" = 400 || {
-    echo "expected a client-supplied X-WSI-Source to return 400, got $status" >&2
+    echo "expected a client-supplied source to return 400, got $status" >&2
     exit 1
   }
 fi
