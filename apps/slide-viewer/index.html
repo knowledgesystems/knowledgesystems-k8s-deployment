@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.844888608407">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.846739629641">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.6.0">
@@ -13,7 +13,7 @@
     <!-- Primary Meta Tags -->
     <title>Slide viewer tile-server operations | CDSI K8s Documentation</title>
     <meta name="title" content="Slide viewer tile-server operations | CDSI K8s Documentation">
-    <meta name="description" content="The tile server is a source-bound pixel service. cBioPortal remains the owner of WSI hierarchy and slide-access metadata; the tile server receives an exact source URL and short-lived capability from the backend.">
+    <meta name="description" content="The tile server is a source-bound pixel service. cBioPortal remains the owner of WSI hierarchy and slide-access metadata. The browser requests">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/slide-viewer/">
@@ -23,7 +23,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/slide-viewer/">
     <meta property="og:title" content="Slide viewer tile-server operations | CDSI K8s Documentation">
-    <meta property="og:description" content="The tile server is a source-bound pixel service. cBioPortal remains the owner of WSI hierarchy and slide-access metadata; the tile server receives an exact source URL and short-lived capability from the backend.">
+    <meta property="og:description" content="The tile server is a source-bound pixel service. cBioPortal remains the owner of WSI hierarchy and slide-access metadata. The browser requests">
     <meta property="og:site_name" content="CDSI K8s">
     <meta property="og:locale" content="en_US">
 
@@ -31,18 +31,18 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/slide-viewer/">
     <meta name="twitter:title" content="Slide viewer tile-server operations | CDSI K8s Documentation">
-    <meta name="twitter:description" content="The tile server is a source-bound pixel service. cBioPortal remains the owner of WSI hierarchy and slide-access metadata; the tile server receives an exact source URL and short-lived capability from the backend.">
+    <meta name="twitter:description" content="The tile server is a source-bound pixel service. cBioPortal remains the owner of WSI hierarchy and slide-access metadata. The browser requests">
 
     <!-- Alternate Markdown -->
     <link rel="alternate" type="text/markdown" href="https://knowledgesystems.github.io/knowledgesystems-k8s-deployment/apps/slide-viewer.md">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=4.6.0.844888608407" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=4.6.0.846739629641" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.844888608407" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.846739629641" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.844888608407" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.846739629641" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -160,8 +160,17 @@
                 <!-- Page content  -->
 <h1 id="slide-viewer-tile-server-operations">Slide viewer tile-server operations</h1>
 <p>The tile server is a source-bound pixel service. cBioPortal remains the owner
-of WSI hierarchy and slide-access metadata; the tile server receives an exact
-source URL and short-lived capability from the backend.</p>
+of WSI hierarchy and slide-access metadata. The browser requests
+<code translate="no" v-pre>/wsi/tiles/zxy/{z}/{x}/{y}</code> and <code translate="no" v-pre>/wsi/thumbnails</code> same-origin with
+<code translate="no" v-pre>studyId</code>, the slide&#x27;s serving <code translate="no" v-pre>key</code>, and its sealed source <code translate="no" v-pre>enc</code>; only the
+tile server can open <code translate="no" v-pre>enc</code>. There is no bearer token: the ingress authorizes
+each pixel request with an auth subrequest to cBioPortal&#x27;s
+<code translate="no" v-pre>GET /api/studies/{studyId}</code> carrying the browser&#x27;s <code translate="no" v-pre>SESSION</code> cookie (2xx
+passes, 401/403 refuse). The study comes from a <code translate="no" v-pre>$request_uri</code> map in the
+controller <code translate="no" v-pre>http-snippet</code> (<code translate="no" v-pre>ingress/values.yaml</code>), because <code translate="no" v-pre>$arg_studyId</code> is
+empty inside the auth subrequest. The auth URL names the beta portal Service
+and must follow the active beta color. The tile server&#x27;s own refusals are 404
+or 400, never 401/403.</p>
 <h2 id="development-capacity-controls">Development capacity controls</h2>
 <ul>
 <li>
@@ -192,7 +201,7 @@ slots across beta.</p>
 </li>
 <li>
 <p><code translate="no" v-pre>CACHE_MISS_RATE_LIMIT_PER_MINUTE</code> is a shared Redis sliding-window limit
-for extraction leaders per capability subject and source. Redis cache hits
+for extraction leaders per client address and slide key. Redis cache hits
 are not application-rate-limited.</p>
 </li>
 <li>
@@ -208,8 +217,10 @@ image-operation, or open-slide concurrency.</p>
 <li>
 <p>Ingress retains a 100 requests/second limit, burst multiplier 5, and a
 300-connection limit per client (six browser connections for 50 users behind
-one NAT address). Requests carrying <code translate="no" v-pre>X-WSI-Source</code> are hashed
-to keep a slide&#x27;s cold-open cache on one pod.</p>
+one NAT address). Requests are hashed by the slide&#x27;s <code translate="no" v-pre>key</code> query parameter
+to keep a slide&#x27;s cold-open cache on one pod. Successful portal auth
+responses are cached for 60 seconds per session and study, and the pixel
+route&#x27;s access log is off because its query carries the sealed source.</p>
 </li>
 </ul>
 <p>The Redis instance used by <code translate="no" v-pre>REDIS_URL</code> must have bounded memory, an LRU/LFU
@@ -223,8 +234,9 @@ default-deny egress with only DNS, Redis port 6379, and ECS port 9020 allowed.
 Do not broaden the policy to <code translate="no" v-pre>0.0.0.0/0</code> as a substitute for that inventory.</p>
 <h2 id="monitoring">Monitoring</h2>
 <p>Datadog scrapes <code translate="no" v-pre>/metrics</code> through the pod IP using OpenMetrics. The public
-ingress intentionally routes only <code translate="no" v-pre>/wsi/tiles</code>, <code translate="no" v-pre>/wsi/thumbnails</code>,
-<code translate="no" v-pre>/wsi/health</code>, and <code translate="no" v-pre>/wsi/ready</code>; <code translate="no" v-pre>/metrics</code> is not externally exposed. The
+ingress intentionally routes only <code translate="no" v-pre>/wsi/tiles</code> and <code translate="no" v-pre>/wsi/thumbnails</code> (portal
+auth) and <code translate="no" v-pre>/wsi/health</code> and <code translate="no" v-pre>/wsi/ready</code> (a separate probe ingress without
+auth); <code translate="no" v-pre>/metrics</code> is not externally exposed. The
 network policy permits the monitoring namespace to scrape the metrics route.</p>
 <p>Alert on tile/thumbnail p95 and p99 latency, hierarchy/access latency from the
 backend, cache hit rate, distributed lock outcomes, Redis errors, image queue
