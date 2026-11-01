@@ -1,0 +1,123 @@
+# Pass A of the Ensembl 111 GRCh38 vep.annotation backfill: offline cache mode,
+# ~99.6% of keys. Delete the Job to re-run; completed shards are skipped.
+#
+# One VEP process per core, one shard per pod -- NOT one forked process per pod.
+# Measured on 4 cores with contiguous input: 4 x --fork=1 gives 428 var/s where
+# 1 x --fork=4 gives 257. --fork scales badly (4 forks return 1.49x), so
+# parallelism belongs at the pod level, with cpu: 1 letting the scheduler pack
+# one pod per core.
+#
+# Shards come from the prep Job already converted, globally sorted and
+# coordinate-contiguous. That ordering is worth ~2.2x (257 vs 116 var/s at
+# --fork=4) because VEP's cache is stored per chromosome in position-ordered
+# blocks, and VEP rejects unsorted input outright (exit 25).
+#
+# completions must equal prep's shard count, which it writes to
+# /work/.shard_count. 547 assumes N = 136.73M at 250k per shard.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gn-vep-111-grch38-backfill-pass-a
+  namespace: genome-nexus
+  labels:
+    run: gn-vep-111-grch38-backfill-pass-a
+spec:
+  completionMode: Indexed
+  # One completion per shard. Set from the prep Job's actual shard count.
+  completions: 547
+  # 12 = 3 cbio-dev nodes x 4 cores. Raise if the pool grows.
+  parallelism: 12
+  # cbio-dev is SPOT and rotates hourly. A shard is ~39 min, so an eviction
+  # costs at most that; the budget must absorb many of them over ~1.2 days.
+  backoffLimit: 200
+  template:
+    metadata:
+      labels:
+        run: gn-vep-111-grch38-backfill-pass-a
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: worker
+          # Backfill image: gn-vep extended + python3 + jq + mongodb-database-tools
+          # + hgvsg2ensembl.py. python3 is NOT in the gn-vep image.
+
+          image: genomenexus/gn-vep-backfill:111-grch38-1
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              W=/work
+              CD=/cache-data
+              DEST=$CD/homo_sapiens/111_GRCh38
+              I=$(printf "%05d" "${JOB_COMPLETION_INDEX}")
+              S="$W/ens.$I"
+
+              if [ -f "$W/doneA.$I" ]; then echo "shard $I already done"; exit 0; fi
+              test -s "$S" || { echo "FAIL: $S missing -- run the prep Job first"; exit 1; }
+
+              # Shards arrive from prep already converted to Ensembl default
+              # format, globally sorted and coordinate-contiguous. Nothing to do
+              # here but annotate.
+              set -o pipefail
+              # No --format: VEPController sets format=Optional.empty() in cache
+              # mode and lets VEP auto-detect. --format=ensembl is what breaks.
+              /opt/vep/src/ensembl-vep/vep \
+                --cache --dir_cache=$CD --offline \
+                --fasta="$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz" --lookup_ref \
+                --everything --hgvsg --no_stats --xref_refseq --json --shift_hgvs=1 \
+                --fork=1 \
+                --plugin=PolyPhen_SIFT,db=/plugin-data/homo_sapiens_pangenome_PolyPhen_SIFT_20240502.db \
+                --plugin=AlphaMissense,file=/plugin-data/AlphaMissense_hg38.tsv.gz \
+                --dir_plugins=/plugin-data \
+                --input_file="$S" --output_file=STDOUT \
+                --warning_file="$W/err.$I.log" \
+                | sed -e 's/sift_pred/sift_prediction/g' \
+                      -e 's/polyphen_humvar_pred/polyphen_prediction/g' \
+                      -e 's/polyphen_humvar_score/polyphen_score/g' \
+                | jq -c '._id = .id
+                         | ((.allele_string // "") | split("/")) as $a
+                         | if ($a | length) == 2 and $a[0] == $a[1]
+                           then . + {_ref_eq_alt: true} else . end' \
+                | mongoimport --uri "$MONGODB_URI" --collection 'vep.annotation' \
+                    --mode upsert --upsertFields _id --numInsertionWorkers 2
+
+              # Straggler accounting: VEP exits 0 with failed variants simply
+              # absent from stdout, so record submitted versus skipped.
+              { echo "submitted $(wc -l < "$S")"
+                echo "vep-skipped $(grep -c skipped "$W/err.$I.log" 2>/dev/null || echo 0)"
+              } > "$W/doneA.$I"
+              cat "$W/doneA.$I"
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://gn-mongo-grch38-ensembl111-blue:27017/annotator"
+          resources:
+            requests:
+              # cpu: 1 so the scheduler packs one pod per core, which is the
+              # configuration that measured 428 var/s across 4 cores.
+              cpu: "1"
+              memory: 3Gi
+            limits:
+              memory: 8Gi
+          volumeMounts:
+            - name: cache
+              mountPath: /cache-data
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-cache-efs
+        - name: work
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-work-efs
+      # No zone pin: both volumes are EFS, which is multi-AZ. Not gn-db-lg --
+      # those nodes run the production mongos at 69-74% memory with no requests
+      # declared, so the scheduler cannot see how full they are.
+      nodeSelector:
+        workload: "cbio-dev"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
