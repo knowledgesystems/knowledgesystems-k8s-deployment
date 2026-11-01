@@ -1,5 +1,5 @@
-# Builds the VEP 111 GRCh38 offline cache onto gn-vep-111-grch38-backfill-pvc,
-# then self-tests it. One-shot; delete the Job to re-run it.
+# Builds the VEP 111 GRCh38 offline cache onto gn-vep-111-grch38-cache-efs, then
+# self-tests it. Delete the Job to re-run; it resumes rather than restarting.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,17 +8,15 @@ metadata:
   labels:
     run: gn-vep-111-grch38-cache-loader
 spec:
-  backoffLimit: 2
+  # cbio-dev is SPOT and rotates every 1-3h. Every step below is resumable, so
+  # an eviction costs seconds -- but the Job needs enough retries to absorb them.
+  backoffLimit: 20
   template:
     metadata:
       labels:
         run: gn-vep-111-grch38-cache-loader
     spec:
       restartPolicy: Never
-      # The image creates /cache-data as root then drops to USER vep (999), so
-      # without this a freshly provisioned PVC mounted there is not writable.
-      securityContext:
-        fsGroup: 999
       containers:
         - name: loader
           # Same image as gn-vep-111-grch38, so the cache is built by the VEP
@@ -29,45 +27,81 @@ spec:
           args:
             - |
               set -euo pipefail
-              echo "node=${NODE_NAME:-?} expected-zone=${EXPECTED_ZONE:-?}"
-              df -h /cache-data | tail -1
+              CD=/cache-data
+              DEST=$CD/homo_sapiens/111_GRCh38
+              CACHE_URL=https://ftp.ensembl.org/pub/release-111/variation/indexed_vep_cache
+              FASTA_URL=https://ftp.ensembl.org/pub/release-111/fasta/homo_sapiens/dna_index
+              TAR=homo_sapiens_vep_111_GRCh38.tar.gz
+              TARSZ=27090944656
+              FA=Homo_sapiens.GRCh38.dna.toplevel.fa.gz
 
-              if [ -f /cache-data/.cache_complete ]; then
-                echo "cache already present, skipping download"
+              echo "node=${NODE_NAME:-?}"
+              # EFS access points substitute their own POSIX uid/gid for the
+              # client's, so this should succeed despite the image running as 999.
+              mkdir -p "$CD/tmp" && touch "$CD/.probe" && rm -f "$CD/.probe"
+              echo "write probe OK as $(id -u):$(id -g)"
+              df -h "$CD" | tail -1
+
+              # --- resumable download. Ensembl serves Accept-Ranges: bytes, so
+              # -C - picks up from whatever is already on disk after an eviction.
+              if [ ! -f "$CD/.cache_extracted" ]; then
+                for i in $(seq 1 200); do
+                  HAVE=$( [ -f "$CD/tmp/$TAR" ] && stat -c %s "$CD/tmp/$TAR" || echo 0 )
+                  [ "$HAVE" -ge "$TARSZ" ] && break
+                  echo "download attempt $i: have $HAVE of $TARSZ"
+                  curl -fL --retry 5 --retry-delay 10 --retry-all-errors \
+                       -C - -o "$CD/tmp/$TAR" "$CACHE_URL/$TAR" || true
+                  NEW=$( [ -f "$CD/tmp/$TAR" ] && stat -c %s "$CD/tmp/$TAR" || echo 0 )
+                  [ "$NEW" -ge "$TARSZ" ] && break
+                  [ "$NEW" -le "$HAVE" ] && sleep 30
+                done
+                HAVE=$(stat -c %s "$CD/tmp/$TAR")
+                [ "$HAVE" -eq "$TARSZ" ] || { echo "FAIL: got $HAVE of $TARSZ bytes"; exit 1; }
+
+                # Ensembl's CHECKSUMS is `sum` format: "<checksum> <blocks> <name>"
+                curl -fsL -o "$CD/tmp/CHECKSUMS" "$CACHE_URL/CHECKSUMS"
+                WANT=$(grep " $TAR\$" "$CD/tmp/CHECKSUMS" | awk '{print $1, $2}')
+                GOT=$(sum "$CD/tmp/$TAR" | awk '{print $1, $2}')
+                echo "checksum want=[$WANT] got=[$GOT]"
+                [ "$WANT" = "$GOT" ] || { echo "FAIL: checksum mismatch"; exit 1; }
+
+                echo "extracting"
+                mkdir -p "$CD"
+                tar -C "$CD" -xzf "$CD/tmp/$TAR"
+                test -d "$DEST" || { echo "FAIL: $DEST not created by tar"; exit 1; }
+                rm -f "$CD/tmp/$TAR"
+                touch "$CD/.cache_extracted"
               else
-                # -a cf also bgzips the FASTA; Ensembl ships plain gzip, which
-                # --fasta rejects. -n leaves the bundled API alone, -l skips
-                # htslib (already in the image).
-                cd /opt/vep/src/ensembl-vep
-                perl INSTALL.pl -a cf -s homo_sapiens -y GRCh38 \
-                  -c /cache-data --CACHE_VERSION 111 -n -l
-                touch /cache-data/.cache_complete
+                echo "cache already extracted, skipping"
               fi
 
-              CACHE_DIR=/cache-data/homo_sapiens/111_GRCh38
-              test -d "$CACHE_DIR" || { echo "FAIL: $CACHE_DIR missing"; exit 1; }
-              FASTA=$(ls "$CACHE_DIR"/*.fa.gz 2>/dev/null | head -1)
-              test -n "$FASTA" || { echo "FAIL: no bgzip FASTA"; exit 1; }
-              du -sh /cache-data/* 2>/dev/null || true
+              # --- FASTA: Ensembl's dna_index/ already ships it bgzip-compressed
+              # with .fai and .gzi, so there is nothing to convert or index.
+              for f in "$FA" "$FA.fai" "$FA.gzi"; do
+                if [ ! -s "$DEST/$f" ]; then
+                  echo "fetching $f"
+                  curl -fL --retry 5 --retry-delay 10 --retry-all-errors \
+                       -C - -o "$DEST/$f" "$FASTA_URL/$f"
+                fi
+              done
+              test -s "$DEST/$FA.gzi" || { echo "FAIL: FASTA index missing"; exit 1; }
 
-              # colocated_variants needs the indexed cache, not the minimal one.
-              ls "$CACHE_DIR"/*/all_vars.gz >/dev/null 2>&1 \
-                && echo "indexed cache OK" \
+              du -sh "$CD"/* 2>/dev/null || true
+              ls "$DEST"/*/all_vars.gz >/dev/null 2>&1 \
+                && echo "indexed cache OK (variation data present)" \
                 || echo "WARN: no all_vars.gz -- colocated_variants will be empty"
 
-              # Self-test. Asserts --lookup_ref resolves a single N placeholder
-              # across a 3-base range, which is what the backfill converter
-              # emits for every deletion. True ref at 17:7676000-7676002 is AGT.
-              # No --format: VEP auto-detects Ensembl default; --format=ensembl
-              # is the form VEPService warns breaks.
+              # --- self-test: a single N placeholder standing in for a 3-base
+              # reference, which is what the backfill converter emits for every
+              # deletion. True ref at 17:7676000-7676002 is AGT. No --format:
+              # VEP auto-detects Ensembl default; --format=ensembl breaks.
               cd /opt/vep/src/ensembl-vep
-              OUT=$(./vep --cache --dir_cache=/cache-data --offline \
-                --fasta="$FASTA" --lookup_ref \
+              OUT=$(./vep --cache --dir_cache="$CD" --offline \
+                --fasta="$DEST/$FA" --lookup_ref \
                 --json --no_stats --everything --hgvsg \
                 --output_file=STDOUT --warning_file=STDERR \
                 --input_data="17 7676000 7676002 N/- + 17:g.7676000_7676002del") || true
               echo "$OUT" | head -c 300; echo
-
               echo "$OUT" | grep -q '"allele_string":"AGT/-"' \
                 || { echo "FAIL: expected allele_string AGT/-; converter cannot rely on --lookup_ref for multi-base deletions"; exit 1; }
               echo "PASS: N placeholder resolved to AGT/- over a 3-base range"
@@ -79,8 +113,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            - name: EXPECTED_ZONE
-              value: "us-east-1d"
           resources:
             requests:
               memory: 2Gi
@@ -93,12 +125,11 @@ spec:
       volumes:
         - name: cache
           persistentVolumeClaim:
-            claimName: gn-vep-111-grch38-backfill-pvc
-      # Not gn-db-lg: those nodes run the production mongos. The zone pin fixes
-      # where the WaitForFirstConsumer PVC is created; later consumers must match.
+            claimName: gn-vep-111-grch38-cache-efs
+      # No zone pin: EFS is multi-AZ, unlike the EBS volume this replaces.
+      # Not gn-db-lg -- those nodes run the production mongos.
       nodeSelector:
         workload: "cbio-dev"
-        topology.kubernetes.io/zone: "us-east-1d"
       tolerations:
         - key: "workload"
           operator: "Equal"
