@@ -40,6 +40,7 @@ spec:
         - name: worker
           # Backfill image: gn-vep extended + python3 + jq + mongodb-database-tools
           # + hgvsg2ensembl.py. python3 is NOT in the gn-vep image.
+
           image: genomenexus/gn-vep-backfill:111-grch38-1
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c"]
