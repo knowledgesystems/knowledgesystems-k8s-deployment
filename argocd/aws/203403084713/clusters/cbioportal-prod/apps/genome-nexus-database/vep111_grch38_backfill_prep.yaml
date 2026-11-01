@@ -1,0 +1,106 @@
+# Prep for the Ensembl 111 GRCh38 backfill: export prod's _id keys, filter,
+# convert, globally sort, and shard. Everything downstream consumes its output.
+#
+# One streaming pipeline, so nothing large lands twice. The global sort is the
+# point: coordinate-contiguous shards annotate ~2.2x faster than _id-order ones
+# (257 vs 116 var/s measured), because VEP's cache is stored per chromosome in
+# position-ordered blocks. VEP also rejects unsorted input outright (exit 25).
+#
+# Converting before sorting means the shards are already Ensembl default format,
+# so Pass A runs VEP and nothing else.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gn-vep-111-grch38-backfill-prep
+  namespace: genome-nexus
+  labels:
+    run: gn-vep-111-grch38-backfill-prep
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        run: gn-vep-111-grch38-backfill-prep
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: prep
+          image: genomenexus/gn-vep-backfill:111-grch38-1
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              W=/work
+              DEST=/cache-data/homo_sapiens/111_GRCh38
+              mkdir -p "$W/tmp"
+
+              # The converter needs a seekable plain FASTA for delins trimming;
+              # the cache ships bgzip only. Idempotent, ~3.3G, kept on EFS.
+              if [ ! -s "$DEST/ref.fa.fai" ]; then
+                echo "decompressing FASTA for converter seeks"
+                bgzip -dc "$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz" > "$DEST/ref.fa"
+                cp "$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz.fai" "$DEST/ref.fa.fai"
+              fi
+
+              if [ -f "$W/.prep_complete" ]; then
+                echo "prep already complete: $(ls $W/ens.* | wc -l) shards"; exit 0
+              fi
+
+              # Covered _id scan on prod. The script re-checks its own query plan
+              # and refuses to run if it is not covered -- an un-hinted empty
+              # predicate plans as COLLSCAN and would drag all 273G of documents
+              # through a cache holding prod's working set.
+              #
+              # Filters mirror CachedVariantAnnotationFetcher.isValidId plus the
+              # corruption classes found in the live collection.
+              mongosh "$SRC_URI" --quiet --file /opt/backfill/scan_vep_annotation_ids.js \
+                | awk '
+                    /^[[:space:]]|[[:space:]]$/ { bad["whitespace"]++; next }
+                    /^"/                        { bad["quote"]++;      next }
+                    !/:/                        { bad["nocolon"]++;    next }
+                    /-|undefined|g\.0/          { bad["invalid"]++;    next }
+                    length($0) >= 900           { bad["toolong"]++;    next }
+                    { print; kept++ }
+                    END { for (k in bad) printf "dropped %s %d\n", k, bad[k] > "/dev/stderr"
+                          printf "kept %d\n", kept > "/dev/stderr" }' \
+                | hgvsg2ensembl.py --in - --out - --defer "$W/deferred.all" \
+                    --fasta "$DEST/ref.fa" \
+                | sort -k1,1 -k2,2n -T "$W/tmp" -S 25% \
+                | split -l 250000 -d -a 5 - "$W/ens."
+
+              SHARDS=$(ls "$W"/ens.* | wc -l)
+              LINES=$(cat "$W"/ens.* | wc -l)
+              DEFERRED=$(wc -l < "$W/deferred.all")
+              echo "shards=$SHARDS converted=$LINES deferred=$DEFERRED"
+              echo "$SHARDS" > "$W/.shard_count"
+              touch "$W/.prep_complete"
+              echo "SET completions: $SHARDS on the Pass A Job before applying it"
+          env:
+            - name: SRC_URI
+              value: "mongodb://gn-mongo-grch38-ensembl95-blue:27017/annotator"
+          resources:
+            requests:
+              cpu: "2"
+              memory: 4Gi
+            limits:
+              memory: 12Gi
+          volumeMounts:
+            - name: cache
+              mountPath: /cache-data
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-cache-efs
+        - name: work
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-work-efs
+      nodeSelector:
+        workload: "cbio-dev"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-dev"
+          effect: "NoSchedule"
