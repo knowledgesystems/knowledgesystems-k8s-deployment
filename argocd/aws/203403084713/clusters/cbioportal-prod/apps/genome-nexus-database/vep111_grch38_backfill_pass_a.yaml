@@ -23,8 +23,9 @@ metadata:
     run: gn-vep-111-grch38-backfill-pass-a
 spec:
   completionMode: Indexed
-  # 548 shards measured: ens.00000-ens.00547, 136,789,775 converted keys.
-  completions: 548
+  # One completion per 50k slice: 547 full shards x 5, plus 1 for ens.00547's
+  # 39,775-line remainder = 2736. See the slice arithmetic in the script.
+  completions: 2736
   # 10 = 4 on cbio-dev (2 nodes, each already ~1.6 cores into cbioportal
   # services) + 6 on ip-10-0-11-224. The 6 is a ceiling, not a target: that
   # node has 7910m allocatable and the mongod it hosts declares no CPU request,
@@ -60,11 +61,23 @@ spec:
               W=/work
               CD=/cache-data
               DEST=$CD/homo_sapiens/111_GRCh38
-              I=$(printf "%05d" "${JOB_COMPLETION_INDEX}")
-              S="$W/ens.$I"
+              J="${JOB_COMPLETION_INDEX}"
 
-              if [ -f "$W/doneA.$I" ]; then echo "shard $I already done"; exit 0; fi
-              test -s "$S" || { echo "FAIL: $S missing -- run the prep Job first"; exit 1; }
+              # One task annotates a 50k-line SLICE of a prep shard, not a whole
+              # 250k shard. A shard is the only resumable unit -- doneA is written
+              # at completion, nothing intra-shard -- so a task must finish inside
+              # a spot node's life or it restarts from zero forever. Measured:
+              # 250k takes 2.4-3.9 h, and ip-10-0-6-33 lived 2.19 h.
+              # 250000 / 50000 = 5 exactly, so slices never straddle two shards.
+              I=$(printf "%05d" $((J / 5)))
+              OFF=$((J % 5))
+              S="$W/slice.$J"
+
+              if [ -f "$W/doneA.$J" ]; then echo "slice $J already done"; exit 0; fi
+              test -s "$W/ens.$I" || { echo "FAIL: $W/ens.$I missing -- run the prep Job first"; exit 1; }
+              sed -n "$((OFF * 50000 + 1)),$(((OFF + 1) * 50000))p" "$W/ens.$I" > "$S"
+              test -s "$S" || { echo "FAIL: slice $J of ens.$I is empty"; exit 1; }
+              echo "slice $J = ens.$I lines $((OFF * 50000 + 1))-$(((OFF + 1) * 50000)), $(wc -l < "$S") rows"
 
               # Shards arrive from prep already converted to Ensembl default
               # format, globally sorted and coordinate-contiguous. Nothing to do
@@ -81,7 +94,7 @@ spec:
                 --plugin=AlphaMissense,file=/plugin-data/AlphaMissense_hg38.tsv.gz \
                 --dir_plugins=/plugin-data \
                 --input_file="$S" --output_file=STDOUT \
-                --warning_file="$W/err.$I.log" \
+                --warning_file="$W/err.$J.log" \
                 | sed -e 's/sift_pred/sift_prediction/g' \
                       -e 's/polyphen_humvar_pred/polyphen_prediction/g' \
                       -e 's/polyphen_humvar_score/polyphen_score/g' \
@@ -95,9 +108,10 @@ spec:
               # Straggler accounting: VEP exits 0 with failed variants simply
               # absent from stdout, so record submitted versus skipped.
               { echo "submitted $(wc -l < "$S")"
-                echo "vep-skipped $(grep -c skipped "$W/err.$I.log" 2>/dev/null || echo 0)"
-              } > "$W/doneA.$I"
-              cat "$W/doneA.$I"
+                echo "vep-skipped $(grep -c skipped "$W/err.$J.log" 2>/dev/null || echo 0)"
+              } > "$W/doneA.$J"
+              cat "$W/doneA.$J"
+              rm -f "$S"
           env:
             - name: MONGODB_URI
               value: "mongodb://gn-mongo-grch38-ensembl111-blue:27017/annotator"
@@ -106,7 +120,9 @@ spec:
               # cpu: 1 so the scheduler packs one pod per core, which is the
               # configuration that measured 428 var/s across 4 cores.
               cpu: "1"
-              memory: 3Gi
+              # Measured peak RSS across 10 live pods: 538Mi. At 3Gi memory,
+              # not CPU, became the packing constraint on larger nodes.
+              memory: 1500Mi
             limits:
               memory: 8Gi
           volumeMounts:
