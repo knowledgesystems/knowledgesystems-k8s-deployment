@@ -80,7 +80,7 @@ spec:
                           printf "kept %d\n", kept > "/dev/stderr" }' \
                 | hgvsg2ensembl.py --in - --out - --defer "$W/deferred.all" \
                     --fasta "$DEST/ref.fa" \
-                | sort -k1,1 -k2,2n -T "$W/tmp" -S 25% \
+                | sort -k1,1 -k2,2n -T "$W/tmp" -S 2G \
                 | split -l 250000 -d -a 5 - "$W/ens."
 
               SHARDS=$(ls "$W"/ens.* | wc -l)
@@ -121,8 +121,17 @@ spec:
       # has no traffic yet. Unlike Pass A's 12 saturating workers, this is one
       # pod asking for 2 cores, so it does not threaten the node. Both volumes
       # are EFS, so there is no AZ constraint.
+      # Pinned to the ONE idle node, not the pool. workload=gn-db-lg matches
+      # all three, and the scheduler picked ip-10-0-7-20 -- which hosts
+      # gn-mongo-beta-0, gn-mongo-vep111-blue-0 and
+      # gn-mongo-grch37-ensembl111-green-0 (the database behind
+      # www.genomenexus.org) at 73% memory with ~13 GiB free. Because the
+      # gn-mongo StatefulSets declare no resource requests, the scheduler sees
+      # that node as nearly empty. ip-10-0-11-224 holds only the ensembl111
+      # mongo, which has no traffic yet, at 3% memory.
       nodeSelector:
         workload: "gn-db-lg"
+        kubernetes.io/hostname: "ip-10-0-11-224.ec2.internal"
       tolerations:
         - key: "workload"
           operator: "Equal"
