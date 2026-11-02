@@ -12,8 +12,8 @@
 # --fork=4) because VEP's cache is stored per chromosome in position-ordered
 # blocks, and VEP rejects unsorted input outright (exit 25).
 #
-# completions must equal prep's shard count, which it writes to
-# /work/.shard_count. 547 assumes N = 136.73M at 250k per shard.
+# completions must equal prep's shard count (/work/.shard_count). Too low and
+# the trailing shards are never scheduled, with no error anywhere.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -23,13 +23,20 @@ metadata:
     run: gn-vep-111-grch38-backfill-pass-a
 spec:
   completionMode: Indexed
-  # One completion per shard. Set from the prep Job's actual shard count.
-  completions: 547
+  # 548 shards measured: ens.00000-ens.00547, 136,789,775 converted keys.
+  completions: 548
   # 12 = 3 cbio-dev nodes x 4 cores. Raise if the pool grows.
   parallelism: 12
-  # cbio-dev is SPOT and rotates hourly. A shard is ~39 min, so an eviction
-  # costs at most that; the budget must absorb many of them over ~1.2 days.
-  backoffLimit: 200
+  # Spot evictions must not consume the retry budget: at 548 shards of ~24-39
+  # min on hourly-rotating capacity they alone would exceed any sane limit.
+  # Ignore only applies to drains that set DisruptionTarget, so the limit
+  # still has to cover ungraceful node loss.
+  podFailurePolicy:
+    rules:
+      - action: Ignore
+        onPodConditions:
+          - type: DisruptionTarget
+  backoffLimit: 400
   template:
     metadata:
       labels:
