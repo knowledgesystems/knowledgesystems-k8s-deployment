@@ -85,6 +85,12 @@ spec:
               set -o pipefail
               # No --format: VEPController sets format=Optional.empty() in cache
               # mode and lets VEP auto-detect. --format=ensembl is what breaks.
+              #
+              # The plugin field renames MUST be structural, not textual: the
+              # cache emits its own sift_prediction, and a sed of sift_pred ->
+              # sift_prediction rewrites that into sift_predictioniction,
+              # destroying SIFT wherever the plugin has no value for the
+              # transcript. jq renames by key, so a prefix cannot collide.
               /opt/vep/src/ensembl-vep/vep \
                 --cache --dir_cache=$CD --offline \
                 --fasta="$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz" --lookup_ref \
@@ -95,10 +101,15 @@ spec:
                 --dir_plugins=/plugin-data \
                 --input_file="$S" --output_file=STDOUT \
                 --warning_file="$W/err.$J.log" \
-                | sed -e 's/sift_pred/sift_prediction/g' \
-                      -e 's/polyphen_humvar_pred/polyphen_prediction/g' \
-                      -e 's/polyphen_humvar_score/polyphen_score/g' \
-                | jq -c '._id = .id
+                | jq -c 'def ren:
+                             (if has("sift_pred")
+                              then .sift_prediction = .sift_pred | del(.sift_pred) else . end)
+                           | (if has("polyphen_humvar_pred")
+                              then .polyphen_prediction = .polyphen_humvar_pred | del(.polyphen_humvar_pred) else . end)
+                           | (if has("polyphen_humvar_score")
+                              then .polyphen_score = .polyphen_humvar_score | del(.polyphen_humvar_score) else . end);
+                         walk(if type == "object" then ren else . end)
+                         | ._id = .id
                          | ((.allele_string // "") | split("/")) as $a
                          | if ($a | length) == 2 and $a[0] == $a[1]
                            then . + {_ref_eq_alt: true} else . end' \
