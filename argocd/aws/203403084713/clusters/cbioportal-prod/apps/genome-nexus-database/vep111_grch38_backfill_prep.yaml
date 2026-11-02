@@ -33,7 +33,9 @@ spec:
               set -euo pipefail
               W=/work
               DEST=/cache-data/homo_sapiens/111_GRCh38
-              mkdir -p "$W/tmp"
+              # A killed attempt leaves its sort spills behind -- sort uses
+              # random names and never reclaims them. ~5 GB per eviction.
+              rm -rf "$W/tmp"; mkdir -p "$W/tmp"
 
               # The converter needs a seekable plain FASTA for delins trimming;
               # the cache ships bgzip only. Idempotent, ~3.3G, kept on EFS.
@@ -109,10 +111,20 @@ spec:
         - name: work
           persistentVolumeClaim:
             claimName: gn-vep-111-grch38-work-efs
+      # On-demand, unlike Pass A. Pass A is resumable per shard, so a spot
+      # eviction costs one shard; prep is a single ~60-minute streaming
+      # pipeline with no resume, so an eviction costs the whole run. cbio-dev
+      # rotates every 1-3h and killed one attempt at ~85%.
+      #
+      # gn-db-lg has the headroom: ip-10-0-11-224 is 8 cores with 58.6 GiB
+      # free at 3% used, and its only co-tenant is the ensembl111 mongo, which
+      # has no traffic yet. Unlike Pass A's 12 saturating workers, this is one
+      # pod asking for 2 cores, so it does not threaten the node. Both volumes
+      # are EFS, so there is no AZ constraint.
       nodeSelector:
-        workload: "cbio-dev"
+        workload: "gn-db-lg"
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "cbio-dev"
+          value: "gn-db-lg"
           effect: "NoSchedule"
