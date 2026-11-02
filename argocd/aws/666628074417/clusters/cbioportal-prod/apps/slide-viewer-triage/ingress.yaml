@@ -23,9 +23,9 @@ metadata:
     # $request_uri (ingress/values.yaml), because $arg_studyId is empty inside
     # the auth subrequest; a missing or invalid studyId becomes "!", which the
     # portal refuses. The tile server itself never answers 401/403.
-    # This must follow the active beta color: it names the same Service as
-    # the beta.cbioportal.mskcc.org rule in cbioportal/eks-msk-ingress.yaml.
-    nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-beta-green.default.svc.cluster.local/api/studies/$wsi_study"
+    # eks-msk-beta-wsi-auth (portal-auth-service.yaml) reaches whichever beta
+    # color is running; the nightly import flips the colors.
+    nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-beta-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
     nginx.ingress.kubernetes.io/auth-method: GET
     # Cache only successes, per session and study, so panning does not send
     # one portal request per tile. A logout or study-access change can take
