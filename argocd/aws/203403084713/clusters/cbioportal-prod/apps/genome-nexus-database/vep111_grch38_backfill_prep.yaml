@@ -25,7 +25,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: prep
-          image: genomenexus/gn-vep-backfill:111-grch38-2
+          image: genomenexus/gn-vep-backfill:111-grch38-3
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c"]
           args:
