@@ -6,10 +6,12 @@
 # One service per color, so the import pipeline's color swap
 # (cmo-pipelines transfer-deployment-color.sh) switches routes between them by
 # renaming -green <-> -blue in the routes that use them: www.cbioportal.org's
-# non-browser catch-all (cbio-www-ingressroute in apps/cbioportal).
+# non-browser routes (cbio-www-ingressroute in apps/cbioportal), and through
+# cbioportal-api-canary-<color> the Java share of api.cbioportal.org.
 #
-# To stop mirroring, point that route back at
-# cbioportal-backend-public-api-<color> (port 80), then delete this file.
+# To stop mirroring, point those routes back at
+# cbioportal-backend-public-api-<color> (port 80), and the canary's java-share
+# entries too, then delete this file.
 apiVersion: traefik.io/v1alpha1
 kind: TraefikService
 metadata:
