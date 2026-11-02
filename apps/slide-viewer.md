@@ -9,8 +9,10 @@ each pixel request with an auth subrequest to cBioPortal's
 `GET /api/studies/{studyId}` carrying the browser's `SESSION` cookie (2xx
 passes, 401/403 refuse). The study comes from a `$request_uri` map in the
 controller `http-snippet` (`ingress/values.yaml`), because `$arg_studyId` is
-empty inside the auth subrequest. The auth URL names the beta portal Service
-and must follow the active beta color. The tile server's own refusals are 404
+empty inside the auth subrequest. The auth URL names `eks-msk-beta-wsi-auth`
+(`slide-viewer-triage/portal-auth-service.yaml`), which selects the portal pods
+of both beta colors by the `wsi.cbioportal.org/beta-portal` label, so it reaches
+whichever color the nightly import left running. The tile server's own refusals are 404
 or 400, never 401/403.
 
 ## Development capacity controls

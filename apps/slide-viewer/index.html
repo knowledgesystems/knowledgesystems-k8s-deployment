@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="turbo-root" content="/knowledgesystems-k8s-deployment">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.846739629641">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="4.6.0.846955524000">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 4.6.0">
@@ -38,11 +38,11 @@
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
-    <link href="../../resources/css/retype.css?v=4.6.0.846739629641" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=4.6.0.846955524000" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.846739629641" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=4.6.0.846955524000" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=4.6.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.846739629641" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=4.6.0.846955524000" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -168,8 +168,10 @@ each pixel request with an auth subrequest to cBioPortal&#x27;s
 <code translate="no" v-pre>GET /api/studies/{studyId}</code> carrying the browser&#x27;s <code translate="no" v-pre>SESSION</code> cookie (2xx
 passes, 401/403 refuse). The study comes from a <code translate="no" v-pre>$request_uri</code> map in the
 controller <code translate="no" v-pre>http-snippet</code> (<code translate="no" v-pre>ingress/values.yaml</code>), because <code translate="no" v-pre>$arg_studyId</code> is
-empty inside the auth subrequest. The auth URL names the beta portal Service
-and must follow the active beta color. The tile server&#x27;s own refusals are 404
+empty inside the auth subrequest. The auth URL names <code translate="no" v-pre>eks-msk-beta-wsi-auth</code>
+(<code translate="no" v-pre>slide-viewer-triage/portal-auth-service.yaml</code>), which selects the portal pods
+of both beta colors by the <code translate="no" v-pre>wsi.cbioportal.org/beta-portal</code> label, so it reaches
+whichever color the nightly import left running. The tile server&#x27;s own refusals are 404
 or 400, never 401/403.</p>
 <h2 id="development-capacity-controls">Development capacity controls</h2>
 <ul>
