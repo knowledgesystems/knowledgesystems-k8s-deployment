@@ -25,7 +25,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: prep
-          image: genomenexus/gn-vep-backfill:111-grch38-1
+          image: genomenexus/gn-vep-backfill:111-grch38-2
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c"]
           args:
@@ -43,8 +43,14 @@ spec:
                 cp "$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz.fai" "$DEST/ref.fa.fai"
               fi
 
+              # Guard against re-running on top of a previous attempt's output.
+              # The earlier unpartitioned scan left a 3.9%-short shard set here;
+              # mixing the two would be worse than either.
               if [ -f "$W/.prep_complete" ]; then
-                echo "prep already complete: $(ls $W/ens.* | wc -l) shards"; exit 0
+                echo "prep already complete: $(ls $W/ens.* | wc -l) shards"
+                echo "to redo it, first clear the previous output:"
+                echo "  rm -f $W/.prep_complete $W/.shard_count $W/ens.* $W/deferred.all"
+                exit 0
               fi
 
               # Covered _id scan on prod. The script re-checks its own query plan
