@@ -25,8 +25,11 @@ spec:
   completionMode: Indexed
   # 548 shards measured: ens.00000-ens.00547, 136,789,775 converted keys.
   completions: 548
-  # 12 = 3 cbio-dev nodes x 4 cores. Raise if the pool grows.
-  parallelism: 12
+  # 10 = 4 on cbio-dev (2 nodes, each already ~1.6 cores into cbioportal
+  # services) + 6 on ip-10-0-11-224. The 6 is a ceiling, not a target: that
+  # node has 7910m allocatable and the mongod it hosts declares no CPU request,
+  # so the scheduler would happily pack 7 pods and leave it ~900m.
+  parallelism: 10
   # Spot evictions must not consume the retry budget: at 548 shards of ~24-39
   # min on hourly-rotating capacity they alone would exceed any sane limit.
   # Ignore only applies to drains that set DisruptionTarget, so the limit
@@ -118,13 +121,32 @@ spec:
         - name: work
           persistentVolumeClaim:
             claimName: gn-vep-111-grch38-work-efs
-      # No zone pin: both volumes are EFS, which is multi-AZ. Not gn-db-lg --
-      # those nodes run the production mongos at 69-74% memory with no requests
-      # declared, so the scheduler cannot see how full they are.
-      nodeSelector:
-        workload: "cbio-dev"
+      # No zone pin: both volumes are EFS, which is multi-AZ.
+      #
+      # Two placement targets, OR'd -- nodeSelector cannot express that. The
+      # gn-db-lg pool is otherwise off limits because its nodes run the
+      # production mongos with no resource requests declared, so the scheduler
+      # cannot see how full they are; ip-10-0-11-224 is named explicitly
+      # because its only co-tenant is this backfill's own write target, which
+      # serves no traffic. Do not widen this to the pool label.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: workload
+                    operator: In
+                    values: ["cbio-dev"]
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: ["ip-10-0-11-224.ec2.internal"]
       tolerations:
         - key: "workload"
           operator: "Equal"
           value: "cbio-dev"
+          effect: "NoSchedule"
+        - key: "workload"
+          operator: "Equal"
+          value: "gn-db-lg"
           effect: "NoSchedule"
