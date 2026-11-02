@@ -22,6 +22,8 @@ POLICY = APP_ROOT / "slide-viewer-triage/wsi-serving-policy.yaml"
 INGRESS = APP_ROOT / "slide-viewer-triage/ingress.yaml"
 INGRESS_CONTROLLER_VALUES = APP_ROOT / "ingress/values.yaml"
 PORTAL_INGRESS = PORTAL_ROOT / "eks-msk-ingress.yaml"
+OFFLINE = PORTAL_ROOT / "cbioportal-eks-msk-beta-offline-deployment-service.yaml"
+AUTH_SERVICE = APP_ROOT / "slide-viewer-triage/portal-auth-service.yaml"
 BETA_HOST = "beta.cbioportal.mskcc.org"
 PIXEL_INGRESS = "slide-viewer-triage-wsi-ingress"
 PROBE_INGRESS = "slide-viewer-triage-wsi-probes"
@@ -397,13 +399,50 @@ for name, ingress in ingresses.items():
 pixel_annotations = ingresses[PIXEL_INGRESS]["metadata"]["annotations"]
 if single_path(ingresses[PIXEL_INGRESS], PIXEL_INGRESS).get("path") != PIXEL_PATH:
     raise AssertionError(f"{PIXEL_INGRESS} must expose only the tile and thumbnail routes")
+# The nightly import flips beta between blue and green, so the auth check
+# targets a Service selecting the portal pods of both colors, never one color.
+AUTH_SERVICE_NAME = "eks-msk-beta-wsi-auth"
+AUTH_POD_LABEL = ("wsi.cbioportal.org/beta-portal", "true")
 expected_auth_url = (
-    f"http://{beta_portal_service()}.default.svc.cluster.local/api/studies/$wsi_study"
+    f"http://{AUTH_SERVICE_NAME}.default.svc.cluster.local/api/studies/$wsi_study"
 )
 if pixel_annotations.get(NGINX + "auth-url") != expected_auth_url:
     raise AssertionError(
-        f"{PIXEL_INGRESS} must authorize against the active beta portal: {expected_auth_url}"
+        f"{PIXEL_INGRESS} must authorize against {AUTH_SERVICE_NAME}: {expected_auth_url}"
     )
+auth_service = next(
+    (
+        document
+        for document in documents(AUTH_SERVICE)
+        if document
+        and document.get("kind") == "Service"
+        and document["metadata"]["name"] == AUTH_SERVICE_NAME
+    ),
+    None,
+)
+if auth_service is None:
+    raise AssertionError(f"{AUTH_SERVICE.name} does not define {AUTH_SERVICE_NAME}")
+if auth_service["spec"].get("selector") != dict([AUTH_POD_LABEL]):
+    raise AssertionError(f"{AUTH_SERVICE_NAME} must select only {AUTH_POD_LABEL[0]}")
+portal_service_ports = {
+    (port.get("port"), port.get("targetPort"))
+    for document in documents(GREEN)
+    if document and document.get("kind") == "Service"
+    for port in document["spec"]["ports"]
+}
+auth_service_ports = {
+    (port.get("port"), port.get("targetPort")) for port in auth_service["spec"]["ports"]
+}
+if auth_service_ports != portal_service_ports:
+    raise AssertionError(f"{AUTH_SERVICE_NAME} ports differ from the beta portal Service")
+for path in (BLUE, GREEN):
+    labels = deployment(path)["spec"]["template"]["metadata"].get("labels", {})
+    if labels.get(AUTH_POD_LABEL[0]) != AUTH_POD_LABEL[1]:
+        raise AssertionError(f"{path.name} pods lack {AUTH_POD_LABEL[0]}")
+offline_labels = deployment(OFFLINE)["spec"]["template"]["metadata"].get("labels", {})
+if AUTH_POD_LABEL[0] in offline_labels:
+    raise AssertionError(f"{OFFLINE.name} pods must not answer the WSI auth check")
+beta_portal_service()  # the beta host still has a portal route
 if pixel_annotations.get(NGINX + "auth-method") != "GET":
     raise AssertionError(f"{PIXEL_INGRESS} auth subrequest must use GET")
 auth_cache_key = pixel_annotations.get(NGINX + "auth-cache-key", "")
