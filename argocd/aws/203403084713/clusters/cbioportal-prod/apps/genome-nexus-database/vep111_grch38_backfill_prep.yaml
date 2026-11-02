@@ -25,7 +25,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: prep
-          image: genomenexus/gn-vep-backfill:111-grch38-2
+          image: genomenexus/gn-vep-backfill:111-grch38-3
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c"]
           args:
@@ -62,6 +62,12 @@ spec:
               # corruption classes found in the live collection.
               mongosh "$SRC_URI" --quiet --file /opt/backfill/scan_vep_annotation_ids.js \
                 | awk '
+                    # The scan logs its partition summary and any range
+                    # mismatch with mongosh print(), which writes to stdout --
+                    # the same stream as the keys. Forward those to stderr so
+                    # they reach the Job log instead of being counted as
+                    # key drops.
+                    /^\[scan\]/ { print > "/dev/stderr"; next }
                     /^[[:space:]]|[[:space:]]$/ { bad["whitespace"]++; next }
                     /^"/                        { bad["quote"]++;      next }
                     !/:/                        { bad["nocolon"]++;    next }
