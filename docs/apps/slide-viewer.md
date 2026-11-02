@@ -15,6 +15,40 @@ of both beta colors by the `wsi.cbioportal.org/beta-portal` label, so it reaches
 whichever color the nightly import left running. The tile server's own refusals are 404
 or 400, never 401/403.
 
+## Triage
+
+Triage (`triage.cbioportal.mskcc.org`, `triage.cbioportal.aws.mskcc.org` and
+`triage-beta.cbioportal.aws.mskcc.org`) uses the same `slide-viewer-triage`
+tile server through its own pixel and probe ingresses
+(`slide-viewer-triage/triage-ingress.yaml`), on the same `/wsi/tiles`,
+`/wsi/thumbnails`, `/wsi/health` and `/wsi/ready` routes. Pixel requests are
+authorized against the triage portal's `GET /api/studies/{studyId}` through
+`eks-triage-wsi-auth` (`slide-viewer-triage/triage-portal-auth-service.yaml`).
+Triage enforces study authorization, so this is a real per-study check. The
+Service selects the `tags.datadoghq.com/env: eks-triage` and
+`tags.datadoghq.com/service: cbioportal` pod labels that both triage colors
+carry, so it reaches whichever color the nightly import left running. The
+auth cache key includes `$host`, because the cache zone and the `SESSION`
+cookie name are shared with beta.
+
+The triage portal itself serves the stock frontend. A user switches one browser
+to the WSI frontend from the browser console on the triage host:
+
+```js
+localStorage.netlify = "6ae4d971b7b0d681b9e88a16--cbioportalfrontend";
+localStorage.frontendConfig = JSON.stringify({serverConfig: {wsi_tile_server_url: "/wsi"}});
+location.reload();
+```
+
+To switch back, use the "clear" link in the frontend banner and run
+`localStorage.removeItem("frontendConfig")`.
+
+- The standalone `/wsi/patient/...` links need a portal that includes
+  cBioPortal/cbioportal#12378; the triage portal's v7.2.3 does not serve that
+  route on a direct visit, so open slides from the patient view instead.
+- The study's WSI data must be in the newer `metadata.serving` format, which
+  carries each slide's serving `key` and sealed source `enc`.
+
 ## Development capacity controls
 
 - Beta runs one warm replica and accepts node/pod downtime. The dedicated
