@@ -73,7 +73,15 @@ spec:
               OFF=$((J % 5))
               S="$W/slice.$J"
 
-              if [ -f "$W/doneA.$J" ]; then echo "slice $J already done"; exit 0; fi
+              # PIPELINE_VERSION must change whenever the annotate/transform stages
+              # change, or completed slices keep output from the old code.
+              PV=3-nopolyphensiftplugin
+              if [ -f "$W/doneA.$J" ]; then
+                if grep -qx "pipeline $PV" "$W/doneA.$J" 2>/dev/null; then
+                  echo "slice $J already done (pipeline $PV)"; exit 0
+                fi
+                echo "slice $J was done by an older pipeline -- re-running"
+              fi
               test -s "$W/ens.$I" || { echo "FAIL: $W/ens.$I missing -- run the prep Job first"; exit 1; }
               sed -n "$((OFF * 50000 + 1)),$(((OFF + 1) * 50000))p" "$W/ens.$I" > "$S"
               test -s "$S" || { echo "FAIL: slice $J of ens.$I is empty"; exit 1; }
@@ -86,17 +94,16 @@ spec:
               # No --format: VEPController sets format=Optional.empty() in cache
               # mode and lets VEP auto-detect. --format=ensembl is what breaks.
               #
-              # The plugin field renames MUST be structural, not textual: the
-              # cache emits its own sift_prediction, and a sed of sift_pred ->
-              # sift_prediction rewrites that into sift_predictioniction,
-              # destroying SIFT wherever the plugin has no value for the
-              # transcript. jq renames by key, so a prefix cannot collide.
+              # No PolyPhen_SIFT plugin: it silently drops SIFT in proportion to
+              # how many variants share a --buffer_size batch (92% missing vs
+              # per-variant ground truth at the default 5000). The cache's own
+              # SIFT/PolyPhen via --everything matches ground truth exactly and
+              # is buffer-independent. Do not re-add it.
               /opt/vep/src/ensembl-vep/vep \
                 --cache --dir_cache=$CD --offline \
                 --fasta="$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz" --lookup_ref \
                 --everything --hgvsg --no_stats --xref_refseq --json --shift_hgvs=1 \
                 --fork=1 \
-                --plugin=PolyPhen_SIFT,db=/plugin-data/homo_sapiens_pangenome_PolyPhen_SIFT_20240502.db \
                 --plugin=AlphaMissense,file=/plugin-data/AlphaMissense_hg38.tsv.gz \
                 --dir_plugins=/plugin-data \
                 --input_file="$S" --output_file=STDOUT \
@@ -111,14 +118,19 @@ spec:
                          walk(if type == "object" then ren else . end)
                          | ._id = .id
                          | ((.allele_string // "") | split("/")) as $a
-                         | if ($a | length) == 2 and $a[0] == $a[1]
-                           then . + {_ref_eq_alt: true} else . end' \
+                         | (if ($a | length) == 2 and $a[0] == $a[1]
+                            then . + {_ref_eq_alt: true} else . end)
+                         | (((.transcript_consequences // [])[0].hgvsg) // "") as $h
+                         | if $h != "" and $h != ._id
+                              and (._id | test("[ACGT]>[ACGT]$"))
+                           then . + {_hgvsg_mismatch: true} else . end' \
                 | mongoimport --uri "$MONGODB_URI" --collection 'vep.annotation' \
                     --mode upsert --upsertFields _id --numInsertionWorkers 2
 
               # Straggler accounting: VEP exits 0 with failed variants simply
               # absent from stdout, so record submitted versus skipped.
-              { echo "submitted $(wc -l < "$S")"
+              { echo "pipeline $PV"
+                echo "submitted $(wc -l < "$S")"
                 echo "vep-skipped $(grep -c skipped "$W/err.$J.log" 2>/dev/null || echo 0)"
               } > "$W/doneA.$J"
               cat "$W/doneA.$J"
