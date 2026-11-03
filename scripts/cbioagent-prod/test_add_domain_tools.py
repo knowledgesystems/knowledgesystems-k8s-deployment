@@ -119,6 +119,44 @@ class AddDomainToolsTest(unittest.TestCase):
         self.assertEqual(self.stored()["tools"], EXISTING_TOOLS)
         self.assertFalse(self.run_script(apply=True, remove=True))
 
+    def test_remove_dry_run_writes_nothing(self):
+        self.db.agents.insert_one(agent(tools=[*EXISTING_TOOLS, *m.DOMAIN_TOOLS]))
+        before = copy.deepcopy(self.stored())
+        self.assertTrue(self.run_script(apply=False, remove=True))
+        self.assertEqual(self.stored(), before)
+
+    def test_unrelated_fields_are_preserved(self):
+        unrelated = {
+            "model": "us.anthropic.claude-sonnet-5",
+            "provider": "bedrock",
+            "model_parameters": {"thinking": False, "maxOutputTokens": 4096},
+            "edges": [{"from": m.PROD_AGENT_ID, "to": "agent_other", "edgeType": "handoff"}],
+            "tool_resources": {"file_search": {"file_ids": ["f1"]}},
+            "conversation_starters": ["How often is KRAS mutated?"],
+            "mcpServerNames": ["cbioportal-database", "cbioportal-navigator"],
+            "category": "general",
+            "tenantId": "tenant",
+            "createdAt": THEN,
+        }
+        self.db.agents.insert_one(agent(**unrelated))
+        acl = {"resourceId": self.stored()["_id"], "principalType": "public", "permBits": 1}
+        self.db.aclentries.insert_one(acl)
+        changed_fields = ("tools", "updatedAt", "versions")
+
+        def others():
+            return {k: v for k, v in self.stored().items() if k not in changed_fields}
+
+        before = copy.deepcopy(others())
+        acl_before = list(self.db.aclentries.find())
+        self.run_script(apply=True)
+        self.assertEqual(others(), before)
+        self.run_script(apply=True, remove=True)
+        self.assertEqual(others(), before)
+        self.assertEqual(list(self.db.aclentries.find()), acl_before)
+        for field, value in unrelated.items():
+            if field != "createdAt":
+                self.assertEqual(self.stored()["versions"][-1][field], value)
+
     def test_missing_agent_exits(self):
         with self.assertRaises(SystemExit):
             self.run_script(apply=True)

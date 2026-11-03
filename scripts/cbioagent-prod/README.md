@@ -11,23 +11,59 @@ The prod cBioPortalChat agent (`agent_9ZXhcwLIsROBQX0u4JS5F`, the `agent_id` in 
 
 It writes only that agent's `tools` and `updatedAt`, and pushes a new entry onto `versions`. It doesn't touch `aclentries` or the instructions, and it has no option to target another agent. It's a dry run unless you pass `--apply`. Re-running is safe. The script stops without writing if the agent is missing or duplicated, has no `cbioportal-database` tools, or changed while the script ran. An agent with the all-tools entry (`sys__all__sys_mcp_cbioportal-database`) already gets the new tools, so it's left alone.
 
-## Run
+## Connect
 
-MongoDB is shared with beta. Run this **after** the prod `cbioagent-clickhouse-mcp` pod has rolled to an image with #154, so the agent never lists tools the server doesn't have. This prints `True` once the running image has them:
-
-```bash
-kubectl exec deploy/cbioagent-clickhouse-mcp -- python -c "import importlib.util as u; print(bool(u.find_spec('cbioportal_mcp.domain_tools')))"
-```
-
-Then:
+MongoDB is shared with beta. The port-forward and the commands in [Inspect](#inspect-read-only) only read, and the password stays in the environment variable; nothing below prints it.
 
 ```bash
 pip install pymongo
 # Port-forward the shared MongoDB (cbioportal-prod cluster, default namespace)
-kubectl port-forward svc/cbioagent-mongodb 27017:27017 &
-# MONGO_URI is in the librechat-credentials-env Secret (portal-configuration); point its host at localhost:27017
-export MONGO_URI='mongodb://<user>:<pass>@localhost:27017/cBioAgent?authSource=admin'
+kubectl port-forward -n default svc/cbioagent-mongodb 27017:27017 &
+# Take MONGO_URI from the Secret and point its host at the port-forward.
+# If the URI has a replicaSet parameter, also add directConnection=true.
+export MONGO_URI="$(kubectl get secret librechat-credentials-env -n default -o jsonpath='{.data.MONGO_URI}' | base64 -d | sed -E 's#@[^/]+/#@localhost:27017/#')"
+```
 
+## Inspect (read-only)
+
+Run this before the rollout. It reads that one document and returns only `tools`:
+
+```bash
+python -c "
+import os, pymongo
+db = pymongo.MongoClient(os.environ['MONGO_URI'], serverSelectionTimeoutMS=10000).get_default_database('cBioAgent')
+docs = list(db.agents.find({'id': 'agent_9ZXhcwLIsROBQX0u4JS5F'}, {'_id': 0, 'tools': 1}))
+print(len(docs), 'document(s)')
+for d in docs: print(*d.get('tools', []), sep='\n')
+"
+```
+
+Expect one document, with `cbioportal-database` tools named one by one and none of the four above. Stop and investigate anything else, unless it's the all-tools entry, which means no change is needed.
+
+The script's dry run (`./add_domain_tools.py`, no `--apply`) also only reads, and doesn't contact the MCP server, so it can run before the rollout too. It prints the tools it would add and the before and after counts, but not the full list.
+
+## Run
+
+Run `--apply` only when **both** of these are true, so the agent never lists tools the server doesn't have, and the tools don't report numbers from the old views:
+
+1. The prod `cbioagent-clickhouse-mcp` pod has rolled to an image with #154. This prints `True`:
+   ```bash
+   kubectl exec -n default deploy/cbioagent-clickhouse-mcp -- /app/.venv/bin/python -c "import importlib.util as u; print(bool(u.find_spec('cbioportal_mcp.domain_tools')))"
+   ```
+2. A clone from that image has applied the new `sql/4` to the serving database. `get_gene_frequency_by_cancer_type` reads one of its views. This should print `UNCALLED 2` and `NOT IN 1` (the old views give 1 and 0):
+   ```bash
+   kubectl exec -n default deploy/cbioagent-clickhouse-mcp -- /app/.venv/bin/python -c "
+   from mcp_clickhouse.mcp_server import create_clickhouse_client as c
+   q = c()
+   print('serving', q.query('SELECT currentDatabase()').result_rows[0][0])
+   print('UNCALLED', q.query('SHOW CREATE VIEW gene_alteration_frequency_by_cancer_type').result_rows[0][0].count('UNCALLED'))
+   print('NOT IN', q.query('SHOW CREATE VIEW top_mutated_genes_in_study').result_rows[0][0].count('NOT IN'))
+   "
+   ```
+
+Then:
+
+```bash
 ./add_domain_tools.py           # dry run: expect "would add on agent_9ZXh... (N -> N+4 tools)" and the four names
 ./add_domain_tools.py --apply   # expect "add on agent_9ZXh..."
 ./add_domain_tools.py           # expect "unchanged agent_9ZXh..."

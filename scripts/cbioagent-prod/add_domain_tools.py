@@ -3,7 +3,8 @@
 
 The prod agent lists its cbioportal-database tools one by one, so a new server tool is invisible to it until
 it is added here. Writes only PROD_AGENT_ID. Dry run unless --apply is given. Safe to re-run: an agent that
-already has the tools is left alone. Run it after the prod MCP image with #154 has rolled; see README.md.
+already has the tools is left alone. The dry run only reads, so it can run at any time. Run --apply only
+after the prod MCP image with #154 has rolled and a clone has applied its sql/4; see README.md.
 
     MONGO_URI=mongodb://localhost:27017/cBioAgent ./add_domain_tools.py
 """
