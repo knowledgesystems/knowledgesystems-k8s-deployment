@@ -62,6 +62,15 @@ spec:
             # cbioagent-librechat on the internal path), so "*" is fine.
             - name: CLICKHOUSE_MCP_FORWARDED_ALLOW_IPS
               value: "*"
+            # Size of the server's ClickHouse query pool (cbioportal-mcp
+            # query_concurrency.py); also overwrites any
+            # CLICKHOUSE_MCP_MAX_WORKERS from the Secret before the pool is
+            # created. Per pod, so account for this Deployment, its sibling
+            # (cbioagent-clickhouse-mcp-auth) and one surge pod each during a roll when
+            # changing it. Queries beyond it queue, and the wait counts
+            # against CLICKHOUSE_MCP_QUERY_TIMEOUT.
+            - name: CBIOPORTAL_MCP_MAX_CONCURRENT_QUERIES
+              value: "4"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
