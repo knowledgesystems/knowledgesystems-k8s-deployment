@@ -65,6 +65,8 @@ spec:
               value: "INFO"
             - name: ANNOTATE_MAX_INPUTS
               value: "250"
+            - name: UI_EVENTS_ENABLED
+              value: "true"
             - name: AUTH_SESSION_TTL_SECONDS
               value: "2592000"
             - name: USER_STORE_BACKEND
