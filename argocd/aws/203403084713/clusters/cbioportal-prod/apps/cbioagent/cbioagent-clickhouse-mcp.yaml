@@ -8,6 +8,9 @@ metadata:
     # Reloader rolls this Deployment when the daily clone cron patches
     # clickhouse-mcp-active.CLICKHOUSE_DATABASE on a successful build.
     configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
+    # Roll when the LibreChat bridge secret is rotated (and created, if
+    # Reloader runs with --reload-on-create).
+    secret.reloader.stakater.com/reload: "cbioportal-mcp-bridge"
     # Keel polls Docker Hub for `cbioportal/mcp:latest` and rolls the
     # Deployment when the digest changes. Without this, `:latest` only
     # gets re-pulled when the pod restarts for other reasons (daily clone
@@ -71,6 +74,42 @@ spec:
             # against CLICKHOUSE_MCP_QUERY_TIMEOUT.
             - name: CBIOPORTAL_MCP_MAX_CONCURRENT_QUERIES
               value: "4"
+            # Upcoming cbioportal-mcp releases refuse to start unless this is
+            # set explicitly (on|off, no default). `off` = current behavior
+            # (no per-user study filtering). Ignored by current images.
+            - name: CBIOPORTAL_MCP_STUDY_FILTERING
+              value: "off"
+            # Upcoming cbioportal-mcp releases refuse to start unless this is
+            # set explicitly (off|enforce, no default). One switch for
+            # mandatory login + LibreChat bridge-secret check + verified-email
+            # check. `off` = current behavior. Flip to `enforce` via a git
+            # change + Argo sync (pod rolls). Ignored by current images.
+            - name: CBIOPORTAL_MCP_AUTH_ENFORCEMENT
+              value: "off"
+            # Required by upcoming images, no default. Comma-separated tester
+            # emails (case-insensitive); while AUTH_ENFORCEMENT is off,
+            # identified testers get the full new checks. Empty string = no
+            # testers, set explicitly. Ignored by current images.
+            - name: CBIOPORTAL_MCP_AUTH_TEST_USERS
+              value: ""
+            # Required by upcoming images, no default (off|enforce). When
+            # `enforce`, the server refuses to start if a filtering-off DB has
+            # public=0 studies, unknown groups, or authorities rows. Ignored
+            # by current images.
+            - name: CBIOPORTAL_MCP_PUBLIC_DB_CHECK
+              value: "off"
+            # Shared secret LibreChat sends in the
+            # x-cbioportal-mcp-bridge-secret header (see librechat-config.yaml).
+            # Upcoming cbioportal-mcp releases require it to trust the
+            # x-user-* identity headers. Secret is created out of band
+            # (portal-configuration); optional so the pod still starts before
+            # it exists. Ignored by current images.
+            - name: CBIOPORTAL_MCP_BRIDGE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-mcp-bridge
+                  key: CBIOPORTAL_MCP_BRIDGE_SECRET
+                  optional: true
           envFrom:
             - secretRef:
                 name: clickhouse-mcp

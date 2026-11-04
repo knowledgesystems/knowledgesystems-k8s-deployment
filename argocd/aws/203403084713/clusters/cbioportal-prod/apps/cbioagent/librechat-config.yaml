@@ -123,9 +123,17 @@ data:
         # recipes) into the agent system prompt so the model doesn't spend
         # tool rounds on list_guides / clickhouse_list_table_columns.
         serverInstructions: true
+        # Bridge contract with cbioportal-mcp (HTTP auth for LibreChat):
+        # x-cbioportal-mcp-bridge-secret proves the request came from this
+        # LibreChat, so the MCP may trust the x-user-* identity headers.
+        # ${CBIOPORTAL_MCP_BRIDGE_SECRET} is resolved from LibreChat's env
+        # (values.yaml, Secret cbioportal-mcp-bridge); emailVerified renders
+        # as "true"/"false". Current MCP images ignore both extra headers.
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
+          x-user-email-verified: "{{LIBRECHAT_USER_EMAILVERIFIED}}"
+          x-cbioportal-mcp-bridge-secret: "${CBIOPORTAL_MCP_BRIDGE_SECRET}"
       cbioportal-navigator:
         type: streamable-http
         url: http://cbioportal-navigator:80/mcp
