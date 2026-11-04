@@ -9,7 +9,7 @@ metadata:
     tags.datadoghq.com/version: 7.1.1
   name: cbioportal-backend-public-beta-blue
   annotations:
-    secret.reloader.stakater.com/reload: "cbioportal-public-blue"
+    secret.reloader.stakater.com/reload: "cbioportal-public-blue,cbioportal-beta-authz-api-clone"
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -118,13 +118,14 @@ spec:
             - --spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys
             - --security.cors.allowed-origins=*
             # db settings
-            - --db.user=$(DB_USER)
-            - --db.password=$(DB_PASSWORD)
-            - --spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+            - --db.user=$(DB_CLICKHOUSE_USER)
+            - --db.password=$(DB_CLICKHOUSE_PASSWORD)
+            - --spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
-            - --spring.datasource.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.username=$(DB_USER)
-            - --spring.datasource.password=$(DB_PASSWORD)
+            - --db.portal_db_name=$(DB_PORTAL_DB_NAME)
+            - --spring.datasource.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.username=$(DB_CLICKHOUSE_USER)
+            - --spring.datasource.password=$(DB_CLICKHOUSE_PASSWORD)
             - --tomcat.catalina.scope=runtime
             - --show.transcript_dropdown=true
             - --skin.show_tweet_button=$(SKIN_SHOW_TWEET_BUTTON)
@@ -165,24 +166,25 @@ spec:
             # spring.autoconfigure.exclude to a random value to override the
             # property in applications.properties.EXAMPLE
             - --spring.autoconfigure.exclude=dontexcludeanythingplz
-            # redis cache settings (currently redis)
+            # cache settings
             #- --cache.statistics_endpoint_enabled=false
             #- --logging.level.org.cbioportal.persistence=DEBUG
-            # persistence cache settings (currently redis)
+            # persistence cache settings
             #- -Dcache.statistics_endpoint_enabled=false
-            - --persistence.cache_type=redis
+            - --persistence.cache_type=no-cache
+            - --cache.cache-map-utils.spring-managed=false
+            - --cache.cancer_study_permission.ttl_seconds=0
             - --redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379
             - --redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379
             - --redis.database=6
             - --redis.password=$(REDIS_PERSISTENCE_PASSWORD)
-            - --redis.clear_on_startup=true
+            - --redis.clear_on_startup=false
             - --redis.ttl_mins=60
             - --cache.endpoint.enabled=true
             - --cache.endpoint.api-key=1kmfbftTb2iY
             # NEW PROPERTIES START
             - --enable_persistent_cache=true
-            - --persistence.cache_type_clickhouse=redis
-            #- --persistence.cache_type_clickhouse=no-cache
+            - --persistence.cache_type_clickhouse=no-cache
             - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
@@ -227,6 +229,13 @@ spec:
           command:
             - java
           env:
+            - name: DB_CLICKHOUSE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-beta-authz-api-clone
+                  key: DB_CLICKHOUSE_CONNECTION_STRING
+            - name: DB_PORTAL_DB_NAME
+              value: cbioportal_authz_api_test
             - name: DD_PROFILING_ENABLED
               value: "true"
             - name: DD_LOGS_INJECTION
