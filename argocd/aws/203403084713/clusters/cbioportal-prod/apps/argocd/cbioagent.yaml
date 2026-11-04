@@ -2,6 +2,25 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cbioagent
+  annotations:
+    # Workaround for Argo CD v2.14.2 on EKS/Kubernetes 1.35. With the app-wide
+    # ServerSideApply=true sync option below, Argo's default diff is the
+    # structured-merge diff, which types live objects against Argo's embedded
+    # static schema (k8s.io/api v0.31). That schema has no
+    # `.status.terminatingReplicas` (added in k8s 1.33), so every comparison
+    # has failed since the 1.35 upgrade with:
+    #   ComparisonError: ... .status.terminatingReplicas: field not declared in schema
+    # Server-Side Diff does a server-side dry-run apply against the cluster's
+    # own schema instead, so the field resolves. The ignoreDifferences below
+    # still applies: the jsonPointers normalizer strips
+    # /data/CLICKHOUSE_DATABASE from the desired manifest before the dry-run
+    # and from both sides before comparing.
+    # Remove this annotation once Argo CD is upgraded to >= v3.1, which ships
+    # a newer static schema.
+    # Refs:
+    #   https://argo-cd.readthedocs.io/en/release-2.14/user-guide/diff-strategies/#server-side-diff
+    #   https://argo-cd.readthedocs.io/en/stable/faq/#how-do-i-fix-field-not-declared-in-schema
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   project: default
   sources:
@@ -19,9 +38,13 @@ spec:
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent/values.yaml
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    # TODO(follow-up PR): restore automated prune/selfHeal. Auto-sync is paused
+    # so the first comparison after ServerSideDiff is enabled (the app has
+    # been unable to compare since 2026-10-15) is reviewed by a human and
+    # synced by hand, not auto-applied or auto-pruned.
+    # automated:
+    #   prune: true
+    #   selfHeal: true
     # RespectIgnoreDifferences + ServerSideApply together let the cron's
     # in-cluster patch on `clickhouse-mcp-active.data.CLICKHOUSE_DATABASE`
     # survive each sync. RespectIgnoreDifferences alone wasn't enough:
