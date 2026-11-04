@@ -18,7 +18,7 @@ fullnameOverride: cbioagent-librechat-beta
 replicaCount: 1
 
 deploymentAnnotations:
-  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
+  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env,cbioportal-mcp-bridge"
   configmap.reloader.stakater.com/reload: "librechat-config-beta"
   # Beta tracks the mutable `cbioportal/librechat:beta` tag — every push
   # to the `beta` branch on cbioportal/librechat overwrites that tag.
@@ -64,6 +64,16 @@ global:
       # Sonnet 5 is now subscribed on the Bedrock account and invokable.
       - name: BEDROCK_AWS_MODELS
         value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5,us.anthropic.claude-haiku-4-5-20251001-v1:0"
+      # Shared secret sent to the cbioportal-database MCP in the
+      # x-cbioportal-mcp-bridge-secret header (librechat-config.yaml resolves
+      # ${CBIOPORTAL_MCP_BRIDGE_SECRET} from this env). Secret is created out
+      # of band (portal-configuration); optional so the pod starts without it.
+      - name: CBIOPORTAL_MCP_BRIDGE_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: cbioportal-mcp-bridge
+            key: CBIOPORTAL_MCP_BRIDGE_SECRET
+            optional: true
 
 librechat:
   existingSecretName: "librechat-credentials-env"

@@ -9,6 +9,8 @@ metadata:
     # changes — the daily clone cron flips that ConfigMap's
     # CLICKHOUSE_DATABASE on each successful build.
     configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
+    # Roll when the LibreChat bridge secret is created or rotated.
+    secret.reloader.stakater.com/reload: "cbioportal-mcp-bridge"
     # Keel polls Docker Hub for `cbioportal/mcp:latest` and rolls the
     # Deployment when the digest changes. Without this, `:latest` only
     # gets re-pulled when the pod restarts for other reasons (daily clone
@@ -59,6 +61,30 @@ spec:
             # in-cluster Services, so "*" is fine.
             - name: CLICKHOUSE_MCP_FORWARDED_ALLOW_IPS
               value: "*"
+            # Explicit transport. The image's Dockerfile default is stdio and
+            # this was previously only set via the clickhouse-mcp Secret;
+            # pinning it here keeps the pod serving streamable HTTP once
+            # cbioportal-mcp makes HTTP the default and stdio local-dev only.
+            # `env:` beats `envFrom:`, so this wins over the Secret's value.
+            - name: CLICKHOUSE_MCP_SERVER_TRANSPORT
+              value: "http"
+            # Upcoming cbioportal-mcp releases refuse to start unless this is
+            # set explicitly (on|off, no default). `off` = current behavior
+            # (no per-user study filtering). Ignored by current images.
+            - name: CBIOPORTAL_MCP_STUDY_FILTERING
+              value: "off"
+            # Shared secret LibreChat sends in the
+            # x-cbioportal-mcp-bridge-secret header (see librechat-config.yaml).
+            # Upcoming cbioportal-mcp releases require it to trust the
+            # x-user-* identity headers. Secret is created out of band
+            # (portal-configuration); optional so the pod still starts before
+            # it exists. Ignored by current images.
+            - name: CBIOPORTAL_MCP_BRIDGE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-mcp-bridge
+                  key: CBIOPORTAL_MCP_BRIDGE_SECRET
+                  optional: true
           envFrom:
             - secretRef:
                 name: clickhouse-mcp

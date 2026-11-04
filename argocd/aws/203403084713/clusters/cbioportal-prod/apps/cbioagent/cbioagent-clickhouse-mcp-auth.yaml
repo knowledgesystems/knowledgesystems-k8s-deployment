@@ -111,6 +111,18 @@ spec:
             # reproduce this exact bug.
             - name: REDIS_URL
               value: "redis://:$(REDIS_SESSION_PASSWORD)@$(REDIS_SESSION_HOST):$(REDIS_SESSION_PORT)/1"
+            # Explicit transport. The image's Dockerfile default is stdio and
+            # this was previously only set via the clickhouse-mcp Secret;
+            # pinning it here keeps the pod serving streamable HTTP once
+            # cbioportal-mcp makes HTTP the default and stdio local-dev only.
+            # `env:` beats `envFrom:`, so this wins over the Secret's value.
+            - name: CLICKHOUSE_MCP_SERVER_TRANSPORT
+              value: "http"
+            # Upcoming cbioportal-mcp releases refuse to start unless this is
+            # set explicitly (on|off, no default). `off` = current behavior
+            # (no per-user study filtering). Ignored by current images.
+            - name: CBIOPORTAL_MCP_STUDY_FILTERING
+              value: "off"
           envFrom:
             - secretRef:
                 name: clickhouse-mcp
