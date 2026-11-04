@@ -17,7 +17,8 @@ metadata:
     # Reloader rolls this Deployment when the beta daily clone cron patches
     # clickhouse-mcp-active-beta.CLICKHOUSE_DATABASE on a successful build.
     configmap.reloader.stakater.com/reload: "clickhouse-mcp-active-beta"
-    # Roll when the LibreChat bridge secret is created or rotated.
+    # Roll when the LibreChat bridge secret is rotated (and created, if
+    # Reloader runs with --reload-on-create).
     secret.reloader.stakater.com/reload: "cbioportal-mcp-bridge"
     # Keel polls Docker Hub for `cbioportal/mcp:beta` and rolls the
     # Deployment when the digest changes, so a merge to the MCP repo's
@@ -75,13 +76,6 @@ spec:
             # llm_user_beta; default readonly=1 disables the cache pilot.
             # - name: CBIOPORTAL_MCP_QUERY_CACHE_ENABLED
             #   value: "true"
-            # Explicit transport. The image's Dockerfile default is stdio and
-            # this was previously only set via the clickhouse-mcp Secret;
-            # pinning it here keeps the pod serving streamable HTTP once
-            # cbioportal-mcp makes HTTP the default and stdio local-dev only.
-            # `env:` beats `envFrom:`, so this wins over the Secret's value.
-            - name: CLICKHOUSE_MCP_SERVER_TRANSPORT
-              value: "http"
             # Upcoming cbioportal-mcp releases refuse to start unless this is
             # set explicitly (on|off, no default). `off` = current behavior
             # (no per-user study filtering). Ignored by current images.
