@@ -238,7 +238,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-blue
-          image: cbioportal/cbioportal:demo-sidebar-web-shenandoah
+          image: cbioportal/cbioportal:example_adding_userid_to_query-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
