@@ -1,0 +1,82 @@
+# OpenMetadata 2.0.7 - chart https://helm.open-metadata.org/ openmetadata 2.0.7
+# Mirrors the pipelines5 trial: basic auth, same Fernet + JWT keys, data migrated from its MySQL.
+
+image:
+  repository: openmetadata/server        # Docker Hub (multi-arch); the cluster already pulls from Docker Hub
+  tag: "2.0.7"
+  pullPolicy: IfNotPresent
+
+nodeSelector:
+  workload: openmetadata
+tolerations:
+  - key: workload
+    operator: Equal
+    value: openmetadata
+    effect: NoSchedule
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 2560Mi
+  limits:
+    memory: 3584Mi
+
+extraEnvs:
+  - name: OPENMETADATA_HEAP_OPTS
+    value: "-Xmx2G -Xms2G"
+
+# JWT signing keys copied from pipelines5 (keeps existing bot tokens valid)
+extraVolumes:
+  - name: jwt-keys
+    secret:
+      secretName: openmetadata-jwt-keys
+extraVolumeMounts:
+  - name: jwt-keys
+    mountPath: /etc/openmetadata/jwt
+    readOnly: true
+
+openmetadata:
+  config:
+    elasticsearch:
+      host: opensearch
+      searchType: opensearch
+      port: 9200
+      scheme: http
+
+    database:
+      host: keycloak-db-blue.cd0mm8ga6b1h.us-east-1.rds.amazonaws.com
+      port: 3306
+      databaseName: openmetadata_db
+      auth:
+        username: openmetadata_user
+        password:
+          secretRef: mysql-secrets
+          secretKey: openmetadata-mysql-password
+      dbParams: "allowPublicKeyRetrieval=true&sslMode=REQUIRED&serverTimezone=UTC"
+
+    # Run agents as Kubernetes Jobs/CronJobs instead of Airflow
+    pipelineServiceClientConfig:
+      enabled: true
+      type: "k8s"
+      metadataApiEndpoint: http://openmetadata:8585/api
+      k8s:
+        ingestionImage: "openmetadata/ingestion-base:2.0.7"
+        nodeSelector: "workload=openmetadata"
+        tolerations:
+          - key: workload
+            operator: Equal
+            value: openmetadata
+            effect: NoSchedule
+
+    authentication:
+      enableSelfSignup: false
+
+    jwtTokenConfiguration:
+      rsapublicKeyFilePath: /etc/openmetadata/jwt/public_key.der
+      rsaprivateKeyFilePath: /etc/openmetadata/jwt/private_key.der
+      keyId: "1124905a-0a0b-4197-8372-fd18b86b8ccc"   # JWT_KEY_ID from pipelines5 .env (not a secret)
+
+    fernetkey:
+      value: ""
+      secretRef: openmetadata-fernet
+      secretKey: FERNET_KEY
