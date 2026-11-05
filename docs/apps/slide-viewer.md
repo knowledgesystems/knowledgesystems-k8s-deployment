@@ -31,22 +31,12 @@ carry, so it reaches whichever color the nightly import left running. The
 auth cache key includes `$host`, because the cache zone and the `SESSION`
 cookie name are shared with beta.
 
-The triage portal itself serves the stock frontend. A user switches one browser
-to the WSI frontend from the browser console on the triage host:
+The Pathology Slides tab appears when the portal is configured with
+`--wsi.tile_server.url=/wsi`.
 
-```js
-localStorage.netlify = "6ae4d971b7b0d681b9e88a16--cbioportalfrontend";
-localStorage.frontendConfig = JSON.stringify({serverConfig: {wsi_tile_server_url: "/wsi"}});
-location.reload();
-```
-
-To switch back, use the "clear" link in the frontend banner and run
-`localStorage.removeItem("frontendConfig")`.
-
-- The standalone `/wsi/patient/...` links need a portal that includes
-  cBioPortal/cbioportal#12378; the triage portal's v7.2.3 does not serve that
-  route on a direct visit, so open slides from the patient view instead.
-- The study's WSI data must be in the newer `metadata.serving` format, which
+- The standalone `/wsi/patient/...` links require a portal version newer
+  than v7.2.3.
+- The study's WSI data must be in the `metadata.serving` format, which
   carries each slide's serving `key` and sealed source `enc`.
 
 ## Development capacity controls
