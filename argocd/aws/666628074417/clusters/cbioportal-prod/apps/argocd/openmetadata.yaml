@@ -6,13 +6,11 @@ metadata:
 spec:
   project: default
   sources:
-    # Plain manifests (the Ingress) + the values files referenced below
     - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
       path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/openmetadata
       targetRevision: HEAD
       directory:
         recurse: true
-        include: "ingress.yaml"   # don't try to apply the values-*.yaml files as manifests
       ref: k8s-repo
     # Search engine (single node, no security plugin, internal only)
     - repoURL: https://opensearch-project.github.io/helm-charts/
@@ -31,7 +29,7 @@ spec:
         valueFiles:
           - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/openmetadata/values-openmetadata.yaml
   destination:
-    namespace: openmetadata
+    namespace: default
     server: https://kubernetes.default.svc
   syncPolicy:
     syncOptions:

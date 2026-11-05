@@ -32,37 +32,3 @@ spec:
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized
     consolidateAfter: 2m
----
-apiVersion: karpenter.sh/v1
-kind: NodePool
-metadata:
-  name: openmetadata
-spec:
-  template:
-    metadata:
-      labels:
-        workload: openmetadata
-    spec:
-      requirements:
-        - key: node.kubernetes.io/instance-type
-          operator: In
-          values: ["r5.large"]          # 2 vCPU / 16 GiB: server + OpenSearch + one ingestion job
-        - key: kubernetes.io/arch
-          operator: In
-          values: ["amd64"]
-        - key: karpenter.sh/capacity-type
-          operator: In
-          values: ["on-demand"]
-      taints:
-        - key: workload
-          value: openmetadata
-          effect: NoSchedule
-      nodeClassRef:
-        group: karpenter.k8s.aws
-        kind: EC2NodeClass
-        name: x86-standard               # same subnet/AZ every time, so the OpenSearch EBS volume can follow
-  limits:
-    cpu: "4"                             # at most two r5.large
-  disruption:
-    consolidationPolicy: WhenEmpty       # don't reshuffle the long-running server/search pods
-    consolidateAfter: 10m

@@ -1,6 +1,6 @@
 # OpenSearch 3.5.0 (chart https://opensearch-project.github.io/helm-charts/ opensearch 3.5.0)
 # Settings follow OpenMetadata's own openmetadata-dependencies chart. Search is rebuildable
-# from the database, so a single node with a small volume is enough.
+# from the database, so a single node on node-local storage is enough; reindex after the pod moves.
 clusterName: opensearch
 fullnameOverride: opensearch
 nodeGroup: ""
@@ -22,9 +22,17 @@ config:
     node.store.allow_mmap: false
 
 persistence:
-  enabled: true
-  storageClass: ebs-sc
-  size: 20Gi
+  enabled: false
+
+# Without persistence the chart mounts nothing at the data dir; emptyDir keeps the
+# index across container restarts.
+extraVolumes:
+  - name: data
+    emptyDir:
+      sizeLimit: 10Gi
+extraVolumeMounts:
+  - name: data
+    mountPath: /usr/share/opensearch/data
 
 resources:
   requests:
