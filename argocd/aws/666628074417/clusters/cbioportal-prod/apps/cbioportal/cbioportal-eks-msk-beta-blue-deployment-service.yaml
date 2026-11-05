@@ -25,8 +25,6 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
-        wsi.cbioportal.org/release-id: "beta-wsi-v8-20261030-1"
-        wsi.cbioportal.org/frontend-git-sha: "8798d8b317422136156441e6081554fd2dd180e3"
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-blue
@@ -87,9 +85,6 @@ spec:
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
             - --frontend.url=https://frontend.cbioportal.org/
-            - --wsi.release-id=beta-wsi-v8-20261030-1
-            - --wsi.backend-git-sha=57f334d10555f279668345da65a2354ac0b32c76
-            - --wsi.serving-contract-version=wsi-serving-v6
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
             - --default_cross_cancer_study_list=mskimpact
