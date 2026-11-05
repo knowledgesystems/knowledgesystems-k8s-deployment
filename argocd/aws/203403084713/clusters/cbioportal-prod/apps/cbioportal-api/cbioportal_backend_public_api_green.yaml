@@ -282,7 +282,7 @@ spec:
               value: "X-Forwarded-For:http.client_ip,X-Real-IP:http.client_ip"
           envFrom:
             - secretRef:
-                name: cbioportal-public-green
+                name: cbioportal-public-api-green
           # Please change this in tandem with the website backend image.
           image: cbioportal/cbioportal:v7.2.3-web-shenandoah
           imagePullPolicy: Always
