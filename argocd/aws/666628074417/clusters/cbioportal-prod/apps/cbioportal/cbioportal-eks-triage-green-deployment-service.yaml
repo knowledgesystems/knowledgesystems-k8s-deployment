@@ -40,6 +40,8 @@ spec:
                 path: local.crt
       containers:
         - envFrom:
+            - configMapRef:
+                name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-triage-green
           env:
