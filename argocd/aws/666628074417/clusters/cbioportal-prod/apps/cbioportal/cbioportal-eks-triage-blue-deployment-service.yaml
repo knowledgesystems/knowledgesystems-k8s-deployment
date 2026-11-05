@@ -58,7 +58,7 @@ spec:
                 secretKeyRef:
                   name: cbioportal-wsi-auth
                   key: WSI_AUTH_SECRET
-          image: cbioportal/cbioportal:master-web-shenandoah
+          image: cbioportal/cbioportal:master-web-shenandoah@sha256:c00b4f652790b3e00650d3aa9789ae5828512139e885f94dddd0818ac0154445
           volumeMounts:
             - name: triage-eks-configmap-volume
               mountPath: /cbioportal/local.key
