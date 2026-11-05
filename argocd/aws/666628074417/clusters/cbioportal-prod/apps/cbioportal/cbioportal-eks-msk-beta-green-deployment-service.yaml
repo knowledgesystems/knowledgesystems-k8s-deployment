@@ -84,7 +84,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            - --frontend.url=https://6aed00462e25d6a4d4aba3eb--cbioportalfrontend.netlify.app/
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
             - --default_cross_cancer_study_list=mskimpact
@@ -257,7 +257,7 @@ spec:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-green
-          image: cbioportal/cbioportal:master-web-shenandoah@sha256:76999beeb2592be45e8e8c49d1d31b9f21c64ea7f22245e56a4472f8d93069fb
+          image: cbioportal/cbioportal-dev:569b24b71fe08808866bc61995d7ba478b610549-web-shenandoah@sha256:246e005ccc0840a2555cf4ffc8c7eb30c1964e6851e713113a6515381f78da2c
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
