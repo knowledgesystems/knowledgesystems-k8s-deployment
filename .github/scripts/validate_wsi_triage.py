@@ -142,12 +142,13 @@ def validate(root: Path) -> None:
     if pixel.get(NGINX + "auth-method") != "GET":
         raise AssertionError(f"{PIXEL_INGRESS} auth subrequest must use GET")
     cache_key = pixel.get(NGINX + "auth-cache-key", "")
-    for variable in ("$host", "$cookie_SESSION", "$wsi_study"):
+    for variable in ("$host", "$cookie_SESSION", "$cookie_JSESSIONID", "$wsi_study"):
         # $host must not be read as a prefix of a longer variable name.
         if re.search(re.escape(variable) + r"(?![A-Za-z0-9_])", cache_key) is None:
             raise AssertionError(
-                f"{PIXEL_INGRESS} auth cache key must contain {variable}: the "
-                "cache zone is shared with beta, whose session cookie is also SESSION"
+                f"{PIXEL_INGRESS} auth cache key must contain {variable}: it must "
+                "cover both session cookie names (SESSION, JSESSIONID), and the "
+                "cache zone is shared with beta, so it must also name the host"
             )
     if re.fullmatch(r"200 [1-9][0-9]*s", pixel.get(NGINX + "auth-cache-duration", "")) is None:
         raise AssertionError(f"{PIXEL_INGRESS} may cache only successful auth responses")
