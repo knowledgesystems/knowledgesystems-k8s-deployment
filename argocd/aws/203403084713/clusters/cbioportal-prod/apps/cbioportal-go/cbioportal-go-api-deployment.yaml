@@ -1,8 +1,12 @@
-# cbioportal-go serving the REST API only, for a share of api.cbioportal.org
-# traffic mirrored to it (apps/cbioportal-api/cbioportal-api-mirror.yaml):
-# its responses are discarded, so this measures load, latency and errors on
-# real API traffic without affecting clients. Stateless (no session file), so
-# it scales out. Same databases as go.cbioportal.org.
+# cbioportal-go serving the REST API only. It answers a share of
+# www.cbioportal.org's non-browser API traffic as the canary of the Go backend,
+# and a mirrored copy of more of it, whose answers are discarded
+# (apps/cbioportal-api/cbioportal-api-mirror.yaml). Stateless (no session
+# file), so it scales out. Same databases as go.cbioportal.org.
+#
+# It runs a pinned release on the API pool's on-demand nodes (cbio-api, next
+# to Java's API pods), so it changes only when a new release is set here:
+# https://github.com/cBioPortal/cbioportal-go/releases
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,9 +17,6 @@ metadata:
   annotations:
     configmap.reloader.stakater.com/reload: "cbioportal-go-active"
     secret.reloader.stakater.com/reload: "clickhouse-go-portal"
-    keel.sh/policy: force
-    keel.sh/trigger: poll
-    keel.sh/match-tag: "true"
 spec:
   replicas: 2
   strategy:
@@ -42,8 +43,8 @@ spec:
         runAsGroup: 10001
       containers:
         - name: cbioportal-go-api
-          image: cbioportal/cbioportal-go:latest
-          imagePullPolicy: Always
+          image: cbioportal/cbioportal-go:0.1.0
+          imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/cbioportal-api"]
           args:
             - --portal-properties=/app/deploy/public-portal.properties
@@ -101,11 +102,11 @@ spec:
             matchLabels:
               run: cbioportal-go-api
       nodeSelector:
-        workload: cbio-dev
+        workload: cbio-api
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "cbio-dev"
+          value: "cbio-api"
           effect: "NoSchedule"
 ---
 apiVersion: v1
@@ -124,8 +125,7 @@ spec:
       targetPort: 8080
   type: ClusterIP
 ---
-# Keeps one pod serving while nodes are drained (the cbio-dev spot pool is
-# consolidated and replaced often).
+# Keeps one pod serving while a node is drained.
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:

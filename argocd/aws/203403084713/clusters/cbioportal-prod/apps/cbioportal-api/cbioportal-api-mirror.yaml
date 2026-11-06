@@ -1,15 +1,52 @@
-# Traefik services that serve the public API pool exactly as before and also
-# send a share of requests to cbioportal-go-api (apps/cbioportal-go), whose
-# responses are discarded: a load and parity test of the Go backend on real API
-# traffic. Clients only ever see the Java responses.
+# Traefik services in front of the public API pool for www.cbioportal.org's
+# non-browser traffic (scripts and agents; cbio-www-ingressroute in
+# apps/cbioportal routes it to cbioportal-api-mirror-<color>).
+#
+# - cbioportal-api-canary-<color> answers each request from Java
+#   (cbioportal-backend-public-api-<color>) or, for a share of them, from
+#   cbioportal-go-api (apps/cbioportal-go): the canary of the Go backend.
+# - cbioportal-api-mirror-<color> serves the canary and also sends a copy of
+#   a share of requests to cbioportal-go-api, whose answers are discarded:
+#   load and parity on more real traffic than the canary carries.
 #
 # One service per color, so the import pipeline's color swap
-# (cmo-pipelines transfer-deployment-color.sh) switches routes between them by
-# renaming -green <-> -blue in the routes that use them: www.cbioportal.org's
-# non-browser catch-all (cbio-www-ingressroute in apps/cbioportal).
+# (cmo-pipelines transfer-deployment-color.sh) switches routes between them
+# by renaming -green <-> -blue in the routes that use them.
 #
-# To stop mirroring, point that route back at
+# To move more traffic to go, raise cbioportal-go-api's weight in both
+# canary services (and lower Java's to match). To stop the canary, set it
+# to 0. To stop mirroring, point the www route back at
 # cbioportal-backend-public-api-<color> (port 80), then delete this file.
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-api-canary-green
+  namespace: default
+spec:
+  weighted:
+    services:
+      - name: cbioportal-backend-public-api-green
+        port: 80
+        weight: 95
+      - name: cbioportal-go-api
+        port: 80
+        weight: 5
+---
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-api-canary-blue
+  namespace: default
+spec:
+  weighted:
+    services:
+      - name: cbioportal-backend-public-api-blue
+        port: 80
+        weight: 95
+      - name: cbioportal-go-api
+        port: 80
+        weight: 5
+---
 apiVersion: traefik.io/v1alpha1
 kind: TraefikService
 metadata:
@@ -17,8 +54,8 @@ metadata:
   namespace: default
 spec:
   mirroring:
-    name: cbioportal-backend-public-api-green
-    port: 80
+    name: cbioportal-api-canary-green
+    kind: TraefikService
     # Mirror POST bodies up to 1 MiB; larger requests are not mirrored.
     mirrorBody: true
     maxBodySize: 1048576
@@ -34,8 +71,8 @@ metadata:
   namespace: default
 spec:
   mirroring:
-    name: cbioportal-backend-public-api-blue
-    port: 80
+    name: cbioportal-api-canary-blue
+    kind: TraefikService
     mirrorBody: true
     maxBodySize: 1048576
     mirrors:
