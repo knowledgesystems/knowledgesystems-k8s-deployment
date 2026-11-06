@@ -45,7 +45,7 @@ roleRef:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: cbioportal-go-mirror-daily
+  name: cbioportal-go-mirror
   namespace: default
   labels:
     app.kubernetes.io/instance: cbioportal-go

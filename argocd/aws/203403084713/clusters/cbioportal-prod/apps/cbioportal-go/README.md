@@ -26,7 +26,7 @@ cbioportal-go repo.
 | `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
-| `CronJob cbioportal-go-mirror-daily` | Hourly: when production serves a new import (and none is running), clones it into the inactive color, builds the Go portal's tables, then flips the pointer; otherwise leaves the pointer as is. |
+| `CronJob cbioportal-go-mirror` | Hourly: when production serves a new import (and none is running), clones it into the inactive color, builds the Go portal's tables, then flips the pointer; otherwise leaves the pointer as is. |
 | `ServiceAccount/Role/RoleBinding cbioportal-go-mirror-job*` | Lets the CronJob `get`/`patch` only `cbioportal-go-active`. |
 | `Application cbioportal-go` (`apps/argocd/`) | Auto-sync (prune + selfHeal) of this directory. |
 
