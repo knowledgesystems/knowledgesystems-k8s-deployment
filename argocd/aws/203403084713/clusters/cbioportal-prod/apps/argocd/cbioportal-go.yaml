@@ -34,4 +34,11 @@ spec:
         - /data/CBIOPORTAL_DB
         - /data/CBIOPORTAL_RAW_DB
         - /data/CBIOPORTAL_REF_DB
+    # Reloader restarts cbioportal-go-api's pods by setting restartAt.
+    - group: argoproj.io
+      kind: Rollout
+      name: cbioportal-go-api
+      namespace: default
+      jsonPointers:
+        - /spec/restartAt
   revisionHistoryLimit: 3

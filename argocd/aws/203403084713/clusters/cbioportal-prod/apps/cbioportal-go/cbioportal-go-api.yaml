@@ -4,11 +4,20 @@
 # apps/cbioportal). Stateless (no session file), so it scales out. Same
 # databases as go.cbioportal.org.
 #
-# It runs a pinned release on the on-demand cbio-api nodes, so it changes
-# only when a new release is set here:
+# It runs a pinned release on the on-demand cbio-api nodes:
 # https://github.com/cBioPortal/cbioportal-go/releases
-apiVersion: apps/v1
-kind: Deployment
+#
+# An Argo Rollout (apps/argocd/argo-rollouts.yaml) rather than a Deployment:
+# - A new release (a new image tag here) goes out as a canary. Argo Rollouts
+#   moves 5%, then 25%, then 50% of the traffic to the new pods, through the
+#   weighted service cbioportal-go-api-weighted that both routes use. It
+#   checks the new pods' 5xx rate in Datadog throughout (AnalysisTemplate
+#   below), and goes back to the old release on its own if the check fails.
+# - A database switch (the mirror job changing cbioportal-go-active) is not a
+#   release. Reloader restarts the pods one at a time (rollout-strategy
+#   restart, which sets spec.restartAt), without the canary steps.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: cbioportal-go-api
   namespace: default
@@ -17,13 +26,32 @@ metadata:
   annotations:
     configmap.reloader.stakater.com/reload: "cbioportal-go-active"
     secret.reloader.stakater.com/reload: "clickhouse-go-portal"
+    reloader.stakater.com/rollout-strategy: "restart"
 spec:
   replicas: 2
+  revisionHistoryLimit: 3
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+    canary:
+      stableService: cbioportal-go-api
+      canaryService: cbioportal-go-api-canary
+      trafficRouting:
+        traefik:
+          weightedTraefikServiceName: cbioportal-go-api-weighted
+      analysis:
+        templates:
+          - templateName: cbioportal-go-api-errors
+        startingStep: 1
+        args:
+          - name: canary-hash
+            valueFrom:
+              podTemplateHashValue: Latest
+      steps:
+        - setWeight: 5
+        - pause: {duration: 30m}
+        - setWeight: 25
+        - pause: {duration: 30m}
+        - setWeight: 50
+        - pause: {duration: 15m}
   selector:
     matchLabels:
       run: cbioportal-go-api
@@ -127,6 +155,67 @@ spec:
       name: http
       targetPort: 8080
   type: ClusterIP
+---
+# The new release's pods during a canary (Argo Rollouts adds the pod template
+# hash to its selector).
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-go-api-canary
+  namespace: default
+  labels:
+    run: cbioportal-go-api
+spec:
+  selector:
+    run: cbioportal-go-api
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  type: ClusterIP
+---
+# The service the routes use. Argo Rollouts sets the two weights during a
+# canary; outside one, all traffic goes to the stable pods.
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: cbioportal-go-api-weighted
+  namespace: default
+spec:
+  weighted:
+    services:
+      - name: cbioportal-go-api
+        port: 80
+        weight: 100
+      - name: cbioportal-go-api-canary
+        port: 80
+        weight: 0
+---
+# The canary check: the new pods' share of 5xx answers, every 5 minutes. Two
+# failed checks abort the canary and send all traffic back to the old pods.
+# Reads the Datadog Secret of the argo-rollouts namespace
+# (apps/argocd/argo-rollouts.yaml).
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: cbioportal-go-api-errors
+  namespace: default
+spec:
+  args:
+    - name: canary-hash
+  metrics:
+    - name: error-rate
+      interval: 5m
+      failureLimit: 1
+      successCondition: default(result, 0) < 0.01
+      provider:
+        datadog:
+          apiVersion: v2
+          interval: 5m
+          queries:
+            errors: sum:cbioportal_go.cbioportal_http_requests.count{kube_replica_set:cbioportal-go-api-{{args.canary-hash}},code:5*}.as_count()
+            all: sum:cbioportal_go.cbioportal_http_requests.count{kube_replica_set:cbioportal-go-api-{{args.canary-hash}}}.as_count()
+          formula: errors / all
 ---
 # Keeps one pod serving while a node is drained.
 apiVersion: policy/v1
