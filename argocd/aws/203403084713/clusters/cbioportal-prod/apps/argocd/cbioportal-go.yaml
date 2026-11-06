@@ -3,6 +3,18 @@ kind: Application
 metadata:
   name: cbioportal-go
   namespace: argocd
+  annotations:
+    # Workaround for Argo CD v2.14.2 on Kubernetes 1.35, as in cbioagent.yaml:
+    # with ServerSideApply=true the default structured-merge diff types live
+    # objects against Argo's embedded schema (k8s.io/api v0.31), which has no
+    # Deployment `.status.terminatingReplicas`, so every comparison fails with
+    #   ComparisonError: ... .status.terminatingReplicas: field not declared in schema
+    # Server-Side Diff dry-runs the apply against the cluster's own schema.
+    # Remove once Argo CD is >= v3.1.
+    # Refs:
+    #   https://argo-cd.readthedocs.io/en/release-2.14/user-guide/diff-strategies/#server-side-diff
+    #   https://argo-cd.readthedocs.io/en/stable/faq/#how-do-i-fix-field-not-declared-in-schema
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   project: default
   source:
