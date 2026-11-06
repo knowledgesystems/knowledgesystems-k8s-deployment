@@ -45,8 +45,8 @@ spec:
         - name: ratelimit-heavy-cloudflare
           namespace: default
       services:
-        - name: cbioportal-go-api
-          port: 80
+        - name: cbioportal-go-api-weighted
+          kind: TraefikService
     # Study-wide clinical-events (bulk/API only; the UI does not call this): per-IP rate limit
     - match: >-
         Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`)
@@ -71,8 +71,8 @@ spec:
         - name: ratelimit-heavy
           namespace: default
       services:
-        - name: cbioportal-go-api
-          port: 80
+        - name: cbioportal-go-api-weighted
+          kind: TraefikService
     # Browser API requests: served as the browser route below, through
     # cbioportal-www-mirror-<color> (apps/cbioportal-go), which also sends a
     # share of them to cbioportal-go-www and discards its answers. Requests
@@ -115,8 +115,8 @@ spec:
         - name: inflight-heavy-total
           namespace: default
       services:
-        - name: cbioportal-go-api
-          port: 80
+        - name: cbioportal-go-api-weighted
+          kind: TraefikService
     - match: >-
         Host(`www.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|structural-variant/fetch|clinical-data/fetch|studies/[^/]+/clinical-data(/fetch)?|molecular-profiles/[^/]+/(molecular-data|mutations|discrete-copy-number)(/fetch)?)$`)
       kind: Rule
@@ -129,10 +129,11 @@ spec:
         - name: inflight-heavy-total
           namespace: default
       services:
-        - name: cbioportal-go-api
-          port: 80
+        - name: cbioportal-go-api-weighted
+          kind: TraefikService
     # Non-browser traffic (catch-all): scripts and agents, answered by the
-    # Go backend (cbioportal-go-api in apps/cbioportal-go). It has no color: it
+    # Go backend (cbioportal-go-api-weighted in apps/cbioportal-go, which
+    # Argo Rollouts splits between releases during a canary). It has no color: it
     # follows production's imports through its own mirror of the database.
     - match: Host(`www.cbioportal.org`)
       kind: Rule
@@ -141,8 +142,8 @@ spec:
         - name: ipblock
           namespace: default
       services:
-        - name: cbioportal-go-api
-          port: 80
+        - name: cbioportal-go-api-weighted
+          kind: TraefikService
   tls:
     secretName: www-cbioportal-cert
 ---

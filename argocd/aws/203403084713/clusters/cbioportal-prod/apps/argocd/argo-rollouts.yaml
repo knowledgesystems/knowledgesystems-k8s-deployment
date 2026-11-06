@@ -1,0 +1,40 @@
+# Argo Rollouts: staged releases (canary steps with automatic checks) for
+# workloads defined as a Rollout instead of a Deployment. Used by
+# cbioportal-go-api (apps/cbioportal-go).
+#
+# The canary checks query Datadog. They read the Secret "datadog" in the
+# argo-rollouts namespace (keys: address, api-key, app-key), which is created
+# out of band, not from this repository.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-rollouts
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-rollouts
+    targetRevision: 2.43.6
+    helm:
+      releaseName: argo-rollouts
+      valuesObject:
+        controller:
+          replicas: 1
+        dashboard:
+          enabled: false
+        # Lets the controller set the weights of Traefik's weighted services.
+        providerRBAC:
+          enabled: true
+          providers:
+            traefik: true
+  destination:
+    namespace: argo-rollouts
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -21,7 +21,7 @@ cbioportal-go repo.
 |---|---|
 | `Deployment cbioportal-go` | 2 replicas of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`), stateless: sessions in the public session service, logins in the public session Redis. Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
-| `Deployment` / `Service cbioportal-go-api` | The public REST API: api.cbioportal.org and www's non-browser API traffic. API-only, stateless, 2 replicas on the same databases. It runs a pinned release (`cbioportal/cbioportal-go:<X.Y.Z>`) on the on-demand `cbio-api` nodes. |
+| `Rollout` / `Service cbioportal-go-api`, `-canary`, `TraefikService cbioportal-go-api-weighted`, `AnalysisTemplate cbioportal-go-api-errors` | The public REST API: api.cbioportal.org and www's non-browser API traffic. Stateless, 2 replicas on the same databases, on the on-demand `cbio-api` nodes. An [Argo Rollout](https://argoproj.github.io/rollouts/): a new release goes out as a canary (see below). |
 | `Deployment` / `Service cbioportal-go-www`, `TraefikService cbioportal-www-mirror-{green,blue}` | The same, for a mirrored share of www's browser API traffic. |
 | `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
@@ -111,10 +111,29 @@ deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
 `cbioportal-go-api` answers api.cbioportal.org
 (`apps/cbioportal-api/cbioportal-api-ingress.yaml`) and www.cbioportal.org's
 non-browser API traffic, from scripts and agents (the non-browser routes of
-`apps/cbioportal/cbio-www-ingressroute.yml`). Its name has no color, so the
-import pipeline's weekly color swap leaves these routes alone. go follows
-production's imports through its own mirror of the database. To upgrade go,
-set a newer release tag on `cbioportal-go-api`'s image.
+`apps/cbioportal/cbio-www-ingressroute.yml`). Both routes use the weighted
+service `cbioportal-go-api-weighted`. Its name has no color, so the import
+pipeline's weekly color swap leaves these routes alone.
+
+**Releases.** To upgrade go, set a newer release tag on the Rollout's image.
+Argo Rollouts (`apps/argocd/argo-rollouts.yaml`) then:
+
+1. starts one pod of the new release and sends it 5% of the traffic, then 25%
+   and then 50%, pausing 30, 30 and 15 minutes;
+2. checks the new pods' share of 5xx answers in Datadog every 5 minutes
+   (`AnalysisTemplate cbioportal-go-api-errors`). Two failed checks abort the
+   release and send all traffic back to the old pods;
+3. replaces the old pods once every step passed.
+
+```bash
+kubectl argo rollouts get rollout cbioportal-go-api      # watch a release
+kubectl argo rollouts promote cbioportal-go-api          # skip the remaining steps
+kubectl argo rollouts abort cbioportal-go-api            # go back to the old release
+```
+
+**Database switches** are not releases. When the mirror job changes
+`cbioportal-go-active`, Reloader restarts the pods one at a time
+(`reloader.stakater.com/rollout-strategy: restart`), without the canary steps.
 
 ## Metrics and logs
 

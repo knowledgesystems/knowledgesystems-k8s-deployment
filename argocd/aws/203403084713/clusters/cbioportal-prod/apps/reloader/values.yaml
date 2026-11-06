@@ -1,3 +1,7 @@
 global:
   imagePullSecrets:
     - 'dockerhub-creds'
+reloader:
+  # Reloads Argo Rollouts too (cbioportal-go-api). Each Rollout picks how with
+  # the reloader.stakater.com/rollout-strategy annotation.
+  isArgoRollouts: true
