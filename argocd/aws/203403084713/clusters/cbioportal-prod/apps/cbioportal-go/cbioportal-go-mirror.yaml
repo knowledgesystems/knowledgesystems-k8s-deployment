@@ -56,9 +56,10 @@ metadata:
     # template, so go follows each production switch within minutes.
     configmap.reloader.stakater.com/reload: "cbioportal-db-status"
 spec:
-  # Hourly as well: mirror-prod.sh rebuilds only when production serves a new
-  # import (and never while one is running), otherwise it leaves the pointer
-  # as is. This retries a failed rebuild and covers a missed change.
+  # Safety net for the Reloader trigger above: retries a failed rebuild and
+  # catches a missed ConfigMap change. A run with nothing new to build exits
+  # within seconds (mirror-prod.sh rebuilds only when production serves a new
+  # import, and never while one is running).
   schedule: "7 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
