@@ -26,7 +26,7 @@ cbioportal-go repo.
 | `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
-| `CronJob cbioportal-go-mirror` | Hourly: when production serves a new import (and none is running), clones it into the inactive color, builds the Go portal's tables, then flips the pointer; otherwise leaves the pointer as is. |
+| `CronJob cbioportal-go-mirror` | After each production switch (Reloader, on a change to `cbioportal-db-status`) and hourly: when production serves a new import (and none is running), clones it into the inactive color, builds the Go portal's tables, then flips the pointer; otherwise leaves the pointer as is. |
 | `ServiceAccount/Role/RoleBinding cbioportal-go-mirror-job*` | Lets the CronJob `get`/`patch` only `cbioportal-go-active`. |
 | `Application cbioportal-go` (`apps/argocd/`) | Auto-sync (prune + selfHeal) of this directory. |
 
@@ -53,14 +53,18 @@ The names come from cbioportal-go's file importer, where `_raw` holds the staged
 study files and `_ref` the reference data loaded from the cBioPortal seed dump; the
 mirror fills the same three roles from production instead.
 
-The mirror CronJob runs every hour, at 7 minutes past.
+The mirror CronJob runs right after each production switch, and also every hour at 7
+minutes past. The public color swap sets `public_db.active_color` in the
+`cbioportal-db-status` ConfigMap (portal-configuration) when it marks an import complete,
+and Reloader then starts a Job from the CronJob's template.
 - **When production serves a new import** (and no import is running), it rebuilds the
   inactive color from production's live database. When the build succeeds, it switches
   the pointer to that color. A failed build leaves the pointer on the previous color,
   and the next run tries again.
 - **Otherwise** it does nothing.
 
-go's databases therefore follow each production import within about an hour. To switch
+go's databases therefore follow each production import within minutes (a rebuild takes
+about 5), or within the hour if that Job did not run. To switch
 by hand (e.g. after loading studies into the inactive color, see below):
 
 ```bash
