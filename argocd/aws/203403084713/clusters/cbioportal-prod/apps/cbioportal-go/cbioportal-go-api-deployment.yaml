@@ -1,8 +1,12 @@
-# cbioportal-go serving the REST API only, for a share of api.cbioportal.org
-# traffic mirrored to it (apps/cbioportal-api/cbioportal-api-mirror.yaml):
-# its responses are discarded, so this measures load, latency and errors on
-# real API traffic without affecting clients. Stateless (no session file), so
-# it scales out. Same databases as go.cbioportal.org.
+# cbioportal-go serving the REST API only: api.cbioportal.org
+# (apps/cbioportal-api/cbioportal-api-ingress.yaml) and www.cbioportal.org's
+# non-browser API traffic, scripts and agents (cbio-www-ingressroute in
+# apps/cbioportal). Stateless (no session file), so it scales out. Same
+# databases as go.cbioportal.org.
+#
+# It runs a pinned release on the on-demand cbio-api nodes, so it changes
+# only when a new release is set here:
+# https://github.com/cBioPortal/cbioportal-go/releases
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,9 +17,6 @@ metadata:
   annotations:
     configmap.reloader.stakater.com/reload: "cbioportal-go-active"
     secret.reloader.stakater.com/reload: "clickhouse-go-portal"
-    keel.sh/policy: force
-    keel.sh/trigger: poll
-    keel.sh/match-tag: "true"
 spec:
   replicas: 2
   strategy:
@@ -42,8 +43,8 @@ spec:
         runAsGroup: 10001
       containers:
         - name: cbioportal-go-api
-          image: cbioportal/cbioportal-go:latest
-          imagePullPolicy: Always
+          image: cbioportal/cbioportal-go:0.1.0
+          imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/cbioportal-api"]
           args:
             - --portal-properties=/app/deploy/public-portal.properties
@@ -86,12 +87,15 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 5
+          # A mirrored quarter of the non-browser traffic used about 0.04
+          # cores and 0.15 GB over both pods on average, and at most about
+          # 1.2 cores.
           resources:
             requests:
-              cpu: 500m
+              cpu: "1"
               memory: 512Mi
             limits:
-              cpu: "2"
+              cpu: "3"
               memory: 2Gi
       topologySpreadConstraints:
         - maxSkew: 1
@@ -101,11 +105,11 @@ spec:
             matchLabels:
               run: cbioportal-go-api
       nodeSelector:
-        workload: cbio-dev
+        workload: cbio-api
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "cbio-dev"
+          value: "cbio-api"
           effect: "NoSchedule"
 ---
 apiVersion: v1
@@ -124,8 +128,7 @@ spec:
       targetPort: 8080
   type: ClusterIP
 ---
-# Keeps one pod serving while nodes are drained (the cbio-dev spot pool is
-# consolidated and replaced often).
+# Keeps one pod serving while a node is drained.
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:

@@ -45,14 +45,21 @@ roleRef:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: cbioportal-go-mirror-daily
+  name: cbioportal-go-mirror
   namespace: default
   labels:
     app.kubernetes.io/instance: cbioportal-go
+  annotations:
+    # The public color swap (cmo-pipelines) sets public_db.active_color in
+    # cbioportal-db-status (portal-configuration) right after it marks an
+    # import complete. Reloader then starts a Job from this CronJob's
+    # template, so go follows each production switch within minutes.
+    configmap.reloader.stakater.com/reload: "cbioportal-db-status"
 spec:
-  # Hourly: mirror-prod.sh rebuilds only when production serves a new import
-  # (and never while one is running), otherwise it leaves the pointer as is,
-  # so go.cbioportal.org follows each production switch within an hour.
+  # Safety net for the Reloader trigger above: retries a failed rebuild and
+  # catches a missed ConfigMap change. A run with nothing new to build exits
+  # within seconds (mirror-prod.sh rebuilds only when production serves a new
+  # import, and never while one is running).
   schedule: "7 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
