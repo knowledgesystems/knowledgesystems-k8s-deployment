@@ -24,6 +24,9 @@ spec:
     syncOptions:
       - RespectIgnoreDifferences=true
       - ServerSideApply=true
+      # Delete removed resources only after the rest of a sync is healthy, so
+      # a replaced workload keeps serving until its replacement is ready.
+      - PruneLast=true
   # The live pointer values are set by kubectl patch (and later the mirror job).
   ignoreDifferences:
     - group: ""
