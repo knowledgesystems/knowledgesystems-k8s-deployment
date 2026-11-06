@@ -53,8 +53,14 @@ The names come from cbioportal-go's file importer, where `_raw` holds the staged
 study files and `_ref` the reference data loaded from the cBioPortal seed dump; the
 mirror fills the same three roles from production instead.
 
-The mirror CronJob rebuilds the inactive color every day and switches the site to it
-when the build succeeds; a failed run leaves the site on the previous color. To switch
+The mirror CronJob runs every hour, at 7 minutes past.
+- **When production serves a new import** (and no import is running), it rebuilds the
+  inactive color from production's live database. When the build succeeds, it switches
+  the pointer to that color. A failed build leaves the pointer on the previous color,
+  and the next run tries again.
+- **Otherwise** it does nothing.
+
+go's databases therefore follow each production import within about an hour. To switch
 by hand (e.g. after loading studies into the inactive color, see below):
 
 ```bash
@@ -62,7 +68,8 @@ kubectl -n default patch configmap cbioportal-go-active --type=merge -p \
   '{"data":{"CBIOPORTAL_DB":"dev_cbioportal_public_go_green","CBIOPORTAL_RAW_DB":"dev_cbioportal_public_go_green_raw","CBIOPORTAL_REF_DB":"dev_cbioportal_public_go_green_ref"}}'
 ```
 
-Reloader sees the ConfigMap change and restarts `cbioportal-go` on the new databases.
+Reloader sees the ConfigMap change and restarts `cbioportal-go`, `cbioportal-go-api` and
+`cbioportal-go-www` on the new databases. It replaces one pod at a time, so the site stays up.
 
 The ConfigMap in git is only the initial seed. The Argo Application lists the three keys
 under `ignoreDifferences` with `RespectIgnoreDifferences=true` + `ServerSideApply=true`,
