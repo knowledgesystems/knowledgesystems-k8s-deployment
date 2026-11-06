@@ -1,11 +1,11 @@
-# cbioportal-go serving the REST API only. It answers a share of
-# www.cbioportal.org's non-browser API traffic as the canary of the Go backend,
-# and a mirrored copy of more of it, whose answers are discarded
-# (apps/cbioportal-api/cbioportal-api-mirror.yaml). Stateless (no session
-# file), so it scales out. Same databases as go.cbioportal.org.
+# cbioportal-go serving the REST API only: api.cbioportal.org
+# (apps/cbioportal-api/cbioportal-api-ingress.yaml) and www.cbioportal.org's
+# non-browser API traffic, scripts and agents (cbio-www-ingressroute in
+# apps/cbioportal). Stateless (no session file), so it scales out. Same
+# databases as go.cbioportal.org.
 #
-# It runs a pinned release on the API pool's on-demand nodes (cbio-api, next
-# to Java's API pods), so it changes only when a new release is set here:
+# It runs a pinned release on the on-demand cbio-api nodes, so it changes
+# only when a new release is set here:
 # https://github.com/cBioPortal/cbioportal-go/releases
 apiVersion: apps/v1
 kind: Deployment
@@ -87,12 +87,15 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 5
+          # A mirrored quarter of the non-browser traffic used about 0.04
+          # cores and 0.15 GB over both pods on average, and at most about
+          # 1.2 cores.
           resources:
             requests:
-              cpu: 500m
+              cpu: "1"
               memory: 512Mi
             limits:
-              cpu: "2"
+              cpu: "3"
               memory: 2Gi
       topologySpreadConstraints:
         - maxSkew: 1
