@@ -9,7 +9,7 @@ metadata:
     tags.datadoghq.com/version: 7.1.1
   name: cbioportal-backend-public-beta-blue
   annotations:
-    secret.reloader.stakater.com/reload: "cbioportal-public-blue"
+    secret.reloader.stakater.com/reload: "cbioportal-public-blue,cbioportal-beta-authz-api-clone"
 spec:
   progressDeadlineSeconds: 600
   replicas: 0
@@ -20,7 +20,7 @@ spec:
   strategy:
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
@@ -170,7 +170,7 @@ spec:
             #- --logging.level.org.cbioportal.persistence=DEBUG
             # persistence cache settings (currently redis)
             #- -Dcache.statistics_endpoint_enabled=false
-            - --persistence.cache_type=redis
+            - --persistence.cache_type=no-cache
             - --redis.leader_address=redis://cbioportal-public-persistence-redis-master:6379
             - --redis.follower_address=redis://cbioportal-public-persistence-redis-replicas:6379
             - --redis.database=6
@@ -181,8 +181,7 @@ spec:
             - --cache.endpoint.api-key=1kmfbftTb2iY
             # NEW PROPERTIES START
             - --enable_persistent_cache=true
-            - --persistence.cache_type_clickhouse=redis
-            #- --persistence.cache_type_clickhouse=no-cache
+            - --persistence.cache_type_clickhouse=no-cache
             - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
             - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
@@ -227,6 +226,11 @@ spec:
           command:
             - java
           env:
+            - name: DB_CLICKHOUSE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-beta-authz-api-clone
+                  key: DB_CLICKHOUSE_CONNECTION_STRING
             - name: DD_PROFILING_ENABLED
               value: "true"
             - name: DD_LOGS_INJECTION
