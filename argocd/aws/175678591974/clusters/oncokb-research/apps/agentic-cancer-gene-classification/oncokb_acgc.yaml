@@ -85,6 +85,12 @@ spec:
               value: "2592000"
             - name: PMID_DISTILLATION_ENABLED
               value: "false"
+            # Expression-context module (oncokb/agentic-cancer-gene-classification#167):
+            # gene -> TCGA cancer types with significantly elevated expression, gated by
+            # literature. Loads stats bundles from public GitHub releases of the ACGC repo
+            # (tags expression-stats-*); all other EXPRESSION_CONTEXT_* settings default.
+            - name: EXPRESSION_CONTEXT_ENABLED
+              value: "true"
             # Repo curator feedback issues get filed against.
             # ONCOKBDEV_PRIVATE_ACCESS_TOKEN (the filing bot's PAT) is not app
             # config, so it comes from the shared oncokb-github Secret
