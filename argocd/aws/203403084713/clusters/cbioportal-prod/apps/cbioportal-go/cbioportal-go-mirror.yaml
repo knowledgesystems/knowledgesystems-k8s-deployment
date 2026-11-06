@@ -51,8 +51,9 @@ metadata:
     app.kubernetes.io/instance: cbioportal-go
 spec:
   # Hourly: mirror-prod.sh rebuilds only when production serves a new import
-  # (and never while one is running), otherwise it leaves the pointer as is,
-  # so go.cbioportal.org follows each production switch within an hour.
+  # (and never while one is running), otherwise it leaves the pointer as is.
+  # The public color swap also runs it as a post-swap hook (post_swap_hooks
+  # in cmo-pipelines), so go follows each production switch within minutes.
   schedule: "7 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
