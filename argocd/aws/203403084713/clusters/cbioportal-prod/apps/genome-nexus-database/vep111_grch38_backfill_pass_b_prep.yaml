@@ -1,0 +1,127 @@
+# Pass B prep: turn the dup/inv keys Pass A deferred into Ensembl default
+# format. These were deferred because the conversion needs the reference
+# sequence -- a duplication's alt is the reference twice over, an inversion's
+# is its reverse complement -- which the HGVSg string does not carry.
+# Bio::DB::HTS::Faidx reads it straight from the bgzipped FASTA, so no
+# database is involved.
+#
+# Run once before vep111_grch38_backfill_pass_b.yaml. Re-running is safe; it
+# rewrites the shards from scratch.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gn-vep-111-grch38-backfill-pass-b-prep
+  namespace: genome-nexus
+  labels:
+    run: gn-vep-111-grch38-backfill-pass-b-prep
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        run: gn-vep-111-grch38-backfill-pass-b-prep
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: prep
+          image: genomenexus/gn-vep-backfill:111-grch38-3
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              W=/work
+              FA=/cache-data/homo_sapiens/111_GRCh38/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+
+              cat $W/deferred.* > $W/defB.all
+              # Only bare dup/inv and dup-with-sequence are recoverable. Everything
+              # else in deferred.* is corrupt beyond repair: comma multi-allele
+              # (ambiguous alt), decimal positions, "ins/G", "delinsna",
+              # literal TRUE/DUP/DEL. Those are accepted losses and heal lazily
+              # through the server's cache-miss path.
+              grep -E '^[^:]+:g\.[0-9]+(_[0-9]+)?(dup|inv)[ACGT]*$' $W/defB.all > $W/defB.clean
+
+              cat > /tmp/convB.pl <<'PL'
+              use strict; use warnings;
+              use Bio::DB::HTS::Faidx;
+              my $fa = Bio::DB::HTS::Faidx->new($ENV{FA}) or die "faidx open failed";
+              sub rc { my $s = reverse(shift); $s =~ tr/ACGTacgtNn/TGCAtgcaNn/; return $s }
+              open(my $IN, "<", $ARGV[0]) or die;
+              open(my $OUT,">", $ARGV[1]) or die;
+              open(my $REJ,">", $ARGV[2]) or die;
+              my %n;
+              while (my $l = <$IN>) {
+                chomp $l; next unless length $l;
+                my ($chr,$rest) = $l =~ /^([^:]+):g\.(.+)$/ or next;
+                my ($s,$e,$op,$stated);
+                if    ($rest =~ /^(\d+)_(\d+)(dup|inv)([ACGT]*)$/) { ($s,$e,$op,$stated)=($1,$2,$3,$4) }
+                elsif ($rest =~ /^(\d+)(dup|inv)([ACGT]*)$/)       { ($s,$e,$op,$stated)=($1,$1,$2,$3) }
+                else { next }
+                if ($e < $s) { $n{reversed}++; print $REJ "$l\treversed_coords\n"; next }
+                my ($seq) = $fa->get_sequence("$chr:$s-$e");
+                $seq = defined($seq) ? uc($seq) : "";
+                # empty or short means the contig is not in the FASTA (malformed
+                # names like "Chr X") or the span runs off the chromosome end
+                if ($seq eq "" || length($seq) != ($e-$s+1)) { $n{oob}++; print $REJ "$l\tout_of_bounds\n"; next }
+                if ($seq =~ /[^ACGTN]/) { $n{badchar}++; print $REJ "$l\tnon_acgt\n"; next }
+                # a stated sequence that disagrees with the reference means the key
+                # does not describe the variant we would be annotating
+                if (length($stated) && uc($stated) ne $seq) { $n{seq_mismatch}++; print $REJ "$l\tstated_ne_ref:$seq\n"; next }
+                my $alt = $op eq "dup" ? $seq.$seq : rc($seq);
+                # field 6 carries the original HGVSg so VEP echoes it back as .id,
+                # which becomes _id -- the key the server looks up
+                print $OUT join(" ", $chr, $s, $e, "$seq/$alt", "+", $l), "\n";
+                $n{"ok_$op"}++;
+              }
+              close $OUT; close $REJ;
+              print "$_ = $n{$_}\n" for sort keys %n;
+              PL
+              FA="$FA" perl /tmp/convB.pl $W/defB.clean $W/ensB.unsorted $W/ensB.rejected
+
+              # VEP rejects unsorted input outright (exit 25). Lexical chromosome
+              # order matches Pass A's shards.
+              sort -k1,1 -k2,2n $W/ensB.unsorted > $W/ensB.sorted
+              rm -f $W/ensB.0*
+              split -l 250000 -d -a 5 $W/ensB.sorted $W/ensB.
+
+              N=$(wc -l < $W/ensB.sorted)
+              SHARDS=$(ls $W/ensB.0* | wc -l)
+              SLICES=$(( (N + 49999) / 50000 ))
+              echo "$SLICES" > $W/.shard_count_b
+              echo "converted=$N rejected=$(wc -l < $W/ensB.rejected) shards=$SHARDS slices=$SLICES"
+              echo "set completions in vep111_grch38_backfill_pass_b.yaml to $SLICES"
+              echo PREP_B_DONE
+          env:
+            - name: FA
+              value: "/cache-data/homo_sapiens/111_GRCh38/Homo_sapiens.GRCh38.dna.toplevel.fa.gz"
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1Gi
+            limits:
+              memory: 4Gi
+          volumeMounts:
+            - name: cache
+              mountPath: /cache-data
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-cache-efs
+        - name: work
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-work-efs
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: workload
+                    operator: In
+                    values: ["cbio-dev"]
+      tolerations:
+        - effect: NoSchedule
+          key: workload
+          operator: Equal
+          value: cbio-dev
