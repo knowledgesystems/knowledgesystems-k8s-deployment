@@ -29,14 +29,15 @@ metadata:
     # triage color is running; the nightly import flips the colors.
     nginx.ingress.kubernetes.io/auth-url: "http://eks-triage-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
     nginx.ingress.kubernetes.io/auth-method: GET
-    # Cache only successes, per host, session and study, so panning does not
-    # send one portal request per tile. The auth cache zone is shared with the
-    # beta pixel ingress, and both portals name their cookie SESSION, so the
-    # key names the host to keep triage and beta sessions apart (the
-    # controller also prefixes its server name and auth location). A logout
-    # or study-access change can take up to the cache duration to apply to
-    # pixels.
-    nginx.ingress.kubernetes.io/auth-cache-key: "$host$cookie_SESSION$wsi_study"
+    # Key auth results by host, session and study. The key covers both session
+    # cookie names a portal may issue (SESSION for Spring Session, JSESSIONID
+    # for in-memory sessions). The auth cache zone is shared with the beta
+    # pixel ingress, so the key also names the host to keep triage and beta
+    # sessions apart (the controller also prefixes its server name and auth
+    # location). Only successes are cached, and only when the portal's
+    # response allows it. If caching is allowed, a logout or study-access
+    # change can take up to the cache duration to apply to pixels.
+    nginx.ingress.kubernetes.io/auth-cache-key: "$host$cookie_SESSION$cookie_JSESSIONID$wsi_study"
     nginx.ingress.kubernetes.io/auth-cache-duration: "200 60s"
     # The query carries the slide's sealed source (enc); keep it out of logs.
     nginx.ingress.kubernetes.io/enable-access-log: "false"

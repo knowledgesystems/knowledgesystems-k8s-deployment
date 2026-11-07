@@ -2,8 +2,9 @@
 # The nightly import flips beta between the blue and green colors and scales
 # the other one to zero, so this Service selects the portal pods of both colors
 # (label set in cbioportal/cbioportal-eks-msk-beta-{blue,green}-deployment-service.yaml)
-# and always reaches the running one. Both colors run the same portal image and
-# share the Redis session store, so either can answer for a session.
+# and always reaches the running one. Sessions are held in memory in each
+# portal pod, so only the pod that issued a session can answer for it; a color
+# flip or pod restart ends existing sessions.
 apiVersion: v1
 kind: Service
 metadata:
