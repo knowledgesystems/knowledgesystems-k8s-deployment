@@ -30,10 +30,12 @@ spec:
   template:
     metadata:
       annotations:
-        # Datadog scrapes the Prometheus metrics (METRICS_ADDR below).
+        # Datadog scrapes the Prometheus metrics (METRICS_ADDR below). The
+        # per-route latency histogram alone is ~1,800 values, over the check's
+        # default limit of 2,000 once the rest is added.
         ad.datadoghq.com/cbioportal-go.checks: |
           {"openmetrics": {"instances": [{"openmetrics_endpoint": "http://%%host%%:9090/metrics",
-            "namespace": "cbioportal_go", "metrics": [".*"]}]}}
+            "namespace": "cbioportal_go", "metrics": [".*"], "max_returned_metrics": 5000}]}}
       labels:
         run: cbioportal-go
     spec:
