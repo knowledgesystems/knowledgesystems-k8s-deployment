@@ -45,7 +45,7 @@ spec:
         runAsGroup: 10001
       containers:
         - name: cbioportal-go-api
-          image: cbioportal/cbioportal-go:0.1.1
+          image: cbioportal/cbioportal-go:0.1.2
           imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/cbioportal-api"]
           args:
