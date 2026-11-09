@@ -46,7 +46,7 @@ if [[ -n "${WSI_SESSION_COOKIE:-}" ]]; then
   # The session passes the ingress; the tile server refuses an `enc` that
   # does not open under `key` with 404 (it never answers 401/403).
   status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --cookie "SESSION=${WSI_SESSION_COOKIE}" \
+    --cookie "JSESSIONID=${WSI_SESSION_COOKIE}; SESSION=${WSI_SESSION_COOKIE}" \
     "$tile_url")"
   test "$status" = 404 || {
     echo "expected an authorized request for an unknown slide to return 404, got $status" >&2
@@ -55,7 +55,7 @@ if [[ -n "${WSI_SESSION_COOKIE:-}" ]]; then
 
   # The sealed `enc` carries the slide source; a browser-supplied one is refused.
   status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --cookie "SESSION=${WSI_SESSION_COOKIE}" \
+    --cookie "JSESSIONID=${WSI_SESSION_COOKIE}; SESSION=${WSI_SESSION_COOKIE}" \
     --get --data-urlencode "source=$source_url" \
     "$tile_url")"
   test "$status" = 400 || {
