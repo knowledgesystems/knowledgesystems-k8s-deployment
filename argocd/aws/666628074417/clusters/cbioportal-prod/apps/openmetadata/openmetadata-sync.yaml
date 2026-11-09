@@ -1,0 +1,79 @@
+# OpenMetadata → Databricks sync: publishes study metadata (data products) and the CDSI glossary from
+# OpenMetadata to cdsi_eng_phi.deng_study_metadata.{meta_study,glossary}.
+# Code, design and runbook: https://github.mskcc.org/cdsi/openmetadata (sync/, docs/databricks-sync.md).
+#
+# Long-running poller: reads OpenMetadata every minute and connects to Databricks (waking the SQL warehouse) only
+# when the published rows change, plus once a day to repair manual edits there. Changes reach Databricks within
+# about a minute.
+#
+# One-off dry run with the same settings (reports, writes nothing):
+#   kubectl -n default exec deploy/openmetadata-sync -- /openmetadata-sync
+# Secrets (created from TSS, not in git): om-sync-openmetadata (OM_TOKEN), om-sync-databricks (DATABRICKS_TOKEN).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openmetadata-sync
+  namespace: default
+  labels:
+    app.kubernetes.io/name: openmetadata-sync
+    app.kubernetes.io/part-of: openmetadata
+spec:
+  replicas: 1                # exactly one writer
+  strategy:
+    type: Recreate           # never two pods at once during a rollout
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openmetadata-sync
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openmetadata-sync
+        app.kubernetes.io/part-of: openmetadata
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 960   # a sync in progress may take up to 15 min (its timeout) to finish
+      imagePullSecrets:
+        - name: dockerhub-creds
+      nodeSelector:
+        workload: openmetadata
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: openmetadata
+          effect: NoSchedule
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sync
+          image: cbioportal/openmetadata-sync:da7e254
+          args:                  # without -apply: report only
+            - -apply
+            - -poll=1m
+          env:
+            - name: OM_URL
+              value: "http://openmetadata:8585"
+            - name: DATABRICKS_HOST
+              value: "msk-mode-prod.cloud.databricks.com"
+            - name: DATABRICKS_WAREHOUSE_ID
+              value: "0b49b7d78734ad5c"     # CDSI Warehouse
+            - name: TARGET_SCHEMA
+              value: "cdsi_eng_phi.deng_study_metadata"
+          envFrom:
+            - secretRef:
+                name: om-sync-openmetadata
+            - secretRef:
+                name: om-sync-databricks
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
