@@ -7,7 +7,7 @@ metadata:
     run: eks-triage-green
     tags.datadoghq.com/env: eks-triage
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: triage-wsi-6901bf2042
+    tags.datadoghq.com/version: triage-wsi-33fae528c7
   name: eks-triage-green
 spec:
   replicas: 0
@@ -24,7 +24,7 @@ spec:
         run: eks-triage-green
         tags.datadoghq.com/env: eks-triage
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: triage-wsi-6901bf2042
+        tags.datadoghq.com/version: triage-wsi-33fae528c7
         admission.datadoghq.com/enabled: "true"
       annotations:
         admission.datadoghq.com/java-lib.version: v1.24.2
@@ -55,7 +55,7 @@ spec:
               value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
-          image: cbioportal/cbioportal-dev:6901bf204292458d141e4baf4fda8e0894a52588-web-shenandoah@sha256:6d0fb6e76177c9084f57e1dc9b7e026f65f9ca5faadb3b79d9ca49f59e6081d9
+          image: cbioportal/cbioportal-dev:33fae528c71e14c339d8d523e31d19fc0cf86ddb-web-shenandoah@sha256:366a1bbe4b1f02f4f730006bd825364959b25e5cb2a525a67d65743d21e60ea8
           volumeMounts:
             - name: triage-eks-configmap-volume
               mountPath: /cbioportal/local.key
