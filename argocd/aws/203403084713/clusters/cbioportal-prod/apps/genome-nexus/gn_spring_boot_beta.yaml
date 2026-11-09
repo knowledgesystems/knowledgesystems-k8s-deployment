@@ -25,7 +25,7 @@ spec:
         - name: SERVER_PORT
           value: "8080"
         - name: MONGODB_URI
-          value: mongodb://gn-mongo-beta:27017/annotator?connectTimeoutMS=120000
+          value: mongodb://gn-mongo-grch38-ensembl111-blue:27017/annotator?connectTimeoutMS=120000
         - name: SENTRY_DSN
           valueFrom: 
             secretKeyRef:
@@ -37,7 +37,8 @@ spec:
         args: [
             # use ZGC (shenandoah like GC, openjdk (Oracle) image does not
             # include shenandoah)
-            "-Dvep.url=http://gn-vep-111.genome-nexus:8080/vep/human/hgvs/VARIANT",
+            # GRCh38 VEP, matching the GRCh38 database above. gn-vep-111 is GRCh37.
+            "-Dvep.url=http://gn-vep-111-grch38.genome-nexus:8080/vep/human/hgvs/VARIANT",
             "-Dcache.enabled=true",
             "-Dgenomenexus.server.version=2.2.4",
             "-Dspring.mongodb.embedded.version=1.5",
