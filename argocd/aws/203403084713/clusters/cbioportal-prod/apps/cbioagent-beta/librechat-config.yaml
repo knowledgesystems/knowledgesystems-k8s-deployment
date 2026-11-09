@@ -13,6 +13,7 @@ data:
 
     # Allow internal k8s MCP server domains
     mcpSettings:
+      apps: true
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
         - 'cbioagent-clickhouse-mcp-beta'
