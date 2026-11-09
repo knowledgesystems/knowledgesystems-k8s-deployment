@@ -27,10 +27,14 @@ metadata:
     # color is running; the nightly import flips the colors.
     nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-beta-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
     nginx.ingress.kubernetes.io/auth-method: GET
-    # Cache only successes, per session and study, so panning does not send
-    # one portal request per tile. A logout or study-access change can take
-    # up to the cache duration to apply to pixels.
-    nginx.ingress.kubernetes.io/auth-cache-key: "$cookie_SESSION$wsi_study"
+    # Key auth results by session and study. The key covers both session
+    # cookie names the portal may issue (JSESSIONID for in-memory sessions,
+    # SESSION for Spring Session), so one user's result never answers for
+    # another. Only successes are cached, and only when the portal's response
+    # allows it: the portal currently sends Cache-Control: no-store, so every
+    # tile request asks the portal. If caching is allowed, a logout or
+    # study-access change can take up to the cache duration to apply to pixels.
+    nginx.ingress.kubernetes.io/auth-cache-key: "$cookie_JSESSIONID$cookie_SESSION$wsi_study"
     nginx.ingress.kubernetes.io/auth-cache-duration: "200 60s"
     # The query carries the slide's sealed source (enc); keep it out of logs.
     nginx.ingress.kubernetes.io/enable-access-log: "false"
