@@ -191,9 +191,9 @@ locals {
     gn-db-lg = {
       instance_types = ["r7g.2xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
+      desired_size   = 3
+      min_size       = 3
+      max_size       = 3
       subnet_ids     = ["subnet-01e2143c0b3d4f8a6", "subnet-066aca23688737c91"]
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
