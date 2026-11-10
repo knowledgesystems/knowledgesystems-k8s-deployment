@@ -6,8 +6,9 @@
 # It reads the same snapshot go serves: the clone of production's tables in
 # the _ref database the pointer ConfigMap names. Reloader restarts it when the
 # mirror switches go to a new import, so both always answer from one import.
-# No login, session service or response cache, so it never writes anywhere
-# and every answer comes from the database.
+# It reads sessions (shared links, virtual studies, groups) from the public
+# portal's session service, as www does. No login or response cache, so
+# every other answer comes from the database.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,6 +18,7 @@ metadata:
     app.kubernetes.io/instance: cbioportal-go
   annotations:
     configmap.reloader.stakater.com/reload: cbioportal-go-active
+    secret.reloader.stakater.com/reload: cbioportal-public-green
 spec:
   replicas: 1
   strategy:
@@ -58,7 +60,11 @@ spec:
                 --enable_persistent_cache=false \
                 --db.suppress_schema_version_mismatch_errors=true \
                 --frontend.url=https://frontend.cbioportal.org/ \
-                --session.service.url= --sitemaps=false \
+                --session.service.url=https://session-service.cbioportal.org/api/sessions/public_portal/ \
+                --session.service.origin='*' \
+                --session.service.user="$SESSION_SERVICE_USER" \
+                --session.service.password="$SESSION_SERVICE_PASSWORD" \
+                --sitemaps=false \
                 --studyview.max_samples_selected=500000 \
                 --server.compression.enabled=true \
                 --server.max-http-request-header-size=16384
@@ -98,6 +104,17 @@ spec:
                 secretKeyRef:
                   name: clickhouse-go-portal
                   key: CLICKHOUSE_PASSWORD
+            # The public portal's session service credentials, as www's.
+            - name: SESSION_SERVICE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_NAME
+            - name: SESSION_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_PASSWORD
             - name: CBIOPORTAL_REF_DB
               valueFrom:
                 configMapKeyRef:
