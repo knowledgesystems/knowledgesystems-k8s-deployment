@@ -206,9 +206,68 @@ data:
       enforce: false
       prioritize: true
       list:
-        - name: "cBioPortalChatBeta"
+        # Mirrors prod: one agent offered under two models (model picker). The
+        # router spec below stays selectable for the handoff experiment.
+        - &betaSpec
+          name: "cBioPortalChatBeta"
           label: "cBioPortalChat - Explore cBioPortal data and links"
-          default: true
+          softDefault: true
+          description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
+          modelOption:
+            label: "Haiku 4.5"
+            description: "Fast answers for most questions"
+          placeholder: "How can I help you explore cBioPortal?"
+          iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
+          showIconInHeader: true
+          showIconInMenu: true
+          showSwitchAgent: false
+          limitBadge:
+            messages: "20 msgs / 30 min"
+            tokens: "20M tokens / week"
+          conversationStarterCategories:
+            - label: "Explore Data"
+              icon: "search"
+              description: "Find studies, datasets, and available molecular data in cBioPortal."
+              starters:
+                - "Which cBioPortal studies include lung adenocarcinoma samples with mutation and copy-number data?"
+                - "Which studies have RNA expression for renal cancer?"
+                - "How many studies have whole exome sequencing data?"
+                - "What TCGA data do you have?"
+            - label: "Navigate cBioPortal"
+              icon: "map"
+              description: "Create direct links to cBioPortal views, cohorts, plots, and study pages."
+              starters:
+                - "Give me an OncoPrint for EGFR and KRAS in TCGA lung adenocarcinoma."
+                - "Can you create a cohort of metastatic prostate cancer with AR amplification?"
+                - "Show me a KM plot of primary vs met prostate cancer in the MSK-IMPACT study."
+            - label: "Analyze Data"
+              icon: "heartbeat"
+              description: "Compare genes, cancer types, molecular profiles, cohorts, and outcomes."
+              starters:
+                - "Show me TP53 mutation frequency across all cancer types."
+                - "What are the most mutated genes in lung cancer?"
+                - "Compare low grade glioma by molecular subtype."
+          preset: &betaPreset
+            endpoint: "agents"
+            agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
+            model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            temperature: 0
+            maxTokens: 4096
+            thinking: false
+            modelLabel: "cBioPortalChat"
+            greeting: |
+              Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
+        - <<: *betaSpec
+          name: "cBioPortalChatBetaSonnet"
+          softDefault: false
+          modelOption:
+            label: "Sonnet 5"
+            description: "Deeper reasoning for complex analyses. Uses more of your limit."
+          preset:
+            <<: *betaPreset
+            model: "us.anthropic.claude-sonnet-5"
+        - name: "cBioPortalChatBetaRouter"
+          label: "cBioPortalChat (router experiment)"
           description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
           placeholder: "How can I help you explore cBioPortal?"
           iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
