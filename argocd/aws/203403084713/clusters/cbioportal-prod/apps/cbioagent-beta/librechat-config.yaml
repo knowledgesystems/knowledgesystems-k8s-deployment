@@ -122,6 +122,14 @@ data:
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
+      cbioportal-database-apps:
+        type: streamable-http
+        # MCP-Apps build (cbioportal/mcp:mcp-apps) that serves ui:// widget
+        # views; runs against the prod ClickHouse like cbioagent-clickhouse-mcp.
+        url: http://cbioagent-clickhouse-mcp-apps:80/db-mcp-apps/mcp
+        headers:
+          x-user-id: "{{LIBRECHAT_USER_ID}}"
+          x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
       cbioportal-navigator:
         type: streamable-http
         url: http://cbioportal-navigator:80/mcp
