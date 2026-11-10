@@ -206,10 +206,15 @@ data:
       enforce: false
       prioritize: true
       list:
-        - name: "cBioPortalChatBeta"
+        # Mirrors prod: one agent offered under two models (model picker).
+        - &betaSpec
+          name: "cBioPortalChatBeta"
           label: "cBioPortalChat - Explore cBioPortal data and links"
-          default: true
+          softDefault: true
           description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
+          modelOption:
+            label: "Haiku 4.5"
+            description: "Fast answers for most questions"
           placeholder: "How can I help you explore cBioPortal?"
           iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
           showIconInHeader: true
@@ -241,22 +246,22 @@ data:
                 - "Show me TP53 mutation frequency across all cancer types."
                 - "What are the most mutated genes in lung cancer?"
                 - "Compare low grade glioma by molecular subtype."
-          preset:
+          preset: &betaPreset
             endpoint: "agents"
-            agent_id: "agent_cbiobeta_router"
+            agent_id: "agent_OHVSJI9Gd6gwsDnFSL-Xl"
             model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-            # With cBioPortal/LibreChat#36 and #37 these preset keys are
-            # forwarded to the router only, and override its saved
-            # model_parameters. They match the router record: thinking off
-            # and a 256-token cap (it emits one transfer call). The 256
-            # replaces #659's 4096 for this spec only. The data and
-            # navigation agents never see the preset; they use their own
-            # records (thinking off, 4096). promptCacheTtl is from #653;
-            # promptCache is left unset because the Bedrock parser defaults
-            # it to true for Claude, which keeps the 1h TTL.
-            maxTokens: 256
+            temperature: 0
+            maxTokens: 4096
             thinking: false
-            promptCacheTtl: 1h
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
+        - <<: *betaSpec
+          name: "cBioPortalChatBetaSonnet"
+          softDefault: false
+          modelOption:
+            label: "Sonnet 5"
+            description: "Deeper reasoning for complex analyses. Uses more of your limit."
+          preset:
+            <<: *betaPreset
+            model: "us.anthropic.claude-sonnet-5"
