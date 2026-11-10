@@ -25,12 +25,13 @@ cbioportal-go repo.
 | `Deployment` / `Service cbioportal-go-www`, `TraefikService cbioportal-www-mirror-{green,blue}` | The same, for a mirrored share of www's browser API traffic. |
 | `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
+| `Deployment` / `Service cbioportal-java-reference`, `IngressRoute`, `Middleware java-reference-auth`, `Certificate java-cbio-cert` | Java cBioPortal on go's copy of production, at java.cbioportal.org behind a password: the reference nightly parity compares go with. See [The Java reference](#the-java-reference). |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
 | `CronJob cbioportal-go-mirror` | After each production switch (Reloader, on a change to `cbioportal-db-status`) and hourly: when production serves a new import (and none is running), clones it into the inactive color, builds the Go portal's tables, then flips the pointer; otherwise leaves the pointer as is. |
 | `ServiceAccount/Role/RoleBinding cbioportal-go-mirror-job*` | Lets the CronJob `get`/`patch` only `cbioportal-go-active`. |
 | `Application cbioportal-go` (`apps/argocd/`) | Auto-sync (prune + selfHeal) of this directory. |
 
-`cbioportal-go` and `cbioportal-go-www` run on the `workload=cbio-dev` node pool
+`cbioportal-go`, `cbioportal-go-www` and `cbioportal-java-reference` run on the `workload=cbio-dev` node pool
 (arm64 spot), alongside the other dev/preview cBioPortal instances.
 `cbioportal-go-api` answers real users, so it runs on the on-demand
 `workload=cbio-api` nodes.
@@ -101,6 +102,11 @@ deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
 - **DNS**: a `go.cbioportal.org` record pointing at the Traefik load balancer (same
   target as the other `*.cbioportal.org` hosts). cert-manager issues the certificate
   over HTTP-01 once the record resolves.
+- **Secret `cbioportal-java-reference-auth`** (with the others above): key `users`
+  holds an htpasswd line (`htpasswd -nbB parity '<password>'`) for java.cbioportal.org.
+  Without it Traefik refuses every request there.
+- **DNS**: a DNS-only `java.cbioportal.org` record pointing at the Traefik load
+  balancer, like `go.cbioportal.org`.
 - **Image**: `cbioportal/cbioportal-go:latest` on Docker Hub (multi-arch amd64+arm64, uid
   10001) with the API as entrypoint and the frontend in `/app/frontend`.
 - **Argo**: the `argocd` app-of-apps is manual-sync; sync it to create the
@@ -115,6 +121,24 @@ non-browser API traffic, from scripts and agents (the non-browser routes of
 import pipeline's weekly color swap leaves these routes alone. go follows
 production's imports through its own mirror of the database. To upgrade go,
 set a newer release tag on `cbioportal-go-api`'s image.
+
+## The Java reference
+
+`cbioportal-java-reference` runs Java cBioPortal, the release go matches
+(`/api/info` `portalVersion` on go), as one small pod. It is the reference
+that nightly parity compares go with, and it stays after browsers on www move
+to go and production Java is turned off.
+
+- **Same data as go.** It reads the clone of production's tables in the `_ref`
+  database that `cbioportal-go-active` names, so it and go always answer from
+  the same import. Reloader restarts it when the mirror switches go to a new
+  import. The weekly production color swap doesn't affect it.
+- **Read only.** It has no login, session service or response cache, so it
+  writes nothing and every answer comes from the database.
+- **Not public.** java.cbioportal.org asks for the user and password in
+  `cbioportal-java-reference-auth`. It is not linked anywhere.
+- **Upgrading.** When go matches a newer Java release, set that release's
+  `-web-shenandoah` image here.
 
 ## Metrics and logs
 
