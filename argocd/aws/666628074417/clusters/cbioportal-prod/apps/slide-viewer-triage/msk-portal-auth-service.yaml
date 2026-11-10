@@ -1,0 +1,22 @@
+# The portal for the MSK WSI pixel ingress's auth check (msk-ingress.yaml
+# auth-url). The MSK portal runs as blue and green colors and the running color
+# changes over time, so this Service must never name one color. It selects the
+# two pod-template labels that both MSK colors carry and no other pods have
+# (cbioportal/cbioportal-eks-msk-{blue,green}-deployment-service.yaml), so it
+# always reaches the running color without any change to the MSK portal
+# deployments. The ports match the MSK portal Services.
+apiVersion: v1
+kind: Service
+metadata:
+  name: eks-msk-wsi-auth
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8888
+  selector:
+    tags.datadoghq.com/env: eks-msk
+    tags.datadoghq.com/service: cbioportal

@@ -1,0 +1,110 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: slide-viewer-triage-wsi-msk
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/proxy-body-size: 1m
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+    # Allow approximately six browser connections for each of 50 concurrent
+    # users behind one NAT address. The tile server still bounds expensive
+    # image work independently with MAX_IMAGE_OPERATIONS.
+    nginx.ingress.kubernetes.io/limit-connections: "300"
+    # Every pixel request is authorized by the MSK portal: the auth subrequest
+    # asks the portal for the request's study with the browser's session
+    # cookie. The MSK portal runs with --authorization=false, so this checks
+    # for a valid session, the same access the portal itself gives: 2xx passes;
+    # the portal's 401 (no or expired session) refuses. $wsi_study comes from
+    # the controller's http-snippet map on $request_uri (ingress/values.yaml),
+    # because $arg_studyId is empty inside the auth subrequest; a missing or
+    # invalid studyId becomes "!", which the portal refuses. The tile server
+    # itself never answers 401/403.
+    # eks-msk-wsi-auth (msk-portal-auth-service.yaml) reaches whichever MSK
+    # color is running.
+    nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
+    nginx.ingress.kubernetes.io/auth-method: GET
+    # Key auth results by host, session and study. The key covers both session
+    # cookie names a portal may issue (SESSION for Spring Session, JSESSIONID
+    # for in-memory sessions). The auth cache zone is shared with the beta and
+    # triage pixel ingresses, so the key also names the host to keep each
+    # portal's sessions apart (the controller also prefixes its server name
+    # and auth location). Only successes are cached, and only when the portal's
+    # response allows it. If caching is allowed, a logout or study-access
+    # change can take up to the cache duration to apply to pixels.
+    nginx.ingress.kubernetes.io/auth-cache-key: "$host$cookie_SESSION$cookie_JSESSIONID$wsi_study"
+    nginx.ingress.kubernetes.io/auth-cache-duration: "200 60s"
+    # The query carries the slide's sealed source (enc); keep it out of logs.
+    nginx.ingress.kubernetes.io/enable-access-log: "false"
+    # Keep a slide's cold-open cache and SlideCache affinity on one pod. The
+    # slide's serving key is the stable per-slide request input.
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_key"
+    # The browser uses a same-origin /wsi route while the FastAPI application
+    # owns root-level /tiles and /thumbnails paths.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cbioportal.mskcc.org
+      http:
+        paths:
+          # Keep the allowlist explicit: do not expose metrics, OpenAPI, or
+          # any future application route through the public ingress.
+          - path: /wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+    - host: cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: slide-viewer-triage-wsi-msk-probes
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    # Unauthenticated health and readiness for the post-deploy smoke; they
+    # carry no slide data.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cbioportal.mskcc.org
+      http:
+        paths:
+          - path: /wsi(/|$)(health|ready)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
+    - host: cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /wsi(/|$)(health|ready)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: slide-viewer-triage
+                port:
+                  number: 80
