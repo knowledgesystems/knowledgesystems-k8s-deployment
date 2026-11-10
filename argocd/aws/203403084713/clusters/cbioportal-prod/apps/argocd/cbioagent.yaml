@@ -38,13 +38,9 @@ spec:
         valueFiles:
           - $k8s-repo/argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioagent/values.yaml
   syncPolicy:
-    # TODO(follow-up PR): restore automated prune/selfHeal. Auto-sync is paused
-    # so the first comparison after ServerSideDiff is enabled (the app has
-    # been unable to compare since 2026-10-15) is reviewed by a human and
-    # synced by hand, not auto-applied or auto-pruned.
-    # automated:
-    #   prune: true
-    #   selfHeal: true
+    automated:
+      prune: true
+      selfHeal: true
     # RespectIgnoreDifferences + ServerSideApply together let the cron's
     # in-cluster patch on `clickhouse-mcp-active.data.CLICKHOUSE_DATABASE`
     # survive each sync. RespectIgnoreDifferences alone wasn't enough:
