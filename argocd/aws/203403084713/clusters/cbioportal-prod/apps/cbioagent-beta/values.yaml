@@ -107,14 +107,14 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  # Built from the v0.8.9-custom-v7 branch on cbioportal/librechat: our
+  # Built from the v0.8.9-custom-v8 branch on cbioportal/librechat: our
   # customizations on upstream v0.8.9-rc1, including per-modelSpec model
   # selection for a single agent (Haiku 4.5 default / Sonnet 5 picker in
   # librechat-config.yaml) and, on the Agents API
   # (/api/agents/v1/chat/completions), the `spec` request field and cache
   # token counts in usage.prompt_tokens_details. Keel watches the tag
   # digest, so a re-push to that branch rolls this pod.
-  tag: "v0.8.9-custom-v7"
+  tag: "v0.8.9-custom-v8"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
