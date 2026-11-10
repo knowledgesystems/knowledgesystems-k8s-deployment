@@ -38,6 +38,10 @@ spec:
           # database. Settings go in custom_http_params: this driver version
           # ignores max_query_size given any other way, and production's
           # largest requests exceed the 256 KiB default.
+          # go's ClickHouse user is read-only, so the connection pool is too:
+          # the driver refuses to make such a connection writable. Only the
+          # standard spring.datasource.* settings configure the pool (with
+          # spring.datasource.clickhouse.url set, Java builds it without them).
           command:
             - /bin/sh
             - -c
@@ -52,10 +56,9 @@ spec:
                 --clickhouse_mode=true --spring.profiles.active=clickhouse \
                 --spring.datasource.url="$url" \
                 --spring.datasource.mysql.url="$url" \
-                --spring.datasource.clickhouse.url="$url" \
                 --spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver \
                 --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver \
-                --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver \
+                --spring.datasource.hikari.read-only=true \
                 --persistence.cache_type=no-cache --persistence.cache_type_clickhouse=no-cache \
                 --enable_persistent_cache=false \
                 --db.suppress_schema_version_mismatch_errors=true \
@@ -90,16 +93,6 @@ spec:
                   name: clickhouse-go-portal
                   key: CLICKHOUSE_USER
             - name: SPRING_DATASOURCE_MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: clickhouse-go-portal
-                  key: CLICKHOUSE_PASSWORD
-            - name: SPRING_DATASOURCE_CLICKHOUSE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: clickhouse-go-portal
-                  key: CLICKHOUSE_USER
-            - name: SPRING_DATASOURCE_CLICKHOUSE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: clickhouse-go-portal
