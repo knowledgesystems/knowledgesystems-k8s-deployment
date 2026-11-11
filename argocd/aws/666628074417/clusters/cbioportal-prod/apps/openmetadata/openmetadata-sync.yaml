@@ -1,5 +1,5 @@
-# OpenMetadata → Databricks sync: publishes study metadata (data products) and the CDSI glossary from
-# OpenMetadata to cdsi_eng_phi.deng_study_metadata.{meta_study,glossary}.
+# OpenMetadata → Databricks sync: publishes study metadata (data products), the CDSI glossary and the table columns
+# linked to its terms from OpenMetadata to cdsi_eng_phi.deng_study_metadata.{meta_study,glossary,column_glossary}.
 # Code, design and runbook: https://github.mskcc.org/cdsi/openmetadata (sync/, docs/databricks-sync.md).
 #
 # Long-running poller: reads OpenMetadata every minute and connects to Databricks (waking the SQL warehouse) only
@@ -47,7 +47,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: sync
-          image: cbioportal/openmetadata-sync:11848c9
+          image: cbioportal/openmetadata-sync:f2aa20a
           args:                  # without -apply: report only
             - -apply
             - -poll=1m
