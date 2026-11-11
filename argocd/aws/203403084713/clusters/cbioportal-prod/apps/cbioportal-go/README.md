@@ -22,7 +22,7 @@ cbioportal-go repo.
 | `Deployment cbioportal-go` | 2 replicas of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`), stateless: sessions in the public session service, logins in the public session Redis. Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
 | `Deployment` / `Service cbioportal-go-api` | The public REST API: api.cbioportal.org and www's non-browser API traffic. API-only, stateless, 2 replicas on the same databases. It runs a pinned release (`cbioportal/cbioportal-go:<X.Y.Z>`) on the on-demand `cbio-api` nodes. |
-| `Deployment` / `Service cbioportal-go-www`, `TraefikService cbioportal-www-mirror-{green,blue}` | The same, for a mirrored share of www's browser API traffic. |
+| `TraefikService cbioportal-www-mirror-{green,blue}` | Sends a mirrored quarter of www's browser API traffic to `cbioportal-go` as well as to Java, and discards go's answers. |
 | `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
 | `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
 | `Deployment` / `Service cbioportal-java-reference`, `IngressRoute`, `Middleware java-reference-auth`, `Certificate java-cbio-cert` | Java cBioPortal on go's copy of production, at java.cbioportal.org behind a password: the reference nightly parity compares go with. See [The Java reference](#the-java-reference). |
@@ -31,10 +31,10 @@ cbioportal-go repo.
 | `ServiceAccount/Role/RoleBinding cbioportal-go-mirror-job*` | Lets the CronJob `get`/`patch` only `cbioportal-go-active`. |
 | `Application cbioportal-go` (`apps/argocd/`) | Auto-sync (prune + selfHeal) of this directory. |
 
-`cbioportal-go`, `cbioportal-go-www` and `cbioportal-java-reference` run on the `workload=cbio-dev` node pool
+`cbioportal-go-api` and `cbioportal-go` answer real users (and `cbioportal-go`
+will serve www's browsers), so they run on the on-demand `workload=cbio-api`
+nodes. `cbioportal-java-reference` runs on the `workload=cbio-dev` node pool
 (arm64 spot), alongside the other dev/preview cBioPortal instances.
-`cbioportal-go-api` answers real users, so it runs on the on-demand
-`workload=cbio-api` nodes.
 
 ## Blue/green pointer
 
@@ -74,7 +74,7 @@ kubectl -n default patch configmap cbioportal-go-active --type=merge -p \
 ```
 
 Reloader sees the ConfigMap change and restarts `cbioportal-go`, `cbioportal-go-api` and
-`cbioportal-go-www` on the new databases. It replaces one pod at a time, so the site stays up.
+`cbioportal-java-reference` on the new databases. It replaces one pod at a time, so the site stays up.
 
 The ConfigMap in git is only the initial seed. The Argo Application lists the three keys
 under `ignoreDifferences` with `RespectIgnoreDifferences=true` + `ServerSideApply=true`,
