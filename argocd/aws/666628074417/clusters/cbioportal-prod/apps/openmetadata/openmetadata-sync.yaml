@@ -47,7 +47,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: sync
-          image: cbioportal/openmetadata-sync:f2aa20a
+          image: cbioportal/openmetadata-sync:ddf0891
           args:                  # without -apply: report only
             - -apply
             - -poll=1m
@@ -60,6 +60,8 @@ spec:
               value: "0b49b7d78734ad5c"     # CDSI Warehouse
             - name: TARGET_SCHEMA
               value: "cdsi_eng_phi.deng_study_metadata"
+            - name: OM_DOMAINS              # data products in these domains (and subdomains) are studies; required
+              value: "research.cancer_data_science_initiative"
           envFrom:
             - secretRef:
                 name: om-sync-openmetadata
