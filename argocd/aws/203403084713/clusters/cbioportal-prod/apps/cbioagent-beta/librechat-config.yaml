@@ -14,6 +14,7 @@ data:
     # Dedicated origin that runs MCP App views isolated from the chat origin.
     mcpAppSandbox:
       url: https://sandbox-ui.chat.cbioportal.org/api/mcp/sandbox
+      maxActiveViews: 12
 
     # Allow internal k8s MCP server domains
     mcpSettings:
