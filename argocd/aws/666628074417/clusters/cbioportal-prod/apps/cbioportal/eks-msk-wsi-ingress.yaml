@@ -25,7 +25,7 @@ metadata:
     # because $arg_studyId is empty inside the auth subrequest; a missing or
     # invalid studyId becomes "!", which the portal refuses. The tile server
     # itself never answers 401/403.
-    # eks-msk-wsi-auth (msk-portal-auth-service.yaml) reaches whichever MSK
+    # eks-msk-wsi-auth (eks-msk-wsi-auth-service.yaml) reaches whichever MSK
     # color is running.
     nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
     nginx.ingress.kubernetes.io/auth-method: GET
@@ -45,7 +45,8 @@ metadata:
     # slide's serving key is the stable per-slide request input.
     nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_key"
     # The browser uses a same-origin /wsi route while the FastAPI application
-    # owns root-level /tiles and /thumbnails paths.
+    # owns root-level /tiles and /thumbnails paths. The backend is the shared
+    # tile server in apps/slide-viewer-triage.
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
