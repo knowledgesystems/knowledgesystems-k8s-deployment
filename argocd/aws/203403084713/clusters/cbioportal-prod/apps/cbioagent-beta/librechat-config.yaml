@@ -17,6 +17,7 @@ data:
       allowedDomains:
         - 'cbioagent-clickhouse-mcp'
         - 'cbioagent-clickhouse-mcp-beta'
+        - 'cbioagent-clickhouse-mcp-apps'
         - 'cbioportal-navigator'
         - 'cbioportal-navigator-beta'
 
