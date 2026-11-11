@@ -11,6 +11,10 @@ data:
     # Cache settings: Set to true to enable caching
     cache: true
 
+    # Dedicated origin that runs MCP App views isolated from the chat origin.
+    mcpAppSandbox:
+      url: https://sandbox-ui.chat.cbioportal.org/api/mcp/sandbox
+
     # Allow internal k8s MCP server domains
     mcpSettings:
       apps: true
