@@ -1,7 +1,7 @@
 # Values for the beta cBioAgent LibreChat instance at beta.chat.cbioportal.org.
 # Rendered by the upstream LibreChat helm chart with releaseName: cbioagent-beta.
 #
-# Beta reuses the prod MongoDB, meilisearch, rag-api (if present), navigator,
+# Beta reuses the prod MongoDB, meilisearch, navigator,
 # and the shared images PVC. The LibreChat pod, its librechat.yaml ConfigMap,
 # and the ClickHouse MCP + its ClickHouse buffers (see
 # cbioagent-clickhouse-mcp-beta.yaml) are separate — beta exists to test new
@@ -88,10 +88,8 @@ librechat:
     AWS_PROFILE: "490004633549"
     DEBUG_PLUGINS: "true"
     PLUGIN_MODELS: "gpt-4,gpt-4-turbo-preview,gpt-4-0125-preview,gpt-4-1106-preview,gpt-4-0613,gpt-3.5-turbo,gpt-3.5-turbo-0125,gpt-3.5-turbo-1106,gpt-3.5-turbo-0613"
-    # Point at the prod meilisearch/rag-api — beta reuses them rather than
-    # standing up its own.
+    # Point at the prod meilisearch — beta reuses it rather than standing up its own.
     MEILI_HOST: "http://cbioagent-meilisearch.default.svc.cluster.local:7700"
-    RAG_API_URL: "http://cbioagent-librechat-rag-api.default.svc.cluster.local:8000"
     # Beta-specific public URL. The chart has no env: support, only envFrom,
     # so this has to go via the configenv ConfigMap.
     DOMAIN_CLIENT: "https://beta.chat.cbioportal.org"

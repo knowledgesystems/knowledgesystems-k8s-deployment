@@ -66,9 +66,7 @@ mongodb:
   enabled: false
 
 librechat-rag-api:
-  enabled: true
-  postgresql:
-    enabled: true
+  enabled: false
 
 podLabels:
   tags.datadoghq.com/env: "public"

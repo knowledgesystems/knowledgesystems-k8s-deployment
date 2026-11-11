@@ -12,7 +12,6 @@ Beta is a second LibreChat frontend plus its **own ClickHouse MCP and ClickHouse
 |---------|--------|-------|
 | MongoDB (`cbioagent-mongodb`) | yes | Same `cBioAgent` database — all agents, conversations, and users are visible in both instances |
 | meilisearch (`cbioagent-meilisearch`) | yes | Only if configured via `librechat-credentials-env` |
-| RAG API (`cbioagent-librechat-rag-api`) | yes | Same |
 | Navigator MCP (`cbioportal-navigator`) | yes (today) | May gain a `-beta` variant in the future |
 | ClickHouse MCP (`cbioagent-clickhouse-mcp`) | **no** | Beta runs `cbioagent-clickhouse-mcp-beta` (`cbioportal/mcp:beta`) — see below |
 | ClickHouse buffers (`cbioportal_public_librechat_{blue,green}`) | **no** | Beta reads `cbioportal_public_librechat_beta_{blue,green}`, built by its own clone cron. Both clones read the same production source DB. |
@@ -152,5 +151,5 @@ Keep `values.yaml` in sync with [`../cbioagent/values.yaml`](../cbioagent/values
 - `replicaCount: 1` (prod: 2)
 - `existingConfigYaml: librechat-config-beta` (prod: `librechat-config`)
 - `DOMAIN_CLIENT` / `DOMAIN_SERVER` point at `beta.chat.cbioportal.org`
-- All sub-charts disabled (prod enables `librechat-rag-api`)
+- All sub-charts disabled
 - `librechat-config.yaml` points `cbioportal-database` at `cbioagent-clickhouse-mcp-beta` (prod: `cbioagent-clickhouse-mcp`)
