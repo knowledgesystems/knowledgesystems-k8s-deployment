@@ -115,7 +115,7 @@ image:
   # (/api/agents/v1/chat/completions), the `spec` request field and cache
   # token counts in usage.prompt_tokens_details. Keel watches the tag
   # digest, so a re-push to that branch rolls this pod.
-  tag: "v0.8.9-custom-v11"
+  tag: "v0.8.9-custom-v12"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:
