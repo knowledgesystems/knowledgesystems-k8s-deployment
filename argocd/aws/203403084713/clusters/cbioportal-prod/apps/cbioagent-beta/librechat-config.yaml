@@ -122,6 +122,14 @@ data:
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
+      cbioportal-database-apps:
+        type: streamable-http
+        # MCP-Apps build (cbioportal/mcp:mcp-apps) that serves ui:// widget
+        # views; runs against the prod ClickHouse like cbioagent-clickhouse-mcp.
+        url: http://cbioagent-clickhouse-mcp-apps:80/db-mcp-apps/mcp
+        headers:
+          x-user-id: "{{LIBRECHAT_USER_ID}}"
+          x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
       cbioportal-navigator:
         type: streamable-http
         url: http://cbioportal-navigator:80/mcp
@@ -261,3 +269,19 @@ data:
           preset:
             <<: *betaPreset
             model: "us.anthropic.claude-sonnet-5"
+        - name: "cBioPortalChatBetaApps"
+          label: "cBioPortalChat (MCP Apps)"
+          description: "Beta agent using the MCP-Apps database server for ui:// widget views."
+          placeholder: "How can I help you explore cBioPortal?"
+          iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
+          showIconInHeader: true
+          showIconInMenu: true
+          showSwitchAgent: false
+          preset:
+            endpoint: "agents"
+            agent_id: "agent_5M2GIGavUHg62kd--FO4g"
+            model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            temperature: 0
+            maxTokens: 4096
+            thinking: false
+            modelLabel: "cBioPortalChat"
