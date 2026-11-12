@@ -83,7 +83,7 @@ spec:
             # /enable remote debug
 
             #            - --frontend.url=https://frontend.cbioportal.org/
-            - --frontend.url=https://deploy-preview-5795--cbioportalfrontend.netlify.app/
+            - --frontend.url=https://frontend.cbioportal.org/
             - --wsi.tile_server.url=/wsi
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
