@@ -47,7 +47,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: sync
-          image: cbioportal/openmetadata-sync:93e6c2e
+          image: cbioportal/openmetadata-sync:1b3a9c4
           args:                  # without -apply: report only
             - -apply
             - -poll=1m
