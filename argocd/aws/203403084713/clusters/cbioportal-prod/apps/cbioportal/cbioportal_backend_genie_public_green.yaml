@@ -11,7 +11,7 @@ metadata:
   namespace: default
 spec:
   progressDeadlineSeconds: 600
-  replicas: 3
+  replicas: 0
   selector:
     matchLabels:
       run: cbioportal-backend-genie-public-green
