@@ -178,9 +178,13 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 5
+          # Also receives a mirrored quarter of www's browser API requests
+          # (cbioportal-www-mirror.yaml), which used about 0.11 cores and
+          # 0.26 GB over two pods on average, 0.28 cores at the 95th
+          # percentile.
           resources:
             requests:
-              cpu: 250m
+              cpu: 500m
               memory: 512Mi
             limits:
               cpu: "2"
@@ -192,12 +196,14 @@ spec:
           labelSelector:
             matchLabels:
               run: cbioportal-go
+      # On-demand nodes, as cbioportal-go-api: these pods will serve
+      # www.cbioportal.org's browsers.
       nodeSelector:
-        workload: cbio-dev
+        workload: cbio-api
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "cbio-dev"
+          value: "cbio-api"
           effect: "NoSchedule"
 ---
 apiVersion: v1
@@ -216,8 +222,7 @@ spec:
       targetPort: 8080
   type: ClusterIP
 ---
-# Keeps one pod serving while nodes are drained (the cbio-dev spot pool is
-# consolidated and replaced often).
+# Keeps one pod serving while nodes are drained.
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
