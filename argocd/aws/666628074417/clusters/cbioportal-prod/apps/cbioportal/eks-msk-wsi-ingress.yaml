@@ -46,7 +46,7 @@ metadata:
     nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_key"
     # The browser uses a same-origin /wsi route while the FastAPI application
     # owns root-level /tiles and /thumbnails paths. The backend is the shared
-    # tile server in apps/slide-viewer-triage.
+    # tile server in apps/cbioportal-tile-server.
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
@@ -61,7 +61,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
     - host: cbioportal.aws.mskcc.org
@@ -71,7 +71,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
 ---
@@ -96,7 +96,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
     - host: cbioportal.aws.mskcc.org
@@ -106,6 +106,6 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80

@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: slide-viewer-triage
+  name: cbioportal-tile-server
   namespace: default
   labels:
-    app: slide-viewer-triage
+    app: cbioportal-tile-server
   annotations:
     # Secret values supplied through envFrom/valueFrom are captured when a
     # pod starts. Reloader makes portal-configuration Secret changes replace
     # all beta tile-server pods automatically.
     secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-source-seal"
-    configmap.reloader.stakater.com/reload: "slide-viewer-triage-config,wsi-serving-policy"
+    configmap.reloader.stakater.com/reload: "cbioportal-tile-server-config,wsi-serving-policy"
 spec:
   # Beta accepts node/pod downtime. Keep one warm replica for the observed
   # low concurrency; scale out manually to the four-node ceiling for an
@@ -18,7 +18,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: slide-viewer-triage
+      app: cbioportal-tile-server
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -29,7 +29,7 @@ spec:
   template:
     metadata:
       labels:
-        app: slide-viewer-triage
+        app: cbioportal-tile-server
       annotations:
         wsi.cbioportal.org/release-id: "beta-wsi-v8-20261030-1"
         # Restart the pod when the ConfigMap-backed CORS allowlist changes.
@@ -64,7 +64,7 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app: slide-viewer-triage
+              app: cbioportal-tile-server
       terminationGracePeriodSeconds: 60
       imagePullSecrets:
         - name: dockerhub-creds
@@ -94,7 +94,7 @@ spec:
             - configMapRef:
                 name: wsi-serving-policy
             - configMapRef:
-                name: slide-viewer-triage-config
+                name: cbioportal-tile-server-config
           env:
             - name: CACHE_MISS_LOCK_TTL_SECONDS
               value: "120"
@@ -184,13 +184,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: slide-viewer-triage
+  name: cbioportal-tile-server
   namespace: default
   labels:
-    app: slide-viewer-triage
+    app: cbioportal-tile-server
 spec:
   selector:
-    app: slide-viewer-triage
+    app: cbioportal-tile-server
   ports:
     - name: http
       port: 80

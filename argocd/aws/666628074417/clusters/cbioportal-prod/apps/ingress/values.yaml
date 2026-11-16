@@ -12,7 +12,7 @@ controller:
   minAvailable: 1
   config:
     use-forwarded-headers: "true"
-    # Beta WSI pixel auth (slide-viewer-triage/ingress.yaml). The ingress
+    # Beta WSI pixel auth (cbioportal-tile-server/ingress.yaml). The ingress
     # authorizes each /wsi/tiles and /wsi/thumbnails request with a subrequest
     # to cBioPortal's /api/studies/$wsi_study, but $arg_studyId is empty
     # inside that auth subrequest; $request_uri still holds the original URI,

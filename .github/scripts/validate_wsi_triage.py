@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reject an inconsistent triage WSI pixel-route and portal-auth contract.
 
-Triage serves pixels from the shared slide-viewer-triage tile server through
+Triage serves pixels from the shared tile server (cbioportal-tile-server) through
 its own ingress, authorized per study by the triage portal. The nightly import
 flips triage between blue and green, so the auth check reaches the portal
 through a Service that selects labels both colors carry and no other pods do.
@@ -20,11 +20,11 @@ from ruamel.yaml import YAML
 ROOT = Path(__file__).resolve().parents[2]
 APP_RELATIVE = Path("argocd/aws/666628074417/clusters/cbioportal-prod/apps")
 NGINX = "nginx.ingress.kubernetes.io/"
-PIXEL_INGRESS = "slide-viewer-triage-wsi-triage"
-PROBE_INGRESS = "slide-viewer-triage-wsi-triage-probes"
+PIXEL_INGRESS = "cbioportal-tile-server-wsi-triage"
+PROBE_INGRESS = "cbioportal-tile-server-wsi-triage-probes"
 PIXEL_PATH = "/wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?)$"
 PROBE_PATH = "/wsi(/|$)(health|ready)$"
-TILE_SERVICE = "slide-viewer-triage"
+TILE_SERVICE = "cbioportal-tile-server"
 AUTH_SERVICE_NAME = "eks-triage-wsi-auth"
 AUTH_URL = (
     f"http://{AUTH_SERVICE_NAME}.default.svc.cluster.local/api/studies/$wsi_study"
@@ -82,8 +82,8 @@ def hosts_and_paths(ingress: dict) -> dict[str, list[dict]]:
 def validate(root: Path) -> None:
     apps = root / APP_RELATIVE
     portal_root = apps / "cbioportal"
-    triage_ingress = apps / "slide-viewer-triage/triage-ingress.yaml"
-    auth_service_file = apps / "slide-viewer-triage/triage-portal-auth-service.yaml"
+    triage_ingress = apps / "cbioportal-tile-server/triage-ingress.yaml"
+    auth_service_file = apps / "cbioportal-tile-server/triage-portal-auth-service.yaml"
     color_files = {
         color: portal_root / f"cbioportal-eks-triage-{color}-deployment-service.yaml"
         for color in COLORS

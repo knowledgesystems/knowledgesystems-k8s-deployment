@@ -1,12 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: slide-viewer-triage-ingress-only
+  name: cbioportal-tile-server-ingress-only
   namespace: default
 spec:
   podSelector:
     matchLabels:
-      app: slide-viewer-triage
+      app: cbioportal-tile-server
   policyTypes:
     - Ingress
   ingress:

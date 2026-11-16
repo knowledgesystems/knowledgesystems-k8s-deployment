@@ -10,20 +10,20 @@ each pixel request with an auth subrequest to cBioPortal's
 passes, 401/403 refuse). The study comes from a `$request_uri` map in the
 controller `http-snippet` (`ingress/values.yaml`), because `$arg_studyId` is
 empty inside the auth subrequest. The auth URL names `eks-msk-beta-wsi-auth`
-(`slide-viewer-triage/portal-auth-service.yaml`), which selects the portal pods
-of both beta colors by the `wsi.cbioportal.org/beta-portal` label, so it reaches
+(`cbioportal-tile-server/portal-auth-service.yaml`), which selects the portal
+pods of both beta colors by the `wsi.cbioportal.org/beta-portal` label, so it reaches
 whichever color the nightly import left running. The tile server's own refusals are 404
 or 400, never 401/403.
 
 ## Triage
 
 Triage (`triage.cbioportal.mskcc.org`, `triage.cbioportal.aws.mskcc.org` and
-`triage-beta.cbioportal.aws.mskcc.org`) uses the same `slide-viewer-triage`
-tile server through its own pixel and probe ingresses
-(`slide-viewer-triage/triage-ingress.yaml`), on the same `/wsi/tiles`,
+`triage-beta.cbioportal.aws.mskcc.org`) uses the same tile server
+(`cbioportal-tile-server`) through its own pixel and probe ingresses
+(`cbioportal-tile-server/triage-ingress.yaml`), on the same `/wsi/tiles`,
 `/wsi/thumbnails`, `/wsi/health` and `/wsi/ready` routes. Pixel requests are
 authorized against the triage portal's `GET /api/studies/{studyId}` through
-`eks-triage-wsi-auth` (`slide-viewer-triage/triage-portal-auth-service.yaml`).
+`eks-triage-wsi-auth` (`cbioportal-tile-server/triage-portal-auth-service.yaml`).
 Triage enforces study authorization, so this is a real per-study check. The
 Service selects the `tags.datadoghq.com/env: eks-triage` and
 `tags.datadoghq.com/service: cbioportal` pod labels that both triage colors
@@ -38,6 +38,18 @@ The Pathology Slides tab appears when the portal is configured with
   than v7.2.3.
 - The study's WSI data must be in the `metadata.serving` format, which
   carries each slide's serving `key` and sealed source `enc`.
+
+## MSK
+
+The MSK portal (`cbioportal.mskcc.org`, `cbioportal.aws.mskcc.org`) uses the
+same tile server through `cbioportal/eks-msk-wsi-ingress.yaml`, which lives in
+the `cbioportal` app with the other MSK portal ingresses. Pixel requests are
+authorized through `eks-msk-wsi-auth` (`cbioportal/eks-msk-wsi-auth-service.yaml`),
+which selects the `tags.datadoghq.com/env: eks-msk` and
+`tags.datadoghq.com/service: cbioportal` pod labels of both MSK colors. The MSK
+portal runs with `--authorization=false`, so the check is for a valid session.
+The frontend turns the viewer on through `wsi_tile_server_url` in
+`msk-eks-frontend-config` (portal-configuration).
 
 ## Development capacity controls
 
