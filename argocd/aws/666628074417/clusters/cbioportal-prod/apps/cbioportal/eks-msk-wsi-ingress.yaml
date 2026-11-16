@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: slide-viewer-triage-wsi-msk
+  name: cbioportal-tile-server-wsi-msk
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
@@ -78,7 +78,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: slide-viewer-triage-wsi-msk-probes
+  name: cbioportal-tile-server-wsi-msk-probes
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
