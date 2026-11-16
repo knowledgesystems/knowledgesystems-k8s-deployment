@@ -46,9 +46,9 @@ same tile server through `cbioportal/eks-msk-wsi-ingress.yaml`, which lives in
 the `cbioportal` app with the other MSK portal ingresses. Pixel requests are
 authorized through `eks-msk-wsi-auth` (`cbioportal/eks-msk-wsi-auth-service.yaml`),
 which selects the `tags.datadoghq.com/env: eks-msk` and
-`tags.datadoghq.com/service: cbioportal` pod labels of both MSK colors. The MSK
-portal runs with `--authorization=false`, so the check is for a valid session.
-The frontend turns the viewer on through `wsi_tile_server_url` in
+`tags.datadoghq.com/service: cbioportal` pod labels of both MSK colors. The
+portal checks the user's Keycloak roles against the study's groups, so this is
+a per-study check. The frontend turns the viewer on through `wsi_tile_server_url` in
 `msk-eks-frontend-config` (portal-configuration).
 
 ## Development capacity controls
