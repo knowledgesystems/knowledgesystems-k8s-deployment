@@ -18,13 +18,13 @@ metadata:
     nginx.ingress.kubernetes.io/limit-connections: "300"
     # Every pixel request is authorized by the MSK portal: the auth subrequest
     # asks the portal for the request's study with the browser's session
-    # cookie. The MSK portal runs with --authorization=false, so this checks
-    # for a valid session, the same access the portal itself gives: 2xx passes;
-    # the portal's 401 (no or expired session) refuses. $wsi_study comes from
-    # the controller's http-snippet map on $request_uri (ingress/values.yaml),
-    # because $arg_studyId is empty inside the auth subrequest; a missing or
-    # invalid studyId becomes "!", which the portal refuses. The tile server
-    # itself never answers 401/403.
+    # cookie, so a user gets a study's slides only if the portal grants them
+    # that study (Keycloak roles against the study's groups): 2xx passes; 401
+    # (no or expired session) and 403 (no access to the study) refuse.
+    # $wsi_study comes from the controller's http-snippet map on $request_uri
+    # (ingress/values.yaml), because $arg_studyId is empty inside the auth
+    # subrequest; a missing or invalid studyId becomes "!", which the portal
+    # refuses. The tile server itself never answers 401/403.
     # eks-msk-wsi-auth (eks-msk-wsi-auth-service.yaml) reaches whichever MSK
     # color is running.
     nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
