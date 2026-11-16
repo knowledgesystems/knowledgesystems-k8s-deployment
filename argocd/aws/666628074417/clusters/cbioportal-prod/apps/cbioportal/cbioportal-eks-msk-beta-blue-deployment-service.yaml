@@ -28,7 +28,7 @@ spec:
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-blue
-        # Selected by eks-msk-beta-wsi-auth (slide-viewer-triage), so the WSI
+        # Selected by eks-msk-beta-wsi-auth (cbioportal-tile-server), so the WSI
         # pixel auth check reaches whichever beta color is running.
         wsi.cbioportal.org/beta-portal: "true"
         tags.datadoghq.com/env: eks-msk-beta

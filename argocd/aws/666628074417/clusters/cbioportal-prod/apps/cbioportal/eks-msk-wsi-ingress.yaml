@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: slide-viewer-triage-wsi-triage
+  name: cbioportal-tile-server-wsi-msk
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
@@ -16,25 +16,25 @@ metadata:
     # users behind one NAT address. The tile server still bounds expensive
     # image work independently with MAX_IMAGE_OPERATIONS.
     nginx.ingress.kubernetes.io/limit-connections: "300"
-    # Every pixel request is authorized by the triage portal: the auth
-    # subrequest asks the portal for the request's study with the browser's
-    # session cookie. Triage enforces study authorization, so this is a real
-    # per-study check: 2xx passes; the portal's 401 (no or expired session) or
-    # 403 (no access to the study) refuses. $wsi_study comes from the
-    # controller's http-snippet map on $request_uri (ingress/values.yaml),
-    # because $arg_studyId is empty inside the auth subrequest; a missing or
-    # invalid studyId becomes "!", which the portal refuses. The tile server
-    # itself never answers 401/403.
-    # eks-triage-wsi-auth (triage-portal-auth-service.yaml) reaches whichever
-    # triage color is running; the nightly import flips the colors.
-    nginx.ingress.kubernetes.io/auth-url: "http://eks-triage-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
+    # Every pixel request is authorized by the MSK portal: the auth subrequest
+    # asks the portal for the request's study with the browser's session
+    # cookie, so a user gets a study's slides only if the portal grants them
+    # that study (Keycloak roles against the study's groups): 2xx passes; 401
+    # (no or expired session) and 403 (no access to the study) refuse.
+    # $wsi_study comes from the controller's http-snippet map on $request_uri
+    # (ingress/values.yaml), because $arg_studyId is empty inside the auth
+    # subrequest; a missing or invalid studyId becomes "!", which the portal
+    # refuses. The tile server itself never answers 401/403.
+    # eks-msk-wsi-auth (eks-msk-wsi-auth-service.yaml) reaches whichever MSK
+    # color is running.
+    nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-wsi-auth.default.svc.cluster.local/api/studies/$wsi_study"
     nginx.ingress.kubernetes.io/auth-method: GET
     # Key auth results by host, session and study. The key covers both session
     # cookie names a portal may issue (SESSION for Spring Session, JSESSIONID
-    # for in-memory sessions). The auth cache zone is shared with the beta
-    # pixel ingress, so the key also names the host to keep triage and beta
-    # sessions apart (the controller also prefixes its server name and auth
-    # location). Only successes are cached, and only when the portal's
+    # for in-memory sessions). The auth cache zone is shared with the beta and
+    # triage pixel ingresses, so the key also names the host to keep each
+    # portal's sessions apart (the controller also prefixes its server name
+    # and auth location). Only successes are cached, and only when the portal's
     # response allows it. If caching is allowed, a logout or study-access
     # change can take up to the cache duration to apply to pixels.
     nginx.ingress.kubernetes.io/auth-cache-key: "$host$cookie_SESSION$cookie_JSESSIONID$wsi_study"
@@ -45,13 +45,14 @@ metadata:
     # slide's serving key is the stable per-slide request input.
     nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_key"
     # The browser uses a same-origin /wsi route while the FastAPI application
-    # owns root-level /tiles and /thumbnails paths.
+    # owns root-level /tiles and /thumbnails paths. The backend is the shared
+    # tile server in apps/cbioportal-tile-server.
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
-    - host: triage.cbioportal.mskcc.org
+    - host: cbioportal.mskcc.org
       http:
         paths:
           # Keep the allowlist explicit: do not expose metrics, OpenAPI, or
@@ -60,34 +61,24 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
-    - host: triage.cbioportal.aws.mskcc.org
+    - host: cbioportal.aws.mskcc.org
       http:
         paths:
           - path: /wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?)$
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
-                port:
-                  number: 80
-    - host: triage-beta.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - path: /wsi(/|$)(tiles(/.*)?|thumbnails(/.*)?)$
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: slide-viewer-triage-wsi-triage-probes
+  name: cbioportal-tile-server-wsi-msk-probes
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
@@ -98,33 +89,23 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: triage.cbioportal.mskcc.org
+    - host: cbioportal.mskcc.org
       http:
         paths:
           - path: /wsi(/|$)(health|ready)$
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
-    - host: triage.cbioportal.aws.mskcc.org
+    - host: cbioportal.aws.mskcc.org
       http:
         paths:
           - path: /wsi(/|$)(health|ready)$
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
-                port:
-                  number: 80
-    - host: triage-beta.cbioportal.aws.mskcc.org
-      http:
-        paths:
-          - path: /wsi(/|$)(health|ready)$
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80

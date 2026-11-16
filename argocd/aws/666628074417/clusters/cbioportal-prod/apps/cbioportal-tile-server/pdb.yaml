@@ -1,7 +1,7 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: slide-viewer-triage
+  name: cbioportal-tile-server
   namespace: default
 spec:
   # Beta intentionally permits its only pod to be voluntarily disrupted;
@@ -9,4 +9,4 @@ spec:
   maxUnavailable: 1
   selector:
     matchLabels:
-      app: slide-viewer-triage
+      app: cbioportal-tile-server

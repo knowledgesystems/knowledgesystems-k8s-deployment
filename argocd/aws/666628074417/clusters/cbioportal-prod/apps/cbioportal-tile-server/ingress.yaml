@@ -1,9 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: slide-viewer-triage-wsi-ingress
+  name: cbioportal-tile-server-wsi-beta
   namespace: default
   annotations:
+    # Applied after the tile server Deployment (wave 0) is healthy, so the
+    # route never points at a Service without ready pods.
+    argocd.argoproj.io/sync-wave: "1"
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
     nginx.ingress.kubernetes.io/proxy-body-size: 1m
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
@@ -57,16 +60,19 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: slide-viewer-triage-wsi-probes
+  name: cbioportal-tile-server-wsi-beta-probes
   namespace: default
   annotations:
+    # Applied after the tile server Deployment (wave 0) is healthy, so the
+    # route never points at a Service without ready pods.
+    argocd.argoproj.io/sync-wave: "1"
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
     # Unauthenticated health and readiness for the post-deploy smoke; they
     # carry no slide data.
@@ -82,6 +88,6 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: slide-viewer-triage
+                name: cbioportal-tile-server
                 port:
                   number: 80
