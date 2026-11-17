@@ -21,6 +21,18 @@ spec:
       labels:
         run: cbioportal-chat-sidebar
     spec:
+      initContainers:
+        - name: migrate
+          image: cbioportal/cbioportal-dev:chat-sidebar-sidebar-chat-ai-sdk
+          imagePullPolicy: Always
+          command: ["node", "packages/chat-sidebar-server/dist/migrate.js"]
+          envFrom:
+            - secretRef:
+                name: cbioportal-chat-sidebar
+          volumeMounts:
+            - mountPath: /etc/supabase
+              name: db-cert
+              readOnly: true
       containers:
         - name: cbioportal-chat-sidebar
           image: cbioportal/cbioportal-dev:chat-sidebar-sidebar-chat-ai-sdk
