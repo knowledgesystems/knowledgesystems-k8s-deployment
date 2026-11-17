@@ -5,7 +5,7 @@ metadata:
   labels:
     run: cbioportal-chat-sidebar
   annotations:
-    secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,cbioportal-chat-sidebar"
+    secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,cbioportal-chat-sidebar,supabase-db-cert"
 spec:
   replicas: 1
   selector:
@@ -49,6 +49,9 @@ spec:
             - mountPath: /home/node/.aws
               name: aws-creds
               readOnly: true
+            - mountPath: /etc/supabase
+              name: db-cert
+              readOnly: true
       terminationGracePeriodSeconds: 120
       nodeSelector:
         workload: cbio-dev
@@ -61,6 +64,9 @@ spec:
         - name: aws-creds
           secret:
             secretName: k8s-aws-creds-manager
+        - name: db-cert
+          secret:
+            secretName: supabase-db-cert
 ---
 apiVersion: v1
 kind: Service
