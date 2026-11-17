@@ -304,6 +304,8 @@ spec:
   # Three hours after prod's 13:00 UTC run. Prod's activeDeadlineSeconds is
   # 2h, so an on-time prod run has finished or been killed before this starts.
   schedule: "0 16 * * *"  # daily 16:00 UTC = 12:00 ET (DST) / 11:00 ET (EST)
+  # study-filtering test: paused so beta_blue isn't dropped; reverting this PR resumes it
+  suspend: true
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1

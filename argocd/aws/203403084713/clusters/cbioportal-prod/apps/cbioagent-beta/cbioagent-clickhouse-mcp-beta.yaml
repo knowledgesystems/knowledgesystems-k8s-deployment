@@ -70,13 +70,9 @@ spec:
               value: ""
             - name: CBIOPORTAL_MCP_PUBLIC_DB_CHECK
               value: "enforce"
-            # TODO BEFORE MERGE (operator fills from SHOW GRANTS, including roles):
-            # replace/complete this comma-separated list with EVERY OTHER database
-            # llm_user_beta has SELECT on, excluding the filtered beta_blue DB.
-            # Each declared database must contain public data only; declarations
-            # do not bypass the startup audit of engines/views or grants.
+            # llm_user_beta's SELECT on beta_green is revoked for the test window, so no other database is declared.
             - name: CBIOPORTAL_MCP_STUDY_FILTERING_PUBLIC_DATABASES
-              value: "cbioportal_public_librechat_beta_green"
+              value: ""
             # Required for the trusted LibreChat bridge identity headers.
             - name: CBIOPORTAL_MCP_BRIDGE_SECRET
               valueFrom:
