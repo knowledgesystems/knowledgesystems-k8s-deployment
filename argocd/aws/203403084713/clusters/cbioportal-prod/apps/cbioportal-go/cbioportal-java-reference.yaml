@@ -65,7 +65,7 @@ spec:
                 "$@"
             - java-reference
           args:
-            - --app.name=java-reference
+            - --app.name=public-portal
             - --spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.hikari.read-only=true
