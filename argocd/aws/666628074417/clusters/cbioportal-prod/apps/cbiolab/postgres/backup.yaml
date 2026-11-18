@@ -1,0 +1,78 @@
+# EFS so the dumps live off the postgres node and are picked up by the account's EFS backup plan
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cbiolab-postgres-backups
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbiolab-postgres-backup
+  labels:
+    app: cbiolab-postgres
+spec:
+  schedule: "0 6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: cbiolab-postgres-backup
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pg-dump
+              # Same major version as the server; pg_dump refuses newer servers
+              image: postgres:17
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+                  out="/backups/cohort_lab-$(date -u +%Y%m%dT%H%M%SZ).dump"
+                  pg_dump -Fc -f "$out.partial"
+                  pg_restore --list "$out.partial" > /dev/null
+                  mv "$out.partial" "$out"
+                  ls -l "$out"
+                  find /backups -name 'cohort_lab-*.dump' -mtime +"$RETENTION_DAYS" -print -delete
+                  find /backups -name '*.partial' -mmin +60 -print -delete
+              env:
+                - name: PGHOST
+                  value: cbiolab-postgres
+                - name: PGDATABASE
+                  value: cohort_lab
+                - name: PGUSER
+                  value: cohort_lab_app
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: cbiolab-postgres
+                      key: POSTGRES_PASSWORD
+                - name: RETENTION_DAYS
+                  value: "14"
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "128Mi"
+                limits:
+                  memory: "512Mi"
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: cbiolab-postgres-backups
+          imagePullSecrets:
+            - name: dockerhub-creds
