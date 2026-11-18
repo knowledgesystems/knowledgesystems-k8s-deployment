@@ -73,6 +73,10 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: cbioagent-od
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: cbioagent-db
       effect: NoSchedule
     - key: workload

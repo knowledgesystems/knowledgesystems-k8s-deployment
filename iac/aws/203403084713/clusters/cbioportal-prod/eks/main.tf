@@ -290,6 +290,32 @@ locals {
         cdsi-owner = "nasirz1@mskcc.org"
       }
     }
+    # On-demand home for the prod cbioagent stack (LibreChat, MCP servers,
+    # navigator, dashboard). Beta stays on the SPOT "cbioagent" group above.
+    # Name kept <=12 chars for the IAM role name_prefix limit.
+    cbioagent-od = {
+      instance_types = ["t4g.medium"]
+      capacity_type  = "ON_DEMAND"
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 3
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbioagent-od"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbioagent-od"
+      }
+      tags = {
+        cdsi-app   = "cbioagent"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "nasirz1@mskcc.org"
+      }
+    }
     cbioagent-db = {
       instance_types = ["t3.small"]
       ami_type       = "BOTTLEROCKET_x86_64"
