@@ -74,12 +74,12 @@ podLabels:
   tags.datadoghq.com/version: "v0.8.3"
 
 nodeSelector:
-  workload: cbioagent
+  workload: "cbioagent-od"
 
 tolerations:
   - key: "workload"
     operator: "Equal"
-    value: "cbioagent"
+    value: "cbioagent-od"
     effect: "NoSchedule"
 
 ingress:
@@ -87,9 +87,9 @@ ingress:
 
 resources:
   requests:
-    memory: 2Gi
+    memory: 1Gi
   limits:
-    memory: 4Gi
+    memory: 2Gi
 
 readinessProbe:
   httpGet:

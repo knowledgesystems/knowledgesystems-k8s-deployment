@@ -24,11 +24,11 @@ spec:
             - secretRef:
                 name: cbioagent-dashboard
       nodeSelector:
-        workload: "cbioagent"
+        workload: "cbioagent-od"
       tolerations:
         - key: "workload"
           operator: "Equal"
-          value: "cbioagent"
+          value: "cbioagent-od"
           effect: "NoSchedule"
 ---
 apiVersion: v1
