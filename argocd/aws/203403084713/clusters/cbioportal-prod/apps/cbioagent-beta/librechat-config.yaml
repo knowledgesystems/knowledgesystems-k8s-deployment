@@ -113,7 +113,7 @@ data:
         # No trailing slash: FastMCP 307-redirects the trailing-slash form to
         # this one, and LibreChat blocks following that redirect as SSRF.
         # Same fix as MSK-side (see portal-configuration#52).
-        # Beta-only MCP (pinned image and beta_blue for the filtering test); see
+        # Beta-only MCP (cbioportal/mcp:beta, beta ClickHouse buffers); see
         # cbioagent-clickhouse-mcp-beta.yaml.
         url: http://cbioagent-clickhouse-mcp-beta:80/db/mcp
         # Inject the server's FastMCP `instructions` (cbioportal-mcp
@@ -121,13 +121,13 @@ data:
         # recipes) into the agent system prompt so the model doesn't spend
         # tool rounds on list_guides / clickhouse_list_table_columns.
         serverInstructions: true
-        # Trusted bridge admission requires verified user identity and the
-        # shared secret exposed by the beta LibreChat Deployment.
+        # LibreChat reaches the MCP over the in-cluster Service without
+        # credentials. The MCP's bridge-secret login route is not used here:
+        # it needs an x-user-email-verified value LibreChat cannot render, and
+        # an unexpanded placeholder makes the MCP answer 401.
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
-          x-user-email-verified: "{{LIBRECHAT_USER_EMAILVERIFIED}}"
-          x-cbioportal-mcp-bridge-secret: "${CBIOPORTAL_MCP_BRIDGE_SECRET}"
       cbioportal-database-apps:
         type: streamable-http
         # MCP-Apps build (cbioportal/mcp:mcp-apps) that serves ui:// widget
