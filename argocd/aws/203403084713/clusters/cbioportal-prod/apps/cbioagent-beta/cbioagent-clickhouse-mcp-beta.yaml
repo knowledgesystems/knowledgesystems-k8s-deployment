@@ -1,13 +1,31 @@
-# TEST ONLY: study filtering pinned to beta_blue; revert after the test.
-# Image and database are fixed, with Keel and Reloader disabled for this window.
-# The daily clone still rebuilds alternating buffers: end the test before blue
-# becomes its target again. Only beta LibreChat uses this in-cluster Service.
+# Beta variant of the ClickHouse MCP server (cbioagent-clickhouse-mcp).
+# Built from the `beta` branch of cBioPortal/cbioportal-mcp, published as
+# `cbioportal/mcp:beta`, so MCP server changes merged to `beta` don't reach
+# the prod MCP (which tracks `:latest`).
+#
+# Reads its own ping-pong buffer (cbioportal_public_librechat_beta_{blue,green})
+# via the clickhouse-mcp-active-beta ConfigMap, which
+# cbioagent-clickhouse-clone-daily-beta owns. Only the beta LibreChat instance
+# (beta.chat.cbioportal.org) talks to this Service; it has no public Ingress.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cbioagent-clickhouse-mcp-beta
   labels:
     run: cbioagent-clickhouse-mcp-beta
+  annotations:
+    # Reloader rolls this Deployment when the beta daily clone cron patches
+    # clickhouse-mcp-active-beta.CLICKHOUSE_DATABASE on a successful build.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active-beta"
+    # Roll when the LibreChat bridge secret is rotated (and created, if
+    # Reloader runs with --reload-on-create).
+    secret.reloader.stakater.com/reload: "cbioportal-mcp-bridge"
+    # Keel polls Docker Hub for `cbioportal/mcp:beta` and rolls the
+    # Deployment when the digest changes, so a merge to the MCP repo's
+    # `beta` branch reaches this pod without waiting for a restart.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
 spec:
   replicas: 1
   selector:
@@ -20,7 +38,7 @@ spec:
     spec:
       containers:
         - name: cbioagent-clickhouse-mcp-beta
-          image: cbioportal/mcp@sha256:e95f5883a27e0ad2e93dd2f5894043757f79cd589258daa6182768ad761c8448
+          image: cbioportal/mcp:beta
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
@@ -58,33 +76,50 @@ spec:
             # llm_user_beta; default readonly=1 disables the cache pilot.
             # - name: CBIOPORTAL_MCP_QUERY_CACHE_ENABLED
             #   value: "true"
-            # Explicit env overrides both envFrom sources, including the clone's
-            # mutable clickhouse-mcp-active-beta pointer, even after a restart.
-            - name: CLICKHOUSE_DATABASE
-              value: "cbioportal_public_librechat_beta_blue"
+            # Upcoming cbioportal-mcp releases refuse to start unless this is
+            # set explicitly (on|off, no default). `off` = current behavior
+            # (no per-user study filtering). Ignored by current images.
             - name: CBIOPORTAL_MCP_STUDY_FILTERING
-              value: "on"
+              value: "off"
+            # Upcoming cbioportal-mcp releases refuse to start unless this is
+            # set explicitly (off|enforce, no default). One switch for
+            # mandatory login + LibreChat bridge-secret check + verified-email
+            # check. `off` = current behavior. Flip to `enforce` via a git
+            # change + Argo sync (pod rolls). Ignored by current images.
             - name: CBIOPORTAL_MCP_AUTH_ENFORCEMENT
-              value: "enforce"
+              value: "off"
+            # Required by upcoming images, no default. Comma-separated tester
+            # emails (case-insensitive); while AUTH_ENFORCEMENT is off,
+            # identified testers get the full new checks. Empty string = no
+            # testers, set explicitly. Ignored by current images.
             - name: CBIOPORTAL_MCP_AUTH_TEST_USERS
               value: ""
+            # Required by upcoming images, no default (off|enforce). When
+            # `enforce`, the server refuses to start if a filtering-off DB has
+            # public=0 studies, unknown groups, or authorities rows. Ignored
+            # by current images.
             - name: CBIOPORTAL_MCP_PUBLIC_DB_CHECK
-              value: "enforce"
-            # llm_user_beta's SELECT on beta_green is revoked for the test window, so no other database is declared.
-            - name: CBIOPORTAL_MCP_STUDY_FILTERING_PUBLIC_DATABASES
-              value: ""
-            # Required for the trusted LibreChat bridge identity headers.
+              value: "off"
+            # Shared secret LibreChat sends in the
+            # x-cbioportal-mcp-bridge-secret header (see librechat-config.yaml).
+            # Upcoming cbioportal-mcp releases require it to trust the
+            # x-user-* identity headers. Secret is created out of band
+            # (portal-configuration); optional so the pod still starts before
+            # it exists. Ignored by current images.
             - name: CBIOPORTAL_MCP_BRIDGE_SECRET
               valueFrom:
                 secretKeyRef:
                   name: cbioportal-mcp-bridge
                   key: CBIOPORTAL_MCP_BRIDGE_SECRET
+                  optional: true
           envFrom:
             # Dedicated read-only ClickHouse credentials (llm_user_beta).
             - secretRef:
                 name: clickhouse-mcp-beta
-            # Last envFrom source overrides Secret duplicates; explicit env
-            # above overrides both, so the clone cannot move this MCP off blue.
+            # ConfigMap mounted AFTER the Secret so its CLICKHOUSE_DATABASE
+            # value wins (envFrom: last-writer-wins on key collisions). The
+            # cbioagent-clickhouse-clone-daily-beta CronJob owns this
+            # ConfigMap and patches it after each successful build.
             - configMapRef:
                 name: clickhouse-mcp-active-beta
       nodeSelector:
