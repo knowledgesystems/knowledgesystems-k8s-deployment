@@ -267,13 +267,14 @@ locals {
         cdsi-owner = "lix2@mskcc.org"
       }
     }
+    # Beta cbioagent stack only (prod runs on cbioagent-od). SPOT is fine here.
     cbioagent = {
       instance_types = ["c8g.large", "c7g.large", "c6gn.large", "c6g.large"]
       capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 3
-      max_size       = 3
-      min_size       = 3
+      desired_size   = 1
+      max_size       = 2
+      min_size       = 1
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
