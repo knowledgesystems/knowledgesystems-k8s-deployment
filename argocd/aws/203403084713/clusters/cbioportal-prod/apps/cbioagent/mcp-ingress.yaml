@@ -89,7 +89,7 @@ metadata:
   name: mcp-cbioportal-db-ingress
   annotations:
     kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/router.middlewares: default-ratelimit-db@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-ratelimit-db@kubernetescrd
   labels:
     app.kubernetes.io/instance: cbioagent
 spec:

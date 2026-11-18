@@ -27,3 +27,7 @@ spec:
         # sitemap_study.xml with junk query params (~10k req/min, 2026-10-12);
         # also blocked in the cbioportal.org Cloudflare WAF rule.
         - 212.56.54.218
+        # University of Kansas (JAYHAWKNET) MCP client stuck in an OAuth loop
+        # against mcp.cbioportal.org (/.well-known, POST /token 400, GET /db/mcp
+        # 401; ~2.6 req/s for 13h+, 2026-11-18). Revisit if the owner shows up.
+        - 129.237.90.146

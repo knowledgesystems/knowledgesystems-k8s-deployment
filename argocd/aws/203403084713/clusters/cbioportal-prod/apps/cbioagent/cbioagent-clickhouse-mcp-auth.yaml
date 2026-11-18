@@ -84,6 +84,11 @@ spec:
             # against CLICKHOUSE_MCP_QUERY_TIMEOUT.
             - name: CBIOPORTAL_MCP_MAX_CONCURRENT_QUERIES
               value: "4"
+            # Per-query cap for clickhouse_run_select_query, including time queued
+            # behind CBIOPORTAL_MCP_MAX_CONCURRENT_QUERIES. Kept below LibreChat's
+            # ~60s MCP request timeout so the agent gets a clean error.
+            - name: CLICKHOUSE_MCP_QUERY_TIMEOUT
+              value: "45"
             # Reused from the cBioPortal webapp's own Spring session Redis
             # (cbioportal-public-blue), not a dedicated instance.
             - name: REDIS_SESSION_HOST
