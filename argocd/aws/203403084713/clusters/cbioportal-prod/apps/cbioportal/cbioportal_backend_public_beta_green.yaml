@@ -65,6 +65,9 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #- -XX:MaxRAM=6500m
+            # Spring 7 ignores flush() on streamed responses without this, which
+            # holds the chat sidebar's streamed replies until they finish.
+            - -Dspring.http.response.flush.enabled=true
             - -jar
             - /cbioportal-webapp/app.jar
             # enable remote debug
@@ -239,7 +242,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-green
-          image: cbioportal/cbioportal:demo-sidebar-web-shenandoah
+          image: cbioportal/cbioportal@sha256:77dc3d74c035a6ec3c67730423498d793048af2b0cbd2ed3f4918f6f0f2db1a0
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
