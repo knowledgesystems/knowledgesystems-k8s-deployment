@@ -112,6 +112,7 @@ spec:
             - --spring.security.oauth2.client.provider.azure.token-uri=https://login.microsoftonline.com/common/oauth2/v2.0/token
             - --spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys
             - --security.cors.allowed-origins=*
+            - --oql_wizard.enabled=true
             # db settings for when clickhouse_mode is set to false
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
@@ -197,6 +198,7 @@ spec:
             - --server.max-http-request-header-size=16384
             - --server.port=8888
             - --show.civic=true
+            - --chat.sidebar.url=http://cbioportal-chat-sidebar:4000
             #- --springdoc.api-docs.version=openapi_3_0
           command:
             - java
