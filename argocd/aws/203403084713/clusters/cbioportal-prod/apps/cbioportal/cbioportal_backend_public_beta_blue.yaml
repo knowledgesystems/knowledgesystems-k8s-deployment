@@ -197,6 +197,7 @@ spec:
             # disable ehcache ??? Are we still using ehcache?
             #- --ehcache.cache_type=none
             # compress on client side
+            - --oql_wizard.enabled=true
             - --enable_request_body_gzip_compression=true
             # for single cell plugin
             - --frontend.config=/cbioportal/frontendConfig.json

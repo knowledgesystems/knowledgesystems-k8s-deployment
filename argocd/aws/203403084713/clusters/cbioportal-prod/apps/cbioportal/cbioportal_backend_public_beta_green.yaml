@@ -118,6 +118,7 @@ spec:
             - --spring.security.oauth2.client.provider.azure.jwk-set-uri=https://login.microsoftonline.com/common/discovery/v2.0/keys
             - --security.cors.allowed-origins=*
             # db settings
+            - --oql_wizard.enabled=true
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --spring.datasource.driver-class-name=com.mysql.jdbc.Driver
