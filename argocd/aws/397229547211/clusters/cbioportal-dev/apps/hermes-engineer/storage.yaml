@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cbio-engineer-trial
+  labels:
+    app.kubernetes.io/part-of: cbio-claw
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cbio-engineer-trial-encrypted
+  labels:
+    app.kubernetes.io/part-of: cbio-claw
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  encrypted: 'true'
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: engineer-data
+  namespace: cbio-engineer-trial
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: cbio-engineer-trial-encrypted
+  resources:
+    requests:
+      storage: 20Gi
