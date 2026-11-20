@@ -35,7 +35,7 @@ spec:
         paths:
           - backend:
               service:
-                name: eks-hgnc
+                name: public-v7-preview-proxy
                 port:
                   number: 80
             path: /

@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cbioportal-v7
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+    targetRevision: master
+    path: argocd/aws/203403084713/clusters/cbioportal-prod/apps/cbioportal-v7
+    directory:
+      recurse: true
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - ServerSideApply=true
