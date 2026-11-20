@@ -5,7 +5,7 @@
 # then in one import at the head commit and removes the studies deleted
 # from master. Forbid: a new run does not start while one is importing; the
 # import lock in dev_cbioportal_hub_go_raw also keeps it from running at the
-# same time as a `hub-preview: all` copy of the hub. The very first run
+# same time as a `hub-preview: pr-studies-plus-hub` copy of the hub. The very first run
 # imports all of datahub (hours).
 apiVersion: batch/v1
 kind: CronJob

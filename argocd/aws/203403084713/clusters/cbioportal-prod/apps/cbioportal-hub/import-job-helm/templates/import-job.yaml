@@ -3,8 +3,8 @@
 # deployment.yaml) with cbioportal-go's ops/cbioportal.org/hub-import.sh
 # (shipped in the image at /app/deploy): checkout of the changed studies, an
 # import of them, and a Check Run plus a Deployment on the PR. With
-# `hub-preview: all` in the PR description, the first import starts from a
-# copy of hub.cbioportal.org's studies (HUB_DB). Jobs of one PR's commits run
+# `hub-preview: pr-studies-plus-hub` in the PR description, the first import
+# starts from a copy of hub.cbioportal.org (HUB_DB). Jobs of one PR's commits run
 # one at a time through a lock in the preview's raw database.
 apiVersion: batch/v1
 kind: Job
@@ -16,8 +16,9 @@ spec:
   ttlSecondsAfterFinished: 86400
   # The script reports failures on the PR; a retry would post a second run.
   backoffLimit: 0
-  # Waiting for another import (LOCK_WAIT) plus the import itself; with
-  # `hub-preview: all` the first import builds every study (about an hour).
+  # Waiting for another import (LOCK_WAIT) plus the import itself; a
+  # preview built by another importer version than the hub's builds every
+  # study (about half an hour for all of datahub).
   activeDeadlineSeconds: 14400
   template:
     spec:
@@ -37,7 +38,7 @@ spec:
               value: {{ .Values.prNumber | quote }}
             - name: HEAD_SHA
               value: {{ .Values.headSha | quote }}
-            # hub.cbioportal.org: `hub-preview: all` copies its databases,
+            # hub.cbioportal.org: `hub-preview: pr-studies-plus-hub` copies its databases,
             # and the validator reads its reference data from its API.
             - name: HUB_DB
               value: dev_cbioportal_hub_go

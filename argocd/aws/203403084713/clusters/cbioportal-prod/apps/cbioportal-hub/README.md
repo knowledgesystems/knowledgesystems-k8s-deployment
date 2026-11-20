@@ -66,9 +66,9 @@ The Job runs `/app/deploy/hub-import.sh` from the cbioportal-go image (source:
    longer the PR head stops ("superseded").
 4. Takes the preview's import lock, so the Jobs of one PR's commits run one
    at a time.
-5. With `hub-preview: all` (first import only): copies the hub's staged
-   studies and reference data into the preview (about 20 s), holding the
-   hub's import lock.
+5. With `hub-preview: pr-studies-plus-hub` (first import only): copies the
+   hub's staged studies, reference data and built tables into the preview
+   (about 20 s), holding the hub's import lock.
 6. Imports the PR's studies, validating each with cbioportal-core's
    `validateData.py` in the background.
 7. Completes the Check Run and the Deployment status, with links to the
@@ -76,18 +76,22 @@ The Job runs `/app/deploy/hub-import.sh` from the cbioportal-go image (source:
 
 ### PR description settings
 
-```markdown
-hub-preview: all
+One `hub-preview:` line, optionally followed by the studies to import, one
+`- ` line each:
 
-hub-import-only:
+```markdown
+hub-preview: pr-studies-plus-hub
 - public/acc_tcga_pan_can_atlas_2018
 ```
 
 | Setting | Effect |
 |---|---|
-| none, or `hub-preview: changed` | The preview holds the reference data and the PR's changed studies (the default). |
-| `hub-preview: all` | The preview starts from a copy of every study on hub.cbioportal.org, with the PR's studies on top. The copy includes the hub's built tables, so only the PR's studies are rebuilt and the preview is ready about as fast as the default. Changing the setting rebuilds the preview with the next commit. |
-| `hub-import-only:` | Limits the import to these of the PR's changed studies. Paths are as on disk (`public/<study>`, `crdc/gdc/<study>`). |
+| none, or `hub-preview: pr-studies` | The preview holds the reference data and the PR's changed studies (the default). |
+| `hub-preview: pr-studies-plus-hub` | The preview starts from a copy of every study on hub.cbioportal.org, with the PR's studies on top. The copy includes the hub's built tables, so only the PR's studies are rebuilt and the preview is ready about as fast as the default. Changing the mode rebuilds the preview with the next commit. |
+| `- <path>` lines below `hub-preview:` | Limits the import to these of the PR's changed studies. Paths are as on disk (`public/<study>`, `crdc/gdc/<study>`). A listed study the PR does not change is not imported; the Check Run summary says so. |
+
+Text inside HTML comments is ignored, so the commented example in datahub's
+PR template does nothing.
 
 Closing the PR or removing the label deletes the Application; its PostDelete
 hook (`cbioportal-ops hub teardown <N>`) drops the preview's databases.
