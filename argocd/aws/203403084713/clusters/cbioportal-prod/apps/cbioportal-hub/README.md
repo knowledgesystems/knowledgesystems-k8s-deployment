@@ -86,7 +86,7 @@ hub-import-only:
 | Setting | Effect |
 |---|---|
 | none, or `hub-preview: changed` | The preview holds the reference data and the PR's changed studies (the default). |
-| `hub-preview: all` | The preview starts from a copy of every study on hub.cbioportal.org, with the PR's studies on top; the first build takes about an hour. Changing the setting rebuilds the preview with the next commit. |
+| `hub-preview: all` | The preview starts from a copy of every study on hub.cbioportal.org, with the PR's studies on top. The copy includes the hub's built tables, so only the PR's studies are rebuilt and the preview is ready about as fast as the default. Changing the setting rebuilds the preview with the next commit. |
 | `hub-import-only:` | Limits the import to these of the PR's changed studies. Paths are as on disk (`public/<study>`, `crdc/gdc/<study>`). |
 
 Closing the PR or removing the label deletes the Application; its PostDelete
