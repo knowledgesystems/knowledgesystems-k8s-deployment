@@ -1,0 +1,154 @@
+# The datahub PR's preview: cbioportal-go's API and frontend on the PR's own
+# databases (filled by import-job.yaml), with www.cbioportal.org's portal
+# settings.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dhpreview.name" . }}
+  labels:
+    {{- include "dhpreview.labels" . | nindent 4 }}
+  annotations:
+    secret.reloader.stakater.com/reload: "clickhouse-go-import,cbioportal-public-green"
+    # Keel polls Docker Hub and rolls the Deployment when the digest behind
+    # cbioportal/cbioportal-go:latest changes.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ include "dhpreview.name" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "dhpreview.labels" . | nindent 8 }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: cbioportal-go
+          image: cbioportal/cbioportal-go:latest
+          imagePullPolicy: Always
+          command: ["/usr/local/bin/cbioportal-api"]
+          args:
+            - --portal-properties=/app/deploy/public-portal.properties
+            - --authenticate=false
+            - --default_cross_cancer_study_session_id=
+            - --priority_studies=
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: ACCESS_LOG
+              value: "true"
+            - name: FRONTEND_DIR
+              value: /app/frontend
+            - name: CBIOPORTAL_DB
+              value: {{ include "dhpreview.db" . }}
+            - name: CBIOPORTAL_RAW_DB
+              value: {{ include "dhpreview.db" . }}_raw
+            - name: CBIOPORTAL_REF_DB
+              value: {{ include "dhpreview.db" . }}_ref
+            - name: SITE_BANNER
+              value: "Preview of cBioPortal/datahub#{{ .Values.prNumber }}; data may be incomplete or incorrect. For research use:"
+            - name: SITE_BANNER_LINK
+              value: https://github.com/cBioPortal/datahub/pull/{{ .Values.prNumber }}
+            # The public portal's OncoKB token and the authenticated OncoKB
+            # API it is for, as on hub.cbioportal.org.
+            - name: ONCOKB_URL
+              value: https://www.oncokb.org/api/v1
+            - name: ONCOKB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: ONCOKB_TOKEN
+            # Tags this preview's queries in ClickHouse's system.query_log.
+            - name: CLICKHOUSE_LOG_COMMENT
+              value: datahub-pr-{{ .Values.prNumber }}
+          # CLICKHOUSE_URL, CLICKHOUSE_USER (go_import), CLICKHOUSE_PASSWORD:
+          # the user that builds the preview's databases.
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-import
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      {{- include "dhpreview.scheduling" . | nindent 6 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dhpreview.name" . }}
+  labels:
+    {{- include "dhpreview.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ include "dhpreview.name" . }}
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  type: ClusterIP
+---
+# datahub-pr-<N>.gopreview.cbioportal.org: the *.gopreview wildcard DNS
+# record points at the Traefik load balancer (not proxied by Cloudflare),
+# so cert-manager issues a certificate per host over HTTP-01.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "dhpreview.name" . }}
+  labels:
+    {{- include "dhpreview.labels" . | nindent 4 }}
+  annotations:
+    acme.cert-manager.io/http01-ingress-class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/tls-acme: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-ratelimit-host-direct@kubernetescrd
+spec:
+  rules:
+    - host: {{ include "dhpreview.host" . }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ include "dhpreview.name" . }}
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - {{ include "dhpreview.host" . }}
+      secretName: {{ include "dhpreview.name" . }}-cert

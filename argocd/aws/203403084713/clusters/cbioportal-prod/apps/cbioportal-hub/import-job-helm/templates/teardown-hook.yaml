@@ -1,0 +1,64 @@
+# Drops the preview's databases once Argo CD has deleted the Application
+# (PR closed or `preview` label removed). The gc CronJob
+# (../../datahub-preview-gc-cronjob.yaml) catches what this misses.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "dhpreview.name" . }}-teardown
+  labels:
+    {{- include "dhpreview.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: PostDelete
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 1800
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: teardown
+          image: cbioportal/cbioportal-go:latest
+          imagePullPolicy: Always
+          command: ["/usr/local/bin/cbioportal-ops", "hub", "teardown", {{ .Values.prNumber | quote }}]
+          env:
+            - name: GH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: hub-preview-bot
+                  key: client-id
+                  optional: true
+            - name: GH_INSTALLATION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: hub-preview-bot
+                  key: installation-id
+                  optional: true
+            - name: GH_APP_KEY
+              value: /etc/gh-app/key.pem
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-import
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: gh-app-key
+              mountPath: /etc/gh-app
+              readOnly: true
+      volumes:
+        - name: gh-app-key
+          secret:
+            secretName: hub-preview-bot
+            optional: true
+            items:
+              - key: private-key
+                path: key.pem
+      {{- include "dhpreview.scheduling" . | nindent 6 }}
