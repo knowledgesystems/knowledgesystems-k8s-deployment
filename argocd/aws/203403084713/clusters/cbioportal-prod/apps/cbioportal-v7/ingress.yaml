@@ -4,12 +4,11 @@ metadata:
   name: public-v7-ingress
   namespace: default
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-public-v7-noindex@kubernetescrd
 spec:
   rules:
-  - host: public-v7.cbioportal.org
+  - host: hgnc.cbioportal.aws.mskcc.org
     http:
       paths:
       - path: /
@@ -19,7 +18,3 @@ spec:
             name: cbioportal-backend-public-v7-green
             port:
               number: 80
-  tls:
-  - hosts:
-    - public-v7.cbioportal.org
-    secretName: public-v7-cbio-cert
