@@ -1,3 +1,8 @@
+# One datahub-import-<N> Application per open cBioPortal/datahub pull
+# request labelled `preview`: datahub-pr-<N>.gopreview.cbioportal.org and
+# its import Job, rendered from apps/cbioportal-hub/import-job-helm.
+# Removing the label or closing the PR deletes the Application, its
+# resources and (PostDelete hook) its databases.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -15,6 +20,8 @@ spec:
   template:
     metadata:
       name: 'datahub-import-{{number}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
     spec:
       destination:
         namespace: default
@@ -34,6 +41,7 @@ spec:
               value: '{{head_sha}}'
       syncPolicy:
         automated:
+          prune: true
           selfHeal: true
         syncOptions:
           - RespectIgnoreDifferences=true

@@ -1,6 +1,6 @@
 apiVersion: v2
-name: datahub-import-job
-description: Import job for datahub PR studies into hub.cbioportal.org (cbioportal-go)
+name: datahub-pr-preview
+description: Preview of one datahub pull request (cbioportal-go) at datahub-pr-<N>.gopreview.cbioportal.org, with its import Job
 type: application
-version: 2.0.0
+version: 3.0.0
 appVersion: "1.0"

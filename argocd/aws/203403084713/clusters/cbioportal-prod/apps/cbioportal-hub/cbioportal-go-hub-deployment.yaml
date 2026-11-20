@@ -1,7 +1,7 @@
-# hub.cbioportal.org: cbioportal-go serving the studies of cBioPortal/datahub
-# pull requests labelled `preview`, imported by the per-PR Jobs
-# (import-job-helm/) into the ClickHouse Cloud databases
-# dev_cbioportal_hub_go{,_raw,_ref}.
+# hub.cbioportal.org: cbioportal-go serving every study on cBioPortal/datahub's
+# master branch, imported by the master sync CronJob (master-sync-cronjob.yaml)
+# into the ClickHouse Cloud databases dev_cbioportal_hub_go{,_raw,_ref}.
+# Pull requests labelled `preview` get previews of their own (import-job-helm/).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -75,7 +75,7 @@ spec:
             - name: CBIOPORTAL_REF_DB
               value: dev_cbioportal_hub_go_ref
             - name: SITE_BANNER
-              value: "Development instance for previewing studies of cBioPortal/datahub pull requests; data may be incomplete or incorrect. For research use:"
+              value: "Development instance showing cBioPortal/datahub's master branch; data may be incomplete or incorrect. For research use:"
             - name: SITE_BANNER_LINK
               value: https://www.cbioportal.org
             # The public portal's OncoKB token and the authenticated OncoKB API
