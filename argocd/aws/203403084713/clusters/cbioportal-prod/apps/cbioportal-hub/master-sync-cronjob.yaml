@@ -29,6 +29,10 @@ spec:
       activeDeadlineSeconds: 43200
       ttlSecondsAfterFinished: 3600
       template:
+        metadata:
+          annotations:
+            # Karpenter does not move a running sync to consolidate nodes.
+            karpenter.sh/do-not-disrupt: "true"
         spec:
           restartPolicy: Never
           securityContext:
@@ -58,8 +62,8 @@ spec:
               resources:
                 requests:
                   cpu: 50m
-                  memory: 128Mi
-                  ephemeral-storage: 256Mi
+                  memory: 512Mi
+                  ephemeral-storage: 4Gi
                 limits:
                   cpu: "2"
                   memory: 2Gi
@@ -68,14 +72,12 @@ spec:
                 - name: work
                   mountPath: /work
           volumes:
-            # One study's files at a time; each is deleted after its import.
+            # The files of the studies being imported and of the next few,
+            # downloaded ahead; each study's are deleted after its import.
             - name: work
               emptyDir:
                 sizeLimit: 15Gi
+          # On-demand nodes: a spot node taken back by AWS kills a full
+          # import or build, which takes up to an hour.
           nodeSelector:
-            workload: cbio-dev
-          tolerations:
-            - key: "workload"
-              operator: "Equal"
-              value: "cbio-dev"
-              effect: "NoSchedule"
+            workload-class: x86-general
