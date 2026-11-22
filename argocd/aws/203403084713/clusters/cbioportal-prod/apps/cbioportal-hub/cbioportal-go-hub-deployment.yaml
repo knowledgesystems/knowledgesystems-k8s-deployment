@@ -46,13 +46,11 @@ spec:
           image: cbioportal/cbioportal-go:latest
           imagePullPolicy: Always
           command: ["/usr/local/bin/cbioportal-api"]
-          # www.cbioportal.org's portal settings, so previews look and behave
-          # like production, minus what points at production's own data.
+          # www.cbioportal.org's portal settings, so the hub looks and behaves
+          # like production for the curators who use it as staging.
           args:
             - --portal-properties=/app/deploy/public-portal.properties
             - --authenticate=false
-            - --default_cross_cancer_study_session_id=
-            - --priority_studies=
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -78,6 +76,21 @@ spec:
               value: "Development instance showing cBioPortal/datahub's master branch; data may be incomplete or incorrect. For research use:"
             - name: SITE_BANNER_LINK
               value: https://www.cbioportal.org
+            # Sessions (shared links, virtual studies, groups) in the public
+            # portal's session service, with its credentials from its secret,
+            # so www links and the default cross-cancer session open here too.
+            - name: SESSION_SERVICE_URL
+              value: https://session-service.cbioportal.org/api/sessions/public_portal/
+            - name: SESSION_SERVICE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_NAME
+            - name: SESSION_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_PASSWORD
             # The public portal's OncoKB token and the authenticated OncoKB API
             # it is for, as on go.cbioportal.org (annotations go through /proxy).
             - name: ONCOKB_URL
