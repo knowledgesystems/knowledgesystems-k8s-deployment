@@ -72,7 +72,7 @@ openmetadata:
     # database has none (e.g. after a reset). Keep them in line with what's live; see cdsi/openmetadata
     # docs/authentication.md.
     authentication:
-      enableSelfSignup: false
+      enableSelfSignup: true          # any MSK PingID user gets a view-only account on first login
       clientType: confidential
       provider: "custom-oidc"
       # The chart key is publicKeys (not publicKeyUrls). Keep OpenMetadata's own JWKS first so
