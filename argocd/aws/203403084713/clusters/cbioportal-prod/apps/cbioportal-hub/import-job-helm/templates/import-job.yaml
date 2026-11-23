@@ -44,6 +44,9 @@ spec:
               value: dev_cbioportal_hub_go
             - name: HUB_BASE
               value: https://hub.cbioportal.org
+            # The hub's API inside the cluster, past the ingress's password.
+            - name: HUB_API
+              value: http://cbioportal-go-hub.default.svc.cluster.local
             - name: HUB_PR_BASE
               value: https://{{ include "dhpreview.host" . }}
             - name: WORKDIR
