@@ -72,7 +72,10 @@ openmetadata:
       enableSelfSignup: false
       clientType: confidential
       provider: "custom-oidc"
-      publicKeyUrls:
+      # The chart key is publicKeys (not publicKeyUrls). Keep OpenMetadata's own JWKS first so
+      # bot tokens and personal access tokens (signed by OM, not Keycloak) stay valid.
+      publicKeys:
+        - "http://openmetadata:8585/api/v1/system/config/jwks"
         - "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/certs"
       authority: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk"
       clientId: "openmetadata"
@@ -80,12 +83,17 @@ openmetadata:
       oidcConfiguration:
         enabled: true
         oidcType: "Keycloak"
-        clientId: "openmetadata"
+        # The chart only reads the OIDC client ID from a secret (schema requires secretRef/secretKey)
+        clientId:
+          secretRef: openmetadata-oidc-secret
+          secretKey: openmetadata-oidc-client-id
         clientSecret:
           secretRef: openmetadata-oidc-secret
           secretKey: openmetadata-oidc-client-secret
         discoveryUri: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/.well-known/openid-configuration"
         callbackUrl: "http://openmetadata.cbioportal.aws.mskcc.org/callback"
+        # Where OM sends the browser after login; the default (http://openmetadata:8585) is cluster-internal
+        serverUrl: "http://openmetadata.cbioportal.aws.mskcc.org"
 
     jwtTokenConfiguration:
       rsapublicKeyFilePath: /etc/openmetadata/jwt/public_key.der
