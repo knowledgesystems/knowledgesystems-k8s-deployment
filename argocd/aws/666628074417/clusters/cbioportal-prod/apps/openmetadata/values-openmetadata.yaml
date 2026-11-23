@@ -68,6 +68,9 @@ openmetadata:
             value: openmetadata
             effect: NoSchedule
 
+    # OpenMetadata 2.x keeps login settings in its database (Settings -> SSO); these values only seed them when the
+    # database has none (e.g. after a reset). Keep them in line with what's live; see cdsi/openmetadata
+    # docs/authentication.md.
     authentication:
       enableSelfSignup: false
       clientType: confidential
@@ -79,7 +82,7 @@ openmetadata:
         - "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/certs"
       authority: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk"
       clientId: "openmetadata"
-      callbackUrl: "http://openmetadata.cbioportal.aws.mskcc.org/callback"
+      callbackUrl: "https://openmetadata.cbioportal.mskcc.org/callback"
       oidcConfiguration:
         enabled: true
         oidcType: "Keycloak"
@@ -91,9 +94,10 @@ openmetadata:
           secretRef: openmetadata-oidc-secret
           secretKey: openmetadata-oidc-client-secret
         discoveryUri: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/.well-known/openid-configuration"
-        callbackUrl: "http://openmetadata.cbioportal.aws.mskcc.org/callback"
+        callbackUrl: "https://openmetadata.cbioportal.mskcc.org/callback"
+        tenant: "msk"   # only used for Azure; the SSO settings form requires a value
         # Where OM sends the browser after login; the default (http://openmetadata:8585) is cluster-internal
-        serverUrl: "http://openmetadata.cbioportal.aws.mskcc.org"
+        serverUrl: "https://openmetadata.cbioportal.mskcc.org"
 
     jwtTokenConfiguration:
       rsapublicKeyFilePath: /etc/openmetadata/jwt/public_key.der
