@@ -98,6 +98,9 @@ openmetadata:
         tenant: "msk"   # only used for Azure; the SSO settings form requires a value
         # Where OM sends the browser after login; the default (http://openmetadata:8585) is cluster-internal
         serverUrl: "https://openmetadata.cbioportal.mskcc.org"
+        # Send logins straight to PingID, skipping the msk realm's username/password page (kc_idp_hint is a
+        # Keycloak parameter; the page itself is shared with cBioPortal, so it stays as is)
+        customParams: '{"customParamKey1": "kc_idp_hint", "customParamValue1": "pingId"}'
 
     jwtTokenConfiguration:
       rsapublicKeyFilePath: /etc/openmetadata/jwt/public_key.der
