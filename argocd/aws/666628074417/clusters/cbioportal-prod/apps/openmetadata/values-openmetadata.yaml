@@ -71,13 +71,6 @@ openmetadata:
     # OpenMetadata 2.x keeps login settings in its database (Settings -> SSO); these values only seed them when the
     # database has none (e.g. after a reset). Keep them in line with what's live; see cdsi/openmetadata
     # docs/authentication.md.
-    authorizer:
-      initialAdmins:                  # = admin principals in Settings -> SSO
-        - "grossb1"
-        - "kundrar"
-        - "wilsonm2"
-      principalDomain: "mskcc.org"
-
     authentication:
       enableSelfSignup: false
       clientType: confidential
