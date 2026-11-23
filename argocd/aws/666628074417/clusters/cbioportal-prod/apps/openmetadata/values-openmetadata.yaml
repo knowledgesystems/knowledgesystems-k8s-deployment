@@ -70,6 +70,22 @@ openmetadata:
 
     authentication:
       enableSelfSignup: false
+      clientType: confidential
+      provider: "custom-oidc"
+      publicKeyUrls:
+        - "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/protocol/openid-connect/certs"
+      authority: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk"
+      clientId: "openmetadata"
+      callbackUrl: "http://openmetadata.cbioportal.aws.mskcc.org/callback"
+      oidcConfiguration:
+        enabled: true
+        oidcType: "Keycloak"
+        clientId: "openmetadata"
+        clientSecret:
+          secretRef: openmetadata-oidc-secret
+          secretKey: openmetadata-oidc-client-secret
+        discoveryUri: "https://keycloak.cbioportal.mskcc.org/auth/realms/msk/.well-known/openid-configuration"
+        callbackUrl: "http://openmetadata.cbioportal.aws.mskcc.org/callback"
 
     jwtTokenConfiguration:
       rsapublicKeyFilePath: /etc/openmetadata/jwt/public_key.der
