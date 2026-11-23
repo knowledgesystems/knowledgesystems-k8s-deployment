@@ -42,8 +42,6 @@ spec:
             # and the validator reads its reference data from its API.
             - name: HUB_DB
               value: dev_cbioportal_hub_go
-            - name: HUB_BASE
-              value: https://hub.cbioportal.org
             # The hub's API inside the cluster, past the ingress's password.
             - name: HUB_API
               value: http://cbioportal-go-hub.default.svc.cluster.local
