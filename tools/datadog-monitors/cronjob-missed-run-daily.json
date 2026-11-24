@@ -1,0 +1,22 @@
+{
+  "name": "[k8s] CronJob not scheduled recently (daily tier)",
+  "type": "query alert",
+  "query": "max(last_4h):max:kubernetes_state.cronjob.duration_since_last_schedule{kube_cluster_name:cbioportal-* AND kube_cronjob IN (cbioagent-clickhouse-clone-daily)} by {kube_cluster_name,kube_cronjob} > 108000",
+  "message": ":warning: **{{kube_cronjob.name}}** in `{{kube_cluster_name.name}}` has not been scheduled in over 30 hours. It may have stopped being scheduled entirely — check the CronJob for `suspend: true` or a missed schedule.\n\n@slack-cBioPortal-cronjob-status",
+  "tags": [
+    "team:knowledgesystems",
+    "service:cronjob"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 108000,
+      "warning": 93600
+    },
+    "notify_no_data": true,
+    "no_data_timeframe": 360,
+    "renotify_interval": 0,
+    "require_full_window": false,
+    "new_group_delay": 300,
+    "include_tags": true
+  }
+}
