@@ -8,6 +8,7 @@ locals {
   # bucket policy in 203403084713 naming this role as principal.
   databricks_s3_mountpoint_bucket = "sc-203403084713-pp-4rxlzd426npxu-bucket-kswubqqre3jr"
   import_studies_bucket = "cdsi-curation-unpublished"
+  hgnc_studies_bucket = "cdsi-curation-hgnc"
   testing_studies_bucket = "cdsi-testing"
 }
 
@@ -115,6 +116,7 @@ resource "aws_iam_policy" "userServicePolicyDatabricksS3Mountpoint" {
           "Resource" : [
             "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}",
             "arn:aws:s3:::${local.import_studies_bucket}",
+            "arn:aws:s3:::${local.hgnc_studies_bucket}",
             "arn:aws:s3:::${local.testing_studies_bucket}"
           ]
         },
@@ -127,6 +129,7 @@ resource "aws_iam_policy" "userServicePolicyDatabricksS3Mountpoint" {
           "Resource" : [
             "arn:aws:s3:::${local.databricks_s3_mountpoint_bucket}/*",
             "arn:aws:s3:::${local.import_studies_bucket}/*",
+            "arn:aws:s3:::${local.hgnc_studies_bucket}/*",
             "arn:aws:s3:::${local.testing_studies_bucket}/*"
           ]
         }
