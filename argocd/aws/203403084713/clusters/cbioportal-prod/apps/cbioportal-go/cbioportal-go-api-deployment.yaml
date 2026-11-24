@@ -106,6 +106,10 @@ spec:
           labelSelector:
             matchLabels:
               run: cbioportal-go-api
+          # Count only this rollout's pods: during a rolling update the old
+          # pods would otherwise let both new ones land on one node.
+          matchLabelKeys:
+            - pod-template-hash
       nodeSelector:
         workload: cbio-api
       tolerations:

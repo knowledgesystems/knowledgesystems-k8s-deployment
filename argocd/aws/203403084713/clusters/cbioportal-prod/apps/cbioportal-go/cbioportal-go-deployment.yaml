@@ -195,6 +195,10 @@ spec:
           labelSelector:
             matchLabels:
               run: cbioportal-go
+          # Count only this rollout's pods: during a rolling update the old
+          # pods would otherwise let both new ones land on one node.
+          matchLabelKeys:
+            - pod-template-hash
       # On-demand nodes, as cbioportal-go-api: these pods will serve
       # www.cbioportal.org's browsers.
       nodeSelector:
