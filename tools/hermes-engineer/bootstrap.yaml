@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: engineer-bootstrap
+  namespace: cbio-engineer-trial
+spec:
+  automountServiceAccountToken: false
+  restartPolicy: Never
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  containers:
+    - name: bootstrap
+      image: nousresearch/hermes-agent:v2026.6.5@sha256:9ad3b04ec916ea2c2da22358fd43b024c788d74073210695af88bfc2e63869b4
+      command: [sh, -c, 'mkdir -p /migration/data /migration/work /migration/vault; sleep infinity']
+      resources:
+        requests:
+          cpu: 250m
+          memory: 512Mi
+        limits:
+          cpu: '2'
+          memory: 2Gi
+      volumeMounts:
+        - name: data
+          mountPath: /migration
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: engineer-data
