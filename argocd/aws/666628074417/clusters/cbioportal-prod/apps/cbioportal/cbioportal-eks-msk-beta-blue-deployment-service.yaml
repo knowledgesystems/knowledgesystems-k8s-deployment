@@ -259,7 +259,7 @@ spec:
                 name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal-dev:0675dc06bad72b8302692ebb3e855ee58c363e63-web-shenandoah@sha256:4fe4a50f7764f021ef1df51552b43dbeb84d39d91943423916571e7747ab29e4
+          image: cbioportal/cbioportal-dev:b1a95048e45d7177d262eac94452d4fd1cc1dc62-web-shenandoah@sha256:ed9d9fd83e8ec32989cc18aa9feef12d4adb66f16149838f13234c2785be69e0
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20
