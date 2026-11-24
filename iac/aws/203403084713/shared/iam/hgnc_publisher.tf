@@ -5,6 +5,7 @@ resource "aws_iam_openid_connect_provider" "github_actions" {
 
 resource "aws_iam_role" "hgnc_publisher" {
   name                 = "userServiceRole-hgnc-study-publisher"
+  max_session_duration = 21600
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
