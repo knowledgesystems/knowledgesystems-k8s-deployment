@@ -178,21 +178,20 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 5
-          # Also receives a mirrored quarter of www's browser API requests
-          # (cbioportal-www-mirror.yaml), which used about 0.11 cores and
-          # 0.26 GB over two pods on average, 0.28 cores at the 95th
-          # percentile.
+          # Sized for all of www's browser traffic. A mirrored quarter of
+          # it (cbioportal-www-mirror.yaml) used about 0.1 cores and 0.4 GB
+          # over both pods on average, 0.3 cores at the 95th percentile.
           resources:
             requests:
-              cpu: 500m
-              memory: 512Mi
+              cpu: "1"
+              memory: 1Gi
             limits:
-              cpu: "2"
+              cpu: "3"
               memory: 2Gi
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
+          whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
               run: cbioportal-go
