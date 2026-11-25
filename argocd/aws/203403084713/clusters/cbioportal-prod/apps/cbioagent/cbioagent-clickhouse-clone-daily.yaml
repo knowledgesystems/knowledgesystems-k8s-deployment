@@ -1,5 +1,7 @@
-# Daily clone of the active cBioPortal production color into a ping-pong
-# librechat buffer in ClickHouse, with LLM-prep SQL applied. Pod runs
+# Hourly check that clones the active cBioPortal production color into a
+# ping-pong librechat buffer in ClickHouse, with LLM-prep SQL applied. A run
+# changes nothing while a production import is running or when the served
+# buffer was already built from the production import. Pod runs
 # fetch-sql → clone → patch-pointer; Reloader watches clickhouse-mcp-active
 # and rolls the MCP when the patch container flips the buffer pointer.
 #
@@ -54,17 +56,49 @@ data:
 
     log() { echo "[clone $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
 
-    # 1) Production color.
-    PROD_COLOR=$(clickhouse client $CH_FLAGS --query "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'" | tr -d '[:space:]')
+    # Every statement is safe to repeat, so transient failures (DNS,
+    # connections, timeouts) are retried.
+    ch() {
+      n=0
+      until clickhouse client $CH_FLAGS "$@"; do
+        n=$((n+1))
+        [ "$n" -ge 6 ] && return 1
+        log "retrying after failed statement ($n/6)" >&2
+        sleep 10
+      done
+    }
+
+    # 1) Production color, import status and the import's completion time.
+    STATUS=$(ch --query "SELECT current_database_in_production, update_process_status, toString(time_of_last_update_process_completion) FROM ${MGMT_DB}.update_status WHERE portal_database='public' FORMAT TSV")
+    PROD_COLOR=$(echo "$STATUS" | cut -f1)
+    IMPORT_STATUS=$(echo "$STATUS" | cut -f2)
+    SNAPSHOT="${PROD_COLOR} $(echo "$STATUS" | cut -f3)"
     if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
       log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
     fi
     SRC_DB="${SRC_PREFIX}${PROD_COLOR}"
-    log "production color=$PROD_COLOR, source=$SRC_DB"
+    log "production color=$PROD_COLOR, status=$IMPORT_STATUS, snapshot=$SNAPSHOT"
 
-    # 2) Active librechat buffer (read from the ConfigMap mounted at /active).
-    #    Falls through to bootstrap mode if value is unrecognised.
+    # 2) Active librechat buffer and the snapshot it was built from (both
+    #    read from the ConfigMap mounted at /active). Falls through to
+    #    bootstrap mode if the buffer is unrecognised.
     ACTIVE_DB="$(cat /active/CLICKHOUSE_DATABASE 2>/dev/null || echo '')"
+    BUILT_FROM="$(cat /active/SNAPSHOT 2>/dev/null || echo '')"
+    case "$ACTIVE_DB" in
+      "${DST_PREFIX}blue"|"${DST_PREFIX}green")
+        if [ "$IMPORT_STATUS" != "complete" ]; then
+          log "production import in progress (status=$IMPORT_STATUS); keeping ${ACTIVE_DB}"
+          printf 'ACTIVE_DB=%s\nSNAPSHOT=%s\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
+          exit 0
+        fi
+        if [ "$BUILT_FROM" = "$SNAPSHOT" ]; then
+          log "${ACTIVE_DB} already built from ${SNAPSHOT}; nothing to do"
+          printf 'ACTIVE_DB=%s\nSNAPSHOT=%s\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
+          exit 0
+        fi
+        log "${ACTIVE_DB} built from '${BUILT_FROM:-unknown}'; rebuilding from ${SNAPSHOT}"
+        ;;
+    esac
     case "$ACTIVE_DB" in
       "${DST_PREFIX}blue")  TARGET_COLOR="green" ;;
       "${DST_PREFIX}green") TARGET_COLOR="blue"  ;;
@@ -75,11 +109,11 @@ data:
     log "active=${ACTIVE_DB:-<unset>}; building into ${DST_DB}"
 
     # 3) Rebuild target.
-    clickhouse client $CH_FLAGS --query "DROP DATABASE IF EXISTS ${DST_DB}"
-    clickhouse client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
+    ch --query "DROP DATABASE IF EXISTS ${DST_DB}"
+    ch --query "CREATE DATABASE ${DST_DB}"
 
     # 4) Enumerate source tables (exclude sensitive + backup).
-    TABLES=$(clickhouse client $CH_FLAGS --query "
+    TABLES=$(ch --query "
       SELECT name FROM system.tables
       WHERE database = '${SRC_DB}'
         AND name NOT IN ${EXCLUDED_TABLES}
@@ -96,7 +130,7 @@ data:
     for t in $TABLES; do
       i=$((i+1))
       log "  [$i/$N] $t"
-      clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
+      ch --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
     done
 
     # 6) Apply LLM-prep SQL files from the fetch-sql initContainer's
@@ -106,18 +140,18 @@ data:
     log "applying LLM-prep SQL files (portable)"
     for f in $(ls /workdir/sql/*.sql 2>/dev/null | sort); do
       log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
-      clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+      ch --database "${DST_DB}" --queries-file "$f"
     done
     log "applying LLM-prep SQL files (portal-specific)"
     for f in $(ls /workdir/sql/portal-specific/*/*.sql 2>/dev/null | sort); do
       log "  → $(echo "$f" | sed 's|/workdir/sql/||')"
-      clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+      ch --database "${DST_DB}" --queries-file "$f"
     done
 
     # 7) Hand off state to the patch-pointer container.
     # llm_user grants persist across DROP DATABASE + CREATE DATABASE in
     # ClickHouse so no GRANT step here.
-    echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
+    printf 'ACTIVE_DB=%s\nSNAPSHOT=%s\n' "$DST_DB" "$SNAPSHOT" > /workdir/state.env
     log "done. ACTIVE_DB=${DST_DB}"
 ---
 apiVersion: v1
@@ -159,7 +193,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: cbioagent
 spec:
-  schedule: "0 13 * * *"  # daily 13:00 UTC = 09:00 ET (DST) / 08:00 ET (EST)
+  schedule: "17 * * * *"  # hourly; a run rebuilds only after a new production import
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
@@ -226,9 +260,9 @@ spec:
                   set -eu
                   . /workdir/state.env
                   : "${ACTIVE_DB:?missing from state.env}"
-                  echo "patching clickhouse-mcp-active → ${ACTIVE_DB}"
+                  echo "patching clickhouse-mcp-active → ${ACTIVE_DB} (${SNAPSHOT})"
                   kubectl -n default patch configmap clickhouse-mcp-active \
-                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
+                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\",\"SNAPSHOT\":\"${SNAPSHOT}\"}}"
               volumeMounts:
                 - mountPath: /workdir
                   name: workdir
