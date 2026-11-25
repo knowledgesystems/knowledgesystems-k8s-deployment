@@ -72,7 +72,10 @@ data:
     STATUS=$(ch --query "SELECT current_database_in_production, update_process_status, toString(time_of_last_update_process_completion) FROM ${MGMT_DB}.update_status WHERE portal_database='public' FORMAT TSV")
     PROD_COLOR=$(echo "$STATUS" | cut -f1)
     IMPORT_STATUS=$(echo "$STATUS" | cut -f2)
-    SNAPSHOT="${PROD_COLOR} $(echo "$STATUS" | cut -f3)"
+    # The snapshot also covers the LLM-prep SQL, so a new cbioportal/mcp image
+    # rebuilds the buffer even when production did not change.
+    SQL_HASH=$(find /workdir/sql -type f -name '*.sql' | sort | while read -r f; do cat "$f"; done | sha256sum | cut -c1-12)
+    SNAPSHOT="${PROD_COLOR} $(echo "$STATUS" | cut -f3) sql:${SQL_HASH}"
     if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
       log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
     fi
@@ -86,17 +89,20 @@ data:
     BUILT_FROM="$(cat /active/SNAPSHOT 2>/dev/null || echo '')"
     case "$ACTIVE_DB" in
       "${DST_PREFIX}blue"|"${DST_PREFIX}green")
-        if [ "$IMPORT_STATUS" != "complete" ]; then
+        EXISTS=$(ch --query "EXISTS DATABASE ${ACTIVE_DB}" | tr -d '[:space:]')
+        if [ "$EXISTS" != "1" ]; then
+          log "${ACTIVE_DB} does not exist; rebuilding"
+        elif [ "$IMPORT_STATUS" != "complete" ]; then
           log "production import in progress (status=$IMPORT_STATUS); keeping ${ACTIVE_DB}"
-          printf 'ACTIVE_DB=%s\nSNAPSHOT=%s\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
+          printf 'ACTIVE_DB=%s\nSNAPSHOT="%s"\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
           exit 0
-        fi
-        if [ "$BUILT_FROM" = "$SNAPSHOT" ]; then
+        elif [ "$BUILT_FROM" = "$SNAPSHOT" ]; then
           log "${ACTIVE_DB} already built from ${SNAPSHOT}; nothing to do"
-          printf 'ACTIVE_DB=%s\nSNAPSHOT=%s\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
+          printf 'ACTIVE_DB=%s\nSNAPSHOT="%s"\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
           exit 0
+        else
+          log "${ACTIVE_DB} built from '${BUILT_FROM:-unknown}'; rebuilding from ${SNAPSHOT}"
         fi
-        log "${ACTIVE_DB} built from '${BUILT_FROM:-unknown}'; rebuilding from ${SNAPSHOT}"
         ;;
     esac
     case "$ACTIVE_DB" in
@@ -151,7 +157,7 @@ data:
     # 7) Hand off state to the patch-pointer container.
     # llm_user grants persist across DROP DATABASE + CREATE DATABASE in
     # ClickHouse so no GRANT step here.
-    printf 'ACTIVE_DB=%s\nSNAPSHOT=%s\n' "$DST_DB" "$SNAPSHOT" > /workdir/state.env
+    printf 'ACTIVE_DB=%s\nSNAPSHOT="%s"\n' "$DST_DB" "$SNAPSHOT" > /workdir/state.env
     log "done. ACTIVE_DB=${DST_DB}"
 ---
 apiVersion: v1
