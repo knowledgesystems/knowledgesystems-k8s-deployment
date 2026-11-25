@@ -38,7 +38,7 @@ librechat:
     DOMAIN_SERVER: "https://chat.cbioportal.org"
     NODE_OPTIONS: "--require dd-trace/init"
     DD_ENV: "public"
-    DD_VERSION: "v0.8.3"
+    DD_VERSION: "v0.8.9"
     DD_LLMOBS_ENABLED: "1"
     DD_LLMOBS_ML_APP: "cbioagent"
     DD_LLMOBS_AGENTLESS_ENABLED: "true"
@@ -60,7 +60,10 @@ image:
   # ~860 upstream commits worth of fixes. Beta soaked 2026-08-07.
   # v0.8.7-custom-v2: per-modelSpec model for one agent (Haiku 4.5 default /
   # Sonnet 5 picker in the chat input) and per-response stats popover.
-  tag: "v0.8.7-custom-v2"
+  # v0.8.9-custom-v13: rebase onto upstream v0.8.9 (Haiku 5.5 / Sonnet 5.5
+  # context windows and Bedrock thinking handling). Beta soaked since
+  # 2026-11-11. To roll back, set this tag to v0.8.7-custom-v2.
+  tag: "v0.8.9-custom-v13"
 
 mongodb:
   enabled: false
@@ -71,7 +74,7 @@ librechat-rag-api:
 podLabels:
   tags.datadoghq.com/env: "public"
   tags.datadoghq.com/service: "librechat"
-  tags.datadoghq.com/version: "v0.8.3"
+  tags.datadoghq.com/version: "v0.8.9"
 
 nodeSelector:
   workload: "cbioagent-od"

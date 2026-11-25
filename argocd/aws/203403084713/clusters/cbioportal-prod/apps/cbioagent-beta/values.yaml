@@ -20,12 +20,8 @@ replicaCount: 1
 deploymentAnnotations:
   secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env,cbioportal-mcp-bridge"
   configmap.reloader.stakater.com/reload: "librechat-config-beta"
-  # Beta tracks the mutable `cbioportal/librechat:beta` tag — every push
-  # to the `beta` branch on cbioportal/librechat overwrites that tag.
-  # Keel polls Docker Hub and rolls this Deployment when the digest
-  # behind `:beta` changes. policy=force matches any digest update;
-  # trigger=poll uses the default schedule (1 min) — fast enough for
-  # beta iteration without hammering the registry.
+  # The image tag below is pinned in this file. Keel only rolls the
+  # Deployment when the digest behind that same tag changes.
   keel.sh/policy: force
   keel.sh/trigger: poll
   keel.sh/match-tag: "true"
