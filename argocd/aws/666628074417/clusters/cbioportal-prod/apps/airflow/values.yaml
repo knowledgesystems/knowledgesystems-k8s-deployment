@@ -69,6 +69,29 @@ env:
   - name: "DEPLOYMENT"
     value: "PROD"
 
+# KubernetesExecutor knows the run ID when it creates the task pod. The DAG
+# supplies both worker profiles without mounting either target's credentials.
+airflowLocalSettings: |-
+  def pod_mutation_hook(pod):
+      annotations = pod.metadata.annotations or {}
+      key = "cbioportal.org/import-worker-profiles"
+      if annotations.get("dag_id") != "import_containerized_dag" or key not in annotations:
+          return
+      import json
+      from airflow.models.dagrun import DagRun
+      from airflow.providers.cncf.kubernetes.pod_generator import PodGenerator
+      from airflow.utils.session import create_session
+
+      with create_session() as session:
+          (conf,) = session.query(DagRun.conf).filter_by(
+              dag_id=annotations["dag_id"], run_id=annotations["run_id"]
+          ).one()
+      target = (conf or {}).get("target", "containerized")
+      profiles = json.loads(annotations.pop(key))
+      profile = profiles["public" if target == "containerized" else target]
+      override = PodGenerator.deserialize_model_dict(profile)
+      pod.spec = PodGenerator.reconcile_pods(pod, override).spec
+
 executor: KubernetesExecutor
 
 extraEnv: |-
