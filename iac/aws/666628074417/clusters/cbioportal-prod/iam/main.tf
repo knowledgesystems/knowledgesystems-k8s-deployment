@@ -10,6 +10,7 @@ locals {
   import_studies_bucket = "cdsi-curation-unpublished"
   hgnc_studies_bucket = "cdsi-curation-hgnc"
   testing_studies_bucket = "cdsi-testing"
+  msk_static_files_bucket = "msk-static-files"
 }
 
 data "aws_caller_identity" "current" {}
@@ -180,4 +181,74 @@ resource "aws_iam_role" "userServiceRoleDatabricksS3Mountpoint" {
 resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentDatabricksS3Mountpoint" {
   policy_arn = aws_iam_policy.userServicePolicyDatabricksS3Mountpoint.arn
   role       = aws_iam_role.userServiceRoleDatabricksS3Mountpoint.name
+}
+
+# ── MSK portal static files ───────────────────────────────────────────
+# Read-only access to the msk-static-files bucket (shared/s3) for the sidecar
+# that mirrors it into each MSK portal pod. Assumed through IRSA by the
+# msk-static-files-reader ServiceAccount in the default namespace.
+resource "aws_iam_policy" "userServicePolicyMskStaticFilesReader" {
+  name        = "userServicePolicyMskStaticFilesReader"
+  path        = "/"
+  description = "Policy to allow the MSK portals to read the msk-static-files S3 bucket"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "MskStaticFilesList",
+          "Effect" : "Allow",
+          "Action" : [
+            "s3:ListBucket"
+          ],
+          "Resource" : [
+            "arn:aws:s3:::${local.msk_static_files_bucket}"
+          ]
+        },
+        {
+          "Sid" : "MskStaticFilesRead",
+          "Effect" : "Allow",
+          "Action" : [
+            "s3:GetObject"
+          ],
+          "Resource" : [
+            "arn:aws:s3:::${local.msk_static_files_bucket}/*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_role" "userServiceRoleMskStaticFilesReader" {
+  name = "userServiceRoleMskStaticFilesReader"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = "sts:AssumeRoleWithWebIdentity",
+          Principal = {
+            Federated = "arn:aws:iam::${local.account_id}:oidc-provider/${var.cluster_oidc_provider_arn}"
+          },
+          Condition = {
+            StringEquals = {
+              "${var.cluster_oidc_provider_arn}:aud" = "sts.amazonaws.com",
+              "${var.cluster_oidc_provider_arn}:sub" = "system:serviceaccount:default:msk-static-files-reader"
+            }
+          }
+        }
+      ]
+    }
+  )
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/${local.permissions_boundary_policy}"
+}
+
+resource "aws_iam_role_policy_attachment" "userServicePolicyAttachmentMskStaticFilesReader" {
+  policy_arn = aws_iam_policy.userServicePolicyMskStaticFilesReader.arn
+  role       = aws_iam_role.userServiceRoleMskStaticFilesReader.name
 }
