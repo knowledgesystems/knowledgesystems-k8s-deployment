@@ -75,6 +75,18 @@ data:
 
     log() { echo "[clone-beta $(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*"; }
 
+    # Every statement is safe to repeat, so transient failures (DNS,
+    # connections, timeouts) are retried.
+    chc() {
+      n=0
+      until clickhouse client $CH_FLAGS "$@"; do
+        n=$((n+1))
+        [ "$n" -ge 6 ] && return 1
+        log "retrying after failed statement ($n/6)" >&2
+        sleep 10
+      done
+    }
+
     # Numeric-prefixed .sql files matching the given globs, sorted; other
     # files are docs and are skipped (same rule as the MCP repo's
     # scripts/apply_sql.sh).
@@ -90,7 +102,7 @@ data:
     # Single-value query. Aborts on a client error instead of treating empty
     # output as an answer (a pipe into tr would hide the exit status).
     ch_scalar() {
-      _out=$(clickhouse client $CH_FLAGS --query "$1") || {
+      _out=$(chc --query "$1") || {
         log "FAIL: clickhouse exited $? for: $1" >&2; return 1; }
       printf '%s' "$_out" | tr -d '[:space:]'
     }
@@ -103,7 +115,7 @@ data:
     apply_sql() {
       for f in "$@"; do
         log "  → ${f#${SQL_DIR}/}"
-        clickhouse client $CH_FLAGS --database "${DST_DB}" --queries-file "$f"
+        chc --database "${DST_DB}" --queries-file "$f"
       done
     }
 
@@ -155,13 +167,19 @@ data:
     [ "$BAD" = 0 ] || exit 1
     log "preflight ok: $(echo $ALL_SQL | wc -w | tr -d ' ') SQL files"
 
-    # 1) Production color.
-    PROD_COLOR=$(ch_scalar "SELECT current_database_in_production FROM ${MGMT_DB}.update_status WHERE portal_database='public'") || exit 1
+    # 1) Production color, import status and the import's completion time.
+    STATUS=$(chc --query "SELECT current_database_in_production, update_process_status, toString(time_of_last_update_process_completion) FROM ${MGMT_DB}.update_status WHERE portal_database='public' FORMAT TSV") || exit 1
+    PROD_COLOR=$(echo "$STATUS" | cut -f1)
+    IMPORT_STATUS=$(echo "$STATUS" | cut -f2)
+    # The snapshot also covers the LLM-prep SQL, so a new cbioportal/mcp:beta
+    # image rebuilds the buffer even when production did not change.
+    SQL_HASH=$(find "$SQL_DIR" -type f -name '*.sql' | sort | while read -r f; do cat "$f"; done | sha256sum | cut -c1-12)
+    SNAPSHOT="${PROD_COLOR} $(echo "$STATUS" | cut -f3) sql:${SQL_HASH}"
     if [ "$PROD_COLOR" != "blue" ] && [ "$PROD_COLOR" != "green" ]; then
       log "FAIL: unexpected production color '$PROD_COLOR'"; exit 1
     fi
     SRC_DB="${SRC_PREFIX}${PROD_COLOR}"
-    log "production color=$PROD_COLOR, source=$SRC_DB"
+    log "production color=$PROD_COLOR, status=$IMPORT_STATUS, snapshot=$SNAPSHOT"
 
     # 2) Active beta buffer (read from the ConfigMap mounted at /active).
     #    Always build the other color, so the database the MCP reads is
@@ -170,6 +188,7 @@ data:
     #    builds blue. If the active buffer doesn't exist (first run), the
     #    MCP keeps failing until this build is published.
     ACTIVE_DB="$(cat /active/CLICKHOUSE_DATABASE 2>/dev/null || echo '')"
+    BUILT_FROM="$(cat /active/SNAPSHOT 2>/dev/null || echo '')"
     case "$ACTIVE_DB" in
       "${DST_PREFIX}blue")  TARGET_COLOR="green" ;;
       "${DST_PREFIX}green") TARGET_COLOR="blue"  ;;
@@ -183,6 +202,20 @@ data:
         0) log "active=${ACTIVE_DB} does not exist yet (first run); beta MCP queries fail until this build is published" ;;
         *) log "FAIL: EXISTS DATABASE ${ACTIVE_DB} returned '${ACTIVE_EXISTS}'"; exit 1 ;;
       esac
+      # Keep the served buffer while a production import runs or when it was
+      # already built from this snapshot; the pointer patch is then a no-op.
+      if [ "$ACTIVE_EXISTS" = "1" ]; then
+        if [ "$IMPORT_STATUS" != "complete" ]; then
+          log "production import in progress (status=$IMPORT_STATUS); keeping ${ACTIVE_DB}"
+          printf 'ACTIVE_DB=%s\nSNAPSHOT="%s"\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
+          exit 0
+        elif [ "$BUILT_FROM" = "$SNAPSHOT" ]; then
+          log "${ACTIVE_DB} already built from ${SNAPSHOT}; nothing to do"
+          printf 'ACTIVE_DB=%s\nSNAPSHOT="%s"\n' "$ACTIVE_DB" "$BUILT_FROM" > /workdir/state.env
+          exit 0
+        fi
+        log "${ACTIVE_DB} built from '${BUILT_FROM:-unknown}'; rebuilding from ${SNAPSHOT}"
+      fi
     fi
     DST_DB="${DST_PREFIX}${TARGET_COLOR}"
     case "$DST_DB" in
@@ -192,11 +225,11 @@ data:
     log "active=${ACTIVE_DB:-<unset>}; building into ${DST_DB}"
 
     # 3) Rebuild target.
-    clickhouse client $CH_FLAGS --query "DROP DATABASE IF EXISTS ${DST_DB}"
-    clickhouse client $CH_FLAGS --query "CREATE DATABASE ${DST_DB}"
+    chc --query "DROP DATABASE IF EXISTS ${DST_DB}"
+    chc --query "CREATE DATABASE ${DST_DB}"
 
     # 4) Enumerate source tables (exclude sensitive + backup).
-    TABLES=$(clickhouse client $CH_FLAGS --query "
+    TABLES=$(chc --query "
       SELECT name FROM system.tables
       WHERE database = '${SRC_DB}'
         AND name NOT IN ${EXCLUDED_TABLES}
@@ -215,7 +248,7 @@ data:
     for t in $TABLES; do
       i=$((i+1))
       log "  [$i/$N] $t"
-      clickhouse client $CH_FLAGS --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
+      chc --query "CREATE TABLE ${DST_DB}.${t} CLONE AS ${SRC_DB}.${t}"
       SRC_ROWS=$(ch_scalar "SELECT count() FROM ${SRC_DB}.${t}") || exit 1
       DST_ROWS=$(ch_scalar "SELECT count() FROM ${DST_DB}.${t}") || exit 1
       if [ -z "$SRC_ROWS" ] || [ "$SRC_ROWS" != "$DST_ROWS" ]; then
@@ -244,7 +277,7 @@ data:
     #    server-wide, so it also empties prod's cache; enable it only while
     #    piloting the query cache on beta. Best effort when enabled.
     if [ "${DROP_QUERY_CACHE:-false}" = "true" ]; then
-      if clickhouse client $CH_FLAGS --query "SYSTEM DROP QUERY CACHE"; then
+      if chc --query "SYSTEM DROP QUERY CACHE"; then
         log "dropped query cache"
       else
         log "WARN: SYSTEM DROP QUERY CACHE failed; cached results expire within the MCP TTL"
@@ -257,7 +290,7 @@ data:
     # llm_user_beta grants are keyed by database name and persist across DROP
     # DATABASE + CREATE DATABASE, so no GRANT step here. The beta names
     # need their own one-time grants (see README.md).
-    echo "ACTIVE_DB=${DST_DB}" > /workdir/state.env
+    printf 'ACTIVE_DB=%s\nSNAPSHOT="%s"\n' "$DST_DB" "$SNAPSHOT" > /workdir/state.env
     log "done. ACTIVE_DB=${DST_DB}"
 ---
 apiVersion: v1
@@ -300,10 +333,19 @@ metadata:
   name: cbioagent-clickhouse-clone-daily-beta
   labels:
     app.kubernetes.io/instance: cbioagent-beta
+  annotations:
+    # The public color swap (cmo-pipelines) sets public_db.active_color in
+    # cbioportal-db-status (portal-configuration) right after it marks an
+    # import complete. Reloader then starts a Job from this CronJob's
+    # template, so the buffer follows each production switch within minutes.
+    configmap.reloader.stakater.com/reload: "cbioportal-db-status"
 spec:
   # Three hours after prod's 13:00 UTC run. Prod's activeDeadlineSeconds is
   # 2h, so an on-time prod run has finished or been killed before this starts.
-  schedule: "0 16 * * *"  # daily 16:00 UTC = 12:00 ET (DST) / 11:00 ET (EST)
+  # Safety net for the Reloader trigger above: retries a failed rebuild and
+  # catches a missed ConfigMap change. A run with nothing new to build exits
+  # within seconds.
+  schedule: "47 * * * *"  # hourly; a run rebuilds only after a new production import or SQL change
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
@@ -377,9 +419,9 @@ spec:
                   set -eu
                   . /workdir/state.env
                   : "${ACTIVE_DB:?missing from state.env}"
-                  echo "patching clickhouse-mcp-active-beta → ${ACTIVE_DB}"
+                  echo "patching clickhouse-mcp-active-beta → ${ACTIVE_DB} (${SNAPSHOT})"
                   kubectl -n default patch configmap clickhouse-mcp-active-beta \
-                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\"}}"
+                    --type=merge -p "{\"data\":{\"CLICKHOUSE_DATABASE\":\"${ACTIVE_DB}\",\"SNAPSHOT\":\"${SNAPSHOT}\"}}"
               volumeMounts:
                 - mountPath: /workdir
                   name: workdir
