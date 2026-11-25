@@ -240,6 +240,10 @@ spec:
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
             - --server.port=8888
+            # Spring's four default static locations, plus the similarity-map
+            # embeddings mounted below; served at /embeddings/<file>.json
+            # behind the portal's login.
+            - --spring.web.resources.static-locations=classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:/mnt/web/
             - --session.endpoint.publisher-api-key=$(VIRTUAL_STUDY_PUBLISHER_API_KEY)
           command:
             - java
@@ -317,6 +321,11 @@ spec:
             - mountPath: /certs/mskcerts
               name: mskcerts-volume
               subPath: mskcerts
+            # A directory mount, not subPath, so a replaced map is picked up
+            # without a restart.
+            - mountPath: /mnt/web/embeddings
+              name: msk-embeddings-volume
+              readOnly: true
       dnsPolicy: ClusterFirst
       nodeSelector:
         workload: cbioportal
@@ -330,6 +339,12 @@ spec:
           operator: Equal
           value: cbioportal
       volumes:
+        # Private, from portal-configuration (secrets/msk-embeddings/).
+        # Optional, so the portal starts even without it.
+        - configMap:
+            name: msk-embeddings
+            optional: true
+          name: msk-embeddings-volume
         - secret:
             defaultMode: 420
             items:
