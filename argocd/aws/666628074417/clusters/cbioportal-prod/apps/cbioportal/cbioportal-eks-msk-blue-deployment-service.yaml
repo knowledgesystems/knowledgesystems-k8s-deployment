@@ -25,6 +25,9 @@ spec:
     metadata:
       annotations:
         admission.datadoghq.com/java-lib.version: v1.59.0
+        # Only the static-files-sync sidecar gets the service account's AWS
+        # credentials; the portal itself never sees them.
+        eks.amazonaws.com/skip-containers: eks-msk-blue
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-blue
@@ -240,6 +243,10 @@ spec:
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
             - --server.port=8888
+            # Spring's four default static locations, plus the msk-static-files
+            # bucket that the static-files-sync sidecar mirrors into /mnt/web:
+            # an object's key is its path, served behind the portal's login.
+            - --spring.web.resources.static-locations=classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:/mnt/web/
             - --session.endpoint.publisher-api-key=$(VIRTUAL_STUDY_PUBLISHER_API_KEY)
           command:
             - java
@@ -317,12 +324,64 @@ spec:
             - mountPath: /certs/mskcerts
               name: mskcerts-volume
               subPath: mskcerts
+            - mountPath: /mnt/web
+              name: msk-static-files-volume
+              readOnly: true
+        # Mirrors the msk-static-files bucket (iac/.../shared/s3) into
+        # /mnt/web every minute, so an upload is served without a restart and
+        # a deletion stops being served. A failed sync only logs: the loop
+        # never exits, so S3 or IAM trouble can't affect the portal, which
+        # keeps serving the files it already has. --exact-timestamps because
+        # a download sync otherwise skips a changed file of the same size.
+        - name: static-files-sync
+          image: public.ecr.aws/aws-cli/aws-cli:2.41.1
+          command:
+            - sh
+            - -c
+            - |
+              while true; do
+                aws s3 sync "s3://${BUCKET}/" /mnt/web/ --delete --exact-timestamps --no-progress --only-show-errors \
+                  || echo "$(date -u +%FT%TZ) sync from s3://${BUCKET} failed; serving the files already here"
+                sleep "${SYNC_INTERVAL_SECONDS}"
+              done
+          env:
+            - name: BUCKET
+              value: msk-static-files
+            - name: SYNC_INTERVAL_SECONDS
+              value: "60"
+            - name: AWS_REGION
+              value: us-east-1
+            - name: HOME
+              value: /tmp
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /mnt/web
+              name: msk-static-files-volume
+            - mountPath: /tmp
+              name: static-files-sync-tmp
       dnsPolicy: ClusterFirst
       nodeSelector:
         workload: cbioportal
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
+      # IRSA: assumes userServiceRoleMskStaticFilesReader, read-only on the
+      # msk-static-files bucket (iac/.../cbioportal-prod/iam).
+      serviceAccountName: msk-static-files-reader
       terminationGracePeriodSeconds: 30
       tolerations:
         - effect: NoSchedule
@@ -330,6 +389,10 @@ spec:
           operator: Equal
           value: cbioportal
       volumes:
+        - emptyDir: {}
+          name: msk-static-files-volume
+        - emptyDir: {}
+          name: static-files-sync-tmp
         - secret:
             defaultMode: 420
             items:
