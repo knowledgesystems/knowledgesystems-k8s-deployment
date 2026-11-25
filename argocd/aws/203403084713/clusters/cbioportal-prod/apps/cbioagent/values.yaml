@@ -8,7 +8,7 @@ global:
     # the default modelSpec; `us.` prefix is required by data-residency policy.
     env:
       - name: BEDROCK_AWS_MODELS
-        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5,us.anthropic.claude-haiku-4-5-20251001-v1:0"
+        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5,us.anthropic.claude-sonnet-5-5,us.anthropic.claude-haiku-4-5-20251001-v1:0,us.anthropic.claude-haiku-5-5"
       # Shared secret sent to the cbioportal-database MCP in the
       # x-cbioportal-mcp-bridge-secret header (librechat-config.yaml resolves
       # ${CBIOPORTAL_MCP_BRIDGE_SECRET} from this env). Secret is created out
