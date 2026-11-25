@@ -275,6 +275,24 @@ data:
           preset:
             <<: *betaPreset
             model: "us.anthropic.claude-sonnet-5"
+        - <<: *betaSpec
+          name: "cBioPortalChatBetaHaiku55"
+          softDefault: false
+          modelOption:
+            label: "Haiku 5.5"
+            description: "Fast answers for most questions (newer model)"
+          preset:
+            <<: *betaPreset
+            model: "us.anthropic.claude-haiku-5-5"
+        - <<: *betaSpec
+          name: "cBioPortalChatBetaSonnet55"
+          softDefault: false
+          modelOption:
+            label: "Sonnet 5.5"
+            description: "Deeper reasoning for complex analyses. Uses more of your limit."
+          preset:
+            <<: *betaPreset
+            model: "us.anthropic.claude-sonnet-5-5"
         - name: "cBioPortalChatBetaApps"
           label: "cBioPortalChat (MCP Apps)"
           description: "Beta agent using the MCP-Apps database server for ui:// widget views."
