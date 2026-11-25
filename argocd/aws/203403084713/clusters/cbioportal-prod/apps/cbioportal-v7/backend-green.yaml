@@ -46,7 +46,9 @@ spec:
         - --persistence.cache_type=no-cache
         - --persistence.cache_type_clickhouse=no-cache
         - --spring.session.store-type=none
-        - --session.service.url=
+        - --session.service.url=https://session-service.cbioportal.org/api/sessions/hgnc_portal/
+        - --session.service.user=$(SESSION_SERVICE_USER_NAME)
+        - --session.service.password=$(SESSION_SERVICE_USER_PASSWORD)
         - --sitemaps=false
         - --skin.title=Public v7 curation preview
         - --skin.blurb=Reference-data rebuild preview. Not the public production portal.
@@ -62,6 +64,17 @@ spec:
         - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
         - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
         - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
+        env:
+        - name: SESSION_SERVICE_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: cbioportal-session-service-user-creds
+              key: USER_NAME
+        - name: SESSION_SERVICE_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cbioportal-session-service-user-creds
+              key: USER_PASSWORD
         envFrom:
         - secretRef:
             name: cbioportal-public-v7-green
