@@ -15,7 +15,7 @@ data:
       "study_bucket": "cdsi-curation-hgnc",
       "reference_release": "hgnc_v7_2025.10.7",
       "promotion_enabled": true,
-      "core_image": "ghcr.io/cbioportal/containerized-importer-core@sha256:f6ca4431f401ff737f2330d7dd760dfc3e85f552ddd1a3b53807d32a953c2b35",
+      "core_image": "ghcr.io/cbioportal/containerized-importer-core@sha256:b0b9f7b30db842a20dfbf145aeadaeb04419e6854b4a6b8c4633948219e83d98",
       "cmo_image": "ghcr.io/cbioportal/containerized-importer-cmo@sha256:1286f2d45ca7dfdf4643eb3c3bad560af94e941647a06e4fedbafcdae5e6dc9b",
       "derived_sql_sha256": "020bddcae552785ef83381c8c97722f071be29e7304c368be37b32d681281b37"
     }
