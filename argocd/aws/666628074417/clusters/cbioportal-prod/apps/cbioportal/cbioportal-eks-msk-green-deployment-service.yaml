@@ -334,7 +334,7 @@ spec:
         # keeps serving the files it already has. --exact-timestamps because
         # a download sync otherwise skips a changed file of the same size.
         - name: static-files-sync
-          image: amazon/aws-cli:2.41.1
+          image: public.ecr.aws/aws-cli/aws-cli:2.41.1
           command:
             - sh
             - -c
