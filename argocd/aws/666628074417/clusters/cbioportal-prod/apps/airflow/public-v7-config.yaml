@@ -12,7 +12,7 @@ data:
         "green": "cbioportal_public_v7_green"
       },
       "preview_host": "hgnc.cbioportal.aws.mskcc.org",
-      "study_bucket": "cdsi-curation-hgnc",
+      "study_bucket": "cdsi-curation-unpublished",
       "reference_release": "hgnc_v7_2025.10.7",
       "promotion_enabled": true,
       "core_image": "ghcr.io/cbioportal/containerized-importer-core@sha256:b0b9f7b30db842a20dfbf145aeadaeb04419e6854b4a6b8c4633948219e83d98",
