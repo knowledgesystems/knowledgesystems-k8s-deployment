@@ -1,0 +1,42 @@
+# Serves the msk-embeddings files on the MSK portal's own host, so the
+# frontend fetches them same-origin: the browser sends the portal session
+# cookie and no CORS is involved. Every request is checked against the portal
+# first: the auth subrequest calls /api/info with the browser's cookie, which
+# the portal answers 2xx for any logged-in user and 401 otherwise (it needs a
+# session but no study access). eks-msk-wsi-auth is the Service the WSI pixel
+# ingress uses for the same purpose; it always reaches the running MSK color
+# (cbioportal/eks-msk-wsi-auth-service.yaml).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: msk-embeddings
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://eks-msk-wsi-auth.default.svc.cluster.local/api/info"
+    nginx.ingress.kubernetes.io/auth-method: GET
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    # Only single-segment .json file names reach the server.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cbioportal.mskcc.org
+      http:
+        paths:
+          - path: /embeddings/[A-Za-z0-9_.-]+\.json$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: msk-embeddings
+                port:
+                  number: 80
+    - host: cbioportal.aws.mskcc.org
+      http:
+        paths:
+          - path: /embeddings/[A-Za-z0-9_.-]+\.json$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: msk-embeddings
+                port:
+                  number: 80

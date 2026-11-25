@@ -1,0 +1,129 @@
+# Serves the similarity-map embeddings for MSK studies as static JSON. The
+# files come from the msk-embeddings ConfigMap, which is private and lives in
+# portal-configuration (secrets/msk-embeddings/). It is mounted as a directory,
+# so an updated map is picked up without a restart. ingress.yaml puts this
+# behind the MSK portal's login.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msk-embeddings
+  namespace: default
+  labels:
+    run: msk-embeddings
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: msk-embeddings
+  template:
+    metadata:
+      labels:
+        run: msk-embeddings
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: dockerhub-creds
+      containers:
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.30.6-alpine
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: embeddings
+              mountPath: /usr/share/nginx/html/embeddings
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            # nginx writes its pid and temp files here; the root filesystem
+            # is read-only.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: embeddings
+          configMap:
+            name: msk-embeddings
+        - name: nginx-conf
+          configMap:
+            name: msk-embeddings-nginx
+        - name: tmp
+          emptyDir: {}
+      nodeSelector:
+        workload: cbioportal
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: cbioportal
+          effect: NoSchedule
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: msk-embeddings-nginx
+  namespace: default
+data:
+  default.conf: |
+    server {
+        listen 8080;
+        server_tokens off;
+        root /usr/share/nginx/html;
+
+        gzip on;
+        gzip_types application/json;
+        gzip_min_length 1024;
+
+        location /embeddings/ {
+            default_type application/json;
+            # Revalidate on every load so a replaced map shows up at once;
+            # the ETag keeps unchanged maps to a 304.
+            add_header Cache-Control "no-cache" always;
+            try_files $uri =404;
+        }
+
+        location = /healthz {
+            access_log off;
+            return 200 "ok\n";
+        }
+
+        location / {
+            return 404;
+        }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: msk-embeddings
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    run: msk-embeddings
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
