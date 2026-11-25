@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: cbioportal-v7
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   project: default
   source:
@@ -14,9 +16,29 @@ spec:
   destination:
     namespace: default
     server: https://kubernetes.default.svc
+  ignoreDifferences:
+  - group: networking.k8s.io
+    kind: Ingress
+    name: public-v7-ingress
+    namespace: default
+    jsonPointers:
+    - /spec/rules/0/http/paths/0/backend/service/name
+  - group: apps
+    kind: Deployment
+    name: cbioportal-backend-public-v7-blue
+    namespace: default
+    jsonPointers:
+    - /spec/template/metadata/annotations/kubectl.kubernetes.io~1restartedAt
+  - group: apps
+    kind: Deployment
+    name: cbioportal-backend-public-v7-green
+    namespace: default
+    jsonPointers:
+    - /spec/template/metadata/annotations/kubectl.kubernetes.io~1restartedAt
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
+    - RespectIgnoreDifferences=true
     - ServerSideApply=true

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: public-v7-config
+  namespace: airflow
+data:
+  environment.json: |
+    {
+      "portal": "public_v7",
+      "databases": {
+        "blue": "cbioportal_public_v7_blue",
+        "green": "cbioportal_public_v7_green"
+      },
+      "preview_host": "hgnc.cbioportal.aws.mskcc.org",
+      "study_bucket": "cdsi-curation-hgnc",
+      "reference_release": "hgnc_v7_2025.10.7",
+      "promotion_enabled": true,
+      "core_image": "ghcr.io/cbioportal/containerized-importer-core@sha256:f6ca4431f401ff737f2330d7dd760dfc3e85f552ddd1a3b53807d32a953c2b35",
+      "cmo_image": "ghcr.io/cbioportal/containerized-importer-cmo@sha256:1286f2d45ca7dfdf4643eb3c3bad560af94e941647a06e4fedbafcdae5e6dc9b",
+      "derived_sql_sha256": "020bddcae552785ef83381c8c97722f071be29e7304c368be37b32d681281b37"
+    }
