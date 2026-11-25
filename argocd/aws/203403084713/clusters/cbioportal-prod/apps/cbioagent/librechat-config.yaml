@@ -246,21 +246,3 @@ data:
           preset:
             <<: *prodPreset
             model: "us.anthropic.claude-sonnet-5-5"
-        - <<: *prodSpec
-          name: "cBioPortalChatHaiku45"
-          softDefault: false
-          modelOption:
-            label: "Haiku 4.5"
-            description: "Previous fast model"
-          preset:
-            <<: *prodPreset
-            model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-        - <<: *prodSpec
-          name: "cBioPortalChatSonnet5"
-          softDefault: false
-          modelOption:
-            label: "Sonnet 5"
-            description: "Previous deeper-reasoning model"
-          preset:
-            <<: *prodPreset
-            model: "us.anthropic.claude-sonnet-5"
