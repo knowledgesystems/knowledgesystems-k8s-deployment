@@ -203,7 +203,7 @@ metadata:
 data:
   default.conf: |
     server {
-      listen 80;
+      listen 8080;
       absolute_redirect off;
       root /usr/share/nginx/html;
       location = /healthz { return 200 'ok'; }
@@ -242,11 +242,11 @@ spec:
       - name: nginx
         image: nginx:1.27-alpine
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         readinessProbe:
           httpGet:
             path: /healthz
-            port: 80
+            port: 8080
           periodSeconds: 10
         resources:
           requests:
@@ -280,4 +280,4 @@ spec:
   selector: *id001
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 8080
