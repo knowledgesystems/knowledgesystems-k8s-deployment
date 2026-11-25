@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: cbioportal-v7
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   project: default
   source:
@@ -41,4 +39,3 @@ spec:
       selfHeal: true
     syncOptions:
     - RespectIgnoreDifferences=true
-    - ServerSideApply=true
