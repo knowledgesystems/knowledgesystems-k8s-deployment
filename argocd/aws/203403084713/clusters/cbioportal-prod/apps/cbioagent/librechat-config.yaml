@@ -194,7 +194,7 @@ data:
           softDefault: true
           description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
           modelOption:
-            label: "Haiku 4.5"
+            label: "Haiku 5.5"
             description: "Fast answers for most questions"
           placeholder: "How can I help you explore cBioPortal?"
           iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
@@ -230,7 +230,7 @@ data:
           preset: &prodPreset
             endpoint: "agents"
             agent_id: "agent_9ZXhcwLIsROBQX0u4JS5F"
-            model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            model: "us.anthropic.claude-haiku-5-5"
             temperature: 0
             maxTokens: 4096
             thinking: false
@@ -241,26 +241,26 @@ data:
           name: "cBioPortalChatSonnet"
           softDefault: false
           modelOption:
-            label: "Sonnet 5"
-            description: "Deeper reasoning for complex analyses. Uses more of your limit."
-          preset:
-            <<: *prodPreset
-            model: "us.anthropic.claude-sonnet-5"
-        - <<: *prodSpec
-          name: "cBioPortalChatHaiku55"
-          softDefault: false
-          modelOption:
-            label: "Haiku 5.5"
-            description: "Fast answers for most questions (newer model)"
-          preset:
-            <<: *prodPreset
-            model: "us.anthropic.claude-haiku-5-5"
-        - <<: *prodSpec
-          name: "cBioPortalChatSonnet55"
-          softDefault: false
-          modelOption:
             label: "Sonnet 5.5"
             description: "Deeper reasoning for complex analyses. Uses more of your limit."
           preset:
             <<: *prodPreset
             model: "us.anthropic.claude-sonnet-5-5"
+        - <<: *prodSpec
+          name: "cBioPortalChatHaiku45"
+          softDefault: false
+          modelOption:
+            label: "Haiku 4.5"
+            description: "Previous fast model"
+          preset:
+            <<: *prodPreset
+            model: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+        - <<: *prodSpec
+          name: "cBioPortalChatSonnet5"
+          softDefault: false
+          modelOption:
+            label: "Sonnet 5"
+            description: "Previous deeper-reasoning model"
+          preset:
+            <<: *prodPreset
+            model: "us.anthropic.claude-sonnet-5"
