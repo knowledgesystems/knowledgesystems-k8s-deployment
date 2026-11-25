@@ -40,6 +40,7 @@ spec:
         - --authenticate=false
         - --authorization=false
         - --security.method_authorization_enabled=false
+        - --security.cors.allowed-origins=https://hgnc.cbioportal.aws.mskcc.org
         - --always_show_study_group=PUBLIC
         - --spring.profiles.active=clickhouse
         - --clickhouse_mode=true
