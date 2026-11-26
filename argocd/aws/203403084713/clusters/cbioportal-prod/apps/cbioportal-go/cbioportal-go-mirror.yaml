@@ -91,8 +91,10 @@ spec:
                 sizeLimit: 1Gi
           initContainers:
             - name: mirror
-              image: cbioportal/cbioportal-go:latest
-              imagePullPolicy: Always
+              # The release cbioportal-go and cbioportal-go-api run, so the
+              # databases it builds are the ones they read.
+              image: cbioportal/cbioportal-go:0.3.2
+              imagePullPolicy: IfNotPresent
               command: ["/app/deploy/mirror-prod.sh"]
               securityContext:
                 runAsNonRoot: true
@@ -118,6 +120,12 @@ spec:
                       name: cbioportal-db-status
                       key: public_db.active_color
                       optional: true
+                # The Job's name: when a pod dies and the Job retries it, the
+                # new pod takes over the build lock instead of waiting for it.
+                - name: JOB_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.labels['batch.kubernetes.io/job-name']
               envFrom:
                 - secretRef:
                     name: clickhouse-go-import
