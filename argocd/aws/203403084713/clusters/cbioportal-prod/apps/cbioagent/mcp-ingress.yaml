@@ -244,19 +244,13 @@ spec:
 # Ingress spec doesn't express. Higher `priority` than any standard
 # Ingress rule so this route wins for matching requests.
 #
-# Detection: `HeaderRegexp("User-Agent", "Mozilla")` catches every
-# real browser (Chrome, Firefox, Safari, Edge — they all send
-# "Mozilla/5.0 (...)"). MCP clients don't: Anthropic/ClaudeAI,
-# Anthropic/Toolbox, github-copilot-developer, python-httpx, curl,
-# WhatsApp scraper, etc. all send non-Mozilla UAs and pass through
-# to the normal MCP path. `!HeaderRegexp("User-Agent", "(?i)(headless|kprofile-pipeline)")`
+# Detection: a page navigation sends `Accept: text/html`; MCP clients
+# send `text/event-stream` (the Streamable HTTP GET) or JSON, including
+# browser-based clients such as the MCP Inspector whose User-Agent says
+# Mozilla. Only GETs that accept HTML are redirected; POSTs (MCP RPC)
+# never are. `!HeaderRegexp("User-Agent", "(?i)(headless|kprofile-pipeline)")`
 # mirrors the sibling cbioportal-www-ingressroute pattern, excluding
 # our own headless testing traffic.
-#
-# GET-only: MCP Streamable HTTP uses GET for the SSE upgrade
-# (`Accept: text/event-stream`) — but MCP clients still send
-# non-Mozilla UAs there, so the UA check is sufficient to avoid
-# breaking SSE. POSTs (MCP RPC) are never intercepted.
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -270,7 +264,7 @@ spec:
   routes:
     - match: >-
         Host(`mcp.cbioportal.org`) && PathPrefix(`/db/mcp`) && Method(`GET`) &&
-        HeaderRegexp(`User-Agent`, `Mozilla`) &&
+        HeaderRegexp(`Accept`, `text/html`) &&
         !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
       kind: Rule
       priority: 100
@@ -282,7 +276,7 @@ spec:
           port: 80
     - match: >-
         Host(`mcp.cbioportal.org`) && PathPrefix(`/db-mcp-apps/mcp`) && Method(`GET`) &&
-        HeaderRegexp(`User-Agent`, `Mozilla`) &&
+        HeaderRegexp(`Accept`, `text/html`) &&
         !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
       kind: Rule
       priority: 100
