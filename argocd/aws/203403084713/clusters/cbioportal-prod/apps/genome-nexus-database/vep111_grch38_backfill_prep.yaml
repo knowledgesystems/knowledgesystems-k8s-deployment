@@ -1,0 +1,139 @@
+# Prep for the Ensembl 111 GRCh38 backfill: export prod's _id keys, filter,
+# convert, globally sort, and shard. Everything downstream consumes its output.
+#
+# One streaming pipeline, so nothing large lands twice. The global sort is the
+# point: coordinate-contiguous shards annotate ~2.2x faster than _id-order ones
+# (257 vs 116 var/s measured), because VEP's cache is stored per chromosome in
+# position-ordered blocks. VEP also rejects unsorted input outright (exit 25).
+#
+# Converting before sorting means the shards are already Ensembl default format,
+# so Pass A runs VEP and nothing else.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gn-vep-111-grch38-backfill-prep
+  namespace: genome-nexus
+  labels:
+    run: gn-vep-111-grch38-backfill-prep
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        run: gn-vep-111-grch38-backfill-prep
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: prep
+          image: genomenexus/gn-vep-backfill:111-grch38-3
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              W=/work
+              DEST=/cache-data/homo_sapiens/111_GRCh38
+              # A killed attempt leaves its sort spills behind -- sort uses
+              # random names and never reclaims them. ~5 GB per eviction.
+              rm -rf "$W/tmp"; mkdir -p "$W/tmp"
+
+              # The converter needs a seekable plain FASTA for delins trimming;
+              # the cache ships bgzip only. Idempotent, ~3.3G, kept on EFS.
+              if [ ! -s "$DEST/ref.fa.fai" ]; then
+                echo "decompressing FASTA for converter seeks"
+                bgzip -dc "$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz" > "$DEST/ref.fa"
+                cp "$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz.fai" "$DEST/ref.fa.fai"
+              fi
+
+              # Guard against re-running on top of a previous attempt's output.
+              # The earlier unpartitioned scan left a 3.9%-short shard set here;
+              # mixing the two would be worse than either.
+              if [ -f "$W/.prep_complete" ]; then
+                echo "prep already complete: $(ls $W/ens.* | wc -l) shards"
+                echo "to redo it, first clear the previous output:"
+                echo "  rm -f $W/.prep_complete $W/.shard_count $W/ens.* $W/deferred.all"
+                exit 0
+              fi
+
+              # Covered _id scan on prod. The script re-checks its own query plan
+              # and refuses to run if it is not covered -- an un-hinted empty
+              # predicate plans as COLLSCAN and would drag all 273G of documents
+              # through a cache holding prod's working set.
+              #
+              # Filters mirror CachedVariantAnnotationFetcher.isValidId plus the
+              # corruption classes found in the live collection.
+              mongosh "$SRC_URI" --quiet --file /opt/backfill/scan_vep_annotation_ids.js \
+                | awk '
+                    # The scan logs its partition summary and any range
+                    # mismatch with mongosh print(), which writes to stdout --
+                    # the same stream as the keys. Forward those to stderr so
+                    # they reach the Job log instead of being counted as
+                    # key drops.
+                    /^\[scan\]/ { print > "/dev/stderr"; next }
+                    /^[[:space:]]|[[:space:]]$/ { bad["whitespace"]++; next }
+                    /^"/                        { bad["quote"]++;      next }
+                    !/:/                        { bad["nocolon"]++;    next }
+                    /-|undefined|g\.0/          { bad["invalid"]++;    next }
+                    length($0) >= 900           { bad["toolong"]++;    next }
+                    { print; kept++ }
+                    END { for (k in bad) printf "dropped %s %d\n", k, bad[k] > "/dev/stderr"
+                          printf "kept %d\n", kept > "/dev/stderr" }' \
+                | hgvsg2ensembl.py --in - --out - --defer "$W/deferred.all" \
+                    --fasta "$DEST/ref.fa" \
+                | sort -k1,1 -k2,2n -T "$W/tmp" -S 2G \
+                | split -l 250000 -d -a 5 - "$W/ens."
+
+              SHARDS=$(ls "$W"/ens.* | wc -l)
+              LINES=$(cat "$W"/ens.* | wc -l)
+              DEFERRED=$(wc -l < "$W/deferred.all")
+              echo "shards=$SHARDS converted=$LINES deferred=$DEFERRED"
+              echo "$SHARDS" > "$W/.shard_count"
+              touch "$W/.prep_complete"
+              echo "SET completions: $SHARDS on the Pass A Job before applying it"
+          env:
+            - name: SRC_URI
+              value: "mongodb://gn-mongo-grch38-ensembl95-blue:27017/annotator"
+          resources:
+            requests:
+              cpu: "2"
+              memory: 4Gi
+            limits:
+              memory: 12Gi
+          volumeMounts:
+            - name: cache
+              mountPath: /cache-data
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-cache-efs
+        - name: work
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-work-efs
+      # On-demand, unlike Pass A. Pass A is resumable per shard, so a spot
+      # eviction costs one shard; prep is a single ~60-minute streaming
+      # pipeline with no resume, so an eviction costs the whole run. cbio-dev
+      # rotates every 1-3h and killed one attempt at ~85%.
+      #
+      # gn-db-lg has the headroom: ip-10-0-11-224 is 8 cores with 58.6 GiB
+      # free at 3% used, and its only co-tenant is the ensembl111 mongo, which
+      # has no traffic yet. Unlike Pass A's 12 saturating workers, this is one
+      # pod asking for 2 cores, so it does not threaten the node. Both volumes
+      # are EFS, so there is no AZ constraint.
+      # Pinned to the ONE idle node, not the pool. workload=gn-db-lg matches
+      # all three, and the scheduler picked ip-10-0-7-20 -- which hosts
+      # gn-mongo-beta-0, gn-mongo-vep111-blue-0 and
+      # gn-mongo-grch37-ensembl111-green-0 (the database behind
+      # www.genomenexus.org) at 73% memory with ~13 GiB free. Because the
+      # gn-mongo StatefulSets declare no resource requests, the scheduler sees
+      # that node as nearly empty. ip-10-0-11-224 holds only the ensembl111
+      # mongo, which has no traffic yet, at 3% memory.
+      nodeSelector:
+        workload: "gn-db-lg"
+        kubernetes.io/hostname: "ip-10-0-11-224.ec2.internal"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "gn-db-lg"
+          effect: "NoSchedule"

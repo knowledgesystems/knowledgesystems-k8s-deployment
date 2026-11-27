@@ -4,6 +4,62 @@ icon: tools
 # Troubleshooting
 This list is used to track issues and their remedies.
 
+## saml2aws Login Issues
+If you are unable to log in to AWS with saml2aws, set up your configuration manually using the steps below.
+
+1. Make sure you have [saml2aws](https://github.com/Versent/saml2aws#install), the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), and [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) installed. If any are missing, install them from the linked pages, or on macOS:
+   ```shell
+   brew install saml2aws awscli kubectl
+   ```
+2. Update `~/.saml2aws` with an entry for each AWS account you need access to. Replace `<AWS_ACCOUNT_ID_*>` with the account IDs and `<username>` with your MSK username. Repeat the block for as many accounts as needed.
+   ```ini
+   [<AWS_ACCOUNT_ID_1>]
+   name                    = <AWS_ACCOUNT_ID_1>
+   url                     = https://ssofed.mskcc.org
+   username                = <username>
+   provider                = Ping
+   mfa                     = Auto
+   skip_verify             = false
+   timeout                 = 0
+   aws_urn                 = urn:amazon:webservices
+   aws_session_duration    = 3600
+   aws_profile             = <AWS_ACCOUNT_ID_1>
+   saml_cache              = false
+   disable_remember_device = false
+   disable_sessions        = false
+   download_browser_driver = false
+   headless                = false
+
+   [<AWS_ACCOUNT_ID_2>]
+   name                    = <AWS_ACCOUNT_ID_2>
+   url                     = https://ssofed.mskcc.org
+   username                = <username>
+   provider                = Ping
+   mfa                     = Auto
+   skip_verify             = false
+   timeout                 = 0
+   aws_urn                 = urn:amazon:webservices
+   aws_session_duration    = 3600
+   aws_profile             = <AWS_ACCOUNT_ID_2>
+   saml_cache              = false
+   disable_remember_device = false
+   disable_sessions        = false
+   download_browser_driver = false
+   headless                = false
+   ```
+3. Log in to the account:
+   ```shell
+   saml2aws login --force -a <AWS_ACCOUNT_ID> --username=<username>
+   ```
+4. Set the AWS profile for your shell session:
+   ```shell
+   export AWS_PROFILE=<AWS_ACCOUNT_ID>
+   ```
+5. Update your kubeconfig for the cluster you want to access:
+   ```shell
+   aws eks update-kubeconfig --profile <AWS_ACCOUNT_ID> --region us-east-1 --name <CLUSTER_NAME>
+   ```
+
 ## EFS Mount Failed - Missing Mount Targets in Availability Zone
 When deploying applications that use EFS persistent volumes, you may encounter mount errors like:
 ```

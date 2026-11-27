@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: triage-frontend-config
+  namespace: default
+data:
+  # Passed to the frontend as frontendConfigOverride via --frontend.config
+  frontendConfig.json: |
+    {"wsi_tile_server_url": "/wsi"}

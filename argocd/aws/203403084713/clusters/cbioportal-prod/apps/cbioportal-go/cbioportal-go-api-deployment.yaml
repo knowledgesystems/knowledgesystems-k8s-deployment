@@ -1,0 +1,147 @@
+# cbioportal-go serving the REST API only: api.cbioportal.org
+# (apps/cbioportal-api/cbioportal-api-ingress.yaml) and www.cbioportal.org's
+# non-browser API traffic, scripts and agents (cbio-www-ingressroute in
+# apps/cbioportal). Stateless (no session file), so it scales out. Same
+# databases as go.cbioportal.org.
+#
+# It runs a pinned release on the on-demand cbio-api nodes, so it changes
+# only when a new release is set here:
+# https://github.com/cBioPortal/cbioportal-go/releases
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-go-api
+  namespace: default
+  labels:
+    run: cbioportal-go-api
+  annotations:
+    configmap.reloader.stakater.com/reload: "cbioportal-go-active"
+    secret.reloader.stakater.com/reload: "clickhouse-go-portal"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go-api
+  template:
+    metadata:
+      annotations:
+        # Datadog scrapes the Prometheus metrics (METRICS_ADDR below). The
+        # per-route latency histogram alone is ~1,800 values, over the check's
+        # default limit of 2,000 once the rest is added.
+        ad.datadoghq.com/cbioportal-go-api.checks: |
+          {"openmetrics": {"instances": [{"openmetrics_endpoint": "http://%%host%%:9090/metrics",
+            "namespace": "cbioportal_go", "metrics": [".*"], "max_returned_metrics": 5000}]}}
+      labels:
+        run: cbioportal-go-api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: cbioportal-go-api
+          image: cbioportal/cbioportal-go:0.3.1
+          imagePullPolicy: IfNotPresent
+          command: ["/usr/local/bin/cbioportal-api"]
+          args:
+            - --portal-properties=/app/deploy/public-portal.properties
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            # Prometheus metrics on a port the Service does not expose, and a
+            # JSON access log line per request.
+            - name: METRICS_ADDR
+              value: ":9090"
+            - name: ACCESS_LOG
+              value: "true"
+            # Tags this deployment's queries in ClickHouse's system.query_log.
+            - name: CLICKHOUSE_LOG_COMMENT
+              value: cbioportal-go-api
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-portal
+            - configMapRef:
+                name: cbioportal-go-active
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          # A mirrored quarter of the non-browser traffic used about 0.04
+          # cores and 0.15 GB over both pods on average, and at most about
+          # 1.2 cores.
+          resources:
+            requests:
+              cpu: "1"
+              memory: 512Mi
+            limits:
+              cpu: "3"
+              memory: 2Gi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              run: cbioportal-go-api
+          # Count only this rollout's pods: during a rolling update the old
+          # pods would otherwise let both new ones land on one node.
+          matchLabelKeys:
+            - pod-template-hash
+      nodeSelector:
+        workload: cbio-api
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-api"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-go-api
+  namespace: default
+  labels:
+    run: cbioportal-go-api
+spec:
+  selector:
+    run: cbioportal-go-api
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  type: ClusterIP
+---
+# Keeps one pod serving while a node is drained.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cbioportal-go-api
+  namespace: default
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go-api

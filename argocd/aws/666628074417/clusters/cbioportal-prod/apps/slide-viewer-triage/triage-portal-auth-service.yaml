@@ -1,0 +1,24 @@
+# The portal for the triage WSI pixel ingress's auth check
+# (triage-ingress.yaml auth-url). The nightly import flips triage between the
+# blue and green colors: it edits the replicas and the eks-triage-ingress
+# backends, so the running color changes from day to day. This Service must
+# therefore never name one color. It selects the two pod-template labels that
+# both triage colors carry and no other pods have
+# (cbioportal/cbioportal-eks-triage-{blue,green}-deployment-service.yaml), so it
+# always reaches the running color without any change to the triage portal
+# deployments. The ports match the triage portal Services.
+apiVersion: v1
+kind: Service
+metadata:
+  name: eks-triage-wsi-auth
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8888
+  selector:
+    tags.datadoghq.com/env: eks-triage
+    tags.datadoghq.com/service: cbioportal

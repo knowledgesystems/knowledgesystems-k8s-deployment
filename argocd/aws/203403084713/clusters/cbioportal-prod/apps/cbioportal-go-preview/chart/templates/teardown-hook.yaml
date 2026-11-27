@@ -1,0 +1,48 @@
+# Drops the preview's databases once Argo CD has deleted the Application
+# (PR closed or `preview` label removed). Runs main's teardown script, as the
+# PR image may not exist. The gc CronJob (../../gc-cronjob.yaml) catches
+# what this misses.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "preview.name" . }}-teardown
+  labels:
+    {{- include "preview.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: PostDelete
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 1800
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: teardown
+          image: cbioportal/cbioportal-go:latest
+          imagePullPolicy: Always
+          command: ["/app/deploy/pr-preview-teardown.sh", {{ .Values.prNumber | quote }}]
+          env:
+            - name: WORKDIR
+              value: /tmp
+            {{- include "preview.ghEnv" . | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-import
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: gh-app-key
+              mountPath: /etc/gh-app
+              readOnly: true
+      volumes:
+        {{- include "preview.ghVolume" . | nindent 8 }}
+      {{- include "preview.scheduling" . | nindent 6 }}

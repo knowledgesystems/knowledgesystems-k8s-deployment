@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openmetadata
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/knowledgesystems/knowledgesystems-k8s-deployment
+      path: argocd/aws/666628074417/clusters/cbioportal-prod/apps/openmetadata
+      targetRevision: HEAD
+      directory:
+        recurse: true
+      ref: k8s-repo
+    # Search engine (single node, no security plugin, internal only)
+    - repoURL: https://opensearch-project.github.io/helm-charts/
+      chart: opensearch
+      targetRevision: 3.5.0
+      helm:
+        releaseName: opensearch
+        valueFiles:
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/openmetadata/values-opensearch.yaml
+    # OpenMetadata server + Kubernetes ingestion runner
+    - repoURL: https://helm.open-metadata.org/
+      chart: openmetadata
+      targetRevision: 2.0.7
+      helm:
+        releaseName: openmetadata
+        valueFiles:
+          - $k8s-repo/argocd/aws/666628074417/clusters/cbioportal-prod/apps/openmetadata/values-openmetadata.yaml
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

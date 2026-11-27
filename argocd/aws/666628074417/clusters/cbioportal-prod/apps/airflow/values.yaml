@@ -53,6 +53,8 @@ dags:
     enabled: true
     knownHosts: |
       github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+    # Tolerate brief GitHub connection timeouts instead of restarting git-sync on the first failure (default: 0)
+    maxFailures: 10
     repo: git@github.com:knowledgesystems/cdsi-airflow-dags.git
     sshKeySecret: airflow-ssh-secret
     subPath: ""
@@ -66,6 +68,29 @@ env:
     value: "airflow"
   - name: "DEPLOYMENT"
     value: "PROD"
+
+# KubernetesExecutor knows the run ID when it creates the task pod. The DAG
+# supplies both worker profiles without mounting either target's credentials.
+airflowLocalSettings: |-
+  def pod_mutation_hook(pod):
+      annotations = pod.metadata.annotations or {}
+      key = "cbioportal.org/import-worker-profiles"
+      if annotations.get("dag_id") != "import_containerized_dag" or key not in annotations:
+          return
+      import json
+      from airflow.models.dagrun import DagRun
+      from airflow.providers.cncf.kubernetes.pod_generator import PodGenerator
+      from airflow.utils.session import create_session
+
+      with create_session() as session:
+          (conf,) = session.query(DagRun.conf).filter_by(
+              dag_id=annotations["dag_id"], run_id=annotations["run_id"]
+          ).one()
+      target = (conf or {}).get("target", "containerized")
+      profiles = json.loads(annotations.pop(key))
+      profile = profiles["public" if target == "containerized" else target]
+      override = PodGenerator.deserialize_model_dict(profile)
+      pod.spec = PodGenerator.reconcile_pods(pod, override).spec
 
 executor: KubernetesExecutor
 

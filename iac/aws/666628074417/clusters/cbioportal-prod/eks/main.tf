@@ -269,6 +269,44 @@ locals {
         (var.LABEL_KEY) = "cbio-triage"
       }
     }
+    tile-viewer = {
+      instance_types = ["r7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 4
+      min_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "tile-viewer"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "tile-viewer"
+      }
+    }
+    openmetadata = {
+      instance_types = ["r7g.large"]
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 1
+      max_size       = 1
+      min_size       = 1
+      block_device_mappings = {
+        root_vol = var.ROOT_VOL_CONFIG
+        data_vol = var.DATA_VOL_CONFIG
+      }
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "openmetadata"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "openmetadata"
+      }
+    }
   }
 }
 

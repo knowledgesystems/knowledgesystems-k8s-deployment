@@ -1,0 +1,238 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-go
+  namespace: default
+  labels:
+    run: cbioportal-go
+  annotations:
+    # Rolls the pod when the import CronJob flips the blue/green pointer or
+    # when the ClickHouse credentials change.
+    configmap.reloader.stakater.com/reload: "cbioportal-go-active"
+    secret.reloader.stakater.com/reload: "clickhouse-go-portal,cbioportal-public-green"
+    # Keel polls Docker Hub and rolls the Deployment when the digest behind
+    # cbioportal/cbioportal-go:latest changes.
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/match-tag: "true"
+spec:
+  # Two replicas, rolled one at a time and spread over nodes: sessions live
+  # in the session service and logins in Redis, so any pod serves any user.
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go
+  template:
+    metadata:
+      annotations:
+        # Datadog scrapes the Prometheus metrics (METRICS_ADDR below). The
+        # per-route latency histogram alone is ~1,800 values, over the check's
+        # default limit of 2,000 once the rest is added.
+        ad.datadoghq.com/cbioportal-go.checks: |
+          {"openmetrics": {"instances": [{"openmetrics_endpoint": "http://%%host%%:9090/metrics",
+            "namespace": "cbioportal_go", "metrics": [".*"], "max_returned_metrics": 5000}]}}
+      labels:
+        run: cbioportal-go
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: cbioportal-go
+          image: cbioportal/cbioportal-go:latest
+          imagePullPolicy: Always
+          command: ["/usr/local/bin/cbioportal-api"]
+          # www.cbioportal.org's portal settings (generated from its
+          # /config_service; analytics and login left out), shipped in the image.
+          # Login, sessions and the frontend are set with go's settings in env.
+          args:
+            - --portal-properties=/app/deploy/public-portal.properties
+            - --always_show_study_group=PUBLIC
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            # Prometheus metrics on a port the Service does not expose, and a
+            # JSON access log line per request.
+            - name: METRICS_ADDR
+              value: ":9090"
+            - name: ACCESS_LOG
+              value: "true"
+            # The released frontend, loaded by the browser from where www
+            # loads it, so frontend releases need no new go image. The
+            # image's own build (FRONTEND_DIR) is the fallback without it.
+            - name: CBIOPORTAL_FRONTEND_ASSETS_URL
+              value: https://frontend.cbioportal.org/
+            - name: FRONTEND_DIR
+              value: /app/frontend
+            - name: SITE_BANNER
+              value: "⚠️ Experimental preview: a reimplementation of cBioPortal in Go. Results may differ from the official portal; do not use for research or clinical decisions. Official portal:"
+            - name: SITE_BANNER_LINK
+              value: https://www.cbioportal.org
+            # Sessions (shared links, virtual studies, groups) in the public
+            # portal's session service, with its credentials from its secret,
+            # so www links open here too.
+            - name: SESSION_SERVICE_URL
+              value: https://session-service.cbioportal.org/api/sessions/public_portal/
+            - name: SESSION_SERVICE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_NAME
+            - name: SESSION_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: SESSION_SERVICE_USER_PASSWORD
+            # The public portal's OncoKB token, read from its secret, and the
+            # authenticated OncoKB API it is for (the frontend's mutation
+            # annotations go through the /proxy endpoint).
+            - name: ONCOKB_URL
+              value: https://www.oncokb.org/api/v1
+            - name: ONCOKB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: ONCOKB_TOKEN
+            # Optional sign-in as on www: Google with the public portal's
+            # client, Microsoft (work and personal accounts) with go's own app
+            # registration ("cBioPortal Go", redirect URI
+            # https://go.cbioportal.org/login/oauth2/code/azure). Studies stay
+            # readable without signing in.
+            - name: CBIOPORTAL_LOGIN
+              value: optional
+            - name: CBIOPORTAL_STUDY_AUTHORIZATION
+              value: "false"
+            - name: CBIOPORTAL_LOGIN_GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: GOOGLE_PLUS_CONSUMER_KEY
+            - name: CBIOPORTAL_LOGIN_GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: GOOGLE_PLUS_CONSUMER_SECRET
+            - name: CBIOPORTAL_LOGIN_MICROSOFT_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-go-microsoft
+                  key: MICROSOFT_CLIENT_ID
+            - name: CBIOPORTAL_LOGIN_MICROSOFT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-go-microsoft
+                  key: MICROSOFT_CLIENT_SECRET
+            # Login sessions in the public portal's session Redis, so they
+            # survive restarts.
+            - name: CBIOPORTAL_LOGIN_SESSION_STORE
+              value: redis
+            - name: CBIOPORTAL_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: REDIS_SESSION_HOST
+            - name: CBIOPORTAL_REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: REDIS_SESSION_PORT
+            - name: CBIOPORTAL_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: REDIS_SESSION_PASSWORD
+            # Tags this deployment's queries in ClickHouse's system.query_log.
+            - name: CLICKHOUSE_LOG_COMMENT
+              value: go.cbioportal.org
+          envFrom:
+            - secretRef:
+                name: clickhouse-go-portal
+            - configMapRef:
+                name: cbioportal-go-active
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          # Sized for all of www's browser traffic. A mirrored quarter of
+          # it (cbioportal-www-mirror.yaml) used about 0.1 cores and 0.4 GB
+          # over both pods on average, 0.3 cores at the 95th percentile.
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1Gi
+            limits:
+              cpu: "3"
+              memory: 2Gi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              run: cbioportal-go
+          # Count only this rollout's pods: during a rolling update the old
+          # pods would otherwise let both new ones land on one node.
+          matchLabelKeys:
+            - pod-template-hash
+      # On-demand nodes, as cbioportal-go-api: these pods will serve
+      # www.cbioportal.org's browsers.
+      nodeSelector:
+        workload: cbio-api
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "cbio-api"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-go
+  namespace: default
+  labels:
+    run: cbioportal-go
+spec:
+  selector:
+    run: cbioportal-go
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8080
+  type: ClusterIP
+---
+# Keeps one pod serving while nodes are drained.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cbioportal-go
+  namespace: default
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      run: cbioportal-go

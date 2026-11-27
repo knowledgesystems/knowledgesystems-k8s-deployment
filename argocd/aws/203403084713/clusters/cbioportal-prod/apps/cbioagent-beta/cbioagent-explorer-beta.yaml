@@ -1,0 +1,283 @@
+# cBioChat Explorer (beta): static frontend served at https://beta.chat.cbioportal.org/explorer/
+# Generated from the explorer repo by k8s/render.py; do not edit the ConfigMap by hand.
+# It runs in the visitor's browser and talks to LibreChat on the same origin with the visitor's own session.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbioagent-explorer-beta-files
+data:
+  index.html: "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>cBioChat Explorer</title>\n<link rel=\"icon\" href=\"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%233786c2%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-size=%2716%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27Arial%27%3EcB%3C/text%3E%3C/svg%3E\">\n<link rel=\"stylesheet\" href=\"app.css\">\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js\"></script>\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js\"></script>\n</head>\n<body>\n<header class=\"top\">\n  <div class=\"brand\"><span class=\"logo\">c<b>Bio</b>Chat</span><span class=\"sub\">Explorer</span></div>\n  <div class=\"top-note\" id=\"top-note\"></div>\n  <button class=\"chat-toggle\" id=\"\
+    chat-toggle\" title=\"Ask the agent\">Ask cBioChat</button>\n</header>\n<nav class=\"rail\" id=\"rail\">\n  <a href=\"#/explore\" data-view=\"explore\" title=\"Explore data\"><svg viewBox=\"0 0 24 24\"><path d=\"M4 20V10M10 20V4M16 20v-8M22 20H2\"/></svg><span>Explore</span></a>\n  <a href=\"#/patients\" data-view=\"patients\" title=\"Patient timelines\"><svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"7\" r=\"3.2\"/><path d=\"M5 20c0-4 3-6 7-6s7 2 7 6\"/></svg><span>Patients</span></a>\n  <a href=\"#/papers\" data-view=\"papers\" title=\"Paper reproductions\"><svg viewBox=\"0 0 24 24\"><path d=\"M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7\"/></svg><span>Papers</span></a>\n</nav>\n<main id=\"main\"></main>\n<aside class=\"chat\" id=\"chat\" hidden>\n  <div class=\"chat-head\">\n    <strong>Ask cBioChat</strong>\n    <span class=\"grow\"></span>\n    <button id=\"chat-new\" title=\"New conversation\">New</button>\n    <button id=\"chat-close\" title=\"Close\">\u2715</button>\n  </div>\n\
+    \  <div class=\"ctx\" id=\"ctx\" hidden></div>\n  <div class=\"msgs\" id=\"msgs\"></div>\n  <form class=\"composer\" id=\"composer\">\n    <textarea id=\"input\" rows=\"2\" placeholder=\"Ask about the data, a patient, or a paper\u2026\"></textarea>\n    <button type=\"submit\" id=\"send\">Send</button>\n  </form>\n</aside>\n<div class=\"tip\" id=\"tip\" hidden></div>\n<script type=\"module\" src=\"app.js\"></script>\n</body>\n</html>\n"
+  app.css: |
+    :root{
+      --blue:#3786c2; --blue-d:#2a6a9c; --bg:#f4f6f9; --card:#fff; --ink:#1f2d3a; --mute:#6b7a89; --line:#dde3ea;
+      --accent:#e6f0f9; --warn:#c0392b;
+      color-scheme:light;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{--bg:#161b21;--card:#1f262e;--ink:#e6edf3;--mute:#93a1b0;--line:#2c353f;--accent:#1b2c3b;color-scheme:dark}
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{font:14px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);display:grid;grid-template-columns:72px 1fr auto;grid-template-rows:52px 1fr;grid-template-areas:"top top top" "rail main chat"}
+    .top{grid-area:top;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 16px}
+    .brand{display:flex;align-items:baseline;gap:8px}
+    .logo{font-size:20px;font-weight:300;color:var(--ink)}.logo b{font-weight:700;color:var(--blue)}
+    .sub{color:var(--mute);font-size:13px}
+    .top-note{color:var(--mute);font-size:12px;margin-left:auto}
+    .chat-toggle,.btn,button{font:inherit;cursor:pointer}
+    .chat-toggle{background:var(--blue);color:#fff;border:0;border-radius:4px;padding:7px 14px}
+    .chat-toggle:hover{background:var(--blue-d)}
+    .rail{grid-area:rail;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:4px}
+    .rail a{width:60px;padding:8px 0;border-radius:6px;text-decoration:none;color:var(--mute);display:flex;flex-direction:column;align-items:center;font-size:11px;gap:2px}
+    .rail a svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .rail a:hover{background:var(--accent);color:var(--blue)}
+    .rail a.on{background:var(--accent);color:var(--blue);font-weight:600}
+    main{grid-area:main;overflow:auto;padding:20px 24px 40px;min-width:0}
+    h1{font-size:22px;font-weight:400;margin:0 0 4px}h2{font-size:16px;font-weight:600;margin:0 0 10px}
+    .lead{color:var(--mute);margin:0 0 18px;max-width:70ch}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:16px}
+    .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+    .tile{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+    .tile .n{font-size:26px;font-weight:300;color:var(--blue)}.tile .l{color:var(--mute);font-size:12px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:1100px){.grid2{grid-template-columns:1fr}}
+    .bars .row{display:grid;grid-template-columns:150px 1fr 90px;align-items:center;gap:8px;padding:3px 0;font-size:13px;cursor:default}
+    .bars .row.click{cursor:pointer}.bars .row.click:hover .lab{color:var(--blue)}
+    .bars .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bars .bar{height:14px;background:var(--accent);border-radius:2px;overflow:hidden}
+    .bars .bar i{display:block;height:100%;background:var(--blue)}
+    .bars .val{color:var(--mute);text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+    .bars .row.sel .bar i{background:var(--blue-d)}.bars .row.sel .lab{font-weight:600;color:var(--blue)}
+    .starts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:16px}
+    .start{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px;text-align:left;color:var(--ink)}
+    .start:hover{border-color:var(--blue);background:var(--accent)}.start small{display:block;color:var(--mute);margin-top:2px}
+    input[type=search],input[type=text],select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink)}
+    .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+    table{border-collapse:collapse;width:100%;font-size:13px}
+    th{position:sticky;top:-20px;background:var(--card);text-align:left;color:var(--mute);font-weight:600;border-bottom:2px solid var(--line);padding:6px 8px;cursor:pointer;white-space:nowrap}
+    td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+    tr:hover td{background:var(--accent)}
+    td.num{text-align:right;font-variant-numeric:tabular-nums}
+    a{color:var(--blue)}
+    .pill{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;background:var(--accent);color:var(--blue);margin-right:4px}
+    .link{background:none;border:0;color:var(--blue);padding:0}.link:hover{text-decoration:underline}
+    .btn{border:1px solid var(--blue);background:var(--card);color:var(--blue);border-radius:4px;padding:5px 12px}
+    .btn:hover{background:var(--blue);color:#fff}.btn.solid{background:var(--blue);color:#fff}.btn.solid:hover{background:var(--blue-d)}
+    .cols{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start}
+    @media(max-width:900px){.cols{grid-template-columns:1fr}}
+    .plist .it{padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);margin-bottom:8px;cursor:pointer}
+    .plist .it:hover,.plist .it.on{border-color:var(--blue);background:var(--accent)}.plist .it b{display:block}.plist .it small{color:var(--mute)}
+    .tl{overflow-x:auto}
+    .tl svg{width:100%;height:auto;display:block}
+    .tl text{font-size:11px;fill:var(--mute)}.tl .lane{font-size:11px;fill:var(--ink)}
+    .tl .grid{stroke:var(--line)}
+    .attrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 16px;margin-bottom:12px}
+    .attrs div small{display:block;color:var(--mute);font-size:11px}
+    .paper{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+    .paper .cite{color:var(--mute);font-size:12px}
+    .repro{background:var(--accent);border-radius:6px;padding:12px 14px;margin-top:10px}
+    .md{overflow-wrap:anywhere}.md table{font-size:12px;margin:8px 0}.md th{position:static}.md p{margin:.5em 0}.md pre{overflow:auto;background:var(--bg);padding:8px;border-radius:4px}
+    .empty{color:var(--mute);padding:30px;text-align:center}
+    .chat{grid-area:chat;width:420px;max-width:100vw;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+    .chat[hidden]{display:none}
+    .chat-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+    .chat-head button{border:1px solid var(--line);background:none;border-radius:4px;padding:3px 8px;color:var(--ink)}.grow{flex:1}
+    .ctx{padding:6px 12px;font-size:12px;background:var(--accent);color:var(--blue);border-bottom:1px solid var(--line)}
+    .msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .m{max-width:92%;padding:8px 11px;border-radius:8px}
+    .m.u{align-self:flex-end;background:var(--blue);color:#fff}.m.a{align-self:flex-start;background:var(--bg)}
+    .m .tools{font-size:11px;color:var(--mute);margin-bottom:4px}.m.err{background:#fdecea;color:var(--warn)}
+    .composer{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+    .composer textarea{flex:1;resize:none;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink)}
+    .composer button{background:var(--blue);color:#fff;border:0;border-radius:4px;padding:0 16px}.composer button:disabled{opacity:.5}
+    .tip{position:fixed;z-index:10;background:#1f2d3a;color:#fff;font-size:12px;padding:6px 9px;border-radius:4px;pointer-events:none;max-width:320px;white-space:pre-line}
+    @media(max-width:760px){body{grid-template-columns:56px 1fr}.chat{position:fixed;inset:52px 0 0 auto;z-index:5}.bars .row{grid-template-columns:100px 1fr 70px}}
+  app.js: "const $ = (s, r = document) => r.querySelector(s);\nconst esc = (s) => String(s ?? '').replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\nconst fmt = (n) => Number(n || 0).toLocaleString('en-US');\nimport { buildPayload, parseStart, streamEvents } from './relay.js';\nconst PORTAL = 'https://www.cbioportal.org/api';\nconst portal = async (p) => {\n  const r = await fetch(PORTAL + p);\n  if (!r.ok) throw new Error(`cBioPortal API ${r.status}`);\n  return r.json();\n};\nconst md = (t) => DOMPurify.sanitize(marked.parse(t || '', { breaks: true }), { ADD_ATTR: ['target'] });\nconst studyUrl = (id) => `https://www.cbioportal.org/study/summary?id=${encodeURIComponent(id)}`;\n\n/* ------------------------------ chat ------------------------------ */\nconst chat = { conv: null, parent: null, ctx: null, busy: false, first: true };\nconst chatEl = $('#chat'), msgs = $('#msgs'), input = $('#input'), send = $('#send');\n\nfunction openChat(show =\
+    \ true) {\n  chatEl.hidden = !show;\n  if (show) input.focus();\n}\nfunction setContext(ctx) {\n  chat.ctx = ctx;\n  const el = $('#ctx');\n  el.hidden = !ctx;\n  el.textContent = ctx ? `Context: ${ctx.label}` : '';\n}\nfunction resetChat() {\n  Object.assign(chat, { conv: null, parent: null, first: true });\n  msgs.innerHTML = '';\n}\nfunction bubble(cls, html) {\n  const d = document.createElement('div');\n  d.className = 'm ' + cls;\n  d.innerHTML = html;\n  msgs.appendChild(d);\n  msgs.scrollTop = msgs.scrollHeight;\n  return d;\n}\n\nlet cfg = { mode: 'proxy' };\n\n// Same-origin deployment: talk to LibreChat directly with the visitor's own session.\nlet jwt = '';\nclass LoginRequired extends Error {}\nasync function bearer(force = false) {\n  if (jwt && !force) return jwt;\n  const r = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });\n  if (!r.ok) throw new LoginRequired('Please log in to LibreChat first.');\n  jwt = (await r.json()).token;\n  return\
+    \ jwt;\n}\nasync function lc(url, init = {}, retry = true) {\n  const r = await fetch(url, { ...init, credentials: 'include', headers: { ...(init.headers || {}), Authorization: `Bearer ${await bearer()}` } });\n  if (r.status === 401 && retry) { await bearer(true); return lc(url, init, false); }\n  return r;\n}\nasync function streamDirect(text, { conv, parent }, onEvent) {\n  const payload = buildPayload({ text, conversationId: conv, parentMessageId: parent }, cfg);\n  const start = await lc('/api/agents/chat/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });\n  if (!start.ok) throw new Error(`LibreChat ${start.status}: ${(await start.text()).slice(0, 200)}`);\n  const { streamId, conversationId } = parseStart(await start.text());\n  onEvent({ type: 'started', conversationId: conversationId || payload.conversationId, messageId: payload.messageId });\n  const r = await lc(`/api/agents/chat/stream/${streamId}`, { headers: { Accept:\
+    \ 'text/event-stream' } });\n  if (!r.ok || !r.body) throw new Error(`LibreChat stream ${r.status}`);\n  for await (const e of streamEvents(r.body)) onEvent(e);\n}\n\n// Streams one question; calls onEvent for each simplified event (started, delta, tool, done, error).\nasync function stream(text, { conv, parent }, onEvent) {\n  if (cfg.mode === 'direct') {\n    try { return await streamDirect(text, { conv, parent }, onEvent); }\n    catch (e) { return onEvent({ type: 'error', message: e.message, login: e instanceof LoginRequired }); }\n  }\n  const r = await fetch('/api/chat', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ text, conversationId: conv, parentMessageId: parent }),\n  });\n  const reader = r.body.getReader();\n  const dec = new TextDecoder();\n  let buf = '';\n  for (;;) {\n    const { value, done } = await reader.read();\n    if (done) break;\n    buf += dec.decode(value, { stream: true });\n    let i;\n    while\
+    \ ((i = buf.indexOf('\\n\\n')) >= 0) {\n      const line = buf.slice(0, i).replace(/^data: /, '');\n      buf = buf.slice(i + 2);\n      try { onEvent(JSON.parse(line)); } catch { /* ignore partial */ }\n    }\n  }\n}\n\nasync function ask(text, ctx) {\n  if (ctx !== undefined) {\n    if (ctx?.label !== chat.ctx?.label) resetChat();\n    setContext(ctx);\n  }\n  openChat(true);\n  if (chat.busy || !text.trim()) return;\n  chat.busy = true; send.disabled = true;\n  bubble('u', esc(text));\n  const out = bubble('a', '<span class=\"tools\">thinking\u2026</span>');\n  const full = chat.first && chat.ctx?.prefix ? `${chat.ctx.prefix}\\n\\n${text}` : text;\n  chat.first = false;\n  let acc = '', tools = [];\n  const render = () => {\n    out.innerHTML = (tools.length ? `<div class=\"tools\">${esc(tools.join(' \u2192 '))}</div>` : '') + `<div class=\"md\">${md(acc)}</div>`;\n    msgs.scrollTop = msgs.scrollHeight;\n  };\n  try {\n    await stream(full, { conv: chat.conv, parent: chat.parent\
+    \ }, (e) => {\n      if (e.type === 'started') chat.conv = e.conversationId;\n      else if (e.type === 'delta') { acc += e.text; render(); }\n      else if (e.type === 'tool') { tools.push(e.name.replace(/_mcp_.*/, '')); render(); }\n      else if (e.type === 'done') { chat.parent = e.messageId || chat.parent; if (!acc && e.text) { acc = e.text; render(); } }\n      else if (e.type === 'error') { out.className = 'm a err'; out.innerHTML = esc(e.message) + (e.login ? ' <a href=\"/login\">Log in</a>, then come back to /explorer/.' : ''); }\n    });\n    if (!acc && !out.classList.contains('err')) out.textContent = '(no answer)';\n  } catch (e) {\n    out.className = 'm a err'; out.textContent = e.message;\n  }\n  chat.busy = false; send.disabled = false;\n}\n// One-off question in its own conversation, returns the final text.\nasync function askOnce(text, onProgress) {\n  let acc = '', err = null;\n  await stream(text, { conv: null, parent: null }, (e) => {\n    if (e.type === 'delta')\
+    \ { acc += e.text; onProgress?.(acc); }\n    else if (e.type === 'done' && !acc) acc = e.text || '';\n    else if (e.type === 'error') err = e.message;\n  });\n  if (err && !acc) throw new Error(err);\n  return acc;\n}\n\n$('#composer').addEventListener('submit', (e) => { e.preventDefault(); const t = input.value; input.value = ''; ask(t); });\ninput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#composer').requestSubmit(); } });\n$('#chat-toggle').onclick = () => openChat(chatEl.hidden);\n$('#chat-close').onclick = () => openChat(false);\n$('#chat-new').onclick = () => { resetChat(); setContext(null); };\n\n/* ------------------------------ data ------------------------------ */\nlet studiesP;\nconst studies = () => (studiesP ||= portal('/studies?projection=DETAILED'));\nconst TYPES = [\n  ['Mutations', (s) => s.sequencedSampleCount],\n  ['Copy number', (s) => s.cnaSampleCount],\n  ['mRNA expression', (s) => s.mrnaRnaSeqSampleCount\
+    \ + s.mrnaRnaSeqV2SampleCount + s.mrnaMicroarraySampleCount],\n  ['Methylation', (s) => s.methylationHm27SampleCount],\n  ['Protein (RPPA)', (s) => s.rppaSampleCount],\n  ['miRNA', (s) => s.miRnaSampleCount],\n  ['Mass spectrometry', (s) => s.massSpectrometrySampleCount],\n  ['Structural variants', (s) => s.structuralVariantCount],\n  ['Treatments', (s) => s.treatmentCount],\n];\n\n/* ------------------------------ views ------------------------------ */\nconst view = { explore, patients, papers };\nconst main = $('#main');\n\nasync function route() {\n  const name = (location.hash.match(/^#\\/(\\w+)/) || [])[1] || 'explore';\n  for (const a of document.querySelectorAll('.rail a')) a.classList.toggle('on', a.dataset.view === name);\n  main.innerHTML = '<div class=\"empty\">Loading\u2026</div>';\n  try { await (view[name] || explore)(); } catch (e) { main.innerHTML = `<div class=\"empty\">Could not load: ${esc(e.message)}</div>`; }\n}\naddEventListener('hashchange', route);\n\n/* ----\
+    \ Explore ---- */\nasync function explore() {\n  const all = await studies();\n  const samples = all.reduce((a, s) => a + s.allSampleCount, 0);\n  const types = new Set(all.map((s) => s.cancerType?.name));\n  let selType = null, q = '', sortBy = 'allSampleCount', dir = -1;\n\n  const starts = [\n    ['Which cancer types have the most studies with expression data?', 'Data coverage'],\n    ['Find studies that have both mutation and treatment data', 'Data discovery'],\n    ['What are the most frequently mutated genes in pancreatic cancer?', 'Gene frequencies'],\n    ['How many samples in cBioPortal have KRAS G12C mutations, by cancer type?', 'Variant counts'],\n    ['Which studies include structural variant data?', 'Data coverage'],\n    ['Suggest a good study to start with for glioma, and why', 'Study discovery'],\n  ];\n  main.innerHTML = `\n    <h1>Explore the data</h1>\n    <p class=\"lead\">What is in cBioPortal right now. Click a cancer type to narrow the studies, or start from one\
+    \ of the questions below.</p>\n    <div class=\"tiles\">\n      <div class=\"tile\"><div class=\"n\">${fmt(all.length)}</div><div class=\"l\">studies</div></div>\n      <div class=\"tile\"><div class=\"n\">${fmt(samples)}</div><div class=\"l\">samples</div></div>\n      <div class=\"tile\"><div class=\"n\">${fmt(types.size)}</div><div class=\"l\">cancer types</div></div>\n      <div class=\"tile\"><div class=\"n\">${fmt(all.filter((s) => s.treatmentCount > 0).length)}</div><div class=\"l\">studies with treatment data</div></div>\n    </div>\n    <div class=\"starts\">${starts.map(([p, l], i) => `<button class=\"start\" data-i=\"${i}\">${esc(p)}<small>${esc(l)}</small></button>`).join('')}</div>\n    <div class=\"grid2\">\n      <div class=\"card\"><h2>Data types</h2><div class=\"bars\" id=\"b-types\"></div></div>\n      <div class=\"card\"><h2>Cancer types <small style=\"font-weight:400;color:var(--mute)\">(by samples, excluding multi-cancer studies; click to filter)</small></h2><div\
+    \ class=\"bars\" id=\"b-cancer\"></div></div>\n    </div>\n    <div class=\"card\">\n      <div class=\"toolbar\"><h2 style=\"margin:0\" id=\"t-title\">Studies</h2><input type=\"search\" id=\"q\" placeholder=\"Search studies\u2026\" style=\"min-width:240px\"><button class=\"btn\" id=\"clear\" hidden>Clear filter</button></div>\n      <div style=\"overflow:auto;max-height:560px\"><table id=\"tbl\"></table></div>\n    </div>`;\n  main.querySelectorAll('.start').forEach((b) => (b.onclick = () => ask(starts[b.dataset.i][0], { label: 'Data exploration' })));\n\n  const cov = TYPES.map(([label, fn]) => ({ label, n: all.filter((s) => fn(s) > 0).length }));\n  const maxCov = Math.max(...cov.map((c) => c.n));\n  $('#b-types').innerHTML = cov.map((c) => `<div class=\"row\"><span class=\"lab\">${c.label}</span><span class=\"bar\"><i style=\"width:${(100 * c.n) / maxCov}%\"></i></span><span class=\"val\">${c.n} studies</span></div>`).join('');\n\n  const byType = new Map();\n  for (const s of all)\
+    \ { const k = s.cancerType?.name || 'Other'; byType.set(k, (byType.get(k) || 0) + s.allSampleCount); }\n  const top = [...byType].filter(([k]) => k !== 'Mixed Cancer Types').sort((a, b) => b[1] - a[1]).slice(0, 14);\n  const drawCancer = () => {\n    $('#b-cancer').innerHTML = top.map(([k, v]) => `<div class=\"row click ${k === selType ? 'sel' : ''}\" data-k=\"${esc(k)}\"><span class=\"lab\" title=\"${esc(k)}\">${esc(k)}</span><span class=\"bar\"><i style=\"width:${(100 * v) / top[0][1]}%\"></i></span><span class=\"val\">${fmt(v)}</span></div>`).join('');\n    $('#b-cancer').querySelectorAll('.row').forEach((r) => (r.onclick = () => { selType = selType === r.dataset.k ? null : r.dataset.k; drawCancer(); drawTable(); }));\n  };\n  const cols = [['name', 'Study'], ['cancer', 'Cancer type'], ['allSampleCount', 'Samples'], ['types', 'Data']];\n  const drawTable = () => {\n    const needle = q.toLowerCase();\n    let rows = all.filter((s) => (!selType || s.cancerType?.name === selType) &&\
+    \ (!needle || (s.name + ' ' + s.studyId + ' ' + (s.cancerType?.name || '')).toLowerCase().includes(needle)));\n    const key = { name: (s) => s.name, cancer: (s) => s.cancerType?.name || '', allSampleCount: (s) => s.allSampleCount, types: (s) => TYPES.filter(([, f]) => f(s) > 0).length }[sortBy];\n    rows = rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * dir);\n    $('#t-title').textContent = `Studies (${fmt(rows.length)})`;\n    $('#clear').hidden = !selType;\n    $('#tbl').innerHTML = `<thead><tr>${cols.map(([k, l]) => `<th data-k=\"${k}\">${l}${sortBy === k ? (dir < 0 ? ' \u2193' : ' \u2191') : ''}</th>`).join('')}<th></th></tr></thead><tbody>` +\n      rows.slice(0, 200).map((s) => `<tr><td><a href=\"${studyUrl(s.studyId)}\" target=\"_blank\" rel=\"noopener\">${esc(s.name)}</a><br><small style=\"color:var(--mute)\">${esc(s.studyId)}</small></td><td>${esc(s.cancerType?.name)}</td><td class=\"num\">${fmt(s.allSampleCount)}</td><td>${TYPES.filter(([, f]) => f(s)\
+    \ > 0).map(([l]) => `<span class=\"pill\">${l}</span>`).join('')}</td><td><button class=\"link\" data-ask=\"${esc(s.studyId)}\">Ask</button></td></tr>`).join('') +\n      (rows.length > 200 ? `<tr><td colspan=\"5\" class=\"empty\">Showing 200 of ${fmt(rows.length)}. Narrow with search.</td></tr>` : '') + '</tbody>';\n    $('#tbl').querySelectorAll('th[data-k]').forEach((th) => (th.onclick = () => { dir = sortBy === th.dataset.k ? -dir : -1; sortBy = th.dataset.k; drawTable(); }));\n    $('#tbl').querySelectorAll('[data-ask]').forEach((b) => (b.onclick = () => {\n      const s = all.find((x) => x.studyId === b.dataset.ask);\n      ask(`Give me an overview of the study ${s.name} (${s.studyId}): cohort size, available data types, the most frequently altered genes, and the main clinical attributes.`, { label: s.name, prefix: `Study in focus: ${s.name} (${s.studyId}).` });\n    }));\n  };\n  $('#q').oninput = (e) => { q = e.target.value; drawTable(); };\n  $('#clear').onclick = () => { selType\
+    \ = null; drawCancer(); drawTable(); };\n  drawCancer(); drawTable();\n}\n\n/* ---- Patients ---- */\nconst PT_STUDY = 'msk_chord_2024';\nconst LANE_COLORS = { Treatment: '#3786c2', Surgery: '#c0392b', Diagnosis: '#8e44ad', Lab_Test: '#27ae60', Sequencing: '#e67e22', 'Sample acquisition': '#16a085' };\nconst LANE_ORDER = ['Sample acquisition', 'Sequencing', 'Surgery', 'Treatment', 'Diagnosis', 'Lab_Test'];\nconst attrOf = (e, k) => (e.attributes || []).find((a) => a.key === k)?.value;\nlet exampleCache;\n\nasync function patients() {\n  const params = new URLSearchParams(location.hash.split('?')[1] || '');\n  main.innerHTML = `\n    <h1>Patient timelines</h1>\n    <p class=\"lead\">Follow one patient through diagnosis, treatment, surgery, lab tests and sequencing. Pick an example, or open any patient by id.</p>\n    <div class=\"cols\">\n      <div><h2>Example patients</h2><div class=\"plist\" id=\"plist\"><div class=\"empty\">Finding patients with rich timelines\u2026</div></div>\n\
+    \        <div class=\"card\"><h2>Open a patient</h2>\n          <div class=\"toolbar\"><input type=\"text\" id=\"sid\" value=\"${esc(params.get('study') || PT_STUDY)}\" style=\"width:100%\" placeholder=\"study id\"><input type=\"text\" id=\"pid\" value=\"${esc(params.get('patient') || '')}\" style=\"width:100%\" placeholder=\"patient id, e.g. P-0000012\"><button class=\"btn solid\" id=\"open\">Open</button></div></div></div>\n      <div id=\"detail\"><div class=\"empty\">Select a patient.</div></div>\n    </div>`;\n  $('#open').onclick = () => { const s = $('#sid').value.trim(), p = $('#pid').value.trim(); if (s && p) showPatient(s, p); };\n\n  exampleCache ||= (async () => {\n    const list = await portal(`/studies/${PT_STUDY}/patients?pageSize=14`);\n    const withEvents = await Promise.all(list.map(async (p) => {\n      const ev = await portal(`/studies/${PT_STUDY}/patients/${p.patientId}/clinical-events`).catch(() => []);\n      const n = (t) => ev.filter((e) => e.eventType === t).length;\n\
+    \      return { id: p.patientId, total: ev.length, treat: n('Treatment'), surg: n('Surgery'), labs: n('Lab_Test'), span: Math.max(0, ...ev.map((e) => e.startNumberOfDaysSinceDiagnosis || 0)) };\n    }));\n    return withEvents.filter((p) => p.total > 20).sort((a, b) => b.treat + b.surg - (a.treat + a.surg)).slice(0, 7);\n  })();\n  const ex = await exampleCache;\n  $('#plist').innerHTML = ex.map((p) => `<div class=\"it\" data-p=\"${p.id}\"><b>${p.id}</b><small>${p.treat} treatments \xB7 ${p.surg} surgeries \xB7 ${p.labs} lab tests \xB7 ${(p.span / 365).toFixed(1)} years</small></div>`).join('') || '<div class=\"empty\">No examples found.</div>';\n  $('#plist').querySelectorAll('.it').forEach((it) => (it.onclick = () => showPatient(PT_STUDY, it.dataset.p)));\n  if (params.get('patient')) showPatient(params.get('study') || PT_STUDY, params.get('patient'));\n  else if (ex[0]) showPatient(PT_STUDY, ex[0].id);\n}\n\nasync function showPatient(study, pid) {\n  document.querySelectorAll('#plist\
+    \ .it').forEach((i) => i.classList.toggle('on', i.dataset.p === pid));\n  const d = $('#detail');\n  d.innerHTML = '<div class=\"empty\">Loading patient\u2026</div>';\n  let ev, cd;\n  try {\n    [ev, cd] = await Promise.all([portal(`/studies/${study}/patients/${pid}/clinical-events`), portal(`/studies/${study}/patients/${pid}/clinical-data`).catch(() => [])]);\n  } catch (e) { d.innerHTML = `<div class=\"empty\">Patient not found: ${esc(e.message)}</div>`; return; }\n  const shown = cd.filter((c) => c.value && !/^(OS_|DFS_|PFS_)/.test(c.clinicalAttributeId)).slice(0, 12);\n  const url = `https://www.cbioportal.org/patient?studyId=${study}&caseId=${pid}`;\n  d.innerHTML = `\n    <div class=\"card\">\n      <div class=\"toolbar\"><h2 style=\"margin:0\">${esc(pid)} <small style=\"font-weight:400;color:var(--mute)\">${esc(study)}</small></h2><span class=\"grow\"></span>\n        <a class=\"btn\" href=\"${url}\" target=\"_blank\" rel=\"noopener\">Open in cBioPortal</a><button class=\"btn\
+    \ solid\" id=\"p-ask\">Ask about this patient</button></div>\n      <div class=\"attrs\">${shown.map((c) => `<div><small>${esc(c.clinicalAttributeId.replace(/_/g, ' ').toLowerCase())}</small>${esc(c.value)}</div>`).join('')}</div>\n      ${ev.length ? '<div class=\"tl\" id=\"tl\"></div>' : '<div class=\"empty\">This patient has no timeline events.</div>'}\n    </div>`;\n  $('#p-ask').onclick = () => ask(`Summarize the clinical course of patient ${pid} in ${study}: diagnosis, treatments in order, surgeries, and anything notable in the timeline. Keep it concise.`, { label: `patient ${pid} (${study})`, prefix: `Patient in focus: ${pid} in study ${study}.` });\n  if (ev.length) drawTimeline(ev);\n}\n\nfunction drawTimeline(ev) {\n  const laneOf = (e) => (e.eventType === 'Diagnosis' || e.eventType === 'Lab_Test') && attrOf(e, 'SUBTYPE') ? `${e.eventType.replace('_', ' ')}: ${attrOf(e, 'SUBTYPE')}` : e.eventType.replace('_', ' ');\n  const lanes = new Map();\n  for (const e of ev) { const\
+    \ k = laneOf(e); if (!lanes.has(k)) lanes.set(k, { k, type: e.eventType, ev: [] }); lanes.get(k).ev.push(e); }\n  const order = [...lanes.values()].sort((a, b) => (LANE_ORDER.indexOf(a.type) - LANE_ORDER.indexOf(b.type)) || b.ev.length - a.ev.length).slice(0, 22);\n  const t0 = Math.min(0, ...ev.map((e) => e.startNumberOfDaysSinceDiagnosis || 0));\n  const t1 = Math.max(1, ...ev.map((e) => Math.max(e.startNumberOfDaysSinceDiagnosis || 0, e.endNumberOfDaysSinceDiagnosis || 0)));\n  const L = 190, W = 1000, R = 14, rowH = 20, top = 22, H = top + order.length * rowH + 8;\n  const x = (d) => L + ((d - t0) / (t1 - t0)) * (W - L - R);\n  const step = t1 - t0 > 3 * 365 ? 365 : t1 - t0 > 365 ? 180 : 30;\n  let g = '';\n  for (let d = Math.ceil(t0 / step) * step; d <= t1; d += step) g += `<line class=\"grid\" x1=\"${x(d)}\" x2=\"${x(d)}\" y1=\"${top - 4}\" y2=\"${H - 4}\"/><text x=\"${x(d)}\" y=\"12\" text-anchor=\"middle\">${step >= 180 ? (d / 365).toFixed(1).replace('.0', '') + ' y' : Math.round(d\
+    \ / 30) + ' mo'}</text>`;\n  const rows = order.map((l, i) => {\n    const y = top + i * rowH + rowH / 2, c = LANE_COLORS[l.type] || '#7f8c8d';\n    const marks = l.ev.map((e, j) => {\n      const s = e.startNumberOfDaysSinceDiagnosis || 0, en = e.endNumberOfDaysSinceDiagnosis;\n      const info = [l.k, `day ${s}${en != null && en !== s ? ' to ' + en : ''}`, ...(e.attributes || []).filter((a) => a.key !== 'STYLE_COLOR').map((a) => `${a.key.replace(/_/g, ' ').toLowerCase()}: ${a.value}`)].join('\\n');\n      const attr = `data-tip=\"${esc(info)}\"`;\n      return en != null && en > s ? `<rect ${attr} x=\"${x(s)}\" y=\"${y - 5}\" width=\"${Math.max(3, x(en) - x(s))}\" height=\"10\" rx=\"2\" fill=\"${c}\" opacity=\".85\"/>` : `<circle ${attr} cx=\"${x(s)}\" cy=\"${y}\" r=\"4\" fill=\"${c}\" opacity=\".85\"/>`;\n    }).join('');\n    return `<text class=\"lane\" x=\"${L - 8}\" y=\"${y + 4}\" text-anchor=\"end\">${esc(l.k.length > 30 ? l.k.slice(0, 29) + '\u2026' : l.k)}</text><line class=\"\
+    grid\" x1=\"${L}\" x2=\"${W - R}\" y1=\"${y}\" y2=\"${y}\" stroke-dasharray=\"2 4\"/>${marks}`;\n  }).join('');\n  $('#tl').innerHTML = `<svg viewBox=\"0 0 ${W} ${H}\">${g}${rows}</svg>`;\n  const tip = $('#tip');\n  $('#tl').onmousemove = (e) => {\n    const t = e.target.closest?.('[data-tip]');\n    tip.hidden = !t;\n    if (t) { tip.textContent = t.dataset.tip; tip.style.left = Math.min(e.clientX + 12, innerWidth - 340) + 'px'; tip.style.top = e.clientY + 14 + 'px'; }\n  };\n  $('#tl').onmouseleave = () => (tip.hidden = true);\n}\n\n/* ---- Papers ---- */\nconst FEATURED = ['pog570_bcgsc_2020', 'luad_cptac_2020', 'ucec_cptac_2020', 'brca_metabric', 'pancreas_msk_2024', 'msk_chord_2024'];\nconst reproPrompt = (s) => `Reproduce the headline genomic findings of the paper behind the cBioPortal study \"${s.name}\" (${s.studyId}${s.citation ? ', ' + s.citation : ''}). Use only data available in cBioPortal. Give: (1) cohort size and sample types, (2) the 10 most frequently altered genes\
+    \ with sample counts and percentages, (3) the main clinical breakdown of the cohort (for example subtype or stage). Use compact tables, end with links to the study and, where useful, a results view for the top genes, and state clearly what could not be reproduced from the portal data.`;\nconst reproStore = { get: (id) => { try { return localStorage.getItem('repro:' + id); } catch { return null; } }, set: (id, v) => { try { localStorage.setItem('repro:' + id, v); } catch { /* storage unavailable */ } } };\n\nasync function papers() {\n  const all = (await studies()).filter((s) => s.pmid);\n  let q = '', page = 0;\n  main.innerHTML = `\n    <h1>Papers</h1>\n    <p class=\"lead\">Studies are published datasets. Reproduce a paper's headline findings from the portal data, then chat with the result.</p>\n    <div class=\"toolbar\"><input type=\"search\" id=\"q\" placeholder=\"Search by title, cancer type, citation or PubMed id\u2026\" style=\"min-width:320px\"></div>\n    <div class=\"card\"\
+    \ id=\"list\"></div>\n    <div class=\"toolbar\"><button class=\"btn\" id=\"prev\">\u2190 Previous</button><button class=\"btn\" id=\"next\">Next \u2192</button><span id=\"pg\" style=\"color:var(--mute)\"></span></div>`;\n  const card = (s) => `<div class=\"paper\" data-id=\"${esc(s.studyId)}\"><div><b>${esc(s.name)}</b><div class=\"cite\">${esc(s.citation || '')} \xB7 ${esc(s.cancerType?.name || '')} \xB7 ${fmt(s.allSampleCount)} samples</div>\n      <div style=\"margin-top:4px\"><a href=\"https://pubmed.ncbi.nlm.nih.gov/${esc(String(s.pmid).split(',')[0].trim())}/\" target=\"_blank\" rel=\"noopener\">PubMed</a> \xB7 <a href=\"${studyUrl(s.studyId)}\" target=\"_blank\" rel=\"noopener\">Study in cBioPortal</a></div>\n      <div class=\"repro\" hidden></div></div>\n      <div style=\"display:flex;flex-direction:column;gap:6px\"><button class=\"btn solid\" data-act=\"repro\">${reproStore.get(s.studyId) ? 'Show reproduction' : 'Reproduce'}</button><button class=\"btn\" data-act=\"chat\"\
+    >Chat</button></div></div>`;\n  const draw = () => {\n    const needle = q.toLowerCase();\n    let rows = all.filter((s) => !needle || (s.name + ' ' + (s.citation || '') + ' ' + (s.cancerType?.name || '') + ' ' + s.pmid).toLowerCase().includes(needle));\n    if (!needle) rows = [...rows.filter((s) => FEATURED.includes(s.studyId)).sort((a, b) => FEATURED.indexOf(a.studyId) - FEATURED.indexOf(b.studyId)), ...rows.filter((s) => !FEATURED.includes(s.studyId))];\n    const n = 20, pages = Math.max(1, Math.ceil(rows.length / n));\n    page = Math.min(page, pages - 1);\n    $('#list').innerHTML = rows.slice(page * n, page * n + n).map(card).join('') || '<div class=\"empty\">No papers match.</div>';\n    $('#pg').textContent = `${fmt(rows.length)} papers \xB7 page ${page + 1} of ${pages}`;\n    $('#prev').disabled = page === 0; $('#next').disabled = page >= pages - 1;\n    $('#list').querySelectorAll('.paper').forEach((el) => {\n      const s = all.find((x) => x.studyId === el.dataset.id), box\
+    \ = $('.repro', el);\n      const show = (t) => { box.hidden = false; box.innerHTML = `<div class=\"md\">${md(t)}</div>`; };\n      $('[data-act=chat]', el).onclick = () => ask(`What are the key findings of the paper behind ${s.name} and what can I explore next in this study?`, { label: `paper: ${s.name}`, prefix: `Paper in focus: ${s.name} (${s.studyId}), ${s.citation || ''}, PMID ${s.pmid}.${reproStore.get(s.studyId) ? '\\n\\nA reproduction of its headline findings from portal data:\\n' + reproStore.get(s.studyId) : ''}` });\n      $('[data-act=repro]', el).onclick = async (ev) => {\n        const cached = reproStore.get(s.studyId);\n        if (cached && !box.hidden) { box.hidden = true; return; }\n        if (cached) return show(cached);\n        const btn = ev.currentTarget; btn.disabled = true; box.hidden = false; box.textContent = 'Reproducing from portal data\u2026 (about a minute)';\n        try { const t = await askOnce(reproPrompt(s), (p) => show(p)); reproStore.set(s.studyId,\
+    \ t); show(t); btn.textContent = 'Show reproduction'; }\n        catch (e) { box.textContent = 'Failed: ' + e.message; }\n        btn.disabled = false;\n      };\n    });\n  };\n  $('#q').oninput = (e) => { q = e.target.value; page = 0; draw(); };\n  $('#prev').onclick = () => { page--; draw(); main.scrollTo(0, 0); };\n  $('#next').onclick = () => { page++; draw(); main.scrollTo(0, 0); };\n  draw();\n}\n\nfetch('config.json').then((r) => r.json()).then((c) => {\n  cfg = c;\n  $('#top-note').textContent = c.mode === 'direct' ? 'signed in via LibreChat' : c.configured ? `chat: ${c.host}` : 'chat not configured: see README';\n}).catch(() => {});\nroute();\n"
+  relay.js: |
+    // LibreChat web-client chat flow, shared by the browser (same-origin deployment) and the dev server.
+    export const NIL_PARENT = '00000000-0000-0000-0000-000000000000';
+
+    export function buildPayload({ text, conversationId, parentMessageId }, { agent, spec }) {
+      return {
+        text: String(text || ''),
+        sender: 'User',
+        clientTimestamp: new Date().toISOString(),
+        isCreatedByUser: true,
+        parentMessageId: parentMessageId || NIL_PARENT,
+        conversationId: conversationId || 'new',
+        messageId: crypto.randomUUID(),
+        error: false,
+        endpoint: 'agents',
+        agent_id: agent,
+        spec,
+        isContinued: false,
+        isTemporary: false,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+      };
+    }
+
+    /** Parses the body of POST /api/agents/chat/agents: JSON with a streamId, or an SSE error event. */
+    export function parseStart(text) {
+      if (text.startsWith('event: error')) {
+        const raw = /data: (.*)/.exec(text)?.[1] || '';
+        let message = raw;
+        try { message = JSON.parse(raw).message; } catch { /* keep raw */ }
+        const err = new Error(message === 'Illegal request'
+          ? 'LibreChat rejected the request as a non-browser client (Illegal request).'
+          : `LibreChat error: ${message}`);
+        throw err;
+      }
+      return JSON.parse(text);
+    }
+
+    const textOf = (m) => (Array.isArray(m.content) ? m.content.filter((c) => c.type === 'text').map((c) => c.text).join('') : m.text || '');
+
+    /** Turns LibreChat's SSE stream into simplified events: delta, tool, done, error. */
+    export async function* streamEvents(body) {
+      const dec = new TextDecoder();
+      let buf = '';
+      for await (const chunk of body) {
+        buf += dec.decode(chunk, { stream: true });
+        let i;
+        while ((i = buf.indexOf('\n\n')) >= 0) {
+          const block = buf.slice(0, i);
+          buf = buf.slice(i + 2);
+          const ev = /^event: (.*)$/m.exec(block)?.[1];
+          const line = block.split('\n').filter((l) => l.startsWith('data: ')).map((l) => l.slice(6)).join('\n');
+          if (!line) continue;
+          let d;
+          try { d = JSON.parse(line); } catch { continue; }
+          if (ev === 'error' || d.error) { yield { type: 'error', message: String(d.error?.message || d.error || d.message || 'stream error') }; continue; }
+          if (d.final) {
+            const m = d.responseMessage || {};
+            yield { type: 'done', conversationId: d.conversation?.conversationId || m.conversationId, messageId: m.messageId, text: textOf(m) };
+            continue;
+          }
+          if (d.event === 'on_message_delta') {
+            for (const c of d.data?.delta?.content || []) if (c.type === 'text' && c.text) yield { type: 'delta', text: c.text };
+          } else if (d.event === 'on_run_step') {
+            for (const tc of d.data?.stepDetails?.tool_calls || []) if (tc.name) yield { type: 'tool', name: tc.name };
+          }
+        }
+      }
+    }
+  config.json: |
+    {
+      "mode": "direct",
+      "agent": "agent_OHVSJI9Gd6gwsDnFSL-Xl",
+      "spec": "cBioPortalChatBetaHaiku55"
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbioagent-explorer-beta-nginx
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      absolute_redirect off;
+      root /usr/share/nginx/html;
+      location = /healthz { return 200 'ok'; }
+      location = /explorer { return 301 /explorer/; }
+      location /explorer/ {
+        index index.html;
+        add_header Cache-Control "no-cache";
+        try_files $uri $uri/ =404;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioagent-explorer-beta
+  labels: &id001
+    app: cbioagent-explorer-beta
+  annotations:
+    configmap.reloader.stakater.com/reload: cbioagent-explorer-beta-files,cbioagent-explorer-beta-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels: *id001
+  template:
+    metadata:
+      labels: *id001
+    spec:
+      nodeSelector:
+        workload: cbioagent
+      tolerations:
+      - key: workload
+        operator: Equal
+        value: cbioagent
+        effect: NoSchedule
+      containers:
+      - name: nginx
+        image: nginx:1.27-alpine
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        volumeMounts:
+        - name: files
+          mountPath: /usr/share/nginx/html/explorer
+          readOnly: true
+        - name: conf
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+          readOnly: true
+      volumes:
+      - name: files
+        configMap:
+          name: cbioagent-explorer-beta-files
+      - name: conf
+        configMap:
+          name: cbioagent-explorer-beta-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioagent-explorer-beta
+  labels: &id001
+    app: cbioagent-explorer-beta
+spec:
+  selector: *id001
+  ports:
+  - port: 80
+    targetPort: 8080

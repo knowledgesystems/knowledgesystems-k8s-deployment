@@ -1,0 +1,119 @@
+# Slide viewer tile-server operations
+
+The tile server is a source-bound pixel service. cBioPortal remains the owner
+of WSI hierarchy and slide-access metadata. The browser requests
+`/wsi/tiles/zxy/{z}/{x}/{y}` and `/wsi/thumbnails` same-origin with
+`studyId`, the slide's serving `key`, and its sealed source `enc`; only the
+tile server can open `enc`. There is no bearer token: the ingress authorizes
+each pixel request with an auth subrequest to cBioPortal's
+`GET /api/studies/{studyId}` carrying the browser's `SESSION` cookie (2xx
+passes, 401/403 refuse). The study comes from a `$request_uri` map in the
+controller `http-snippet` (`ingress/values.yaml`), because `$arg_studyId` is
+empty inside the auth subrequest. The auth URL names `eks-msk-beta-wsi-auth`
+(`slide-viewer-triage/portal-auth-service.yaml`), which selects the portal pods
+of both beta colors by the `wsi.cbioportal.org/beta-portal` label, so it reaches
+whichever color the nightly import left running. The tile server's own refusals are 404
+or 400, never 401/403.
+
+## Triage
+
+Triage (`triage.cbioportal.mskcc.org`, `triage.cbioportal.aws.mskcc.org` and
+`triage-beta.cbioportal.aws.mskcc.org`) uses the same `slide-viewer-triage`
+tile server through its own pixel and probe ingresses
+(`slide-viewer-triage/triage-ingress.yaml`), on the same `/wsi/tiles`,
+`/wsi/thumbnails`, `/wsi/health` and `/wsi/ready` routes. Pixel requests are
+authorized against the triage portal's `GET /api/studies/{studyId}` through
+`eks-triage-wsi-auth` (`slide-viewer-triage/triage-portal-auth-service.yaml`).
+Triage enforces study authorization, so this is a real per-study check. The
+Service selects the `tags.datadoghq.com/env: eks-triage` and
+`tags.datadoghq.com/service: cbioportal` pod labels that both triage colors
+carry, so it reaches whichever color the nightly import left running. The
+auth cache key includes `$host`, because the cache zone and the `SESSION`
+cookie name are shared with beta.
+
+The Pathology Slides tab appears when the portal is configured with
+`--wsi.tile_server.url=/wsi`.
+
+- The standalone `/wsi/patient/...` links require a portal version newer
+  than v7.2.3.
+- The study's WSI data must be in the `metadata.serving` format, which
+  carries each slide's serving `key` and sealed source `enc`.
+
+## Development capacity controls
+
+- Beta runs one warm replica and accepts node/pod downtime. The dedicated
+  node group keeps a one-node steady-state floor and a four-node ceiling;
+  scale to the ceiling manually for an announced load event until workload
+  autoscaling is added.
+- The beta disruption budget allows the single pod to be voluntarily
+  disrupted; production should use a separate multi-replica policy.
+  Gunicorn worker count and the remaining runtime settings come from the
+  private ConfigMap/environment.
+- The checked-in container manifest reserves 8Gi and caps memory at 16Gi per
+  pod. CPU and ephemeral-storage requests/limits remain unset until sustained
+  production load establishes realistic values.
+- Pods select and tolerate `workload=tile-viewer`. That node group is managed
+  outside this repository and must exist before the Argo Application is synced.
+- `MAX_IMAGE_OPERATIONS=2` bounds blocking tile/thumbnail work per worker;
+  one replica and two Gunicorn workers provide four bounded image operation
+  slots across beta.
+- `CACHE_MISS_RATE_LIMIT_PER_MINUTE` is a shared Redis sliding-window limit
+  for extraction leaders per client address and slide key. Redis cache hits
+  are not application-rate-limited.
+- Redis locks coalesce identical cache misses across workers and replicas.
+- Cold-read guardrails use a renewable 120-second distributed lock lease, a
+  30-second follower wait, a 2-second image-operation queue bound, and a
+  60-second Gunicorn worker timeout. ECS slide opens use bounded client
+  connect/read timeouts and retries. These values do not increase worker,
+  image-operation, or open-slide concurrency.
+- Ingress retains a 100 requests/second limit, burst multiplier 5, and a
+  300-connection limit per client (six browser connections for 50 users behind
+  one NAT address). Requests are hashed by the slide's `key` query parameter
+  to keep a slide's cold-open cache on one pod. Successful portal auth
+  responses are cached for 60 seconds per session and study, and the pixel
+  route's access log is off because its query carries the sealed source.
+
+The Redis instance used by `REDIS_URL` must have bounded memory, an LRU/LFU
+eviction policy, and alerts for evictions, memory pressure, and unavailable
+connections. Redis is an optimization; a Redis outage must leave the service
+authorized and bounded by the ingress and image-operation controls.
+
+Before promotion, record the live Redis service/CIDR, ECS endpoint/CIDR, and
+cluster DNS labels. The current policy intentionally remains ingress-only
+until those destinations are verified; the promotion gate is to add
+default-deny egress with only DNS, Redis port 6379, and ECS port 9020 allowed.
+Do not broaden the policy to `0.0.0.0/0` as a substitute for that inventory.
+
+## Monitoring
+
+Datadog scrapes `/metrics` through the pod IP using OpenMetrics. The public
+ingress intentionally routes only `/wsi/tiles` and `/wsi/thumbnails` (portal
+auth) and `/wsi/health` and `/wsi/ready` (a separate probe ingress without
+auth); `/metrics` is not externally exposed. The
+network policy permits the monitoring namespace to scrape the metrics route.
+
+Alert on tile/thumbnail p95 and p99 latency, hierarchy/access latency from the
+backend, cache hit rate, distributed lock outcomes, Redis errors, image queue
+time, 429/503 rates, pod restarts, memory, and block-cache volume usage.
+
+## Release procedure
+
+The `wsi-serving-policy` ConfigMap is the shared non-secret artifact policy for
+MSK beta and the shared tile service. The portal importer and tile service must
+receive the same values; a release that only allows one source root is not a
+complete WSI release.
+
+1. Build and publish the backend and tile-server images, then replace their
+   tags in the deployment with exact immutable `image@sha256:<digest>`
+   references before promotion.
+2. Build the green ClickHouse database with the WSI access projection and
+   import the complete `meta_wsi.txt`/`data_wsi.txt` snapshots.
+3. Verify WSI row counts, `can_serve_tiles`, projection materialization, and
+   ClickHouse query plans before switching cBioPortal to the green database.
+4. Ensure the external `tile-viewer` node group and private configuration are
+   available, deploy the tile server, warm representative slides, and monitor
+   memory, Redis, and latency dashboards during the canary.
+
+Rollback is the previous backend/tile image pair plus the previous green
+ClickHouse database. The projection is additive and does not require a live
+mutation of the active database.

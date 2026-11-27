@@ -28,6 +28,13 @@ spec:
     - host: beta.chat.cbioportal.org
       http:
         paths:
+          - path: /explorer
+            pathType: Prefix
+            backend:
+              service:
+                name: cbioagent-explorer-beta
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:

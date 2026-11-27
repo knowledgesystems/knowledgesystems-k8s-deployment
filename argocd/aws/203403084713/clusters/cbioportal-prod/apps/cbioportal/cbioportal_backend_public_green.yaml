@@ -7,7 +7,7 @@ metadata:
     run: cbioportal-backend-public-green
     tags.datadoghq.com/env: eks-public
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.5
+    tags.datadoghq.com/version: 7.2.8
   name: cbioportal-backend-public-green
 spec:
   progressDeadlineSeconds: 600
@@ -31,13 +31,13 @@ spec:
         run: cbioportal-backend-public-green
         tags.datadoghq.com/env: eks-public
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.5
+        tags.datadoghq.com/version: 7.2.8
     spec:
       containers:
         - args:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             - -Xms100m
-            - -Xmx11g
+            - -Xmx9g
             - -XX:+UnlockExperimentalVMOptions
             - -XX:+UseShenandoahGC
             - -XX:ShenandoahUncommitDelay=1000
@@ -151,6 +151,12 @@ spec:
             - --db.suppress_schema_version_mismatch_errors=true
             - --sitemaps=true
             - --robots.disallow_user_agents=PetalBot
+            # Serve /cbioportal-llms/ (public-portal-llms-txt ConfigMap) as static files, so
+            # /llms.txt is served directly. Keeps Spring Boot's default locations first.
+            - --spring.web.resources.static-locations=classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:/cbioportal-llms/
+            # Same file via LlmsTxtController (cBioPortal/cbioportal#12396) once the image
+            # includes it; that controller would otherwise answer /llms.txt with 404.
+            - --llms_txt.location=file:/cbioportal-llms/llms.txt
             - --oncokb.public_api.url=https://www.oncokb.org/api/v1
             - --oncokb.token=$(ONCOKB_TOKEN)
             - --genomenexus.url=https://v1.genomenexus.org
@@ -186,15 +192,16 @@ spec:
             - --enable_persistent_cache=true
             - --persistence.cache_type_clickhouse=redis
             #- --persistence.cache_type_clickhouse=no-cache
-            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)&custom_settings=log_comment%3Dcbioportal-www
             - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
             - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
-            - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)&custom_settings=log_comment%3Dcbioportal-www
             - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
             - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
             - --clickhouse_mode=true
+            - --request-logging.enabled=true
             - --spring.profiles.active=clickhouse
             # NEW PROPERTIES END
             # disable ehcache ??? Are we still using ehcache?
@@ -223,7 +230,7 @@ spec:
             #- --server.tomcat.port=8888
             - --server.max-http-request-header-size=16384
             - --show.civic=true
-            - --springdoc.api-docs.version=openapi_3_0
+            #- --springdoc.api-docs.version=openapi_3_0
             # DATADOG SETTINGS
             - -Ddd.profiling.allocation.enabled=true
             - -Ddd.profiling.heap.enabled=true
@@ -262,7 +269,7 @@ spec:
             - name: DD_SERVICE
               value: "cbioportal"
             - name: DD_VERSION
-              value: "7.0.5"
+              value: "7.2.3"
             # 1. Ensure collection is explicitly enabled
             - name: DD_TRACE_CLIENT_IP_ENABLED
               value: "true"
@@ -278,8 +285,12 @@ spec:
             - secretRef:
                 name: cbioportal-public-green
           # Please change this in tandem with the public API backend image.
-          image: cbioportal/cbioportal:master-web-shenandoah
+          image: cbioportal/cbioportal:v7.2.8-web-shenandoah
           imagePullPolicy: Always
+          # Liveness checks only that the JVM answers (/ renders without the
+          # database), so a ClickHouse outage does not restart every pod;
+          # readiness (/api/health) queries the database. Both allow 5 s for GC
+          # pauses and warm-up under load.
           livenessProbe:
             failureThreshold: 5
             httpGet:
@@ -289,7 +300,7 @@ spec:
             initialDelaySeconds: 180
             periodSeconds: 12
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           name: cbioportal-backend-public-green
           ports:
             - containerPort: 8080
@@ -305,7 +316,7 @@ spec:
             initialDelaySeconds: 45
             periodSeconds: 5
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           resources:
             limits:
               memory: 12Gi
@@ -316,6 +327,9 @@ spec:
           volumeMounts:
             - mountPath: /cbioportal/
               name: cbioportal-frontend-config-volume
+            - mountPath: /cbioportal-llms/
+              name: llms-txt-volume
+              readOnly: true
       dnsPolicy: ClusterFirst
       nodeSelector:
         workload: cbioportal
@@ -333,6 +347,10 @@ spec:
             defaultMode: 420
             name: single-cell-frontend-config
           name: cbioportal-frontend-config-volume
+        - configMap:
+            defaultMode: 420
+            name: public-portal-llms-txt
+          name: llms-txt-volume
 ---
 apiVersion: v1
 kind: Service

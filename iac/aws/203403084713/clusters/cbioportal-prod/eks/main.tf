@@ -6,9 +6,9 @@ locals {
     cbioportal = {
       instance_types = ["r7g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 3
-      max_size       = 4
-      min_size       = 3
+      desired_size   = 2
+      max_size       = 3
+      min_size       = 2
       subnet_ids     = ["subnet-0d2671d84a3f5eb99", "subnet-06f2712e78e593152", "subnet-001ff98812a2e49e5", "subnet-0b42183b1df0e9061", "subnet-01b9abeeefc878fc4", "subnet-03225fc0c62f573b7"]
       taints = {
         dedicated = {
@@ -191,9 +191,9 @@ locals {
     gn-db-lg = {
       instance_types = ["r7g.2xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 2
+      desired_size   = 3
+      min_size       = 3
+      max_size       = 3
       subnet_ids     = ["subnet-01e2143c0b3d4f8a6", "subnet-066aca23688737c91"]
       block_device_mappings = {
         root_vol = var.ROOT_VOL_CONFIG
@@ -267,13 +267,14 @@ locals {
         cdsi-owner = "lix2@mskcc.org"
       }
     }
+    # Beta cbioagent stack only (prod runs on cbioagent-od). SPOT is fine here.
     cbioagent = {
       instance_types = ["c8g.large", "c7g.large", "c6gn.large", "c6g.large"]
       capacity_type  = "SPOT"
       ami_type       = "BOTTLEROCKET_ARM_64"
-      desired_size   = 3
-      max_size       = 3
-      min_size       = 3
+      desired_size   = 1
+      max_size       = 2
+      min_size       = 1
       taints = {
         dedicated = {
           key    = var.TAINT_KEY
@@ -283,6 +284,32 @@ locals {
       }
       labels = {
         (var.LABEL_KEY) = "cbioagent"
+      }
+      tags = {
+        cdsi-app   = "cbioagent"
+        cdsi-team  = "data-visualization"
+        cdsi-owner = "nasirz1@mskcc.org"
+      }
+    }
+    # On-demand home for the prod cbioagent stack (LibreChat, MCP servers,
+    # navigator, dashboard). Beta stays on the SPOT "cbioagent" group above.
+    # Name kept <=12 chars for the IAM role name_prefix limit.
+    cbioagent-od = {
+      instance_types = ["t4g.medium"]
+      capacity_type  = "ON_DEMAND"
+      ami_type       = "BOTTLEROCKET_ARM_64"
+      desired_size   = 2
+      max_size       = 3
+      min_size       = 2
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "cbioagent-od"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "cbioagent-od"
       }
       tags = {
         cdsi-app   = "cbioagent"
@@ -315,7 +342,7 @@ locals {
       }
     }
     cbio-api = {
-      instance_types = ["t4g.large"]
+      instance_types = ["t4g.xlarge"]
       ami_type       = "BOTTLEROCKET_ARM_64"
       desired_size   = 2
       max_size       = 2
@@ -376,6 +403,23 @@ locals {
       }
       labels = {
         (var.LABEL_KEY) = "curation"
+      }
+    }
+    keycloak = {
+      instance_types = ["t3.medium"]
+      ami_type       = "BOTTLEROCKET_x86_64"
+      desired_size   = 1
+      min_size       = 1
+      max_size       = 1
+      taints = {
+        dedicated = {
+          key    = var.TAINT_KEY
+          value  = "keycloak"
+          effect = var.TAINT_EFFECT
+        }
+      }
+      labels = {
+        (var.LABEL_KEY) = "keycloak"
       }
     }
   }

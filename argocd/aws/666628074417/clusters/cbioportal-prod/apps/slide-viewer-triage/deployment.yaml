@@ -1,0 +1,198 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-viewer-triage
+  namespace: default
+  labels:
+    app: slide-viewer-triage
+  annotations:
+    # Secret values supplied through envFrom/valueFrom are captured when a
+    # pod starts. Reloader makes portal-configuration Secret changes replace
+    # all beta tile-server pods automatically.
+    secret.reloader.stakater.com/reload: "slide-viewer-secrets,cbioportal-wsi-source-seal"
+    configmap.reloader.stakater.com/reload: "slide-viewer-triage-config,wsi-serving-policy"
+spec:
+  # Beta accepts node/pod downtime. Keep one warm replica for the observed
+  # low concurrency; scale out manually to the four-node ceiling for an
+  # announced load event until workload autoscaling is added.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slide-viewer-triage
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # The dedicated pool has one 8Gi pod per node. Roll one pod at a time
+      # so a four-replica rollout does not require a temporary fifth node.
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: slide-viewer-triage
+      annotations:
+        wsi.cbioportal.org/release-id: "beta-wsi-v8-20261030-1"
+        # Restart the pod when the ConfigMap-backed CORS allowlist changes.
+        # Force a clean beta block cache after source-region tile failures.
+        slide-viewer-cache-revision: "2026-08-31-native-overview-cache-recovery"
+        slide-viewer-config-revision: "2026-09-04-cold-open-capacity"
+        ad.datadoghq.com/tile-server.checks: >-
+          {"openmetrics":{"init_config":{},"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics","namespace":"wsi_tile_server","metrics":["tile_server_.*"]}]}}
+    spec:
+      automountServiceAccountToken: false
+      # ECS is reachable from the worker-node network but not from the pod
+      # CIDR in this beta VPC. Keep the tile reader on the node network until
+      # the CNI/TGW egress path is repaired.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      nodeSelector:
+        workload: tile-viewer
+      tolerations:
+        - effect: NoSchedule
+          key: workload
+          operator: Equal
+          value: tile-viewer
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: slide-viewer-triage
+      terminationGracePeriodSeconds: 60
+      imagePullSecrets:
+        - name: dockerhub-creds
+      containers:
+        - name: tile-server
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          # Keep the channel tag for operator familiarity; the digest is the
+          # immutable release identity validated by CI.
+          image: cbioportal/cbioportal-tile-server:beta-wsi-20261030-ae936903e9@sha256:fca2e68300a516c495be27dbdefb4a17b6d700120e35ad69df6fbe9d5b04e1f0
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: 8Gi
+            limits:
+              memory: 16Gi
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: wsi-serving-policy
+            - configMapRef:
+                name: slide-viewer-triage-config
+          env:
+            - name: CACHE_MISS_LOCK_TTL_SECONDS
+              value: "120"
+            - name: CACHE_MISS_WAIT_TIMEOUT_SECONDS
+              value: "30"
+            - name: GUNICORN_TIMEOUT
+              value: "60"
+            # Concurrent slide decodes per worker (overrides the ConfigMap's 2).
+            # With N_WORKERS=2, 2 per worker returned 503 for ~2% of tiles under
+            # 5 users panning uncached regions; 4 gave none, at the same memory
+            # (memory scales with workers and MAX_OPEN_SLIDES, not this).
+            - name: MAX_IMAGE_OPERATIONS
+              value: "4"
+            - name: CORS_ORIGINS
+              value: "https://beta.cbioportal.mskcc.org,https://6ae4d971b7b0d681b9e88a16--cbioportalfrontend.netlify.app"
+            - name: WSI_RELEASE_ID
+              value: "beta-wsi-v8-20261030-1"
+            - name: IMAGE_GIT_SHA
+              value: "ae936903e954ad51aaf789933c906ee2d41780be"
+            - name: WSI_SERVING_CONTRACT_VERSION
+              value: "wsi-serving-v6"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: slide-viewer-secrets
+                  key: REDIS_URL
+            # wsi-serving-v6: opens the sealed slide sources the pathology
+            # pipeline writes; the same key is the Databricks secret
+            # pdm-wsi/wsi_source_seal_key. Required: the tile fails closed without it.
+            - name: WSI_SOURCE_SEAL_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-wsi-source-seal
+                  key: WSI_SOURCE_SEAL_KEY
+          volumeMounts:
+            - name: slide-block-cache
+              mountPath: /cache/slide-blocks
+            - name: prometheus-cache
+              mountPath: /cache/prometheus
+            - name: tmp
+              mountPath: /tmp
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: slide-block-cache
+          emptyDir:
+            sizeLimit: 16Gi
+        - name: prometheus-cache
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slide-viewer-triage
+  namespace: default
+  labels:
+    app: slide-viewer-triage
+spec:
+  selector:
+    app: slide-viewer-triage
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

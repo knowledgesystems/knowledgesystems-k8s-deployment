@@ -73,7 +73,15 @@ agents:
       effect: NoSchedule
     - key: workload
       operator: Equal
+      value: cbioagent-od
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
       value: cbioagent-db
+      effect: NoSchedule
+    - key: workload
+      operator: Equal
+      value: keycloak
       effect: NoSchedule
 clusterAgent:
 #  confd:
@@ -112,6 +120,9 @@ datadog:
     # Experimental: Set to True and see if cloudwatch costs go up.
     containerCollectAll: true
     enabled: true
+  dogstatsd:
+    nonLocalTraffic: true
+    useHostPort: true
   apm:
     portEnabled: true
     instrumentation:

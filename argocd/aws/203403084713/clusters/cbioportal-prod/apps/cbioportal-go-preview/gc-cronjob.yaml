@@ -1,0 +1,75 @@
+# Safety net for the per-PR teardown hook: daily, drops the
+# dev_cbioportal_go_pr<N>* databases of cbioportal-go PRs that are closed or
+# no longer labelled `preview`.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioportal-go-preview-gc
+  namespace: default
+  labels:
+    app.kubernetes.io/part-of: cbioportal-go-preview
+spec:
+  schedule: "37 4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+          containers:
+            - name: gc
+              image: cbioportal/cbioportal-go:latest
+              imagePullPolicy: Always
+              command: ["/app/deploy/pr-preview-teardown.sh", "--gc"]
+              env:
+                - name: WORKDIR
+                  value: /tmp
+                # GitHub App that reads the (private) PRs; without it every
+                # PR is unreadable and nothing is dropped.
+                - name: GH_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: hub-preview-bot
+                      key: client-id
+                - name: GH_INSTALLATION_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: hub-preview-bot
+                      key: installation-id
+                - name: GH_APP_KEY
+                  value: /etc/gh-app/key.pem
+              envFrom:
+                - secretRef:
+                    name: clickhouse-go-import
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 256Mi
+              volumeMounts:
+                - name: gh-app-key
+                  mountPath: /etc/gh-app
+                  readOnly: true
+          volumes:
+            - name: gh-app-key
+              secret:
+                secretName: hub-preview-bot
+                items:
+                  - key: private-key
+                    path: key.pem
+          nodeSelector:
+            workload: cbio-dev
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbio-dev"
+              effect: "NoSchedule"

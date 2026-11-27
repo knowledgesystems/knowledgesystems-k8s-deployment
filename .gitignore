@@ -35,3 +35,7 @@ terraform.rc
 
 # Binary files for lambda
 iac/aws/203403084713/shared/lambda/*.zip
+
+# Python bytecode
+__pycache__/
+*.pyc

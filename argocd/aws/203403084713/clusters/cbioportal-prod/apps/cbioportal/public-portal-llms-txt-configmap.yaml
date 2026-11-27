@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: public-portal-llms-txt
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: cbioportal
+data:
+  # Served at https://www.cbioportal.org/llms.txt as a static file: mounted at
+  # /cbioportal-llms/ in the public backend, which lists that directory in
+  # spring.web.resources.static-locations. Guidance for AI agents and automated
+  # clients: where to get data in bulk instead of crawling the app or the API.
+  llms.txt: |
+    # cBioPortal for Cancer Genomics
+
+    > cBioPortal (https://www.cbioportal.org) is an open-access resource for exploring, visualizing and analyzing multidimensional cancer genomics data. The website is an interactive single-page app. Please don't render it page by page or loop over the web API to collect data in bulk: every dataset shown on the site can be downloaded directly, and that is much faster for you and much cheaper for us.
+
+    ## Bulk data (preferred for large or repeated access)
+
+    - [cBioPortal public database on Hugging Face](https://huggingface.co/datasets/cBioPortal/publicDatabase): weekly Parquet export of the whole public portal database (studies, samples, clinical data, mutations, copy number, structural variants, ...). Query it in place with DuckDB, e.g. `SELECT * FROM read_parquet('hf://datasets/cBioPortal/publicDatabase/data/cancer_study.parquet')`.
+    - [cBioPortal Datahub on GitHub](https://github.com/cBioPortal/datahub): the source study files (clinical, mutations, CNA, expression, ...) for every public study.
+    - Per-study downloads: `https://datahub.assets.cbioportal.org/<studyId>.tar.gz` (e.g. https://datahub.assets.cbioportal.org/acc_tcga.tar.gz). Study IDs are listed at https://www.cbioportal.org/api/studies?projection=SUMMARY.
+
+    ## Programmatic access (small, targeted queries)
+
+    - cBioPortal MCP server for AI assistants: `https://mcp.cbioportal.org/db/mcp/` (OAuth sign-in). It answers questions straight from the cBioPortal database and is the best option for agents.
+    - [REST API docs](https://docs.cbioportal.org/web-api-and-clients/): use `https://api.cbioportal.org` for scripted access. Prefer filtered requests (specific genes and samples) over whole-study pulls, run them sequentially, and cache results locally. Clients that send many concurrent bulk requests are rate-limited (HTTP 429).
+    - [R client cBioPortalData](https://bioconductor.org/packages/cBioPortalData/); other clients are listed in the REST API docs.
+
+    ## Documentation
+
+    - [User guide and FAQ](https://docs.cbioportal.org/)
+    - [Citing cBioPortal](https://docs.cbioportal.org/user-guide/faq/#how-do-i-cite-the-cbioportal)

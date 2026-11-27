@@ -5,10 +5,19 @@ metadata:
   namespace: default
 spec:
   # Generous whole-host per-client-IP rate limit for secondary hosts
-  # (master/beta/staging) that share an annotation-based Ingress and so cannot
-  # path-scope a middleware. Set well above a normal page load (a study view
-  # fires many API calls) but far below bulk scraping. Tune as needed.
+  # (master/beta/staging/webinar via cbio-ingress, go via cbioportal-go-ingress)
+  # that use annotation-based Ingresses and so cannot path-scope a middleware.
+  # Set well above a normal page load (a study view fires many API calls) but
+  # far below bulk scraping. Tune as needed.
+  #
+  # These hosts are proxied by Cloudflare, so the connection IP is a Cloudflare
+  # edge; the client is keyed on CF-Connecting-IP, which Cloudflare sets on every
+  # request (overwriting any client-supplied value). Requests that reach the ELB
+  # directly have no such header and share one bucket; Cloudflare's WAF and rate
+  # limit don't see those.
   rateLimit:
+    sourceCriterion:
+      requestHeaderName: Cf-Connecting-Ip
     average: 600 # ~600 requests / minute / client IP
     period: 1m
     burst: 100

@@ -7,7 +7,7 @@ metadata:
     run: eks-msk-beta-blue
     tags.datadoghq.com/env: eks-msk-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: msk-beta-test
+    tags.datadoghq.com/version: 7.2.8
   name: eks-msk-beta-blue
 spec:
   progressDeadlineSeconds: 600
@@ -28,15 +28,18 @@ spec:
       labels:
         admission.datadoghq.com/enabled: "true"
         run: eks-msk-beta-blue
+        # Selected by eks-msk-beta-wsi-auth (slide-viewer-triage), so the WSI
+        # pixel auth check reaches whichever beta color is running.
+        wsi.cbioportal.org/beta-portal: "true"
         tags.datadoghq.com/env: eks-msk-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: msk-beta-test
+        tags.datadoghq.com/version: 7.2.8
     spec:
       containers:
         - args:
             # from https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
             - -Xms100m
-            - -Xmx4g
+            - -Xmx3g
             - -XX:+UnlockExperimentalVMOptions
             - -XX:+UseShenandoahGC
             - -XX:ShenandoahUncommitDelay=1000
@@ -115,11 +118,11 @@ spec:
             - --db.user=$(DB_USER)
             - --db.password=$(DB_PASSWORD)
             - --db.suppress_schema_version_mismatch_errors=true
-            - --spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+            - --spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
             - --spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
-            - --spring.datasource.url=$(DB_CONNECTION_STRING)
-            - --spring.datasource.username=$(DB_USER)
-            - --spring.datasource.password=$(DB_PASSWORD)
+            - --spring.datasource.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+            - --spring.datasource.username=$(DB_CLICKHOUSE_USER)
+            - --spring.datasource.password=$(DB_CLICKHOUSE_PASSWORD)
             - --tomcat.catalina.scope=runtime
             - --show.transcript_dropdown=true
             - --show.civic=$(SHOW_CIVIC)
@@ -131,7 +134,7 @@ spec:
             - --skin.authorization_message=Access to this portal is only available to authorized users at MSKCC. [<a href="http://bit.ly/gdac-form">Request Access</a>].
             - --skin.blurb=<p>Please adhere to the Memorial Hospital Research Data Governance guidelines regarding <a href="https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Abstract-&amp;-Manuscript-Submission-for-MH-RDG-Review.aspx?source=https%3A%2F%2Fmskcc.sharepoint.com%2Fsites%2Fpub-ResearchDG%2FSitePages%2FForms%2FByAuthor.aspx">abstract and manuscript submission</a>, <a href="https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/Policies.aspx?csf=1&amp;web=1&amp;share=EZhGGgAuvUdMkI7dTo25OyABYkazBEq5LtO--jhVL-UuTw&amp;e=hA3Lh2">guiding principles</a>, and <a href="https://mskcc.sharepoint.com/sites/pub-ResearchDG/SitePages/ResearchDG-Policies.aspx">authorship policies</a> when using unpublished MSK patient-derived clinical data.</p></p>When writing manuscripts, please do not include private links to this portal.</p>
             - --show.mdacc.heatmap=true
-            - --priority_studies=Shared institutional Data Sets#mskimpact,mskarcher,cellline_mskcc,mixed_cbe_solitd_MSK_cfDNA_IMPACT,mixed_impact_wes_2017,msk_impact_ch_2020
+            - --priority_studies=Shared institutional Data Sets#mskimpact,msk_impact_50k_2026,mskarcher,cellline_mskcc,mixed_cbe_solitd_MSK_cfDNA_IMPACT,mixed_impact_wes_2017,msk_impact_ch_2020,msk_impact_ch_2026,msktarget
             - --session.service.url=https://session-service.cbioportal.org/api/sessions/msk_portal/
             - --session.service.origin=*
             - --session.service.user=$(SESSION_SERVICE_USER_NAME)
@@ -211,13 +214,12 @@ spec:
             - --spring.profiles.active=clickhouse
             # compress on client side
             - --enable_request_body_gzip_compression=true
+            - --wsi.tile_server.url=/wsi
             - --enable_study_tags=false
             - --sample_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&sampleId=SAMPLE_ID
             - --patient_view.url=https://cbioportal.mskcc.org/patient?studyId=STUDY_ID&caseId=CASE_ID
             # *** msk specific settings ***
             - --msk_entity_translation_enabled=true
-            # msk whole slide viewer
-            - --msk.whole.slide.viewer.secret.key=$(MSK_WHOLE_SLIDE_VIEWER_SECRET_KEY)
             # darwin
             - --darwin.auth_url=$(DARWIN_AUTH_URL)
             - --darwin.response_url=$(DARWIN_RESPONSE_URL)
@@ -236,6 +238,8 @@ spec:
             - --server.tomcat.connection-timeout=20000
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
+            - --server.servlet.session.cookie.same-site=none
+            - --server.servlet.session.cookie.secure=true
             - --server.port=8888
           command:
             - java
@@ -251,9 +255,11 @@ spec:
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "true"
           envFrom:
+            - configMapRef:
+                name: wsi-serving-policy
             - secretRef:
                 name: cbioportal-msk-beta-blue
-          image: cbioportal/cbioportal-dev:85b4edacc5e76525b2dd0fe98a2fcb02f37c6897-web-shenandoah
+          image: cbioportal/cbioportal:v7.2.8-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 20

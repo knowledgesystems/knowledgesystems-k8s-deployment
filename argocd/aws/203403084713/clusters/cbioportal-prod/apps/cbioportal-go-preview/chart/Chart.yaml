@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cbioportal-go-preview
+description: Preview instance of a cBioPortal/cbioportal-go pull request (pr-<N>.gopreview.cbioportal.org)
+type: application
+version: 1.0.0
+appVersion: "1.0"

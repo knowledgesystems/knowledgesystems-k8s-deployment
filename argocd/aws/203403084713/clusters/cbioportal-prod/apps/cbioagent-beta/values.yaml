@@ -1,10 +1,11 @@
 # Values for the beta cBioAgent LibreChat instance at beta.chat.cbioportal.org.
 # Rendered by the upstream LibreChat helm chart with releaseName: cbioagent-beta.
 #
-# Beta reuses all prod *backends* (MongoDB, meilisearch, rag-api if present,
-# the navigator, clickhouse-mcp, and the shared images PVC). Only the
-# LibreChat pod + its librechat.yaml ConfigMap are separate — beta exists to
-# test new agent variants and LibreChat changes without affecting prod.
+# Beta reuses the prod MongoDB, meilisearch, navigator,
+# and the shared images PVC. The LibreChat pod, its librechat.yaml ConfigMap,
+# and the ClickHouse MCP + its ClickHouse buffers (see
+# cbioagent-clickhouse-mcp-beta.yaml) are separate — beta exists to test new
+# agent variants, MCP changes, and LibreChat changes without affecting prod.
 #
 # Keep this file in sync with apps/cbioagent/values.yaml for anything that
 # should behave the same way on both environments. The differences below are
@@ -17,14 +18,10 @@ fullnameOverride: cbioagent-librechat-beta
 replicaCount: 1
 
 deploymentAnnotations:
-  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env"
+  secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,librechat-credentials-env,cbioportal-mcp-bridge"
   configmap.reloader.stakater.com/reload: "librechat-config-beta"
-  # Beta tracks the mutable `cbioportal/librechat:beta` tag — every push
-  # to the `beta` branch on cbioportal/librechat overwrites that tag.
-  # Keel polls Docker Hub and rolls this Deployment when the digest
-  # behind `:beta` changes. policy=force matches any digest update;
-  # trigger=poll uses the default schedule (1 min) — fast enough for
-  # beta iteration without hammering the registry.
+  # The image tag below is pinned in this file. Keel only rolls the
+  # Deployment when the digest behind that same tag changes.
   keel.sh/policy: force
   keel.sh/trigger: poll
   keel.sh/match-tag: "true"
@@ -62,7 +59,17 @@ global:
       # data-residency policy blocks `global.` Anthropic profiles.
       # Sonnet 5 is now subscribed on the Bedrock account and invokable.
       - name: BEDROCK_AWS_MODELS
-        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5"
+        value: "us.anthropic.claude-sonnet-4-5-20250929-v1:0,us.anthropic.claude-sonnet-4-6,us.anthropic.claude-sonnet-5,us.anthropic.claude-sonnet-5-5,us.anthropic.claude-haiku-4-5-20251001-v1:0,us.anthropic.claude-haiku-5-5"
+      # Shared secret sent to the cbioportal-database MCP in the
+      # x-cbioportal-mcp-bridge-secret header (librechat-config.yaml resolves
+      # ${CBIOPORTAL_MCP_BRIDGE_SECRET} from this env). Secret is created out
+      # of band (portal-configuration); optional so the pod starts without it.
+      - name: CBIOPORTAL_MCP_BRIDGE_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: cbioportal-mcp-bridge
+            key: CBIOPORTAL_MCP_BRIDGE_SECRET
+            optional: true
 
 librechat:
   existingSecretName: "librechat-credentials-env"
@@ -77,14 +84,13 @@ librechat:
     AWS_PROFILE: "490004633549"
     DEBUG_PLUGINS: "true"
     PLUGIN_MODELS: "gpt-4,gpt-4-turbo-preview,gpt-4-0125-preview,gpt-4-1106-preview,gpt-4-0613,gpt-3.5-turbo,gpt-3.5-turbo-0125,gpt-3.5-turbo-1106,gpt-3.5-turbo-0613"
-    # Point at the prod meilisearch/rag-api — beta reuses them rather than
-    # standing up its own.
+    # Point at the prod meilisearch — beta reuses it rather than standing up its own.
     MEILI_HOST: "http://cbioagent-meilisearch.default.svc.cluster.local:7700"
-    RAG_API_URL: "http://cbioagent-librechat-rag-api.default.svc.cluster.local:8000"
     # Beta-specific public URL. The chart has no env: support, only envFrom,
     # so this has to go via the configenv ConfigMap.
     DOMAIN_CLIENT: "https://beta.chat.cbioportal.org"
     DOMAIN_SERVER: "https://beta.chat.cbioportal.org"
+    MCP_SANDBOX_FRAME_ANCESTORS: "https://beta.chat.cbioportal.org"
     DD_TRACE_PROPAGATION_STYLE: "tracecontext,datadog"
   # Disable the chart-managed image PVC so we can mount the same PVC prod uses
   # (see volumes/volumeMounts below). Keeps beta image uploads visible in prod
@@ -96,14 +102,14 @@ image:
   repository: cbioportal/librechat
   registry: docker.io
   pullPolicy: Always
-  # Beta pinned to the v0.8.7 rebase for validation. Built from the
-  # v0.8.7-custom-v1 branch on cbioportal/librechat (rebase of our
-  # v0.8.3-rc1-custom-v9 customizations on top of upstream v0.8.7 —
-  # brings agents-lib 3.2.46 with Bedrock cachePoint wiring, ~860
-  # upstream commits worth of fixes). Once soaked on beta we roll to
-  # prod under the same tag scheme. Keel still watches the tag digest;
-  # a re-push to v0.8.7-custom-v1 would still roll this pod.
-  tag: "v0.8.7-custom-v1"
+  # Built from the v0.8.9-custom-v8 branch on cbioportal/librechat: our
+  # customizations on upstream v0.8.9-rc1, including per-modelSpec model
+  # selection for a single agent (Haiku 4.5 default / Sonnet 5 picker in
+  # librechat-config.yaml) and, on the Agents API
+  # (/api/agents/v1/chat/completions), the `spec` request field and cache
+  # token counts in usage.prompt_tokens_details. Keel watches the tag
+  # digest, so a re-push to that branch rolls this pod.
+  tag: "v0.8.9-custom-v13"
 
 # Sub-charts: all disabled. Beta shares prod's backend services.
 mongodb:

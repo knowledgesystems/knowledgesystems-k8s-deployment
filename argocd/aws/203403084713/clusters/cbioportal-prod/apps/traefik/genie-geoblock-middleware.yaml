@@ -26,3 +26,23 @@ spec:
         - RU
         - VE
       httpStatusCodeDeniedRequest: 451
+      # Cloudflare edges (https://www.cloudflare.com/ips/, IPv4; the ELB is
+      # IPv4-only). For Cloudflare-proxied requests the connection IP is an edge,
+      # which geojs often can't place; the same countries are blocked by the
+      # "GENIE geoblock" WAF rule in the cbioportal.org zone using the real client.
+      allowedIPAddresses:
+        - "173.245.48.0/20"
+        - "103.21.244.0/22"
+        - "103.22.200.0/22"
+        - "103.31.4.0/22"
+        - "141.101.64.0/18"
+        - "108.162.192.0/18"
+        - "190.93.240.0/20"
+        - "188.114.96.0/20"
+        - "197.234.240.0/22"
+        - "198.41.128.0/17"
+        - "162.158.0.0/15"
+        - "104.16.0.0/13"
+        - "104.24.0.0/14"
+        - "172.64.0.0/13"
+        - "131.0.72.0/22"

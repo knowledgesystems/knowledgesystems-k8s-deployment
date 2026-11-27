@@ -26,18 +26,24 @@ div#kc-header::after {
 
 /* hide the keycloak login form */
 div#kc-form-wrapper {
-    padding-right: 0px;
-    margin-right: 0px;
-    border-right: none;
-    visibility: hidden;
-    width: 25%;
+    display: none;
 }
 
-/* hide the left border attached to the social options */
 div#kc-social-providers {
-    padding-left: 0px;
-    border-left: none;
     margin: auto;
+}
+
+div#kc-social-providers h4 {
+    display: none;
+}
+
+div#kc-social-providers .kc-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 0;
 }
 
 /* between header::after and link-out to synapse */
@@ -52,55 +58,35 @@ h1 {
     margin-top: 20px;
 }
 
-/* turn off provided button content */
-a.zocial.google span {
-    display:none;
-}
-a.zocial.google:before {
+/* use the provider artwork in place of Keycloak's default button content */
+a#social-google > *,
+a#social-synapse-oidc > * {
     display: none;
 }
 
-/* add google images to various button states */
-a.zocial.google {
+a#social-google,
+a#social-synapse-oidc {
+    display: block;
+    flex: none;
+    padding: 0;
+    border: none;
+}
+
+a#social-google {
     background: url("../img/btn_google_signin_dark_normal_web.png") no-repeat center top;
     height: 46px;
-    width: auto;
+    width: 191px;
 }
-a.zocial.google:hover {
+a#social-google:hover,
+a#social-google:focus {
     background: url("../img/btn_google_signin_dark_focus_web.png") no-repeat center top !important;
-    height: 46px;
-    width: auto;
 }
-a.zocial.google:active {
+a#social-google:active {
     background: url("../img/btn_google_signin_dark_pressed_web.png") no-repeat center top !important;
-    height: 46px;
-    width: auto;
 }
 
-/* turn off provided button content */
-a.zocial.oidc span {
-    display:none;
-}
-a.zocial.oidc:before {
-    display: none;
-}
-
-/* add synapse images to various button states */
-a.zocial.oidc {
+a#social-synapse-oidc {
     background: url("../img/synapse_logo_block.png") no-repeat center top;
     height: 55px;
-    width: auto;
-    border: none;
-}
-a.zocial.oidc:hover {
-    background: url("../img/synapse_logo_block.png") no-repeat center top !important;
-    height: 55px;
-    width: auto;
-    border: none;
-}
-a.zocial.oidc:active {
-    background: url("../img/synapse_logo_block.png") no-repeat center top !important;
-    height: 55px;
-    width: auto;
-    border: none;
+    width: 173px;
 }

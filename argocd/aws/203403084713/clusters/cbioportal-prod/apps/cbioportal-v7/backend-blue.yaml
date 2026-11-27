@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbioportal-backend-public-v7-blue
+  namespace: default
+  labels: &id001
+    app.kubernetes.io/name: cbioportal-public-v7
+    run: cbioportal-backend-public-v7-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cbioportal-backend-public-v7-blue
+  template:
+    metadata:
+      labels: *id001
+    spec:
+      nodeSelector:
+        workload: cbioportal
+        kubernetes.io/arch: arm64
+      tolerations:
+      - key: workload
+        operator: Equal
+        value: cbioportal
+        effect: NoSchedule
+      containers:
+      - name: cbioportal-backend-public-v7-blue
+        image: cbioportal/cbioportal@sha256:551b8e230604e7e4c5a944dfb4467471066648d96e592799a8a1bf9af4c6c324
+        command:
+        - java
+        args:
+        - -Xms100m
+        - -Xmx10g
+        - -XX:+UseShenandoahGC
+        - -jar
+        - /cbioportal-webapp/app.jar
+        - --app.name=public-v7-preview
+        - --frontend.url=https://frontend.cbioportal.org/
+        - --dbconnector=dbcp
+        - --authenticate=false
+        - --authorization=false
+        - --security.method_authorization_enabled=false
+        - --security.cors.allowed-origins=https://hgnc.cbioportal.aws.mskcc.org
+        - --always_show_study_group=PUBLIC
+        - --spring.profiles.active=clickhouse
+        - --clickhouse_mode=true
+        - --persistence.cache_type=no-cache
+        - --persistence.cache_type_clickhouse=no-cache
+        - --spring.session.store-type=none
+        - --session.service.url=https://session-service.cbioportal.org/api/sessions/hgnc_portal/
+        - --session.service.user=$(SESSION_SERVICE_USER_NAME)
+        - --session.service.password=$(SESSION_SERVICE_USER_PASSWORD)
+        - --sitemaps=false
+        - --skin.title=Public v7 curation preview
+        - --skin.blurb=Reference-data rebuild preview. Not the public production portal.
+        - --spring.datasource.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+        - --spring.datasource.username=$(DB_CLICKHOUSE_USER)
+        - --spring.datasource.password=$(DB_CLICKHOUSE_PASSWORD)
+        - --spring.datasource.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
+        - --spring.datasource.mysql.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+        - --spring.datasource.mysql.username=$(DB_CLICKHOUSE_USER)
+        - --spring.datasource.mysql.password=$(DB_CLICKHOUSE_PASSWORD)
+        - --spring.datasource.mysql.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
+        - --spring.datasource.clickhouse.url=$(DB_CLICKHOUSE_CONNECTION_STRING)
+        - --spring.datasource.clickhouse.username=$(DB_CLICKHOUSE_USER)
+        - --spring.datasource.clickhouse.password=$(DB_CLICKHOUSE_PASSWORD)
+        - --spring.datasource.clickhouse.driver-class-name=com.clickhouse.jdbc.ClickHouseDriver
+        env:
+        - name: SESSION_SERVICE_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: cbioportal-session-service-user-creds
+              key: USER_NAME
+        - name: SESSION_SERVICE_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cbioportal-session-service-user-creds
+              key: USER_PASSWORD
+        envFrom:
+        - secretRef:
+            name: cbioportal-public-v7-blue
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8080
+          initialDelaySeconds: 45
+          periodSeconds: 5
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8080
+          initialDelaySeconds: 180
+          periodSeconds: 15
+          timeoutSeconds: 3
+        resources:
+          requests:
+            cpu: '1'
+            memory: 8Gi
+          limits:
+            memory: 12Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cbioportal-backend-public-v7-blue
+  namespace: default
+spec:
+  selector:
+    run: cbioportal-backend-public-v7-blue
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080

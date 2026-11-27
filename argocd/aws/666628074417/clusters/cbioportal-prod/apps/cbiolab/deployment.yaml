@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbiolab
+  labels:
+    app: cbiolab
+  annotations:
+    # The daily clone cron flips clickhouse-mcp-active to the freshly built
+    # librechat buffer; roll alongside cbioagent-clickhouse-mcp.
+    configmap.reloader.stakater.com/reload: "clickhouse-mcp-active"
+spec:
+  # 'use cache: remote' falls back to process memory off Vercel, so each replica keeps its own cache
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cbiolab
+  template:
+    metadata:
+      labels:
+        app: cbiolab
+    spec:
+      initContainers:
+        # db/migrations are idempotent and there is no runner, so apply them all on every start
+        - name: migrate
+          image: ghcr.io/cbioportal/cohort-lab:latest
+          imagePullPolicy: Always
+          command:
+            - node
+            - -e
+            - |
+              const fs = require("fs"), { Client } = require("pg");
+              const dir = "db/migrations";
+              (async () => {
+                for (let i = 0; ; i++) {
+                  const c = new Client({ connectionString: process.env.SUPABASE_DB_URL });
+                  try { await c.connect(); }
+                  catch (e) {
+                    if (i >= 30) throw e;
+                    console.log("waiting for postgres:", e.message);
+                    await new Promise((r) => setTimeout(r, 2000));
+                    continue;
+                  }
+                  for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".sql")).sort()) {
+                    console.log("applying", f);
+                    await c.query(fs.readFileSync(dir + "/" + f, "utf8"));
+                  }
+                  await c.end();
+                  return;
+                }
+              })().catch((e) => { console.error(e); process.exit(1); });
+          env:
+            - name: CBIOLAB_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbiolab-postgres
+                  key: POSTGRES_PASSWORD
+            - name: SUPABASE_DB_URL
+              value: "postgresql://cohort_lab_app:$(CBIOLAB_POSTGRES_PASSWORD)@cbiolab-postgres:5432/cohort_lab?sslmode=disable"
+      containers:
+        - name: cbiolab
+          image: ghcr.io/cbioportal/cohort-lab:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: cbiolab
+          env:
+            # In-cluster store (postgres/); takes precedence over SUPABASE_DB_URL in the cbiolab secret.
+            # sslmode=disable because the in-cluster server has no TLS and lib/db.ts otherwise forces it.
+            - name: CBIOLAB_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbiolab-postgres
+                  key: POSTGRES_PASSWORD
+            - name: SUPABASE_DB_URL
+              value: "postgresql://cohort_lab_app:$(CBIOLAB_POSTGRES_PASSWORD)@cbiolab-postgres:5432/cohort_lab?sslmode=disable"
+            # Same ClickHouse, user and buffer as cbioagent-clickhouse-mcp
+            - name: CLICKHOUSE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_HOST
+            - name: CLICKHOUSE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_PORT
+            - name: CLICKHOUSE_URL
+              value: "https://$(CLICKHOUSE_HOST):$(CLICKHOUSE_PORT)"
+            - name: CLICKHOUSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_USER
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-mcp
+                  key: CLICKHOUSE_PASSWORD
+            - name: CLICKHOUSE_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: clickhouse-mcp-active
+                  key: CLICKHOUSE_DATABASE
+            - name: STUDY_ID
+              value: "mskimpact"
+            - name: APP_BASE_URL
+              value: "https://cbiolab.cbioportal.aws.mskcc.org"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1536"
+            # Assistant sidebar on Bedrock; the credentials chain re-reads the file on every request
+            - name: CHAT_PROVIDER
+              value: "bedrock"
+            - name: CHAT_ON_DEPLOYMENT
+              value: "1"
+            - name: CHAT_MODEL
+              value: "us.anthropic.claude-sonnet-5"
+            - name: AWS_REGION
+              value: "us-east-1"
+            # Bedrock creds written by the aws-credentials-refresher cron (cbioagent)
+            - name: AWS_SHARED_CREDENTIALS_FILE
+              value: /aws/credentials
+            - name: AWS_PROFILE
+              value: default
+          volumeMounts:
+            - name: aws-creds
+              mountPath: /aws
+              readOnly: true
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /lab
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /lab
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 5
+      volumes:
+        - name: aws-creds
+          persistentVolumeClaim:
+            claimName: aws-credentials-pvc
+      imagePullSecrets:
+        - name: ghcr-creds

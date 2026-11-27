@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cbiolab-postgres
+  labels:
+    app: cbiolab-postgres
+spec:
+  serviceName: cbiolab-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cbiolab-postgres
+  template:
+    metadata:
+      labels:
+        app: cbiolab-postgres
+    spec:
+      containers:
+        - name: postgres
+          # Pinned to 17: the 18 image moves PGDATA and the mount point
+          image: postgres:17
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: cohort_lab
+            - name: POSTGRES_USER
+              value: cohort_lab_app
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cbiolab-postgres
+                  key: POSTGRES_PASSWORD
+            # A subdirectory, since the EBS volume root holds lost+found and initdb wants an empty dir
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              memory: "1Gi"
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "cohort_lab_app", "-d", "cohort_lab"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "cohort_lab_app", "-d", "cohort_lab"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 5
+      imagePullSecrets:
+        - name: dockerhub-creds
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ebs-sc
+        resources:
+          requests:
+            storage: 10Gi

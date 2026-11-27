@@ -1,0 +1,159 @@
+# Hourly mirror of the live production database into the inactive blue/green
+# databases of go.cbioportal.org, then a flip of the cbioportal-go-active
+# pointer — the pattern of cbioagent-clickhouse-clone-daily. Pod runs
+# mirror → patch-pointer; Reloader rolls cbioportal-go when the pointer
+# changes.
+#
+# The script ships in the cbioportal/cbioportal-go image (/app/deploy/mirror-prod.sh).
+# It reads the live production color from update_status, zero-copy clones
+# production's tables (without auth/credential tables) into the inactive
+# color, builds the portal database from them with
+# `cbioportal-import transform --from-prod`, and writes the new pointer values
+# to /work/state.env.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cbioportal-go-mirror-job
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cbioportal-go-mirror-job-role
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["cbioportal-go-active"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cbioportal-go-mirror-job-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: cbioportal-go-mirror-job
+    namespace: default
+roleRef:
+  kind: Role
+  name: cbioportal-go-mirror-job-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioportal-go-mirror
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: cbioportal-go
+  annotations:
+    # The public color swap (cmo-pipelines) sets public_db.active_color in
+    # cbioportal-db-status (portal-configuration) right after it marks an
+    # import complete. Reloader then starts a Job from this CronJob's
+    # template, so go follows each production switch within minutes.
+    configmap.reloader.stakater.com/reload: "cbioportal-db-status"
+spec:
+  # Safety net for the Reloader trigger above: retries a failed rebuild and
+  # catches a missed ConfigMap change. A run with nothing new to build exits
+  # within seconds (mirror-prod.sh rebuilds only when production serves a new
+  # import, and never while one is running).
+  schedule: "7 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200
+      # A failed mirror leaves the pointer on the previous databases; the
+      # next scheduled run retries.
+      # mirror-prod.sh can be rerun from any point (it rebuilds the inactive
+      # color from scratch), so a transient failure retries.
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: cbioportal-go-mirror-job
+          restartPolicy: Never
+          securityContext:
+            fsGroup: 10001
+          nodeSelector:
+            workload: cbio-dev
+          tolerations:
+            - key: "workload"
+              operator: "Equal"
+              value: "cbio-dev"
+              effect: "NoSchedule"
+          volumes:
+            - name: work
+              emptyDir:
+                sizeLimit: 1Gi
+          initContainers:
+            - name: mirror
+              image: cbioportal/cbioportal-go:latest
+              imagePullPolicy: Always
+              command: ["/app/deploy/mirror-prod.sh"]
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 10001
+                runAsGroup: 10001
+              env:
+                - name: PREFIX
+                  value: dev_cbioportal_public_go
+                - name: WORKDIR
+                  value: /work
+                - name: ACTIVE_DB
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cbioportal-go-active
+                      key: CBIOPORTAL_DB
+                      optional: true
+                # The production color www serves, set by the public color
+                # swap. The mirror copies this color, so an import that was
+                # not swapped in never reaches go.
+                - name: LIVE_COLOR
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cbioportal-db-status
+                      key: public_db.active_color
+                      optional: true
+              envFrom:
+                - secretRef:
+                    name: clickhouse-go-import
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                  ephemeral-storage: 100Mi
+                limits:
+                  cpu: "1"
+                  memory: 1Gi
+                  ephemeral-storage: 1Gi
+              volumeMounts:
+                - mountPath: /work
+                  name: work
+          containers:
+            - name: patch-pointer
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  . /work/state.env
+                  : "${CBIOPORTAL_DB:?missing from state.env}"
+                  : "${CBIOPORTAL_RAW_DB:?missing from state.env}"
+                  : "${CBIOPORTAL_REF_DB:?missing from state.env}"
+                  echo "patching cbioportal-go-active → ${CBIOPORTAL_DB} / ${CBIOPORTAL_RAW_DB} / ${CBIOPORTAL_REF_DB}"
+                  kubectl -n default patch configmap cbioportal-go-active --type=merge \
+                    -p "{\"data\":{\"CBIOPORTAL_DB\":\"${CBIOPORTAL_DB}\",\"CBIOPORTAL_RAW_DB\":\"${CBIOPORTAL_RAW_DB}\",\"CBIOPORTAL_REF_DB\":\"${CBIOPORTAL_REF_DB}\"}}"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+              volumeMounts:
+                - mountPath: /work
+                  name: work
+                  readOnly: true

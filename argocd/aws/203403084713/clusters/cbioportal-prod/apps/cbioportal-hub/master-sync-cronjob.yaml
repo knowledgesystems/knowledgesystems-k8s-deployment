@@ -1,0 +1,83 @@
+# Keeps hub.cbioportal.org at cBioPortal/datahub's master branch
+# (`cbioportal-ops hub sync-master`). Every minute it compares master's head
+# commit (git ls-remote) with the last one imported and stops within
+# seconds when they match. Otherwise it imports every study changed since
+# then in one import at the head commit and removes the studies deleted
+# from master. Forbid: a new run does not start while one is importing; the
+# import lock in dev_cbioportal_hub_go_raw also keeps it from running at the
+# same time as a `hub-preview: pr-studies-plus-hub` copy of the hub. The very first run
+# imports all of datahub (hours).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cbioportal-hub-master-sync
+  namespace: default
+  labels:
+    app.kubernetes.io/part-of: cbioportal-hub
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 120
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # A failed run reports in its log; the next minute's run tries again
+      # (after RETRY_AFTER for a commit whose import failed).
+      backoffLimit: 0
+      # The first run imports all of datahub.
+      activeDeadlineSeconds: 43200
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          annotations:
+            # Karpenter does not move a running sync to consolidate nodes.
+            karpenter.sh/do-not-disrupt: "true"
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+          containers:
+            - name: sync
+              image: cbioportal/cbioportal-go:latest
+              imagePullPolicy: Always
+              command: ["/usr/local/bin/cbioportal-ops", "hub", "sync-master"]
+              env:
+                - name: HUB_DB
+                  value: dev_cbioportal_hub_go
+                - name: WORKDIR
+                  value: /work
+                - name: HOME
+                  value: /work
+                # Tags the sync's queries in ClickHouse's system.query_log.
+                - name: CLICKHOUSE_LOG_COMMENT
+                  value: hub-master-sync
+              # CLICKHOUSE_URL, CLICKHOUSE_USER (go_import), CLICKHOUSE_PASSWORD
+              envFrom:
+                - secretRef:
+                    name: clickhouse-go-import
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 512Mi
+                  ephemeral-storage: 4Gi
+                limits:
+                  cpu: "2"
+                  memory: 2Gi
+                  ephemeral-storage: 15Gi
+              volumeMounts:
+                - name: work
+                  mountPath: /work
+          volumes:
+            # The files of the studies being imported and of the next few,
+            # downloaded ahead; each study's are deleted after its import.
+            - name: work
+              emptyDir:
+                sizeLimit: 15Gi
+          # On-demand nodes: a spot node taken back by AWS kills a full
+          # import or build, which takes up to an hour.
+          nodeSelector:
+            workload-class: x86-general

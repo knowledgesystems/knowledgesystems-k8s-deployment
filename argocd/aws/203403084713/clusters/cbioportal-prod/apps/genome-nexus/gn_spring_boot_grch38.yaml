@@ -17,7 +17,9 @@ spec:
   strategy:
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      # 0, not 1: readinessProbe.initialDelaySeconds is 240, so taking a pod
+      # down before its replacement is ready leaves 1 of 2 serving for 4-8 min.
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:

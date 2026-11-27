@@ -43,6 +43,16 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+    - host: webinar.cbioportal.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: cbioportal-backend-public-webinar-blue
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
   tls:
     - hosts:
         - master.cbioportal.org
@@ -53,3 +63,6 @@ spec:
     - hosts:
         - staging.cbioportal.org
       secretName: staging-cbioportal-cert
+    - hosts:
+        - webinar.cbioportal.org
+      secretName: webinar-cbioportal-cert

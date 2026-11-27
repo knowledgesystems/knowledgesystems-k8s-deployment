@@ -63,6 +63,49 @@ spec:
               value: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
             - name: LOG_LEVEL
               value: "INFO"
+            - name: ANNOTATE_MAX_INPUTS
+              value: "250"
+            - name: UI_EVENTS_ENABLED
+              value: "true"
+            - name: AUTH_SESSION_TTL_SECONDS
+              value: "2592000"
+            - name: USER_STORE_BACKEND
+              value: "mysql"
+            - name: BOOTSTRAP_ADMIN_EMAILS
+              value: "kuangf@mskcc.org"
+            # OPENEVIDENCE_API_KEY comes from the acgc Secret via envFrom.
+            - name: OPENEVIDENCE_ENABLED
+              value: "true"
+            # The httpx timeout is per read (max gap between streamed chunks),
+            # not a total-call limit. Traefik and AWS LB still cut browser
+            # requests at ~300s; the backend continues and caches after a proxy 504.
+            - name: OPENEVIDENCE_TIMEOUT_SECONDS
+              value: "600"
+            - name: OPENEVIDENCE_CACHE_TTL_SECONDS
+              value: "2592000"
+            - name: PMID_DISTILLATION_ENABLED
+              value: "false"
+            # Expression-context module (oncokb/agentic-cancer-gene-classification#167):
+            # gene -> TCGA cancer types with significantly elevated expression, gated by
+            # literature. Loads stats bundles from public GitHub releases of the ACGC repo
+            # (tags expression-stats-*); all other EXPRESSION_CONTEXT_* settings default.
+            - name: EXPRESSION_CONTEXT_ENABLED
+              value: "true"
+            # Repo curator feedback issues get filed against.
+            # ONCOKBDEV_PRIVATE_ACCESS_TOKEN (the filing bot's PAT) is not app
+            # config, so it comes from the shared oncokb-github Secret
+            # (envFrom below) instead of here.
+            - name: GITHUB_REPO
+              value: "oncokb/agentic-cancer-gene-classification"
+            # DogStatsD product metrics (usage + cache hit-rate dashboards).
+            # DATADOG_STATSD_HOST/PORT are deliberately left unset — the app
+            # then falls through to DogStatsd's own DD_DOGSTATSD_URL env var
+            # detection, which resolves to the Unix socket the Datadog
+            # admission controller already injects for APM tracing above.
+            - name: DATADOG_METRICS_ENABLED
+              value: "true"
+            - name: DATADOG_METRICS_NAMESPACE
+              value: "acgc"
             # oncokb-db-public-rds-admin supplies DB_URL/DB_USERNAME/DB_PASSWORD
             # (the shared RDS instance's admin credentials); the app parses
             # DB_URL directly. MYSQL_DATABASE isn't part of that secret since
@@ -74,6 +117,13 @@ spec:
             # plain master/replica, so REDIS_URL just points at the master.
             - name: REDIS_URL
               value: "redis://:$(REDIS_PASSWORD)@acgc-redis-master:6379/0"
+            # Authentication & SSO Settings
+            - name: AUTH_ENABLED
+              value: "true"
+            - name: PUBLIC_APP_BASE_URL
+              value: "https://acgc.oncokb.org"
+            - name: GOOGLE_CLIENT_ID
+              value: "635615829896-fndd6v2mk8pi6ha4emjqi0opbvh461he.apps.googleusercontent.com"
           envFrom:
             - secretRef:
                 name: oncokb-db-public-rds-admin
@@ -81,6 +131,8 @@ spec:
                 name: redis-cluster
             - secretRef:
                 name: acgc
+            - secretRef:
+                name: oncokb-github
           readinessProbe:
             httpGet:
               path: /health

@@ -8,10 +8,19 @@ metadata:
   annotations:
     # Restart when the aws creds (refreshed on a schedule) or app secrets change.
     secret.reloader.stakater.com/reload: "k8s-aws-creds-manager,cell-explorer-secrets"
+    # Config is injected with envFrom, which Kubernetes reads only at container
+    # start — a ConfigMap edit alone changes nothing until something restarts
+    # the pod. Without this, a config change and an image bump applied in the
+    # wrong order leave both merged and neither in effect.
+    configmap.reloader.stakater.com/reload: "cell-explorer-config"
 spec:
-  replicas: 1
+  # One replica per spot node, so a reclaim or restart leaves one serving.
+  replicas: 2
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: cell-explorer
@@ -27,9 +36,22 @@ spec:
           operator: "Equal"
           value: "cell-explorer"
           effect: "NoSchedule"
+      # Prefer one pod per node. Soft, so while a node drains (still a cordoned
+      # node in the cluster) the evicted pod can double up on the other one
+      # instead of sitting Pending. matchLabelKeys counts only pods of the same
+      # rollout; otherwise the outgoing pods push every new pod onto one node.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: cell-explorer
+          matchLabelKeys:
+            - pod-template-hash
       containers:
         - name: cell-explorer
-          image: ghcr.io/cbioportal/cell-explorer-py:0.5.0
+          image: ghcr.io/cbioportal/cell-explorer-py:sha-537fb0b@sha256:eb86cee0ae38d89de1aba6f5ebbae39f486588009a811a777b355cf4ecd3dfdf
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -39,8 +61,6 @@ spec:
             - secretRef:
                 name: cell-explorer-secrets
           volumeMounts:
-            - name: data
-              mountPath: /app/data
             # AWS credentials for Bedrock (account 490004633549); the container
             # runs as root, so HOME=/root and the SDK reads /root/.aws/credentials.
             - name: aws-creds
@@ -76,9 +96,6 @@ spec:
               cpu: "2"
               memory: "4Gi"
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: cell-explorer-data
         - name: aws-creds
           secret:
             secretName: k8s-aws-creds-manager

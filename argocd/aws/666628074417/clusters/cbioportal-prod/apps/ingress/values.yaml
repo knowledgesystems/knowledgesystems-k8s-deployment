@@ -12,6 +12,21 @@ controller:
   minAvailable: 1
   config:
     use-forwarded-headers: "true"
+    # Beta WSI pixel auth (slide-viewer-triage/ingress.yaml). The ingress
+    # authorizes each /wsi/tiles and /wsi/thumbnails request with a subrequest
+    # to cBioPortal's /api/studies/$wsi_study, but $arg_studyId is empty
+    # inside that auth subrequest; $request_uri still holds the original URI,
+    # so the study is read from it here (snippet annotations are disabled on
+    # this controller). The id pattern keeps the auth path safe: no "/", "%"
+    # or other escapes, and never only dots, so it cannot form a "."/".."
+    # segment. A missing or invalid studyId becomes "!", which the portal
+    # refuses. The tile server refuses a repeated studyId, so the ingress and
+    # the tile server cannot read different studies from one request.
+    http-snippet: |
+      map $request_uri $wsi_study {
+          "~^/wsi/(?:tiles|thumbnails)(?:/[^?]*)?\?(?:[^#]*&)?studyId=(?<wsi_study_id>(?!\.+(?:&|$))[A-Za-z0-9_.-]{1,128})(?:&|#|$)" $wsi_study_id;
+          default "!";
+      }
   service:
     targetPorts:
       http: http

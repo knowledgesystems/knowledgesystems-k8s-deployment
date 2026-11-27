@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: uablock-patient-crawler
+  namespace: default
+spec:
+  plugin:
+    uablock:
+      # Distributed crawler (~24k residential IPs) rendering /patient pages.
+      # Only reached via the fingerprint route in cbio-www-ingressroute.yml.
+      regex:
+        - "^Mozilla/5\\.0 \\(X11; Linux x86_64\\) AppleWebKit/537\\.36 \\(KHTML, like Gecko\\) Chrome/154\\.0\\.0\\.0 Safari/537\\.36$"
+      statusCode: 403
+      responseMessage: "Forbidden"

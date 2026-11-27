@@ -6,8 +6,10 @@ metadata:
     run: cbioportal-backend-public-beta-blue
     tags.datadoghq.com/env: eks-public-beta
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 6.3.4
+    tags.datadoghq.com/version: 7.1.1
   name: cbioportal-backend-public-beta-blue
+  annotations:
+    secret.reloader.stakater.com/reload: "cbioportal-public-blue"
 spec:
   progressDeadlineSeconds: 600
   replicas: 0
@@ -30,7 +32,7 @@ spec:
         run: cbioportal-backend-public-beta-blue
         tags.datadoghq.com/env: eks-public-beta
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 6.3.4
+        tags.datadoghq.com/version: 7.1.1
     spec:
       containers:
         - args:
@@ -63,6 +65,9 @@ spec:
             # need to set MaxRAM, somehow the MaxRAMFraction is not picked up
             # from the limits
             #- -XX:MaxRAM=6500m
+            # Spring 7 ignores flush() on streamed responses without this, which
+            # holds the chat sidebar's streamed replies until they finish.
+            - -Dspring.http.response.flush.enabled=true
             - -jar
             - /cbioportal-webapp/app.jar
             # enable remote debug
@@ -74,7 +79,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://frontend.cbioportal.org/
+            - --frontend.url=https://deploy-preview-5702.preview.cbioportal.org
             - --enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -97,7 +102,7 @@ spec:
             # connecting over dbcp
             - --dbconnector=dbcp
             # Authentication settings
-            - --authenticate=optional_oauth2
+            - --authenticate=oauth2
             - --authorization=false
             - --security.method_authorization_enabled=false
             - --always_show_study_group=PUBLIC
@@ -195,6 +200,7 @@ spec:
             # disable ehcache ??? Are we still using ehcache?
             #- --ehcache.cache_type=none
             # compress on client side
+            - --oql_wizard.enabled=true
             - --enable_request_body_gzip_compression=true
             # for single cell plugin
             - --frontend.config=/cbioportal/frontendConfig.json
@@ -218,6 +224,10 @@ spec:
             - --server.tomcat.max-http-response-header-size=16384
             - --server.max-http-request-header-size=16384
             - --show.civic=true
+            # Experimental chat sidebar feature
+            - --chat.sidebar.url=http://cbioportal-chat-sidebar:4000
+            - --chat.sidebar.allowed_domains=$(CHAT_SIDEBAR_ALLOWED_DOMAINS)
+            - --chat.sidebar.allowed_users=$(CHAT_SIDEBAR_ALLOWED_USERS)
           command:
             - java
           env:
@@ -232,7 +242,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-public-blue
-          image: cbioportal/cbioportal:v7.0.0-rc.9-web-shenandoah
+          image: cbioportal/cbioportal@sha256:77dc3d74c035a6ec3c67730423498d793048af2b0cbd2ed3f4918f6f0f2db1a0
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5

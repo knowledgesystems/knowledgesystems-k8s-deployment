@@ -1,0 +1,19 @@
+# Scratch space for the Ensembl 111 GRCh38 vep.annotation backfill. Deleted once
+# the backfill is done.
+#
+# EFS, not EBS. EBS is zonal, and the earlier EBS volume bound to us-east-1d
+# while cbio-dev is a 3-node SPOT pool spread across AZs -- so the pod was
+# repeatedly left with no node it could mount from. EFS is multi-AZ, and
+# ReadWriteMany also lets Pass A run as more than one pod.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gn-vep-111-grch38-cache-efs
+  namespace: genome-nexus
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 60Gi

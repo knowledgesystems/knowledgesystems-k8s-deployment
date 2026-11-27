@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wsi-serving-policy
+  namespace: default
+data:
+  WSI_ALLOWED_SOURCE_PREFIXES: s3://pathology/,s3://mskmind-bkt/,s3://ocra/
+  WSI_ALLOWED_THUMBNAIL_PREFIXES: s3://mskmind-bkt/wsi-thumbnails/

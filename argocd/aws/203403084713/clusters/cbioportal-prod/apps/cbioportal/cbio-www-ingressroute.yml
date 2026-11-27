@@ -9,6 +9,44 @@ spec:
   entryPoints:
     - websecure
   routes:
+    # Patient-page crawler fingerprint: forged Google referer with Sec-Fetch-Site "none"
+    # (a real click-through sends "cross-site") and no cookies. Blocking the landing page
+    # stops the frontend from loading and fanning out to the patient API calls.
+    - match: >-
+        Host(`www.cbioportal.org`) && Path(`/patient`) && Header(`User-Agent`, `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36`) && Header(`Referer`, `https://www.google.com/`) && Header(`Sec-Fetch-Site`, `none`) && !HeaderRegexp(`Cookie`, `.+`)
+      kind: Rule
+      priority: 300
+      middlewares:
+        - name: uablock-patient-crawler
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-green
+          port: 80
+    # Same two clinical-events routes for requests proxied by Cloudflare: the
+    # connection IP is a Cloudflare edge (IPv4 ranges from
+    # https://www.cloudflare.com/ips/; the origin ELB is IPv4-only), so the
+    # rate limit keys on CF-Connecting-IP instead. ipblock does not apply here;
+    # its list is mirrored as a Cloudflare WAF rule that blocks at the edge.
+    - match: >-
+        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
+      kind: Rule
+      priority: 201
+      middlewares:
+        - name: ratelimit-heavy-cloudflare
+          namespace: default
+      services:
+        - name: cbioportal-backend-public-green
+          port: 80
+    - match: >-
+        Host(`www.cbioportal.org`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
+      kind: Rule
+      priority: 191
+      middlewares:
+        - name: ratelimit-heavy-cloudflare
+          namespace: default
+      services:
+        - name: cbioportal-go-api
+          port: 80
     # Study-wide clinical-events (bulk/API only; the UI does not call this): per-IP rate limit
     - match: >-
         Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathRegexp(`^/api/studies/[^/]+/clinical-events`)
@@ -33,8 +71,23 @@ spec:
         - name: ratelimit-heavy
           namespace: default
       services:
-        - name: cbioportal-backend-public-api-green
+        - name: cbioportal-go-api
           port: 80
+    # Browser API requests: served as the browser route below, through
+    # cbioportal-www-mirror-<color> (apps/cbioportal-go), which also sends a
+    # share of them to cbioportal-go (go.cbioportal.org) and discards its answers. Requests
+    # that write (sessions, virtual study publishing, tokens, the cache) are
+    # left to the browser route, so they are never sent twice.
+    - match: >-
+        Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`) && PathPrefix(`/api/`) && !PathPrefix(`/api/session`) && !PathPrefix(`/api/public_virtual_studies`) && !PathPrefix(`/api/data-access-token`) && !PathPrefix(`/api/cache`)
+      kind: Rule
+      priority: 110
+      middlewares:
+        - name: ipblock
+          namespace: default
+      services:
+        - name: cbioportal-www-mirror-green
+          kind: TraefikService
     # Browser traffic: User-Agent contains Mozilla
     - match: >-
         Host(`www.cbioportal.org`) && HeaderRegexp(`User-Agent`, `Mozilla`) && !HeaderRegexp(`User-Agent`, `(?i)(headless|kprofile-pipeline)`)
@@ -46,7 +99,41 @@ spec:
       services:
         - name: cbioportal-backend-public-green
           port: 80
-    # Non-browser traffic (catch-all)
+    # Non-browser bulk-data endpoints: cap concurrent requests per client IP
+    # (inflight-heavy) and in total (inflight-heavy-total) so whole-study
+    # fetches can't saturate the API pool.
+    # Browser traffic matches the priority-100 route first and is not capped.
+    # Cloudflare-proxied twin keys on CF-Connecting-IP (see the clinical-events
+    # twins above).
+    - match: >-
+        Host(`www.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|structural-variant/fetch|clinical-data/fetch|studies/[^/]+/clinical-data(/fetch)?|molecular-profiles/[^/]+/(molecular-data|mutations|discrete-copy-number)(/fetch)?)$`) && (ClientIP(`173.245.48.0/20`) || ClientIP(`103.21.244.0/22`) || ClientIP(`103.22.200.0/22`) || ClientIP(`103.31.4.0/22`) || ClientIP(`141.101.64.0/18`) || ClientIP(`108.162.192.0/18`) || ClientIP(`190.93.240.0/20`) || ClientIP(`188.114.96.0/20`) || ClientIP(`197.234.240.0/22`) || ClientIP(`198.41.128.0/17`) || ClientIP(`162.158.0.0/15`) || ClientIP(`104.16.0.0/13`) || ClientIP(`104.24.0.0/14`) || ClientIP(`172.64.0.0/13`) || ClientIP(`131.0.72.0/22`))
+      kind: Rule
+      priority: 61
+      middlewares:
+        - name: inflight-heavy-cloudflare
+          namespace: default
+        - name: inflight-heavy-total
+          namespace: default
+      services:
+        - name: cbioportal-go-api
+          port: 80
+    - match: >-
+        Host(`www.cbioportal.org`) && PathRegexp(`^/api/(molecular-data/fetch|mutations/fetch|copy-number-segments/fetch|structural-variant/fetch|clinical-data/fetch|studies/[^/]+/clinical-data(/fetch)?|molecular-profiles/[^/]+/(molecular-data|mutations|discrete-copy-number)(/fetch)?)$`)
+      kind: Rule
+      priority: 60
+      middlewares:
+        - name: ipblock
+          namespace: default
+        - name: inflight-heavy
+          namespace: default
+        - name: inflight-heavy-total
+          namespace: default
+      services:
+        - name: cbioportal-go-api
+          port: 80
+    # Non-browser traffic (catch-all): scripts and agents, answered by the
+    # Go backend (cbioportal-go-api in apps/cbioportal-go). It has no color: it
+    # follows production's imports through its own mirror of the database.
     - match: Host(`www.cbioportal.org`)
       kind: Rule
       priority: 50
@@ -54,7 +141,7 @@ spec:
         - name: ipblock
           namespace: default
       services:
-        - name: cbioportal-backend-public-api-green
+        - name: cbioportal-go-api
           port: 80
   tls:
     secretName: www-cbioportal-cert

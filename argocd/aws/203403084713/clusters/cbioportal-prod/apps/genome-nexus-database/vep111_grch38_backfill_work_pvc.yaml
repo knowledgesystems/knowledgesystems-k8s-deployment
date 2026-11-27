@@ -1,0 +1,18 @@
+# Shards, deferral lists, VEP warning logs and completion markers for the
+# backfill. Separate from the cache volume so the cache survives re-sharding.
+#
+# EFS: multi-AZ (the cache's earlier EBS volume stranded pods when the spot pool
+# rotated out of its zone) and ReadWriteMany, which is what lets Pass A run as
+# many pods rather than one.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gn-vep-111-grch38-work-efs
+  namespace: genome-nexus
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 40Gi

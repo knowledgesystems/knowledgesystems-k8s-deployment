@@ -110,8 +110,23 @@ data:
     mcpServers:
       cbioportal-database:
         type: streamable-http
-        # Trailing slash avoids FastMCP's 307 that LibreChat v0.8.7+ blocks as SSRF.
-        url: http://cbioagent-clickhouse-mcp:80/db/mcp/
+        # No trailing slash — the FastMCP 3.3.1 in cbioportal/mcp:latest
+        # (from cbioportal-mcp#107) mounts /db/mcp WITHOUT trailing slash
+        # as canonical. Requests to /db/mcp/ get a 307 back to /db/mcp,
+        # which LibreChat v0.8.7 fails to follow across the ClusterIP
+        # hop — pod log shows a wall of 307 -> 406 -> 404 retries and
+        # the tool call ultimately fails. Same fix as MSK-side (see
+        # portal-configuration#52).
+        url: http://cbioagent-clickhouse-mcp:80/db/mcp
+        # Inject the server's FastMCP `instructions` (cbioportal-mcp
+        # resources/system-prompt.md: compact schema + guide index + core
+        # recipes) into the agent system prompt so the model doesn't spend
+        # tool rounds on list_guides / clickhouse_list_table_columns.
+        serverInstructions: true
+        # LibreChat reaches the MCP over the in-cluster Service without
+        # credentials. The MCP's bridge-secret login route is not used here:
+        # it needs an x-user-email-verified value LibreChat cannot render, and
+        # an unexpanded placeholder makes the MCP answer 401.
         headers:
           x-user-id: "{{LIBRECHAT_USER_ID}}"
           x-user-email: "{{LIBRECHAT_USER_EMAIL}}"
@@ -166,10 +181,21 @@ data:
       enforce: false
       prioritize: true
       list:
-        - name: "cBioPortalChat"
+        # Same agent offered under two models. cbioportal/librechat
+        # v0.8.7-custom-v2+ runs the agent with preset.model when the spec's
+        # agent_id matches, and specs with `modelOption` for the same agent
+        # are shown as a model picker in the chat input. The Sonnet spec
+        # reuses this one via YAML merge.
+        # softDefault (not default) so a new chat reuses the model picked in
+        # the user's last conversation; Haiku only applies with no prior pick.
+        - &prodSpec
+          name: "cBioPortalChat"
           label: "cBioPortalChat - Explore cBioPortal data and links"
-          default: true
+          softDefault: true
           description: "Ask cBioPortalChat to explore cBioPortal data, generate cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results."
+          modelOption:
+            label: "Haiku 5.5"
+            description: "Fast answers for most questions"
           placeholder: "How can I help you explore cBioPortal?"
           iconURL: "https://avatars.githubusercontent.com/u/9876251?s=48&v=4"
           showIconInHeader: true
@@ -201,10 +227,22 @@ data:
                 - "Show me TP53 mutation frequency across all cancer types."
                 - "What are the most mutated genes in lung cancer?"
                 - "Compare low grade glioma by molecular subtype."
-          preset:
+          preset: &prodPreset
             endpoint: "agents"
             agent_id: "agent_9ZXhcwLIsROBQX0u4JS5F"
+            model: "us.anthropic.claude-haiku-5-5"
             temperature: 0
+            maxTokens: 4096
+            thinking: false
             modelLabel: "cBioPortalChat"
             greeting: |
               Ask cBioPortalChat to explore cBioPortal data, build direct cBioPortal links, and answer questions about studies, genes, mutations, clinical attributes, and patient-level results. <a href="https://docs.cbioportal.org/ai-integrations/chat-interface/" target="_blank">Learn more</a>
+        - <<: *prodSpec
+          name: "cBioPortalChatSonnet"
+          softDefault: false
+          modelOption:
+            label: "Sonnet 5.5"
+            description: "Deeper reasoning for complex analyses. Uses more of your limit."
+          preset:
+            <<: *prodPreset
+            model: "us.anthropic.claude-sonnet-5-5"

@@ -11,3 +11,23 @@ spec:
         # Huawei-Cloud-SG (PetalBot). Fetches robots.txt but ignores it; ~1,600/hr
         # patient-page render fan-out. Datacenter range, no real users.
         - 114.119.128.0/19
+        # AWS us-east-1 headless-browser scraper looping /results/oncoprint on
+        # brca_tcga_pan_can_atlas_2018 (~245k req/hr, 2026-10-04); its bulk
+        # fetches OOM-crash-loop cbioportal-backend-public(-api)-green.
+        - 52.55.52.183
+        - 34.202.101.75
+        - 3.229.98.135
+        - 18.211.227.23
+        - 52.55.84.43
+        # Google Cloud python-httpx client looping whole-study mutation GETs for
+        # luad/lusc TCGA PanCan and nsclc_tcga_broad_2016 (~7k req/hr,
+        # 2026-10-05); OOM-restarted cbioportal-backend-public-api-green.
+        - 34.93.139.167
+        # Trenton NJ hosting IP flooding /results, /cross_cancer.do and
+        # sitemap_study.xml with junk query params (~10k req/min, 2026-10-12);
+        # also blocked in the cbioportal.org Cloudflare WAF rule.
+        - 212.56.54.218
+        # University of Kansas (JAYHAWKNET) MCP client stuck in an OAuth loop
+        # against mcp.cbioportal.org (/.well-known, POST /token 400, GET /db/mcp
+        # 401; ~2.6 req/s for 13h+, 2026-11-18). Revisit if the owner shows up.
+        - 129.237.90.146

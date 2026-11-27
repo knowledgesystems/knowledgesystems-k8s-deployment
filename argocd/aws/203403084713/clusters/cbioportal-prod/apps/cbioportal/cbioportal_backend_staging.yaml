@@ -6,7 +6,7 @@ metadata:
     run: cbioportal-backend-staging
     tags.datadoghq.com/env: eks-public-staging
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.5
+    tags.datadoghq.com/version: 7.0.6
   name: cbioportal-backend-staging
 spec:
   progressDeadlineSeconds: 600
@@ -30,7 +30,7 @@ spec:
         run: cbioportal-backend-staging
         tags.datadoghq.com/env: eks-public-staging
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.5
+        tags.datadoghq.com/version: 7.0.6
     spec:
       containers:
         - args:
@@ -75,7 +75,7 @@ spec:
             - --com.sun.management.jmxremote.local.only=false
             - --java.rmi.server.hostname=localhost
             # /enable remote debug
-            - --frontend.url=https://deploy-preview-5638.preview.cbioportal.org/
+            - --frontend.url=https://deploy-preview-5629.preview.cbioportal.org/
             - --enable_cross_study_expression=(studies)=>(studies.filter(s=>/pan_can_atlas/.test(s.studyId) === false).length === 0 || studies.filter(s=>/tcga_gdc/.test(s.studyId) === false).length === 0)
             - --default_cross_cancer_study_session_id=5c8a7d55e4b046111fee2296
             - --quick_search.enabled=true
@@ -106,6 +106,7 @@ spec:
             - --spring.security.oauth2.client.registration.google.clientSecret=$(GOOGLE_PLUS_CONSUMER_SECRET)
             - --spring.security.oauth2.client.provider.google.user-name-attribute=email
             #- --logging.level.org.springframework.security=DEBUG
+            - --logging.level.org.cbioportal.infrastructure.repository.clickhouse.resource.ClickhouseResourceDataMapper=DEBUG
             - --spring.security.oauth2.client.registration.azure.client-id=$(MICROSOFT_LIVE_CONSUMER_KEY)
             - --spring.security.oauth2.client.registration.azure.clientSecret=$(MICROSOFT_LIVE_CONSUMER_SECRET)
             - --spring.security.oauth2.client.registration.azure.authorization-grant-type=authorization_code
@@ -218,7 +219,7 @@ spec:
             #- --server.tomcat.port=8888
             - --server.max-http-request-header-size=16384
             - --show.civic=true
-            - --springdoc.api-docs.version=openapi_3_0
+            #- --springdoc.api-docs.version=openapi_3_0
           command:
             - java
           env:
@@ -251,7 +252,7 @@ spec:
           envFrom:
             - secretRef:
                 name: cbioportal-staging
-          image: cbioportal/cbioportal:master-web-shenandoah
+          image: cbioportal/cbioportal-dev:014e916a530cb885cddf98fdc49c0acd8bcd1e39-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5

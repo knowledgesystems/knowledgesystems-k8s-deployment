@@ -1,0 +1,153 @@
+# Pass B of the Ensembl 111 GRCh38 vep.annotation backfill: the dup/inv keys
+# Pass A deferred, 250,132 of them. Same offline cache mode as Pass A, so the
+# documents are structurally identical to the 136.7M already loaded.
+#
+# NOT database mode, which the original plan called for. The GRCh38 core server
+# holds only homo_sapiens_core_111_38 -- no variation, regulation or
+# otherfeatures database -- so it cannot produce colocated_variants,
+# regulatory_feature_consequences, SIFT or PolyPhen, and would write documents
+# of a different shape into the same collection. dup/inv need only the
+# reference sequence, which the prep step reads from the FASTA via
+# Bio::DB::HTS::Faidx.
+#
+# completions must equal ceil(lines / 50000) over the ensB.* shards.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gn-vep-111-grch38-backfill-pass-b
+  namespace: genome-nexus
+  labels:
+    run: gn-vep-111-grch38-backfill-pass-b
+spec:
+  completionMode: Indexed
+  # ensB.00000 is 250,000 lines (5 slices), ensB.00001 is 132 (1 slice).
+  completions: 6
+  # 5, not Pass A's 10: this job is 0.2% of Pass A's volume so concurrency buys
+  # nothing, and 10-way packing starved the co-located mongod into connection
+  # timeouts.
+  parallelism: 5
+  podFailurePolicy:
+    rules:
+      - action: Ignore
+        onPodConditions:
+          - type: DisruptionTarget
+  backoffLimit: 20
+  template:
+    metadata:
+      labels:
+        run: gn-vep-111-grch38-backfill-pass-b
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: worker
+          image: genomenexus/gn-vep-backfill:111-grch38-3
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              W=/work
+              CD=/cache-data
+              DEST=$CD/homo_sapiens/111_GRCh38
+              J="${JOB_COMPLETION_INDEX}"
+              I=$(printf "%05d" $((J / 5)))
+              OFF=$((J % 5))
+              S="$W/sliceB.$J"
+
+              PV=B1
+              if [ -f "$W/doneB.$J" ]; then
+                if grep -qx "pipeline $PV" "$W/doneB.$J" 2>/dev/null; then
+                  echo "slice $J already done (pipeline $PV)"; exit 0
+                fi
+                echo "slice $J was done by an older pipeline -- re-running"
+              fi
+              test -s "$W/ensB.$I" || { echo "FAIL: $W/ensB.$I missing -- run the Pass B prep first"; exit 1; }
+              sed -n "$((OFF * 50000 + 1)),$(((OFF + 1) * 50000))p" "$W/ensB.$I" > "$S"
+              test -s "$S" || { echo "FAIL: slice $J of ensB.$I is empty"; exit 1; }
+              echo "slice $J = ensB.$I lines $((OFF * 50000 + 1))-$(((OFF + 1) * 50000)), $(wc -l < "$S") rows"
+
+              set -o pipefail
+              # buffer_size 500, not the 5000 default: output is byte-for-byte
+              # identical (verified on 50k real variants) but peak RSS drops ~7x,
+              # and at 5000 a dense slice plus mongoimport backlog OOMs an 8Gi
+              # container. Do not raise it.
+              #
+              # No PolyPhen_SIFT plugin -- see Pass A. Do not re-add it.
+              /opt/vep/src/ensembl-vep/vep \
+                --cache --dir_cache=$CD --offline \
+                --fasta="$DEST/Homo_sapiens.GRCh38.dna.toplevel.fa.gz" --lookup_ref \
+                --everything --hgvsg --no_stats --xref_refseq --json --shift_hgvs=1 \
+                --fork=1 --buffer_size=500 \
+                --plugin=AlphaMissense,file=/plugin-data/AlphaMissense_hg38.tsv.gz \
+                --dir_plugins=/plugin-data \
+                --input_file="$S" --output_file=STDOUT \
+                --warning_file="$W/errB.$J.log" \
+                | jq -c 'def ren:
+                             (if has("sift_pred")
+                              then .sift_prediction = .sift_pred | del(.sift_pred) else . end)
+                           | (if has("polyphen_humvar_pred")
+                              then .polyphen_prediction = .polyphen_humvar_pred | del(.polyphen_humvar_pred) else . end)
+                           | (if has("polyphen_humvar_score")
+                              then .polyphen_score = .polyphen_humvar_score | del(.polyphen_humvar_score) else . end);
+                         walk(if type == "object" then ren else . end)
+                         | ._id = .id
+                         | ((.allele_string // "") | split("/")) as $a
+                         | (if ($a | length) == 2 and $a[0] == $a[1]
+                            then . + {_ref_eq_alt: true} else . end)
+                         | (((.transcript_consequences // [])[0].hgvsg) // "") as $h
+                         | if $h != "" and $h != ._id
+                              and (._id | test("[ACGT]>[ACGT]$"))
+                           then . + {_hgvsg_mismatch: true} else . end' \
+                | mongoimport --uri "$MONGODB_URI" --collection 'vep.annotation' \
+                    --mode upsert --upsertFields _id --numInsertionWorkers 2
+
+              { echo "pipeline $PV"
+                echo "submitted $(wc -l < "$S")"
+                echo "vep-skipped $(grep -c skipped "$W/errB.$J.log" 2>/dev/null || echo 0)"
+              } > "$W/doneB.$J"
+              cat "$W/doneB.$J"
+              rm -f "$S"
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://gn-mongo-grch38-ensembl111-blue:27017/annotator"
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1500Mi
+            limits:
+              # 12Gi, not Pass A's 8Gi: 8 left no headroom for a dense slice
+              # plus mongoimport backlog and OOM-looped two Pass A slices.
+              memory: 12Gi
+          volumeMounts:
+            - name: cache
+              mountPath: /cache-data
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-cache-efs
+        - name: work
+          persistentVolumeClaim:
+            claimName: gn-vep-111-grch38-work-efs
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: workload
+                    operator: In
+                    values: ["cbio-dev"]
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: ["ip-10-0-11-224.ec2.internal"]
+      tolerations:
+        - effect: NoSchedule
+          key: workload
+          operator: Equal
+          value: cbio-dev
+        - effect: NoSchedule
+          key: workload
+          operator: Equal
+          value: gn-db-lg

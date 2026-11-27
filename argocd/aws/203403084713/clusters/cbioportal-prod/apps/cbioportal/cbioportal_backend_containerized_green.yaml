@@ -7,7 +7,7 @@ metadata:
     run: cbioportal-backend-containerized-green
     tags.datadoghq.com/env: eks-containerized
     tags.datadoghq.com/service: cbioportal
-    tags.datadoghq.com/version: 7.0.5
+    tags.datadoghq.com/version: 7.2.8
   name: cbioportal-backend-containerized-green
 spec:
   progressDeadlineSeconds: 600
@@ -31,7 +31,7 @@ spec:
         run: cbioportal-backend-containerized-green
         tags.datadoghq.com/env: eks-containerized
         tags.datadoghq.com/service: cbioportal
-        tags.datadoghq.com/version: 7.0.5
+        tags.datadoghq.com/version: 7.2.8
     spec:
       containers:
         - args:
@@ -150,6 +150,7 @@ spec:
             - --bitly.access.token=$(BITLY_ACCESS_TOKEN)
             - --db.suppress_schema_version_mismatch_errors=true
             - --sitemaps=true
+            - --robots.disallow_paths=/
             - --oncokb.public_api.url=https://www.oncokb.org/api/v1
             - --oncokb.token=$(ONCOKB_TOKEN)
             - --genomenexus.url=https://v1.genomenexus.org
@@ -222,7 +223,7 @@ spec:
             #- --server.tomcat.port=8888
             - --server.max-http-request-header-size=16384
             - --show.civic=true
-            - --springdoc.api-docs.version=openapi_3_0
+            #- --springdoc.api-docs.version=openapi_3_0
             # DATADOG SETTINGS
             - -Ddd.profiling.allocation.enabled=true
             - -Ddd.profiling.heap.enabled=true
@@ -261,7 +262,7 @@ spec:
             - name: DD_SERVICE
               value: "cbioportal"
             - name: DD_VERSION
-              value: "7.0.5"
+              value: "7.2.3"
             # 1. Ensure collection is explicitly enabled
             - name: DD_TRACE_CLIENT_IP_ENABLED
               value: "true"
@@ -277,7 +278,7 @@ spec:
             - secretRef:
                 name: cbioportal-containerized-green
           # Please change this in tandem with the public API backend image.
-          image: cbioportal/cbioportal:v7.0.5-web-shenandoah
+          image: cbioportal/cbioportal:v7.2.8-web-shenandoah
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 5
