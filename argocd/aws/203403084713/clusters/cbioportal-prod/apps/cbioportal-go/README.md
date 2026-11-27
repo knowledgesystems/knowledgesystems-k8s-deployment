@@ -1,15 +1,10 @@
 # cbioportal-go
 
-> [!WARNING]
-> **Experimental.** go.cbioportal.org runs
-> [cbioportal-go](https://github.com/cBioPortal/cbioportal-go), an experiment to
-> reimplement cBioPortal in Go. It is not an official cBioPortal release and
-> not a supported service: results may differ from www.cbioportal.org, and it
-> may change, break or be taken down at any time. Every page shows an
-> "experimental preview" banner.
-
-Go reimplementation of the cBioPortal backend (REST API + bundled React frontend),
-served at https://go.cbioportal.org. Backed by ClickHouse Cloud; an hourly job mirrors
+[cbioportal-go](https://github.com/cBioPortal/cbioportal-go) is the Go
+reimplementation of the cBioPortal backend (REST API + bundled React frontend).
+It serves www.cbioportal.org: its browsers from `cbioportal-go`, its scripts and
+agents (and api.cbioportal.org) from `cbioportal-go-api`. go.cbioportal.org
+serves the same pods as www's browsers. Backed by ClickHouse Cloud; a job mirrors
 production's data (zero-copy clone of the live `cbioportal_public_<color>`) after each
 production import. Studies
 can also be loaded by hand with `deploy/publish-local-studies.sh` from the
@@ -19,21 +14,20 @@ cbioportal-go repo.
 
 | Resource | Purpose |
 |---|---|
-| `Deployment cbioportal-go` | 2 replicas of `cbioportal/cbioportal-go:latest` on port 8080 (API + frontend from `/app/frontend`), stateless: sessions in the public session service, logins in the public session Redis. Keel rolls it on new `:latest` digests; Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. |
+| `Deployment cbioportal-go` | www.cbioportal.org's browsers and go.cbioportal.org: 2 replicas of a pinned release (`cbioportal/cbioportal-go:<X.Y.Z>`) on port 8080 (API + frontend), with www's settings. Stateless: sessions in the public session service, logins in the public session Redis. Reloader rolls it when `cbioportal-go-active` or `clickhouse-go-portal` changes. See [www.cbioportal.org's browsers](#wwwcbioportalorgs-browsers). |
 | `Service cbioportal-go` | ClusterIP, port 80 → 8080. |
 | `Deployment` / `Service cbioportal-go-api` | The public REST API: api.cbioportal.org and www's non-browser API traffic. API-only, stateless, 2 replicas on the same databases. It runs a pinned release (`cbioportal/cbioportal-go:<X.Y.Z>`) on the on-demand `cbio-api` nodes. |
-| `TraefikService cbioportal-www-mirror-{green,blue}` | Sends a mirrored quarter of www's browser API traffic to `cbioportal-go` as well as to Java, and discards go's answers. |
+| `TraefikService cbioportal-www-mirror-{green,blue}` | No longer used by any route: they mirrored a quarter of www's browser API traffic from Java to `cbioportal-go`. To be deleted. |
 | `PodDisruptionBudget cbioportal-go`, `cbioportal-go-api` | Keep one pod serving through node drains. |
-| `Ingress cbioportal-go-ingress` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares. |
+| `Ingress cbioportal-go-ingress`, `Middleware go-noindex` | Traefik + cert-manager TLS (`go-cbioportal-cert`) for go.cbioportal.org, with the `ipblock` and `ratelimit-host` middlewares, and an `X-Robots-Tag: noindex` header so search engines index www only. |
 | `Deployment` / `Service cbioportal-java-reference`, `IngressRoute`, `Middleware java-reference-auth`, `Certificate java-cbio-cert` | Java cBioPortal on go's copy of production, at java.cbioportal.org behind a password: the reference nightly parity compares go with. See [The Java reference](#the-java-reference). |
 | `ConfigMap cbioportal-go-active` | Blue/green pointer: `CBIOPORTAL_DB`, `CBIOPORTAL_RAW_DB`, `CBIOPORTAL_REF_DB`. |
 | `CronJob cbioportal-go-mirror` | After each production switch (Reloader, on a change to `cbioportal-db-status`) and hourly: when production serves a new import (and none is running), clones it into the inactive color, builds the Go portal's tables, then flips the pointer; otherwise leaves the pointer as is. |
 | `ServiceAccount/Role/RoleBinding cbioportal-go-mirror-job*` | Lets the CronJob `get`/`patch` only `cbioportal-go-active`. |
 | `Application cbioportal-go` (`apps/argocd/`) | Auto-sync (prune + selfHeal) of this directory. |
 
-`cbioportal-go-api` and `cbioportal-go` answer real users (and `cbioportal-go`
-will serve www's browsers), so they run on the on-demand `workload=cbio-api`
-nodes. `cbioportal-java-reference` runs on the `workload=cbio-dev` node pool
+`cbioportal-go-api` and `cbioportal-go` serve www, so they run on the
+on-demand `workload=cbio-api` nodes. `cbioportal-java-reference` runs on the `workload=cbio-dev` node pool
 (arm64 spot), alongside the other dev/preview cBioPortal instances.
 
 ## Blue/green pointer
@@ -107,8 +101,10 @@ deploy/publish-local-studies.sh dev_cbioportal_public_go_blue \
   Without it Traefik refuses every request there.
 - **DNS**: a DNS-only `java.cbioportal.org` record pointing at the Traefik load
   balancer, like `go.cbioportal.org`.
-- **Image**: `cbioportal/cbioportal-go:latest` on Docker Hub (multi-arch amd64+arm64, uid
-  10001) with the API as entrypoint and the frontend in `/app/frontend`.
+- **Image**: `cbioportal/cbioportal-go:<X.Y.Z>` releases on Docker Hub (multi-arch
+  amd64+arm64, uid 10001) with the API as entrypoint and the frontend in `/app/frontend`.
+- **ConfigMaps** `single-cell-frontend-config` and `public-portal-llms-txt`
+  (portal-configuration), the frontend config and llms.txt www's Java pool also mounts.
 - **Argo**: the `argocd` app-of-apps is manual-sync; sync it to create the
   `cbioportal-go` Application.
 
@@ -120,14 +116,44 @@ non-browser API traffic, from scripts and agents (the non-browser routes of
 `apps/cbioportal/cbio-www-ingressroute.yml`). Its name has no color, so the
 import pipeline's weekly color swap leaves these routes alone. go follows
 production's imports through its own mirror of the database. To upgrade go,
-set a newer release tag on `cbioportal-go-api`'s image.
+see [Releases](#releases).
+
+## Releases
+
+`cbioportal-go`, `cbioportal-go-api` and the mirror CronJob run the same
+release (`cbioportal/cbioportal-go:<X.Y.Z>`), so the databases the mirror
+builds are the ones both deployments read. To upgrade, set the new tag in all
+three files in one pull request. Releases are listed at
+<https://github.com/cBioPortal/cbioportal-go/releases>.
+
+## www.cbioportal.org's browsers
+
+The browser routes of `apps/cbioportal/cbio-www-ingressroute.yml` send
+www.cbioportal.org's browsers to `cbioportal-go`. They keep their rate limits,
+IP blocks and crawler blocks. The service name has no color, so the weekly
+color swap leaves these routes alone.
+
+`cbioportal-go` runs with www's settings: the portal properties shipped in the
+image (generated from www's `/config_service`) plus the arguments www's Java
+pool sets on top. These are indexing by search engines, Google Analytics, Tag
+Manager and Datadog browser monitoring, no data access tokens, and www's
+frontend config and llms.txt from the same ConfigMaps. Sign-in uses www's
+Google client and Microsoft app, whose redirect addresses are www's, so it
+works on www only.
+
+- **Upgrading.** See [Releases](#releases).
+- **Rolling back to Java.** Point the browser routes back at
+  `cbioportal-backend-public-<color>`, with the color www's Java pool runs
+  (the one with replicas in `apps/cbioportal/cbioportal_backend_public_*.yaml`).
+  Until the color swap stops managing that pool, it keeps running and follows
+  each import.
 
 ## The Java reference
 
 `cbioportal-java-reference` runs Java cBioPortal, the release go matches
 (`/api/info` `portalVersion` on go), as one small pod. It is the reference
-that nightly parity compares go with, and it stays after browsers on www move
-to go and production Java is turned off.
+that nightly parity compares go with, and it stays after production Java is
+turned off.
 
 - **Same data as go.** It reads the clone of production's tables in the `_ref`
   database that `cbioportal-go-active` names, so it and go always answer from

@@ -10,11 +10,8 @@ metadata:
     # when the ClickHouse credentials change.
     configmap.reloader.stakater.com/reload: "cbioportal-go-active"
     secret.reloader.stakater.com/reload: "clickhouse-go-portal,cbioportal-public-green"
-    # Keel polls Docker Hub and rolls the Deployment when the digest behind
-    # cbioportal/cbioportal-go:latest changes.
-    keel.sh/policy: force
-    keel.sh/trigger: poll
-    keel.sh/match-tag: "true"
+# Serves www.cbioportal.org's browsers (apps/cbioportal/cbio-www-ingressroute.yml)
+# and go.cbioportal.org (cbioportal-go-ingress.yaml), with www's settings.
 spec:
   # Two replicas, rolled one at a time and spread over nodes: sessions live
   # in the session service and logins in Redis, so any pod serves any user.
@@ -46,15 +43,32 @@ spec:
         fsGroup: 10001
       containers:
         - name: cbioportal-go
-          image: cbioportal/cbioportal-go:latest
-          imagePullPolicy: Always
+          # A release, as for api.cbioportal.org: a new release reaches www
+          # only by changing this tag.
+          image: cbioportal/cbioportal-go:0.3.2
+          imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/cbioportal-api"]
           # www.cbioportal.org's portal settings (generated from its
-          # /config_service; analytics and login left out), shipped in the image.
-          # Login, sessions and the frontend are set with go's settings in env.
+          # /config_service), shipped in the image, plus what www's Java pool
+          # (apps/cbioportal/cbioportal_backend_public_<color>.yaml) sets on
+          # top: indexing by search engines, analytics, no data access
+          # tokens, and the frontend config and llms.txt from the same
+          # ConfigMaps. Login, sessions and the frontend are set with go's
+          # settings in env.
           args:
             - --portal-properties=/app/deploy/public-portal.properties
             - --always_show_study_group=PUBLIC
+            - --robots.disallow_all=false
+            - --sitemaps=true
+            - --dat.method=none
+            - --google_analytics_profile_id=G-5260NDGD6Z
+            - --google_tag_manager_id=GTM-TLXCGKK
+            - --datadog_rum_application_id=${DATADOG_RUM_APPLICATION_ID}
+            - --datadog_rum_client_token=${DATADOG_RUM_CLIENT_TOKEN}
+            - --datadog_rum_site=datadoghq.com
+            - --datadog_rum_env=public
+            - --frontend.config=/cbioportal/frontendConfig.json
+            - --llms_txt.location=file:/cbioportal-llms/llms.txt
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -77,10 +91,6 @@ spec:
               value: https://frontend.cbioportal.org/
             - name: FRONTEND_DIR
               value: /app/frontend
-            - name: SITE_BANNER
-              value: "⚠️ Experimental preview: a reimplementation of cBioPortal in Go. Results may differ from the official portal; do not use for research or clinical decisions. Official portal:"
-            - name: SITE_BANNER_LINK
-              value: https://www.cbioportal.org
             # Sessions (shared links, virtual studies, groups) in the public
             # portal's session service, with its credentials from its secret,
             # so www links open here too.
@@ -106,11 +116,10 @@ spec:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: ONCOKB_TOKEN
-            # Optional sign-in as on www: Google with the public portal's
-            # client, Microsoft (work and personal accounts) with go's own app
-            # registration ("cBioPortal Go", redirect URI
-            # https://go.cbioportal.org/login/oauth2/code/azure). Studies stay
-            # readable without signing in.
+            # Optional sign-in as on www, with www's Google client and
+            # Microsoft app (work and personal accounts). Their redirect URIs
+            # are www's, so sign-in works on www.cbioportal.org only. Studies
+            # stay readable without signing in.
             - name: CBIOPORTAL_LOGIN
               value: optional
             - name: CBIOPORTAL_STUDY_AUTHORIZATION
@@ -128,13 +137,13 @@ spec:
             - name: CBIOPORTAL_LOGIN_MICROSOFT_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: cbioportal-go-microsoft
-                  key: MICROSOFT_CLIENT_ID
+                  name: cbioportal-public-green
+                  key: MICROSOFT_LIVE_CONSUMER_KEY
             - name: CBIOPORTAL_LOGIN_MICROSOFT_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: cbioportal-go-microsoft
-                  key: MICROSOFT_CLIENT_SECRET
+                  name: cbioportal-public-green
+                  key: MICROSOFT_LIVE_CONSUMER_SECRET
             # Login sessions in the public portal's session Redis, so they
             # survive restarts.
             - name: CBIOPORTAL_LOGIN_SESSION_STORE
@@ -154,6 +163,17 @@ spec:
                 secretKeyRef:
                   name: cbioportal-public-green
                   key: REDIS_SESSION_PASSWORD
+            # www's Datadog browser monitoring (RUM) keys, for the arguments.
+            - name: DATADOG_RUM_APPLICATION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: DATADOG_RUM_APPLICATION_ID
+            - name: DATADOG_RUM_CLIENT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cbioportal-public-green
+                  key: DATADOG_RUM_CLIENT_TOKEN
             # Tags this deployment's queries in ClickHouse's system.query_log.
             - name: CLICKHOUSE_LOG_COMMENT
               value: go.cbioportal.org
@@ -162,6 +182,13 @@ spec:
                 name: clickhouse-go-portal
             - configMapRef:
                 name: cbioportal-go-active
+          volumeMounts:
+            - name: frontend-config
+              mountPath: /cbioportal/
+              readOnly: true
+            - name: llms-txt
+              mountPath: /cbioportal-llms/
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health
@@ -178,9 +205,9 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 5
-          # Sized for all of www's browser traffic. A mirrored quarter of
-          # it (cbioportal-www-mirror.yaml) used about 0.1 cores and 0.4 GB
-          # over both pods on average, 0.3 cores at the 95th percentile.
+          # Sized for all of www's browser traffic. A mirrored quarter of it
+          # used about 0.1 cores and 0.4 GB over both pods on average, 0.3
+          # cores at the 95th percentile.
           resources:
             requests:
               cpu: "1"
@@ -199,7 +226,16 @@ spec:
           # pods would otherwise let both new ones land on one node.
           matchLabelKeys:
             - pod-template-hash
-      # On-demand nodes, as cbioportal-go-api: these pods will serve
+      # www's frontend config and llms.txt, the ConfigMaps www's Java pool
+      # mounts (from portal-configuration).
+      volumes:
+        - name: frontend-config
+          configMap:
+            name: single-cell-frontend-config
+        - name: llms-txt
+          configMap:
+            name: public-portal-llms-txt
+      # On-demand nodes, as cbioportal-go-api: these pods serve
       # www.cbioportal.org's browsers.
       nodeSelector:
         workload: cbio-api

@@ -6,7 +6,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: traefik
     kubernetes.io/tls-acme: "true"
-    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-ratelimit-host@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-ipblock@kubernetescrd,default-ratelimit-host@kubernetescrd,default-go-noindex@kubernetescrd
   labels:
     app.kubernetes.io/instance: cbioportal-go
   name: cbioportal-go-ingress
@@ -27,3 +27,18 @@ spec:
     - hosts:
         - go.cbioportal.org
       secretName: go-cbioportal-cert
+---
+# go.cbioportal.org serves the same pods and settings as www.cbioportal.org's
+# browsers, robots.txt and sitemaps included. This header keeps search
+# engines from indexing it as a copy of www.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: go-noindex
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: cbioportal-go
+spec:
+  headers:
+    customResponseHeaders:
+      X-Robots-Tag: "noindex, nofollow"
